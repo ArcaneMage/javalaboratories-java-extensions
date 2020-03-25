@@ -17,7 +17,8 @@ import java.util.stream.Stream;
  * more.
  * <p>
  * <pre>
- *    Nullable<String>maybeHelloWorld = Nullable.of("Hello World");
+ *   {@code
+ *    Nullable<String> maybeHelloWorld = Nullable.of("Hello World");
  *
  *    maybeHelloWorld
  *          .filter("Hello World"::equals)
@@ -30,8 +31,14 @@ import java.util.stream.Stream;
  *          .ifPresentOrElse(System.out::println,
  *              () -> System.out.println("Empty World"));
  *
+ *    maybeHelloWorld
+ *          .map(String::length)
+ *          .filter(s -> s <= 11)
+ *          .orElseThrow(IllegalStateException::new);
+ *
  *    List<String> list = maybeHelloWorld
  *                          .toList();
+ *   }
  * </pre>
  *
  * @param <T> the type of value
