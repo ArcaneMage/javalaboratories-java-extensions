@@ -42,6 +42,7 @@ import java.util.stream.Stream;
  * </pre>
  *
  * @param <T> the type of value
+ * @see NullableDouble
  * @author Kevin H, Excelsior Software
  */
 @SuppressWarnings("WeakerAccess")
@@ -53,7 +54,10 @@ public final class Nullable<T> {
 
     public static <T> Nullable<T> of(T value) { return new Nullable<>(value); }
 
-    public static <T> Nullable<T> of(Optional<T> optional) { return ofNullable(optional.orElse(null)); }
+    public static <T> Nullable<T> of(Optional<T> optional) {
+        Objects.requireNonNull(optional);
+        return ofNullable(optional.orElse(null));
+    }
 
     public static <T> Nullable<T> ofNullable(T value) { return value == null ? empty() : of(value); }
 

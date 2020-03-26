@@ -19,7 +19,7 @@ public class NullableTest {
     
     private Optional<String> optional;
     private Nullable<String> nullable;
-    private Nullable<String> nullableOptional;
+    private Nullable<String> nullable2;
     private Nullable<String> empty;
 
     private static final Consumer<String> DO_NOTHING_CONSUMER = (value) -> {};
@@ -29,7 +29,7 @@ public class NullableTest {
     public void setup() {
         optional = Optional.of("Hello World");
         nullable = Nullable.of("Hello World");
-        nullableOptional = Nullable.of(optional);
+        nullable2 = Nullable.of(optional);
         empty = Nullable.ofNullable(null);
     }
 
@@ -37,7 +37,7 @@ public class NullableTest {
     public void testCreateNullable_Pass() {
         assertNotNull(nullable);
         assertNotNull(empty);
-        assertNotNull(nullableOptional);
+        assertNotNull(nullable2);
     }
 
     @Test
