@@ -10,26 +10,26 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class NullableDoubleTest {
+public class NullableLongTest {
 
-    private Optional<Double> optional;
-    private NullableDouble nullable;
-    private NullableDouble nullable2;
-    private NullableDouble empty;
+    private Optional<Long> optional;
+    private NullableLong nullable;
+    private NullableLong nullable2;
+    private NullableLong empty;
 
-    private static final Consumer<Double> DO_NOTHING_CONSUMER = (value) -> {};
+    private static final Consumer<Long> DO_NOTHING_CONSUMER = (value) -> {};
     private static final Runnable DO_NOTHING_RUNNABLE = () -> {};
 
     @BeforeEach
     public void setup() {
-        optional = Optional.of(99.9999);
-        nullable = NullableDouble.of(99.9999);
-        nullable2 = NullableDouble.of(optional);
-        empty = NullableDouble.empty();
+        optional = Optional.of(99L);
+        nullable = NullableLong.of(99L);
+        nullable2 = NullableLong.of(optional);
+        empty = NullableLong.empty();
     }
 
     @Test
-    public void testCreateNullableDouble_Pass() {
+    public void testCreateNullableLong_Pass() {
         assertNotNull(nullable);
         assertNotNull(nullable2);
         assertNotNull(empty);
@@ -37,39 +37,39 @@ public class NullableDoubleTest {
 
     @Test
     public void testEquals_Pass() {
-        NullableDouble twin = NullableDouble.of(99.9999);
+        NullableLong twin = NullableLong.of(99L);
         assertEquals(nullable,twin);
         assertEquals(nullable, nullable);
     }
 
     @Test
     public void testHashCode_Pass() {
-        NullableDouble twin = NullableDouble.of(99.9999);
+        NullableLong twin = NullableLong.of(99L);
         assertEquals(nullable.hashCode(),twin.hashCode());
     }
 
     @Test
-    public void testGetAsDouble_Pass() {
-        assertEquals(99.9999,nullable.getAsDouble());
+    public void testGetAsLong_Pass() {
+        assertEquals(99L,nullable.getAsLong());
     }
 
     @Test
     public void testIfPresent_Pass() {
-        AtomicReference<Double> reference = new AtomicReference<>();
+        AtomicReference<Long> reference = new AtomicReference<>();
 
         nullable.ifPresent(v -> reference.set(v));
-        assertEquals((Double)99.9999,reference.get());
+        assertEquals((Long) 99L,reference.get());
     }
 
     @Test
     public void testIfPresentOrElse_Pass() {
-        AtomicReference<Double> reference = new AtomicReference<>();
+        AtomicReference<Long> reference = new AtomicReference<>();
 
         nullable.ifPresentOrElse(v -> reference.set(v),DO_NOTHING_RUNNABLE);
-        assertEquals((Double) 99.9999,reference.get());
+        assertEquals((Long)99L,reference.get());
 
-        empty.ifPresentOrElse(DO_NOTHING_CONSUMER,() -> reference.set(0.0));
-        assertEquals((Double) 0.0,reference.get());
+        empty.ifPresentOrElse(DO_NOTHING_CONSUMER,() -> reference.set(0L));
+        assertEquals((Long) 0L,reference.get());
     }
 
     @Test
@@ -79,26 +79,26 @@ public class NullableDoubleTest {
 
     @Test
     public void testOrElseGet_Pass() {
-        assertEquals(99.9999, empty.orElseGet(() -> 99.9999));
+        assertEquals(99, empty.orElseGet(() -> 99L));
     }
 
     @Test
     public void testOrElse_Pass() {
-        assertEquals(99.9999,empty.orElse(99.9999));
+        assertEquals(99,empty.orElse(99));
     }
 
     @Test
     public void testOrElseThrowNoSuchElementException_Fail() {
         assertThrows(NoSuchElementException.class, () -> empty.orElseThrow());
 
-        assertEquals(99.9999,nullable.orElseThrow());
+        assertEquals(99,nullable.orElseThrow());
     }
 
     @Test
     public void testOrElseThrowIllegalArgumentException_Fail() {
         assertThrows(IllegalArgumentException.class, () -> empty.orElseThrow(IllegalArgumentException::new));
 
-        assertEquals(99.9999,nullable.orElseThrow(IllegalArgumentException::new));
+        assertEquals(99,nullable.orElseThrow(IllegalArgumentException::new));
     }
 
     @Test
@@ -108,27 +108,27 @@ public class NullableDoubleTest {
 
     @Test
     public void testStream_Pass() {
-        double value = nullable.stream()
-                .map(v -> v + 0.0001)
-                .filter(v -> v == 100.0)
+        long value = nullable.stream()
+                .map(v -> v + 1)
+                .filter(v -> v == 100)
                 .findFirst()
-                .getAsDouble();
+                .getAsLong();
         assertEquals(100, value);
 
         value = empty.stream()
                 .sum();
-        assertEquals(0.0,value);
+        assertEquals(0,value);
     }
 
     @Test
     public void testToNullable_Pass() {
-        Nullable<Double> value = nullable.toNullable();
-        value.ifPresent((v -> assertEquals((Double) 99.9999,v)));
+        Nullable<Long> value = nullable.toNullable();
+        value.ifPresent((v -> assertEquals((Long) 99L,v)));
     }
 
     @Test
     public void testToString_Pass() {
-        assertEquals("NullableDouble[99.999900]",nullable.toString());
-        assertEquals("NullableDouble[isEmpty]",empty.toString());
+        assertEquals("NullableLong[99]",nullable.toString());
+        assertEquals("NullableLong[isEmpty]",empty.toString());
     }
 }

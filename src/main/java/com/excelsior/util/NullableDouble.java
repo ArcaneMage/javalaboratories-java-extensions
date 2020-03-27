@@ -70,6 +70,10 @@ public class NullableDouble {
         return this.value.isPresent() ? DoubleStream.of(this.value.get()) : DoubleStream.of();
     }
 
+    public Nullable<Double> toNullable() {
+        return isPresent() ? Nullable.of(this.value.get()) : Nullable.empty();
+    }
+
     public String toString() {
         return this.isPresent() ? String.format("NullableDouble[%f]",this.value.get()) : "NullableDouble[isEmpty]";
     }
