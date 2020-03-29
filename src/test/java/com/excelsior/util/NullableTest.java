@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
 public class NullableTest {
-    
+
     private Optional<String> optional;
     private Nullable<String> nullable;
     private Nullable<String> nullable2;
@@ -34,7 +34,7 @@ public class NullableTest {
     }
 
     @Test
-    public void testCreateNullable_Pass() {
+    public void testOf_Pass() {
         assertNotNull(nullable);
         assertNotNull(empty);
         assertNotNull(nullable2);
@@ -137,6 +137,12 @@ public class NullableTest {
 
     @Test
     public void testOrElseThrow_Fail() {
+        assertThrows(NoSuchElementException.class, () -> empty.orElseThrow());
+    }
+
+
+    @Test
+    public void testOrElseThrowException_Fail() {
         assertThrows(IllegalArgumentException.class, () -> empty.orElseThrow(IllegalArgumentException::new));
     }
 
@@ -157,10 +163,10 @@ public class NullableTest {
 
     @Test
     public void testToMap_Pass() {
-        Map<String,String> nullableMap = nullable.toMap(() -> "first",(value) -> value );
+        Map<String,String> nullableMap = nullable.toMap(v -> "first", v -> v);
         assertEquals("Hello World", nullableMap.get("first"));
 
-        Map<String,String> emptyMap = empty.toMap(() -> "first",(value) -> value);
+        Map<String,String> emptyMap = empty.toMap(v -> "first",v -> v);
         assertEquals(0, emptyMap.size());
     }
 

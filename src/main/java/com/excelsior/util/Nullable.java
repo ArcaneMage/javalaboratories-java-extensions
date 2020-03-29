@@ -43,6 +43,8 @@ import java.util.stream.Stream;
  *
  * @param <T> the type of value
  * @see NullableDouble
+ * @see NullableInt
+ * @see NullableLong
  * @author Kevin H, Excelsior Software
  */
 @SuppressWarnings("WeakerAccess")
@@ -54,6 +56,7 @@ public final class Nullable<T> {
 
     public static <T> Nullable<T> of(T value) { return new Nullable<>(value); }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public static <T> Nullable<T> of(Optional<T> optional) {
         Objects.requireNonNull(optional);
         return ofNullable(optional.orElse(null));
@@ -136,6 +139,10 @@ public final class Nullable<T> {
         else return Objects.requireNonNull(supplier.get());
     }
 
+    public T orElseThrow() {
+        return orElseThrow(NoSuchElementException::new);
+    }
+
     public <E extends Throwable> T orElseThrow(Supplier<? extends E> exSupplier) throws E {
         if ( this.value != null ) return value;
         else throw exSupplier.get();
@@ -155,10 +162,10 @@ public final class Nullable<T> {
         else return Collections.emptyList();
     }
 
-    public <K,V> Map<K,V> toMap(Supplier<? extends K> keyMapper,Function<? super T,? extends V> valueMapper ) {
+    public <K,V> Map<K,V> toMap(Function<? super T, ? extends K> keyMapper,Function<? super T,? extends V> valueMapper ) {
         Objects.requireNonNull(keyMapper);
         Objects.requireNonNull(valueMapper);
-        if ( this.value != null ) return Collections.singletonMap(keyMapper.get(), valueMapper.apply(this.value));
+        if ( this.value != null ) return Collections.singletonMap(keyMapper.apply(value), valueMapper.apply(this.value));
         else return Collections.emptyMap();
     }
 

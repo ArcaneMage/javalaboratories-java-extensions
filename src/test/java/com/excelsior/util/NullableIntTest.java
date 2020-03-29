@@ -29,7 +29,7 @@ public class NullableIntTest {
     }
 
     @Test
-    public void testCreateNullableInt_Pass() {
+    public void testOf_Pass() {
         assertNotNull(nullable);
         assertNotNull(nullable2);
         assertNotNull(empty);
@@ -88,14 +88,14 @@ public class NullableIntTest {
     }
 
     @Test
-    public void testOrElseThrowNoSuchElementException_Fail() {
+    public void testOrElseThrow_Fail() {
         assertThrows(NoSuchElementException.class, () -> empty.orElseThrow());
 
         assertEquals(99,nullable.orElseThrow());
     }
 
     @Test
-    public void testOrElseThrowIllegalArgumentException_Fail() {
+    public void testOrElseThrowException_Fail() {
         assertThrows(IllegalArgumentException.class, () -> empty.orElseThrow(IllegalArgumentException::new));
 
         assertEquals(99,nullable.orElseThrow(IllegalArgumentException::new));
