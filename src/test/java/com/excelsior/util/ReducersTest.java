@@ -37,6 +37,24 @@ public class ReducersTest {
     }
 
     @Test
+    public void testAveragingDouble_Pass() {
+        List<String> strings = Arrays.asList("3","4","5");
+
+        strings.stream()
+                .collect(Reducers.averagingDouble(Double::parseDouble))
+                .ifPresent(r -> assertEquals((Double) 4.0, r));
+
+        strings.parallelStream()
+                .collect(Reducers.averagingDouble(Double::parseDouble))
+                .ifPresent(r -> assertEquals((Double) 4.0, r));
+
+        List<String> zero = Collections.emptyList();
+        zero.parallelStream()
+                .collect(Reducers.averagingDouble(Double::parseDouble))
+                .ifPresent(r -> assertEquals((Double) Double.NaN, r));
+    }
+
+    @Test
     public void testAveragingLong_Pass() {
         List<String> strings = Arrays.asList("3","4","5");
 
@@ -54,5 +72,21 @@ public class ReducersTest {
                 .ifPresent(r -> assertEquals((Double) Double.NaN, r));
     }
 
+    @Test
+    public void testAveragingInt_Pass() {
+        List<String> strings = Arrays.asList("3","4","5");
 
+        strings.stream()
+                .collect(Reducers.averagingInt(Integer::parseInt))
+                .ifPresent(r -> assertEquals((Double) 4.0, r));
+
+        strings.parallelStream()
+                .collect(Reducers.averagingInt(Integer::parseInt))
+                .ifPresent(r -> assertEquals((Double) 4.0, r));
+
+        List<String> zero = Collections.emptyList();
+        zero.parallelStream()
+                .collect(Reducers.averagingInt(Integer::parseInt))
+                .ifPresent(r -> assertEquals((Double) Double.NaN, r));
+    }
 }

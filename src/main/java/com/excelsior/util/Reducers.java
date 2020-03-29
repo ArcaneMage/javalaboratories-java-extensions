@@ -8,6 +8,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@SuppressWarnings("WeakerAccess")
 public final class Reducers {
 
     private static class ReducerImpl<T,A,R> implements Reducer<T,A,R> {
@@ -61,9 +62,19 @@ public final class Reducers {
     public static <T> Reducer<? super T, ?, Nullable<Long>> counting() {
         return new ReducerImpl<> (
                 ()     -> new long[1],
-                (e,l)  -> e[0] += 1L,
+                (a,l)  -> a[0] += 1L,
                 (l,r)  -> {l[0] += r[0]; return l;},
                 result -> Nullable.of(result[0]),
+                Collections.emptySet()
+        );
+    }
+
+    public static <T,R extends Double> Reducer<T,?,Nullable<Double>> averagingDouble(Function<? super T, ? extends R> mapper) {
+        return new ReducerImpl<>(
+                ()     -> new double[2],
+                (a,l)  -> {a[0]  = a[0] + (Double) mapper.apply(l); a[1] += 1;},
+                (l,r)  -> {l[0] += r[0]; l[1] += r[1]; return l;},
+                result -> Nullable.of (result[0] / result[1]),
                 Collections.emptySet()
         );
     }
@@ -71,7 +82,17 @@ public final class Reducers {
     public static <T,R extends Long> Reducer<T,?,Nullable<Double>> averagingLong(Function<? super T, ? extends R> mapper) {
         return new ReducerImpl<>(
                 ()     -> new long[2],
-                (e,l)  -> {e[0]  = e[0] + (Long) mapper.apply(l); e[1] += 1;},
+                (a,l)  -> {a[0]  = a[0] + (Long) mapper.apply(l); a[1] += 1;},
+                (l,r)  -> {l[0] += r[0]; l[1] += r[1]; return l;},
+                result -> Nullable.of ( (double) result[0] / result[1]),
+                Collections.emptySet()
+        );
+    }
+
+    public static <T,R extends Integer> Reducer<T,?,Nullable<Double>> averagingInt(Function<? super T, ? extends R> mapper) {
+        return new ReducerImpl<>(
+                ()     -> new int[2],
+                (a,l)  -> {a[0]  = a[0] + (Integer) mapper.apply(l); a[1] += 1;},
                 (l,r)  -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of ( (double) result[0] / result[1]),
                 Collections.emptySet()
@@ -96,7 +117,7 @@ public final class Reducers {
                                                          CharSequence suffix) {
         return new ReducerImpl<>(
                 () -> new StringJoiner(delimiter, prefix, suffix),
-                (sj,cs)-> sj.add(cs.toString()),
+                (a,cs)-> a.add(cs.toString()),
                 StringJoiner::merge,
                 (result -> Nullable.of(result.toString())),
                 Collections.emptySet());
