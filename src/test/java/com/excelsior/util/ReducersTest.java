@@ -180,4 +180,26 @@ public class ReducersTest {
                 .ifPresent(r -> assertEquals(0L, r.getCount()));
     }
 
+    @Test
+    public void testPartitionBy_Pass() {
+        List<String> strings = Arrays.asList("3","4","5","7","8");
+
+        strings.stream()
+                .collect(Reducers.partitioningBy(s -> Integer.parseInt(s) > 4))
+                .ifPresent(r -> {
+                    assertEquals(2,r.get(false).size());
+                    assertEquals("[3, 4]",r.get(false).toString());
+                    assertEquals(3,r.get(true).size());
+                    assertEquals("[5, 7, 8]",r.get(true).toString());
+                });
+
+        strings.parallelStream()
+                .collect(Reducers.partitioningBy(s -> Integer.parseInt(s) > 4))
+                .ifPresent(r -> {
+                    assertEquals(2,r.get(false).size());
+                    assertEquals("[3, 4]",r.get(false).toString());
+                    assertEquals(3,r.get(true).size());
+                    assertEquals("[5, 7, 8]",r.get(true).toString());
+                });
+    }
 }

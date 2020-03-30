@@ -119,6 +119,16 @@ public final class Reducers {
                 Collections.emptySet());
     }
 
+    public static <T> Reducer<T,Partition<T>,Nullable<Map<Boolean,List<T>>>> partitioningBy(Predicate<? super T> predicate) {
+        return new ReducerImpl<>(
+                Partition::new,
+                (a,v) -> a.put(predicate.test(v),v),
+                (l,r) -> { l.putAll(r); return l; },
+                Nullable::of,
+                Collections.emptySet()
+        );
+    }
+
     public static <T> Reducer<T,?,Nullable<IntSummaryStatistics>> summarizingInt(ToIntFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 IntSummaryStatistics::new,
@@ -148,4 +158,35 @@ public final class Reducers {
                 EnumSet.of(Collector.Characteristics.CONCURRENT)
         );
     }
+
+
+    /**
+     * Partition class used by partitionBy
+     */
+    private static class Partition<T> extends AbstractMap<Boolean,List<T>>  {
+        private Map<Boolean,List<T>> map;
+
+        public Partition() {
+            map = new HashMap<>();
+            map.put(true, new ArrayList<>());
+            map.put(false, new ArrayList<>());
+        }
+
+        public T put(Boolean key, T value) {
+            map.get(key).add(value);
+            return value;
+        }
+
+        @Override
+        public Set<Entry<Boolean, List<T>>> entrySet() {
+            return map.entrySet();
+        }
+
+        public List<T> put(Boolean k, List<T> list) {
+            list.forEach (v -> put(k,v));
+            return list;
+        }
+
+    }
+
 }
