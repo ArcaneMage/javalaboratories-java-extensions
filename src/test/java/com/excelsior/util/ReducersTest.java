@@ -89,4 +89,95 @@ public class ReducersTest {
                 .collect(Reducers.averagingInt(Integer::parseInt))
                 .ifPresent(r -> assertEquals((Double) Double.NaN, r));
     }
+
+    @Test
+    public void testSummarizingInt_Pass() {
+        List<String> strings = Arrays.asList("3","4","5");
+
+        strings.stream()
+                .collect(Reducers.summarizingInt(Integer::parseInt))
+                .ifPresent(r -> {
+                    assertEquals(3, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3 ,r.getMin());
+                    assertEquals(5, r.getMax());
+                    assertEquals(12, r.getSum());
+                });
+
+        strings.parallelStream()
+                .collect(Reducers.summarizingInt(Integer::parseInt))
+                .ifPresent(r -> {
+                    assertEquals(3, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3 ,r.getMin());
+                    assertEquals(5, r.getMax());
+                    assertEquals(12, r.getSum());
+                });
+
+        List<String> zero = Collections.emptyList();
+        zero.parallelStream()
+                .collect(Reducers.summarizingInt(Integer::parseInt))
+                .ifPresent(r -> assertEquals(0, r.getCount()));
+    }
+
+    @Test
+    public void testSummarizingLong_Pass() {
+        List<String> strings = Arrays.asList("3","4","5");
+
+        strings.stream()
+                .collect(Reducers.summarizingLong(Long::parseLong))
+                .ifPresent(r -> {
+                    assertEquals(3L, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3L ,r.getMin());
+                    assertEquals(5L, r.getMax());
+                    assertEquals(12L, r.getSum());
+                });
+
+        strings.parallelStream()
+                .collect(Reducers.summarizingLong(Long::parseLong))
+                .ifPresent(r -> {
+                    assertEquals(3L, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3L ,r.getMin());
+                    assertEquals(5L, r.getMax());
+                    assertEquals(12L, r.getSum());
+                });
+
+        List<String> zero = Collections.emptyList();
+        zero.parallelStream()
+                .collect(Reducers.summarizingLong(Long::parseLong))
+                .ifPresent(r -> assertEquals(0L, r.getCount()));
+    }
+
+    @Test
+    public void testSummarizingDouble_Pass() {
+        List<String> strings = Arrays.asList("3","4","5");
+
+        strings.stream()
+                .collect(Reducers.summarizingDouble(Double::parseDouble))
+                .ifPresent(r -> {
+                    assertEquals(3L, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3.0 ,r.getMin());
+                    assertEquals(5.0, r.getMax());
+                    assertEquals(12.0, r.getSum());
+                });
+
+        strings.parallelStream()
+                .collect(Reducers.summarizingDouble(Double::parseDouble))
+                .ifPresent(r -> {
+                    assertEquals(3L, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3.0 ,r.getMin());
+                    assertEquals(5.0, r.getMax());
+                    assertEquals(12.0, r.getSum());
+                });
+
+        List<String> zero = Collections.emptyList();
+        zero.parallelStream()
+                .collect(Reducers.summarizingDouble(Double::parseDouble))
+                .ifPresent(r -> assertEquals(0L, r.getCount()));
+    }
+
 }

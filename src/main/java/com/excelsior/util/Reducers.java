@@ -1,12 +1,8 @@
 package com.excelsior.util;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.Collector;
 
 @SuppressWarnings("WeakerAccess")
 public final class Reducers {
@@ -69,33 +65,33 @@ public final class Reducers {
         );
     }
 
-    public static <T,R extends Double> Reducer<T,?,Nullable<Double>> averagingDouble(Function<? super T, ? extends R> mapper) {
+    public static <T> Reducer<T,?,Nullable<Double>> averagingDouble(ToDoubleFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 ()     -> new double[2],
-                (a,l)  -> {a[0]  = a[0] + (Double) mapper.apply(l); a[1] += 1;},
+                (a,l)  -> {a[0]  = a[0] + mapper.applyAsDouble(l); a[1] += 1;},
                 (l,r)  -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of (result[0] / result[1]),
-                Collections.emptySet()
+                EnumSet.of(Collector.Characteristics.CONCURRENT)
         );
     }
 
-    public static <T,R extends Long> Reducer<T,?,Nullable<Double>> averagingLong(Function<? super T, ? extends R> mapper) {
+    public static <T> Reducer<T,?,Nullable<Double>> averagingLong(ToLongFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 ()     -> new long[2],
-                (a,l)  -> {a[0]  = a[0] + (Long) mapper.apply(l); a[1] += 1;},
+                (a,l)  -> {a[0]  = a[0] + mapper.applyAsLong(l); a[1] += 1;},
                 (l,r)  -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of ( (double) result[0] / result[1]),
-                Collections.emptySet()
+                EnumSet.of(Collector.Characteristics.CONCURRENT)
         );
     }
 
-    public static <T,R extends Integer> Reducer<T,?,Nullable<Double>> averagingInt(Function<? super T, ? extends R> mapper) {
+    public static <T> Reducer<T,?,Nullable<Double>> averagingInt(ToIntFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 ()     -> new int[2],
-                (a,l)  -> {a[0]  = a[0] + (Integer) mapper.apply(l); a[1] += 1;},
+                (a,l)  -> {a[0]  = a[0] + mapper.applyAsInt(l); a[1] += 1;},
                 (l,r)  -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of ( (double) result[0] / result[1]),
-                Collections.emptySet()
+                EnumSet.of(Collector.Characteristics.CONCURRENT)
         );
     }
 
@@ -117,9 +113,39 @@ public final class Reducers {
                                                          CharSequence suffix) {
         return new ReducerImpl<>(
                 () -> new StringJoiner(delimiter, prefix, suffix),
-                (a,cs)-> a.add(cs.toString()),
+                (a,s)-> a.add(s.toString()),
                 StringJoiner::merge,
                 (result -> Nullable.of(result.toString())),
                 Collections.emptySet());
+    }
+
+    public static <T> Reducer<T,?,Nullable<IntSummaryStatistics>> summarizingInt(ToIntFunction<? super T> mapper) {
+        return new ReducerImpl<>(
+                IntSummaryStatistics::new,
+                (a,v) -> a.accept(mapper.applyAsInt(v)),
+                (l,r) -> {l.combine(r); return l;},
+                Nullable::of,
+                EnumSet.of(Collector.Characteristics.CONCURRENT)
+        );
+    }
+
+    public static <T> Reducer<T,?,Nullable<LongSummaryStatistics>> summarizingLong(ToLongFunction<? super T> mapper) {
+        return new ReducerImpl<>(
+                LongSummaryStatistics::new,
+                (a,v) -> a.accept(mapper.applyAsLong(v)),
+                (l,r) -> {l.combine(r); return l;},
+                Nullable::of,
+                EnumSet.of(Collector.Characteristics.CONCURRENT)
+        );
+    }
+
+    public static <T> Reducer<T,?,Nullable<DoubleSummaryStatistics>> summarizingDouble(ToDoubleFunction<? super T> mapper) {
+        return new ReducerImpl<>(
+                DoubleSummaryStatistics::new,
+                (a,v) -> a.accept(mapper.applyAsDouble(v)),
+                (l,r) -> {l.combine(r); return l;},
+                Nullable::of,
+                EnumSet.of(Collector.Characteristics.CONCURRENT)
+        );
     }
 }
