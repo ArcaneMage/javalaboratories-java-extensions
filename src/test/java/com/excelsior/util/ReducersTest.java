@@ -218,4 +218,28 @@ public class ReducersTest {
                 .collect(Reducers.partitioningBy(s -> Integer.parseInt(s) > 4))
                 .ifPresent(r -> assertEquals(2, r.size()));
     }
+
+    @Test
+    public void testGroupingBy_Pass() {
+        List<Integer> numbers = Arrays.asList(1,2,3,4,5,6,7,8,9);
+
+        numbers.stream()
+                .collect(Reducers.groupingBy(n -> n % 2 == 0 ? "Even" : "Odd"))
+                .ifPresent(g -> {
+                    assertEquals("[2, 4, 6, 8]",g.get("Even").toString());
+                    assertEquals("[1, 3, 5, 7, 9]",g.get("Odd").toString());
+                });
+
+        numbers.parallelStream()
+                .collect(Reducers.groupingBy(n -> n % 2 == 0 ? "Even" : "Odd"))
+                .ifPresent(g -> {
+                    assertEquals("[2, 4, 6, 8]",g.get("Even").toString());
+                    assertEquals("[1, 3, 5, 7, 9]",g.get("Odd").toString());
+                });
+
+        List<Integer> zero = Collections.emptyList();
+        zero.stream()
+                .collect(Reducers.groupingBy(n -> n % 2 == 0 ? "Even" : "Odd"))
+                .ifPresent(g -> assertEquals(0, g.size()));
+    }
 }

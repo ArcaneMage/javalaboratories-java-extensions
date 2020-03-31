@@ -129,6 +129,25 @@ public final class Reducers {
         );
     }
 
+    public static <T,K> Reducer<T,?,Nullable<Map<K,List<T>>>> groupingBy(Function<? super T, ? extends K> function) {
+        return new ReducerImpl<>(
+                (Supplier<HashMap<K, List<T>>>) HashMap::new,
+                (a,v) -> {
+                        K key = function.apply(v);
+                        if ( key != null )
+                            a.computeIfAbsent(key, k -> new ArrayList<>())
+                                    .add(v);
+                    },
+                (l,r) -> {
+                        r.forEach((rk, v) -> l.computeIfAbsent(rk, lk -> new ArrayList<>())
+                                .addAll(v));
+                        return l;
+                    },
+                (result -> Nullable.of(Collections.unmodifiableMap(result))),
+                Collections.emptySet()
+        );
+    }
+
     public static <T> Reducer<T,?,Nullable<IntSummaryStatistics>> summarizingInt(ToIntFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 IntSummaryStatistics::new,
@@ -186,6 +205,8 @@ public final class Reducers {
             list.forEach (v -> put(k,v));
             return list;
         }
+
+
 
     }
 
