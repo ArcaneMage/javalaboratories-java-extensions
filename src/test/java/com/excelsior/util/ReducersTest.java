@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -201,5 +203,19 @@ public class ReducersTest {
                     assertEquals(3,r.get(true).size());
                     assertEquals("[5, 7, 8]",r.get(true).toString());
                 });
+
+        strings.parallelStream()
+                .collect(Reducers.partitioningBy(s -> Integer.parseInt(s) > 0))
+                .ifPresent(r -> {
+                    assertEquals(0,r.get(false).size());
+                    assertEquals("[]",r.get(false).toString());
+                    assertEquals(5,r.get(true).size());
+                    assertEquals("[3, 4, 5, 7, 8]",r.get(true).toString());
+                });
+
+        List<String> zero = Collections.emptyList();
+        zero.stream()
+                .collect(Reducers.partitioningBy(s -> Integer.parseInt(s) > 4))
+                .ifPresent(r -> assertEquals(2, r.size()));
     }
 }

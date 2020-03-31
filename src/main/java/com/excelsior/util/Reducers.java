@@ -119,12 +119,12 @@ public final class Reducers {
                 Collections.emptySet());
     }
 
-    public static <T> Reducer<T,Partition<T>,Nullable<Map<Boolean,List<T>>>> partitioningBy(Predicate<? super T> predicate) {
+    public static <T> Reducer<T,?,Nullable<Map<Boolean,List<T>>>> partitioningBy(Predicate<? super T> predicate) {
         return new ReducerImpl<>(
-                Partition::new,
+                (Supplier<Partition<T>>) Partition::new,
                 (a,v) -> a.put(predicate.test(v),v),
                 (l,r) -> { l.putAll(r); return l; },
-                Nullable::of,
+                (result -> Nullable.of(Collections.unmodifiableMap(result))),
                 Collections.emptySet()
         );
     }
@@ -168,11 +168,11 @@ public final class Reducers {
 
         public Partition() {
             map = new HashMap<>();
-            map.put(true, new ArrayList<>());
-            map.put(false, new ArrayList<>());
+            map.put(true,new ArrayList<>());
+            map.put(false,new ArrayList<>());
         }
 
-        public T put(Boolean key, T value) {
+        private T put(Boolean key, T value) {
             map.get(key).add(value);
             return value;
         }
