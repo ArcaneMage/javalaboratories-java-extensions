@@ -57,9 +57,9 @@ public final class Reducers {
 
     public static <T> Reducer<? super T, ?, Nullable<Long>> counting() {
         return new ReducerImpl<> (
-                ()     -> new long[1],
-                (a,l)  -> a[0] += 1L,
-                (l,r)  -> {l[0] += r[0]; return l;},
+                () -> new long[1],
+                (a,l) -> a[0] += 1L,
+                (l,r) -> {l[0] += r[0]; return l;},
                 result -> Nullable.of(result[0]),
                 Collections.emptySet()
         );
@@ -67,9 +67,9 @@ public final class Reducers {
 
     public static <T> Reducer<T,?,Nullable<Double>> averagingDouble(ToDoubleFunction<? super T> mapper) {
         return new ReducerImpl<>(
-                ()     -> new double[2],
-                (a,l)  -> {a[0]  = a[0] + mapper.applyAsDouble(l); a[1] += 1;},
-                (l,r)  -> {l[0] += r[0]; l[1] += r[1]; return l;},
+                () -> new double[2],
+                (a,l) -> {a[0]  = a[0] + mapper.applyAsDouble(l); a[1] += 1;},
+                (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of (result[0] / result[1]),
                 EnumSet.of(Collector.Characteristics.CONCURRENT)
         );
@@ -77,9 +77,9 @@ public final class Reducers {
 
     public static <T> Reducer<T,?,Nullable<Double>> averagingLong(ToLongFunction<? super T> mapper) {
         return new ReducerImpl<>(
-                ()     -> new long[2],
-                (a,l)  -> {a[0]  = a[0] + mapper.applyAsLong(l); a[1] += 1;},
-                (l,r)  -> {l[0] += r[0]; l[1] += r[1]; return l;},
+                () -> new long[2],
+                (a,l) -> {a[0]  = a[0] + mapper.applyAsLong(l); a[1] += 1;},
+                (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of ( (double) result[0] / result[1]),
                 EnumSet.of(Collector.Characteristics.CONCURRENT)
         );
@@ -87,9 +87,9 @@ public final class Reducers {
 
     public static <T> Reducer<T,?,Nullable<Double>> averagingInt(ToIntFunction<? super T> mapper) {
         return new ReducerImpl<>(
-                ()     -> new int[2],
-                (a,l)  -> {a[0]  = a[0] + mapper.applyAsInt(l); a[1] += 1;},
-                (l,r)  -> {l[0] += r[0]; l[1] += r[1]; return l;},
+                () -> new int[2],
+                (a,l) -> {a[0]  = a[0] + mapper.applyAsInt(l); a[1] += 1;},
+                (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of ( (double) result[0] / result[1]),
                 EnumSet.of(Collector.Characteristics.CONCURRENT)
         );
@@ -113,7 +113,7 @@ public final class Reducers {
                                                          CharSequence suffix) {
         return new ReducerImpl<>(
                 () -> new StringJoiner(delimiter, prefix, suffix),
-                (a,s)-> a.add(s.toString()),
+                (a,s) -> a.add(s.toString()),
                 StringJoiner::merge,
                 (result -> Nullable.of(result.toString())),
                 Collections.emptySet());
@@ -121,11 +121,11 @@ public final class Reducers {
 
     public static <T> Reducer<T,?,Nullable<Map<Boolean,List<T>>>> partitioningBy(Predicate<? super T> predicate) {
         return new ReducerImpl<>(
-                (Supplier<Partition<T>>) Partition::new,
-                (a,v) -> a.put(predicate.test(v),v),
-                (l,r) -> { l.putAll(r); return l; },
+                () -> new Partition<List<T>>(new ArrayList<>(),new ArrayList<>()),
+                (a,v) -> a.get(predicate.test(v)).add(v),
+                (l,r) -> { r.forEach((rk,v) -> l.get(rk).addAll(v)); return l; },
                 (result -> Nullable.of(Collections.unmodifiableMap(result))),
-                Collections.emptySet()
+                EnumSet.of(Collector.Characteristics.CONCURRENT)
         );
     }
 
@@ -144,7 +144,7 @@ public final class Reducers {
                         return l;
                     },
                 (result -> Nullable.of(Collections.unmodifiableMap(result))),
-                Collections.emptySet()
+                EnumSet.of(Collector.Characteristics.CONCURRENT)
         );
     }
 
@@ -180,34 +180,45 @@ public final class Reducers {
 
 
     /**
-     * Partition class used by partitionBy
+     * Partition class used by partitionBy reducer
      */
-    private static class Partition<T> extends AbstractMap<Boolean,List<T>>  {
-        private Map<Boolean,List<T>> map;
-
-        public Partition() {
-            map = new HashMap<>();
-            map.put(true,new ArrayList<>());
-            map.put(false,new ArrayList<>());
+    private static class Partition<T> extends AbstractMap<Boolean, T> {
+        private class PartitionSet extends AbstractSet<Map.Entry<Boolean, T>> {
+            @Override
+            public Iterator<Map.Entry<Boolean, T>> iterator() {
+                Map.Entry<Boolean,T> falseEntry = new SimpleEntry<>(false, Partition.this.falseEntry);
+                Map.Entry<Boolean,T> trueEntry = new SimpleEntry<>(true, Partition.this.trueEntry);
+                return Arrays.asList(falseEntry,trueEntry).iterator();
+            }
+            @Override
+            public int size() {
+                return 2;
+            }
         }
+        private final T falseEntry;
+        private final T trueEntry;
+        private final PartitionSet set;
 
-        private T put(Boolean key, T value) {
-            map.get(key).add(value);
-            return value;
+        Partition(final T falseEntry, final T trueEntry) {
+            this.falseEntry = falseEntry;
+            this.trueEntry = trueEntry;
+            set = new PartitionSet();
         }
 
         @Override
-        public Set<Entry<Boolean, List<T>>> entrySet() {
-            return map.entrySet();
+        public Set<Entry<Boolean, T>> entrySet() {
+            return set;
         }
 
-        public List<T> put(Boolean k, List<T> list) {
-            list.forEach (v -> put(k,v));
-            return list;
+        @Override
+        public T put(Boolean key, T value) {
+            set.stream()
+                .filter(e -> e.getKey() == key)
+                .findFirst()
+                .ifPresent(e -> e.setValue(value));
+            return value;
         }
-
-
-
     }
+
 
 }
