@@ -1,6 +1,7 @@
 package com.excelsior.util;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 import java.util.stream.Collector;
 
@@ -119,6 +120,14 @@ public final class Reducers {
                 Collections.emptySet());
     }
 
+    public static <T> Reducer<T,?,Nullable<T>> maxBy(Comparator<? super T>  comparator) {
+        return reduce(BinaryOperator.maxBy(comparator));
+    }
+
+    public static <T> Reducer<T,?,Nullable<T>> minBy(Comparator<? super T>  comparator) {
+        return reduce(BinaryOperator.minBy(comparator));
+    }
+
     public static <T> Reducer<T,?,Nullable<Map<Boolean,List<T>>>> partitioningBy(Predicate<? super T> predicate) {
         return new ReducerImpl<>(
                 () -> new Partition<List<T>>(new ArrayList<>(),new ArrayList<>()),
@@ -178,6 +187,16 @@ public final class Reducers {
         );
     }
 
+    @SuppressWarnings("unchecked")
+    private static <T> Reducer<T,?,Nullable<T>> reduce(BinaryOperator<T> operator) {
+        return new ReducerImpl<>(
+                () -> new Object[1],
+                (a,v) -> a[0] = operator.apply(a[0] != null ? (T) a[0] : v,v),
+                (l,r) -> {l[0] = operator.apply((T) l[0],(T)r[0]); return l;},
+                (result) -> Nullable.ofNullable((T)result[0]),
+                Collections.emptySet());
+    }
+
 
     /**
      * Partition class used by partitionBy reducer
@@ -219,6 +238,4 @@ public final class Reducers {
             return value;
         }
     }
-
-
 }

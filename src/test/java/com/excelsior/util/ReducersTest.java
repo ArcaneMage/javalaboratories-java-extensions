@@ -242,4 +242,46 @@ public class ReducersTest {
                 .collect(Reducers.groupingBy(n -> n % 2 == 0 ? "Even" : "Odd"))
                 .ifPresent(g -> assertEquals(0, g.size()));
     }
+
+    @Test
+    public void testMaxBy_Pass() {
+        List<Integer> numbers = Arrays.asList(9,7,5,76,3,40,101);
+
+        numbers.stream()
+                .collect(Reducers.maxBy(Integer::compareTo))
+                .ifPresent( n -> assertEquals((Integer) 101,n));
+
+        numbers.parallelStream()
+                .collect(Reducers.maxBy(Integer::compareTo))
+                .ifPresent( n -> assertEquals((Integer) 101,n));
+
+        numbers = Arrays.asList(0);
+        numbers.stream()
+                .collect(Reducers.maxBy(Integer::compareTo))
+                .ifPresent( n -> assertEquals((Integer) 0,n));
+
+    }
+
+    @Test
+    public void testMinBy_Pass() {
+        List<Integer> numbers = Arrays.asList(9,7,5,76,2,40,101);
+
+        numbers.stream()
+                .collect(Reducers.minBy(Integer::compareTo))
+                .ifPresent( n -> assertEquals((Integer) 2,n));
+
+        numbers.parallelStream()
+                .collect(Reducers.minBy(Integer::compareTo))
+                .ifPresent( n -> assertEquals((Integer) 2,n));
+
+        numbers = Arrays.asList(0);
+        numbers.stream()
+                .collect(Reducers.minBy(Integer::compareTo))
+                .ifPresent( n -> assertEquals((Integer) 0,n));
+        numbers = Arrays.asList();
+
+        numbers.stream()
+                .collect(Reducers.minBy(Integer::compareTo))
+                .ifPresent( n -> assertEquals((Integer) 0,n));
+    }
 }
