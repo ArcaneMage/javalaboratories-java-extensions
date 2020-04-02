@@ -260,6 +260,11 @@ public class ReducersTest {
                 .collect(Reducers.maxBy(Integer::compareTo))
                 .ifPresent( n -> assertEquals((Integer) 0,n));
 
+        numbers = Arrays.asList();
+        numbers.stream()
+                .collect(Reducers.maxBy(Integer::compareTo))
+                .ifPresent( n -> assertEquals((Integer) 0,n));
+
     }
 
     @Test
@@ -278,8 +283,8 @@ public class ReducersTest {
         numbers.stream()
                 .collect(Reducers.minBy(Integer::compareTo))
                 .ifPresent( n -> assertEquals((Integer) 0,n));
-        numbers = Arrays.asList();
 
+        numbers = Arrays.asList();
         numbers.stream()
                 .collect(Reducers.minBy(Integer::compareTo))
                 .ifPresent( n -> assertEquals((Integer) 0,n));

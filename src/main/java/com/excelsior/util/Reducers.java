@@ -7,6 +7,8 @@ import java.util.stream.Collector;
 @SuppressWarnings("WeakerAccess")
 public final class Reducers {
 
+    private static final Set<Collector.Characteristics> NO_CHARACTERISTICS = Collections.emptySet();
+
     private static class ReducerImpl<T,A,R> implements Reducer<T,A,R> {
 
         private final Supplier<A> supplier;
@@ -61,8 +63,7 @@ public final class Reducers {
                 (a,l) -> a[0] += 1L,
                 (l,r) -> {l[0] += r[0]; return l;},
                 result -> Nullable.of(result[0]),
-                Collections.emptySet()
-        );
+                NO_CHARACTERISTICS);
     }
 
     public static <T> Reducer<T,?,Nullable<Double>> averagingDouble(ToDoubleFunction<? super T> mapper) {
@@ -71,7 +72,7 @@ public final class Reducers {
                 (a,l) -> {a[0]  = a[0] + mapper.applyAsDouble(l); a[1] += 1;},
                 (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of (result[0] / result[1]),
-                EnumSet.of(Collector.Characteristics.CONCURRENT)
+                NO_CHARACTERISTICS
         );
     }
 
@@ -81,7 +82,7 @@ public final class Reducers {
                 (a,l) -> {a[0]  = a[0] + mapper.applyAsLong(l); a[1] += 1;},
                 (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of ( (double) result[0] / result[1]),
-                EnumSet.of(Collector.Characteristics.CONCURRENT)
+                NO_CHARACTERISTICS
         );
     }
 
@@ -91,7 +92,7 @@ public final class Reducers {
                 (a,l) -> {a[0]  = a[0] + mapper.applyAsInt(l); a[1] += 1;},
                 (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
                 result -> Nullable.of ( (double) result[0] / result[1]),
-                EnumSet.of(Collector.Characteristics.CONCURRENT)
+                NO_CHARACTERISTICS
         );
     }
 
@@ -101,7 +102,7 @@ public final class Reducers {
                 StringBuilder::append,
                 (l,r) -> {l.append(r); return l;},
                 (result -> Nullable.of(result.toString())),
-                Collections.emptySet());
+                NO_CHARACTERISTICS);
     }
 
     public static Reducer<CharSequence,?,Nullable<String>> joining(String delimiter) {
@@ -116,7 +117,7 @@ public final class Reducers {
                 (a,s) -> a.add(s.toString()),
                 StringJoiner::merge,
                 (result -> Nullable.of(result.toString())),
-                Collections.emptySet());
+                NO_CHARACTERISTICS);
     }
 
     public static <T> Reducer<T,?,Nullable<T>> maxBy(Comparator<? super T>  comparator) {
@@ -133,26 +134,30 @@ public final class Reducers {
                 (a,v) -> a.get(predicate.test(v)).add(v),
                 (l,r) -> { r.forEach((rk,v) -> l.get(rk).addAll(v)); return l; },
                 (result -> Nullable.of(Collections.unmodifiableMap(result))),
-                EnumSet.of(Collector.Characteristics.CONCURRENT)
+                NO_CHARACTERISTICS
         );
     }
 
     public static <T,K> Reducer<T,?,Nullable<Map<K,List<T>>>> groupingBy(Function<? super T, ? extends K> function) {
+        BiConsumer<Map<K,List<T>>,T> accumulator = (a,v) -> {
+            K key = function.apply(v);
+            if ( key != null )
+                a.computeIfAbsent(key, k -> new ArrayList<>())
+                        .add(v);
+        };
+
+        BinaryOperator<Map<K, List<T>>> combiner = (l,r) -> {
+            r.forEach((rk, v) -> l.computeIfAbsent(rk, lk -> new ArrayList<>())
+                    .addAll(v));
+            return l;
+        };
+
         return new ReducerImpl<>(
-                (Supplier<HashMap<K, List<T>>>) HashMap::new,
-                (a,v) -> {
-                        K key = function.apply(v);
-                        if ( key != null )
-                            a.computeIfAbsent(key, k -> new ArrayList<>())
-                                    .add(v);
-                    },
-                (l,r) -> {
-                        r.forEach((rk, v) -> l.computeIfAbsent(rk, lk -> new ArrayList<>())
-                                .addAll(v));
-                        return l;
-                    },
+                HashMap::new,
+                accumulator,
+                combiner,
                 (result -> Nullable.of(Collections.unmodifiableMap(result))),
-                EnumSet.of(Collector.Characteristics.CONCURRENT)
+                NO_CHARACTERISTICS
         );
     }
 
@@ -162,7 +167,7 @@ public final class Reducers {
                 (a,v) -> a.accept(mapper.applyAsInt(v)),
                 (l,r) -> {l.combine(r); return l;},
                 Nullable::of,
-                EnumSet.of(Collector.Characteristics.CONCURRENT)
+                NO_CHARACTERISTICS
         );
     }
 
@@ -172,7 +177,7 @@ public final class Reducers {
                 (a,v) -> a.accept(mapper.applyAsLong(v)),
                 (l,r) -> {l.combine(r); return l;},
                 Nullable::of,
-                EnumSet.of(Collector.Characteristics.CONCURRENT)
+                NO_CHARACTERISTICS
         );
     }
 
@@ -182,7 +187,7 @@ public final class Reducers {
                 (a,v) -> a.accept(mapper.applyAsDouble(v)),
                 (l,r) -> {l.combine(r); return l;},
                 Nullable::of,
-                EnumSet.of(Collector.Characteristics.CONCURRENT)
+                NO_CHARACTERISTICS
         );
     }
 
@@ -192,7 +197,8 @@ public final class Reducers {
                 (a,v) -> a.set(operator.apply(a.get() != null ? a.get() : v,v)),
                 (l,r) -> { l.set(operator.apply((l.get()),r.get())); return l; },
                 (result) -> Nullable.ofNullable(result.get()),
-                Collections.emptySet());
+                NO_CHARACTERISTICS
+        );
     }
 
 
