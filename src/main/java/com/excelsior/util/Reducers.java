@@ -1,7 +1,6 @@
 package com.excelsior.util;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 import java.util.stream.Collector;
 
@@ -187,13 +186,12 @@ public final class Reducers {
         );
     }
 
-    @SuppressWarnings("unchecked")
     private static <T> Reducer<T,?,Nullable<T>> reduce(BinaryOperator<T> operator) {
         return new ReducerImpl<>(
-                () -> new Object[1],
-                (a,v) -> a[0] = operator.apply(a[0] != null ? (T) a[0] : v,v),
-                (l,r) -> {l[0] = operator.apply((T) l[0],(T)r[0]); return l;},
-                (result) -> Nullable.ofNullable((T)result[0]),
+                Holder<T>::new,
+                (a,v) -> a.set(operator.apply(a.get() != null ? a.get() : v,v)),
+                (l,r) -> { l.set(operator.apply((l.get()),r.get())); return l; },
+                (result) -> Nullable.ofNullable(result.get()),
                 Collections.emptySet());
     }
 
