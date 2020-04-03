@@ -65,7 +65,7 @@ public final class Holders {
      *      Holder<Person> p = Holders.immutableHolder(() -> new Person());
      *     }
      * </pre>
-     * @param copy a clone of the object for the holder.
+     * @param copy a of the object for the holder.
      * @param <T> type of the {@code value} encapsulated in the container.
      * @return an immutable implementation.
      */
