@@ -3,7 +3,6 @@ package com.excelsior.util;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 /**
  * Holder utility class
@@ -58,8 +57,9 @@ public final class Holders {
      * Returns an immutable {@code Holder} implementation.
      * <p>
      * The holder container contains a reference to the {@code value} that cannot
-     * be overwritten with the {@code set} method. Provide a copy of the value to be
-     * held with the {@code Supplier}
+     * be overwritten with the {@code set} method. It is recommended to provide a
+     * copy of the value to be held with the {@code Supplier}. Note that immutability
+     * refers to the holder object, not necessarily the value it holds.
      * <pre>
      *     {@code
      *      Holder<Person> p = Holders.immutableHolder(() -> new Person());
@@ -69,7 +69,6 @@ public final class Holders {
      * @param <T> type of the {@code value} encapsulated in the container.
      * @return an immutable implementation.
      */
-    @Deprecated
     public static <T> Holder<T> immutableHolder(final Supplier<T> copy) {
         Objects.requireNonNull(copy);
         return new ImmutableHolder<>(copy.get());
@@ -87,9 +86,7 @@ public final class Holders {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Holder<?> holder = (Holder<?>) o;
-            synchronized(this) {
-                return Objects.equals(value, holder.get());
-            }
+            return Objects.equals(value, holder.get());
         }
 
         @Override

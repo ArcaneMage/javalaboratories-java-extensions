@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("WeakerAccess")
 public class ReducersTest {
 
     @Test
@@ -255,12 +254,12 @@ public class ReducersTest {
                 .collect(Reducers.maxBy(Integer::compareTo))
                 .ifPresent( n -> assertEquals((Integer) 101,n));
 
-        numbers = Arrays.asList(0);
+        numbers = Collections.singletonList(0);
         numbers.stream()
                 .collect(Reducers.maxBy(Integer::compareTo))
                 .ifPresent( n -> assertEquals((Integer) 0,n));
 
-        numbers = Arrays.asList();
+        numbers = Collections.emptyList();
         numbers.stream()
                 .collect(Reducers.maxBy(Integer::compareTo))
                 .ifPresent( n -> assertEquals((Integer) 0,n));
@@ -279,14 +278,77 @@ public class ReducersTest {
                 .collect(Reducers.minBy(Integer::compareTo))
                 .ifPresent( n -> assertEquals((Integer) 2,n));
 
-        numbers = Arrays.asList(0);
+        numbers = Collections.singletonList(0);
         numbers.stream()
                 .collect(Reducers.minBy(Integer::compareTo))
                 .ifPresent( n -> assertEquals((Integer) 0,n));
 
-        numbers = Arrays.asList();
+        numbers = Collections.emptyList();
         numbers.stream()
                 .collect(Reducers.minBy(Integer::compareTo))
                 .ifPresent( n -> assertEquals((Integer) 0,n));
+    }
+
+    @Test
+    public void testSummingInt_Pass() {
+        List<String> strings = Arrays.asList("9","7","5","76","2","40","101");
+
+        strings.stream()
+                .map(Integer::parseInt)
+                .collect(Reducers.summingInt(Integer::valueOf))
+                .ifPresent(n -> assertEquals((Integer) 240,n));
+
+        strings.parallelStream()
+                .map(Integer::parseInt)
+                .collect(Reducers.summingInt(Integer::valueOf))
+                .ifPresent(n -> assertEquals((Integer) 240,n));
+
+        strings = Collections.emptyList();
+        strings.stream()
+                .map(Integer::parseInt)
+                .collect(Reducers.summingInt(Integer::valueOf))
+                .ifPresent(n -> assertEquals((Integer) 0,n));
+    }
+
+    @Test
+    public void testSummingLong_Pass() {
+        List<String> strings = Arrays.asList("9","7","5","76","2","40","101");
+
+        strings.stream()
+                .map(Long::parseLong)
+                .collect(Reducers.summingLong(Long::valueOf))
+                .ifPresent(n -> assertEquals((Long) 240L,n));
+
+        strings.parallelStream()
+                .map(Long::parseLong)
+                .collect(Reducers.summingLong(Long::valueOf))
+                .ifPresent(n -> assertEquals((Long) 240L,n));
+
+        strings = Collections.emptyList();
+        strings.stream()
+                .map(Long::parseLong)
+                .collect(Reducers.summingLong(Long::valueOf))
+                .ifPresent(n -> assertEquals((Long) 0L,n));
+    }
+
+    @Test
+    public void testSummingDouble_Pass() {
+        List<String> strings = Arrays.asList("9.5","7","5.5","76","2.5","40","101.5");
+
+        strings.stream()
+                .map(Double::parseDouble)
+                .collect(Reducers.summingDouble(Double::valueOf))
+                .ifPresent(n -> assertEquals((Double) 242.0,n));
+
+        strings.parallelStream()
+                .map(Double::parseDouble)
+                .collect(Reducers.summingDouble(Double::valueOf))
+                .ifPresent(n -> assertEquals((Double) 242.0,n));
+
+        strings = Collections.emptyList();
+        strings.stream()
+                .map(Double::parseDouble)
+                .collect(Reducers.summingDouble(Double::valueOf))
+                .ifPresent(n -> assertEquals((Double) 0.0,n));
     }
 }

@@ -161,6 +161,37 @@ public final class Reducers {
         );
     }
 
+    public static <T> Reducer<T,?,Nullable<Integer>> summingInt(ToIntFunction<? super T> mapper) {
+        return new ReducerImpl<>(
+                () -> new int[1],
+                (a,v) -> a[0] += mapper.applyAsInt(v),
+                (l,r) -> {l[0] += r[0]; return l;},
+                (result -> Nullable.of(result[0])),
+                NO_CHARACTERISTICS
+        );
+    }
+
+    public static <T> Reducer<T,?,Nullable<Long>> summingLong(ToLongFunction<? super T> mapper) {
+        return new ReducerImpl<>(
+                () -> new long[1],
+                (a,v) -> a[0] += mapper.applyAsLong(v),
+                (l,r) -> {l[0] += r[0]; return l;},
+                (result -> Nullable.of(result[0])),
+                NO_CHARACTERISTICS
+        );
+    }
+
+    public static <T> Reducer<T,?,Nullable<Double>> summingDouble(ToDoubleFunction<? super T> mapper) {
+        return new ReducerImpl<>(
+                () -> new double[1],
+                (a,v) -> a[0] += mapper.applyAsDouble(v),
+                (l,r) -> {l[0] += r[0]; return l;},
+                (result -> Nullable.of(result[0])),
+                NO_CHARACTERISTICS
+        );
+    }
+
+
     public static <T> Reducer<T,?,Nullable<IntSummaryStatistics>> summarizingInt(ToIntFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 IntSummaryStatistics::new,
