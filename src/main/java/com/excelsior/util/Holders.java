@@ -2,6 +2,8 @@ package com.excelsior.util;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 /**
  * Holder utility class
@@ -10,29 +12,67 @@ import java.util.Objects;
  * <p>
  * Use this class to create a variety of {@code Holder} objects, which can be
  * thread-safe, immutable as well as mutable. Each factory method describes
- * the type holder it creates.
+ * the type of implementation it creates.
  */
 @SuppressWarnings("WeakerAccess")
 public final class Holders {
 
-    public static <T> Holder<T> synchronizedHolder(final T value) {
-        return new SynchronizedHolder<>(value);
+    /**
+     * Returns a mutable, thread-safe {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference that can be overwritten with the
+     * {@code set} method.
+     * @param <T> type encapsulated in the container.
+     * @return an mutable, thread-safe implementation.
+     */
+    public static <T> Holder<T> synchronizedHolder(final Holder<? extends T> holder )  {
+        Objects.requireNonNull(holder);
+        return new SynchronizedHolder<>(holder);
     }
 
-    public static <T> Holder<T> synchronizedHolder() {
-        return new SynchronizedHolder<>(null);
-    }
-
+    /**
+     * Returns a mutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a null reference that can be overwritten with the
+     * {@code set} method.
+     * @param <T> type encapsulated in the container.
+     * @return an mutable implementation.
+     */
     public static <T> Holder<T> mutableHolder() {
         return mutableHolder(null);
     }
 
+    /**
+     * Returns a mutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that can
+     * be overwritten with the {@code set} method.
+     * @param <T> type of the {@code value} encapsulated in the container.
+     * @return an mutable implementation.
+     */
     public static <T> Holder<T> mutableHolder(final T value) {
         return new MutableHolder<>(value);
     }
 
-    public static <T> Holder<T> immutableHolder(final T value) {
-        return new ImmutableHolder<>(value);
+    /**
+     * Returns an immutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that cannot
+     * be overwritten with the {@code set} method. Provide a copy of the value to be
+     * held with the {@code Supplier}
+     * <pre>
+     *     {@code
+     *      Holder<Person> p = Holders.immutableHolder(() -> new Person());
+     *     }
+     * </pre>
+     * @param copy a clone of the object for the holder.
+     * @param <T> type of the {@code value} encapsulated in the container.
+     * @return an immutable implementation.
+     */
+    @Deprecated
+    public static <T> Holder<T> immutableHolder(final Supplier<T> copy) {
+        Objects.requireNonNull(copy);
+        return new ImmutableHolder<>(copy.get());
     }
 
     private static class MutableHolder<T> implements Holder<T>, Serializable {
@@ -85,8 +125,8 @@ public final class Holders {
 
     private final static class SynchronizedHolder<T> extends MutableHolder<T> {
 
-        public SynchronizedHolder(final T value) {
-            super(value);
+        public SynchronizedHolder(final Holder<? extends T> holder) {
+            super(holder.get());
         }
 
         @Override
@@ -122,5 +162,4 @@ public final class Holders {
             }
         }
     }
-
 }
