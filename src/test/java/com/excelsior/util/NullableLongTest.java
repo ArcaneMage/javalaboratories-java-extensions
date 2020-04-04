@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("WeakerAccess")
 public class NullableLongTest {
 
     private Optional<Long> optional;
@@ -130,5 +131,17 @@ public class NullableLongTest {
     public void testToString_Pass() {
         assertEquals("NullableLong[99]",nullable.toString());
         assertEquals("NullableLong[isEmpty]",empty.toString());
+    }
+
+    @Test
+    public void testForEach_Pass() {
+        Holder<Boolean> forEachHolder = Holders.writableHolder(false);
+
+        nullable.forEach(v -> forEachHolder.set(true));
+        assertTrue(forEachHolder.get());
+
+        forEachHolder.set(false);
+        empty.forEach(v -> forEachHolder.set(true));
+        assertFalse(forEachHolder.get());
     }
 }

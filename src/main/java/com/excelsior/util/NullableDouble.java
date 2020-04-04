@@ -1,5 +1,6 @@
 package com.excelsior.util;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -8,7 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.DoubleStream;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableDouble {
+public class NullableDouble implements Iterable<Double> {
 
     private Nullable<Double> value;
 
@@ -76,6 +77,11 @@ public class NullableDouble {
 
     public String toString() {
         return this.isPresent() ? String.format("NullableDouble[%f]",this.value.get()) : "NullableDouble[isEmpty]";
+    }
+
+    @Override
+    public Iterator<Double> iterator() {
+        return this.value.iterator();
     }
 
     private NullableDouble() { this.value = Nullable.empty(); }

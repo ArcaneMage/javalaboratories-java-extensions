@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("WeakerAccess")
 public class NullableIntTest {
 
     private Optional<Integer> optional;
@@ -124,6 +125,18 @@ public class NullableIntTest {
     public void testToNullable_Pass() {
         Nullable<Integer> value = nullable.toNullable();
         value.ifPresent((v -> assertEquals((Integer) 99,v)));
+    }
+
+    @Test
+    public void testForEach_Pass() {
+        Holder<Boolean> forEachHolder = Holders.writableHolder(false);
+
+        nullable.forEach(v -> forEachHolder.set(true));
+        assertTrue(forEachHolder.get());
+
+        forEachHolder.set(false);
+        empty.forEach(v -> forEachHolder.set(true));
+        assertFalse(forEachHolder.get());
     }
 
     @Test

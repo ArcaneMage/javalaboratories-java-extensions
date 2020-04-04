@@ -1,5 +1,6 @@
 package com.excelsior.util;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -8,7 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableInt {
+public class NullableInt implements Iterable<Integer> {
 
     private Nullable<Integer> value;
 
@@ -78,7 +79,13 @@ public class NullableInt {
         return this.isPresent() ? String.format("NullableInt[%d]",this.value.get()) : "NullableInt[isEmpty]";
     }
 
+    @Override
+    public Iterator<Integer> iterator() {
+        return this.value.iterator();
+    }
+
     private NullableInt() { this.value = Nullable.empty(); }
 
     private NullableInt(int value) { this.value = Nullable.ofNullable(value); }
+
 }

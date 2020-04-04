@@ -1,5 +1,6 @@
 package com.excelsior.util;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -9,7 +10,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableLong {
+public class NullableLong implements Iterable<Long> {
 
     private Nullable<Long> value;
 
@@ -77,6 +78,11 @@ public class NullableLong {
 
     public String toString() {
         return this.isPresent() ? String.format("NullableLong[%d]",this.value.get()) : "NullableLong[isEmpty]";
+    }
+
+    @Override
+    public Iterator<Long> iterator() {
+        return this.value.iterator();
     }
 
     private NullableLong() { this.value = Nullable.empty(); }

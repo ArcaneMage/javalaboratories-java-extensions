@@ -48,7 +48,7 @@ import java.util.stream.Stream;
  * @author Kevin H, Excelsior Software
  */
 @SuppressWarnings("WeakerAccess")
-public final class Nullable<T> {
+public final class Nullable<T> implements Iterable<T> {
 
     private T value;
 
@@ -158,7 +158,7 @@ public final class Nullable<T> {
     }
 
     public List<T> toList() {
-        if (isPresent()) return Collections.singletonList(value);
+        if (this.value != null) return Collections.singletonList(value);
         else return Collections.emptyList();
     }
 
@@ -176,10 +176,16 @@ public final class Nullable<T> {
 
     public boolean isPresent() { return value != null; }
 
+    @Override
+    public Iterator<T> iterator() {
+        return toList().iterator();
+    }
+
     private Nullable() { value = null; }
 
     private Nullable(T value) {
         this.value = value;
         Objects.requireNonNull(value);
     }
+
 }

@@ -162,6 +162,18 @@ public class NullableTest {
     }
 
     @Test
+    public void testForEach_Pass() {
+        Holder<Boolean> forEachHolder = Holders.writableHolder(false);
+
+        nullable.forEach(v -> forEachHolder.set(true));
+        assertTrue(forEachHolder.get());
+
+        forEachHolder.set(false);
+        empty.forEach(v -> forEachHolder.set(true));
+        assertFalse(forEachHolder.get());
+    }
+
+    @Test
     public void testToMap_Pass() {
         Map<String,String> nullableMap = nullable.toMap(v -> "first", v -> v);
         assertEquals("Hello World", nullableMap.get("first"));

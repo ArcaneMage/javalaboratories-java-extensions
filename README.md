@@ -18,10 +18,22 @@ holder object is an effectively final object allowing its contents to be mutated
 `Holders` utility class can create several implementations of `Holder` objects, including a thread-safe and a read-only
 implementations. 
 ### Nullable
-The library introduces `Nullable` object, which is a "drop-in" replacement for `Optional`. It has features that are only 
-found in the `Optional` class in Java-11/13 but also includes new features. Currently, there is a consideration to make
-the class implement the `Iterable` interface, rational being that it is a container, although it contains one element.
-However, there are use cases for this requirement.
+The library introduces `Nullable` class, which is a "drop-in" replacement for `Optional`. It has features that are only 
+available in the `Optional` class in Java-11/13 but it also includes new features. For example, the following is possible:
+```
+    Nullable<Person> person = people.findById(10983);
+    
+    person.forEach(System.out::println);    
+    
+    ...
+    
+    person.ifPresentOrElse(System.out::println, () -> System.out.println("Person not found"))
+    
+    ...
+    
+    List<Person> list = person.toList();
+```
+Similarly, there are `NullableInt`,`NullableLong` and `NullableDouble` for `int`,`long` and `double` types respectively.
 
 ### Reducers
 `Reducers` are collectors but with a difference. Most of them return `Stream` objects, and so it is possible to continue
