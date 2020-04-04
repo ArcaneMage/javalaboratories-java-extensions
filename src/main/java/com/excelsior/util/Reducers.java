@@ -225,7 +225,7 @@ public final class Reducers {
 
     private static <T> Reducer<T,Holder<T>,Nullable<T>> reduce(BinaryOperator<T> operator) {
         return new ReducerImpl<>(
-                Holders::mutableHolder,
+                Holders::writableHolder,
                 (a,v) -> a.set(operator.apply(a.get() != null ? a.get() : v,v)),
                 (l,r) -> { l.set(operator.apply((l.get()),r.get())); return l; },
                 (result) -> Nullable.ofNullable(result.get()),

@@ -325,6 +325,13 @@ public class ReducersTest {
 
         strings.stream()
                 .map(Integer::parseInt)
+                .peek(n -> System.out.print(n+" "))
+                .collect(Reducers.summingInt(Integer::valueOf))
+                .findFirst()
+                .ifPresent(n -> System.out.println("= "+n));
+
+        strings.stream()
+                .map(Integer::parseInt)
                 .collect(Reducers.summingInt(Integer::valueOf))
                 .findFirst()
                 .ifPresent(n -> assertEquals((Integer) 240,n));

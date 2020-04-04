@@ -12,13 +12,13 @@ import java.util.stream.Stream;
  * returns {@code true}. If no value is present the object is considered {@code empty()}
  * <p>
  * This object is a drop-in replacement for {@code Optional}. If you're familiar with the {@code Optional},
- * class, you will be familiar with the API of this object. For Java 8 developers, this object offers a wealth of methods
- * that only users of Java 9 and above enjoy, for example {@code IfPresentOrElse}, {@code stream()} and much
+ * class, you will be familiar with the API writableHolder this object. For Java 8 developers, this object offers a wealth writableHolder methods
+ * that only users writableHolder Java 9 and above enjoy, for example {@code IfPresentOrElse}, {@code stream()} and much
  * more.
  * <p>
  * <pre>
  *   {@code
- *    Nullable<String> maybeHelloWorld = Nullable.of("Hello World");
+ *    Nullable<String> maybeHelloWorld = Nullable.writableHolder("Hello World");
  *
  *    maybeHelloWorld
  *          .filter("Hello World"::equals)
@@ -41,7 +41,7 @@ import java.util.stream.Stream;
  *   }
  * </pre>
  *
- * @param <T> the type of value
+ * @param <T> the type writableHolder value
  * @see NullableDouble
  * @see NullableInt
  * @see NullableLong

@@ -9,9 +9,9 @@ import java.util.function.Supplier;
  * <p>
  * Generally used in lambda expressions to mutate objects declared as effectively final.
  * <p>
- * Use this class to create a variety of {@code Holder} objects, which can be
+ * Use this class to create a variety writableHolder {@code Holder} objects, which can be
  * thread-safe, immutable as well as mutable. Each factory method describes
- * the type of implementation it creates.
+ * the type writableHolder implementation it creates.
  */
 @SuppressWarnings("WeakerAccess")
 public final class Holders {
@@ -37,8 +37,8 @@ public final class Holders {
      * @param <T> type encapsulated in the container.
      * @return an mutable implementation.
      */
-    public static <T> Holder<T> mutableHolder() {
-        return mutableHolder(null);
+    public static <T> Holder<T> writableHolder() {
+        return writableHolder(null);
     }
 
     /**
@@ -46,11 +46,11 @@ public final class Holders {
      * <p>
      * The holder container contains a reference to the {@code value} that can
      * be overwritten with the {@code set} method.
-     * @param <T> type of the {@code value} encapsulated in the container.
+     * @param <T> type writableHolder the {@code value} encapsulated in the container.
      * @return an mutable implementation.
      */
-    public static <T> Holder<T> mutableHolder(final T value) {
-        return new MutableHolder<>(value);
+    public static <T> Holder<T> writableHolder(final T value) {
+        return new WritableHolder<>(value);
     }
 
     /**
@@ -58,26 +58,26 @@ public final class Holders {
      * <p>
      * The holder container contains a reference to the {@code value} that cannot
      * be overwritten with the {@code set} method. It is recommended to provide a
-     * copy of the value to be held with the {@code Supplier}. Note that immutability
+     * copy writableHolder the value to be held with the {@code Supplier}. Note that immutability
      * refers to the holder object, not necessarily the value it holds.
      * <pre>
      *     {@code
-     *      Holder<Person> p = Holders.immutableHolder(() -> new Person());
+     *      Holder<Person> p = Holders.readableHolder(() -> new Person());
      *     }
      * </pre>
-     * @param copy a of the object for the holder.
-     * @param <T> type of the {@code value} encapsulated in the container.
+     * @param copy a writableHolder the object for the holder.
+     * @param <T> type writableHolder the {@code value} encapsulated in the container.
      * @return an immutable implementation.
      */
-    public static <T> Holder<T> immutableHolder(final Supplier<T> copy) {
+    public static <T> Holder<T> readableHolder(final Supplier<T> copy) {
         Objects.requireNonNull(copy);
-        return new ImmutableHolder<>(copy.get());
+        return new ReadableHolder<>(copy.get());
     }
 
-    private static class MutableHolder<T> implements Holder<T>, Serializable {
+    private static class WritableHolder<T> implements Holder<T>, Serializable {
         private T value;
 
-        public MutableHolder(final T value) {
+        public WritableHolder(final T value) {
             this.value = value;
         }
 
@@ -110,8 +110,8 @@ public final class Holders {
         }
     }
 
-    private final static class ImmutableHolder<T> extends MutableHolder<T> {
-        public ImmutableHolder(final T value) {
+    private final static class ReadableHolder<T> extends WritableHolder<T> {
+        public ReadableHolder(final T value) {
             super(value);
         }
 
@@ -120,7 +120,7 @@ public final class Holders {
         }
     }
 
-    private final static class SynchronizedHolder<T> extends MutableHolder<T> {
+    private final static class SynchronizedHolder<T> extends WritableHolder<T> {
 
         public SynchronizedHolder(final Holder<? extends T> holder) {
             super(holder.get());

@@ -5,7 +5,7 @@ package com.excelsior.util;
  * <p>
  * Generally used in lambda expressions to mutate objects declared as effectively final.
  * <p>
- * @param <T> type of variable to hold.
+ * @param <T> type writableHolder variable to hold.
  */
 public interface Holder<T> {
 
