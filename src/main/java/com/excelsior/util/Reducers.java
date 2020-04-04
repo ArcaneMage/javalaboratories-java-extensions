@@ -3,6 +3,7 @@ package com.excelsior.util;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 @SuppressWarnings("WeakerAccess")
 public final class Reducers {
@@ -57,66 +58,66 @@ public final class Reducers {
 
     private Reducers() {}
 
-    public static <T> Reducer<? super T, ?, Nullable<Long>> counting() {
+    public static <T> Reducer<? super T, ?, Stream<Long>> counting() {
         return new ReducerImpl<> (
                 () -> new long[1],
                 (a,l) -> a[0] += 1L,
                 (l,r) -> {l[0] += r[0]; return l;},
-                result -> Nullable.of(result[0]),
+                result -> Stream.of(result[0]),
                 NO_CHARACTERISTICS);
     }
 
-    public static <T> Reducer<T,?,Nullable<Double>> averagingDouble(ToDoubleFunction<? super T> mapper) {
+    public static <T> Reducer<T,?,Stream<Double>> averagingDouble(ToDoubleFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 () -> new double[2],
                 (a,l) -> {a[0]  = a[0] + mapper.applyAsDouble(l); a[1] += 1;},
                 (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
-                result -> Nullable.of (result[0] / result[1]),
+                result -> Stream.of (result[0] / result[1]),
                 NO_CHARACTERISTICS
         );
     }
 
-    public static <T> Reducer<T,?,Nullable<Double>> averagingLong(ToLongFunction<? super T> mapper) {
+    public static <T> Reducer<T,?,Stream<Double>> averagingLong(ToLongFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 () -> new long[2],
                 (a,l) -> {a[0]  = a[0] + mapper.applyAsLong(l); a[1] += 1;},
                 (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
-                result -> Nullable.of ( (double) result[0] / result[1]),
+                result -> Stream.of ( (double) result[0] / result[1]),
                 NO_CHARACTERISTICS
         );
     }
 
-    public static <T> Reducer<T,?,Nullable<Double>> averagingInt(ToIntFunction<? super T> mapper) {
+    public static <T> Reducer<T,?,Stream<Double>> averagingInt(ToIntFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 () -> new int[2],
                 (a,l) -> {a[0]  = a[0] + mapper.applyAsInt(l); a[1] += 1;},
                 (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
-                result -> Nullable.of ( (double) result[0] / result[1]),
+                result -> Stream.of ( (double) result[0] / result[1]),
                 NO_CHARACTERISTICS
         );
     }
 
-    public static Reducer<CharSequence,?,Nullable<String>> joining() {
+    public static Reducer<CharSequence,?,Stream<String>> joining() {
         return new ReducerImpl<>(
                 StringBuilder::new,
                 StringBuilder::append,
                 (l,r) -> {l.append(r); return l;},
-                (result -> Nullable.of(result.toString())),
+                (result -> Stream.of(result.toString())),
                 NO_CHARACTERISTICS);
     }
 
-    public static Reducer<CharSequence,?,Nullable<String>> joining(String delimiter) {
+    public static Reducer<CharSequence,?,Stream<String>> joining(String delimiter) {
         return joining(delimiter,"","");
     }
 
-    public static Reducer<CharSequence,?,Nullable<String>> joining(CharSequence delimiter,
+    public static Reducer<CharSequence,?,Stream<String>> joining(CharSequence delimiter,
                                                          CharSequence prefix,
                                                          CharSequence suffix) {
         return new ReducerImpl<>(
                 () -> new StringJoiner(delimiter, prefix, suffix),
                 (a,s) -> a.add(s.toString()),
                 StringJoiner::merge,
-                (result -> Nullable.of(result.toString())),
+                (result -> Stream.of(result.toString())),
                 NO_CHARACTERISTICS);
     }
 
@@ -128,22 +129,22 @@ public final class Reducers {
         return reduce(BinaryOperator.minBy(comparator));
     }
 
-    public static <T> Reducer<T,?,Nullable<Map<Boolean,List<T>>>> partitioningBy(Predicate<? super T> predicate) {
+    public static <T> Reducer<T,?,Stream<Map<Boolean,List<T>>>> partitioningBy(Predicate<? super T> predicate) {
         return new ReducerImpl<>(
                 () -> new Partition<List<T>>(new ArrayList<>(),new ArrayList<>()),
                 (a,v) -> a.get(predicate.test(v)).add(v),
                 (l,r) -> { r.forEach((rk,v) -> l.get(rk).addAll(v)); return l; },
-                (result -> Nullable.of(Collections.unmodifiableMap(result))),
+                (result -> Stream.of(Collections.unmodifiableMap(result))),
                 NO_CHARACTERISTICS
         );
     }
 
-    public static <T,K> Reducer<T,?,Nullable<Map<K,List<T>>>> groupingBy(Function<? super T, ? extends K> function) {
+    public static <T,K> Reducer<T,?,Stream<Map<K,List<T>>>> groupingBy(Function<? super T, ? extends K> function) {
         BiConsumer<Map<K,List<T>>,T> accumulator = (a,v) -> {
             K key = function.apply(v);
-            if ( key != null )
-                a.computeIfAbsent(key, k -> new ArrayList<>())
-                        .add(v);
+            Objects.requireNonNull(key,"Cannot accept NULL result from function");
+            a.computeIfAbsent(key, k -> new ArrayList<>())
+                    .add(v);
         };
 
         BinaryOperator<Map<K, List<T>>> combiner = (l,r) -> {
@@ -156,68 +157,68 @@ public final class Reducers {
                 HashMap::new,
                 accumulator,
                 combiner,
-                (result -> Nullable.of(Collections.unmodifiableMap(result))),
+                (result -> Stream.of(Collections.unmodifiableMap(result))),
                 NO_CHARACTERISTICS
         );
     }
 
-    public static <T> Reducer<T,?,Nullable<Integer>> summingInt(ToIntFunction<? super T> mapper) {
+    public static <T> Reducer<T,?,Stream<Integer>> summingInt(ToIntFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 () -> new int[1],
                 (a,v) -> a[0] += mapper.applyAsInt(v),
                 (l,r) -> {l[0] += r[0]; return l;},
-                (result -> Nullable.of(result[0])),
+                (result -> Stream.of(result[0])),
                 NO_CHARACTERISTICS
         );
     }
 
-    public static <T> Reducer<T,?,Nullable<Long>> summingLong(ToLongFunction<? super T> mapper) {
+    public static <T> Reducer<T,?,Stream<Long>> summingLong(ToLongFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 () -> new long[1],
                 (a,v) -> a[0] += mapper.applyAsLong(v),
                 (l,r) -> {l[0] += r[0]; return l;},
-                (result -> Nullable.of(result[0])),
+                (result -> Stream.of(result[0])),
                 NO_CHARACTERISTICS
         );
     }
 
-    public static <T> Reducer<T,?,Nullable<Double>> summingDouble(ToDoubleFunction<? super T> mapper) {
+    public static <T> Reducer<T,?,Stream<Double>> summingDouble(ToDoubleFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 () -> new double[1],
                 (a,v) -> a[0] += mapper.applyAsDouble(v),
                 (l,r) -> {l[0] += r[0]; return l;},
-                (result -> Nullable.of(result[0])),
+                (result -> Stream.of(result[0])),
                 NO_CHARACTERISTICS
         );
     }
 
 
-    public static <T> Reducer<T,?,Nullable<IntSummaryStatistics>> summarizingInt(ToIntFunction<? super T> mapper) {
+    public static <T> Reducer<T,?,Stream<IntSummaryStatistics>> summarizingInt(ToIntFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 IntSummaryStatistics::new,
                 (a,v) -> a.accept(mapper.applyAsInt(v)),
                 (l,r) -> {l.combine(r); return l;},
-                Nullable::of,
+                Stream::of,
                 NO_CHARACTERISTICS
         );
     }
 
-    public static <T> Reducer<T,?,Nullable<LongSummaryStatistics>> summarizingLong(ToLongFunction<? super T> mapper) {
+    public static <T> Reducer<T,?,Stream<LongSummaryStatistics>> summarizingLong(ToLongFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 LongSummaryStatistics::new,
                 (a,v) -> a.accept(mapper.applyAsLong(v)),
                 (l,r) -> {l.combine(r); return l;},
-                Nullable::of,
+                Stream::of,
                 NO_CHARACTERISTICS
         );
     }
 
-    public static <T> Reducer<T,?,Nullable<DoubleSummaryStatistics>> summarizingDouble(ToDoubleFunction<? super T> mapper) {
+    public static <T> Reducer<T,?,Stream<DoubleSummaryStatistics>> summarizingDouble(ToDoubleFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 DoubleSummaryStatistics::new,
                 (a,v) -> a.accept(mapper.applyAsDouble(v)),
                 (l,r) -> {l.combine(r); return l;},
-                Nullable::of,
+                Stream::of,
                 NO_CHARACTERISTICS
         );
     }
