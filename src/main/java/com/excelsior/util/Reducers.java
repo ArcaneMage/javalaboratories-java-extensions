@@ -1,5 +1,7 @@
 package com.excelsior.util;
 
+import com.excelsior.util.statistics.LongStatisticalCalculators;
+
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collector;
@@ -53,6 +55,47 @@ public final class Reducers {
             this.combiner = combiner;
             this.finisher = finisher;
             this.characteristics = characteristics;
+        }
+    }
+
+    /**
+     * Partition class used by partitionBy reducer
+     */
+    private static class Partition<T> extends AbstractMap<Boolean, T> {
+        private class PartitionSet extends AbstractSet<Map.Entry<Boolean, T>> {
+            @Override
+            public Iterator<Map.Entry<Boolean, T>> iterator() {
+                Map.Entry<Boolean,T> falseEntry = new SimpleEntry<>(false, Partition.this.falseEntry);
+                Map.Entry<Boolean,T> trueEntry = new SimpleEntry<>(true, Partition.this.trueEntry);
+                return Arrays.asList(falseEntry,trueEntry).iterator();
+            }
+            @Override
+            public int size() {
+                return 2;
+            }
+        }
+        private final T falseEntry;
+        private final T trueEntry;
+        private final PartitionSet set;
+
+        Partition(final T falseEntry, final T trueEntry) {
+            this.falseEntry = falseEntry;
+            this.trueEntry = trueEntry;
+            set = new PartitionSet();
+        }
+
+        @Override
+        public Set<Entry<Boolean, T>> entrySet() {
+            return set;
+        }
+
+        @Override
+        public T put(Boolean key, T value) {
+            set.stream()
+                    .filter(e -> e.getKey() == key)
+                    .findFirst()
+                    .ifPresent(e -> e.setValue(value));
+            return value;
         }
     }
 
@@ -192,7 +235,6 @@ public final class Reducers {
         );
     }
 
-
     public static <T> Reducer<T,?,Stream<IntSummaryStatistics>> summarizingInt(ToIntFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 IntSummaryStatistics::new,
@@ -213,6 +255,17 @@ public final class Reducers {
         );
     }
 
+    public static <T> Reducer<T,?,Stream<LongStatisticalCalculators>> calculateStatisticsLong(ToLongFunction<? super T> mapper) {
+        return new ReducerImpl<>(
+                LongStatisticalCalculators::new,
+                (a,v) -> a.accept(mapper.applyAsLong(v)),
+                (l,r) -> {l.combine(r); return l;},
+                Stream::of,
+                NO_CHARACTERISTICS
+        );
+    }
+
+
     public static <T> Reducer<T,?,Stream<DoubleSummaryStatistics>> summarizingDouble(ToDoubleFunction<? super T> mapper) {
         return new ReducerImpl<>(
                 DoubleSummaryStatistics::new,
@@ -231,47 +284,5 @@ public final class Reducers {
                 (result) -> Nullable.ofNullable(result.get()),
                 NO_CHARACTERISTICS
         );
-    }
-
-
-    /**
-     * Partition class used by partitionBy reducer
-     */
-    private static class Partition<T> extends AbstractMap<Boolean, T> {
-        private class PartitionSet extends AbstractSet<Map.Entry<Boolean, T>> {
-            @Override
-            public Iterator<Map.Entry<Boolean, T>> iterator() {
-                Map.Entry<Boolean,T> falseEntry = new SimpleEntry<>(false, Partition.this.falseEntry);
-                Map.Entry<Boolean,T> trueEntry = new SimpleEntry<>(true, Partition.this.trueEntry);
-                return Arrays.asList(falseEntry,trueEntry).iterator();
-            }
-            @Override
-            public int size() {
-                return 2;
-            }
-        }
-        private final T falseEntry;
-        private final T trueEntry;
-        private final PartitionSet set;
-
-        Partition(final T falseEntry, final T trueEntry) {
-            this.falseEntry = falseEntry;
-            this.trueEntry = trueEntry;
-            set = new PartitionSet();
-        }
-
-        @Override
-        public Set<Entry<Boolean, T>> entrySet() {
-            return set;
-        }
-
-        @Override
-        public T put(Boolean key, T value) {
-            set.stream()
-                .filter(e -> e.getKey() == key)
-                .findFirst()
-                .ifPresent(e -> e.setValue(value));
-            return value;
-        }
     }
 }

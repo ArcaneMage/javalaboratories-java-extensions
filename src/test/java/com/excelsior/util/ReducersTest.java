@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -135,6 +136,104 @@ public class ReducersTest {
                 .collect(Reducers.summarizingInt(Integer::parseInt))
                 .findFirst()
                 .ifPresent(r -> assertEquals(0, r.getCount()));
+    }
+
+    @Test
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public void testCalculateStatisticsLong_Pass() {
+        List<String> strings = Arrays.asList("3","4","4","5");
+
+        strings.stream()
+                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(4L, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3L ,r.getMin());
+                    assertEquals(5L, r.getMax());
+                    assertEquals(16L, r.getSum());
+                    assertEquals(4L, r.getMode().get());
+                    assertEquals(4L, r.getMedian());
+                });
+
+        strings.parallelStream()
+                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(4L, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3L ,r.getMin());
+                    assertEquals(5L, r.getMax());
+                    assertEquals(16L, r.getSum());
+                    assertEquals(4L, r.getMode().get());
+                    assertEquals(4L, r.getMedian());
+                });
+
+        // Mode is calculable: minimum sample, repeated values
+        strings = Arrays.asList("5","5","5");
+
+        strings.stream()
+                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(3L, r.getCount());
+                    assertEquals(5.0 ,r.getAverage());
+                    assertEquals(5L ,r.getMin());
+                    assertEquals(5L, r.getMax());
+                    assertEquals(15L, r.getSum());
+                    assertEquals(5L, r.getMode().get());
+                    assertEquals(5L, r.getMedian());
+                });
+
+        strings.parallelStream()
+                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(3L, r.getCount());
+                    assertEquals(5.0 ,r.getAverage());
+                    assertEquals(5L ,r.getMin());
+                    assertEquals(5L, r.getMax());
+                    assertEquals(15L, r.getSum());
+                    assertEquals(5L, r.getMode().get());
+                    assertEquals(5L, r.getMedian());
+                });
+
+
+        List<String> zero = Collections.emptyList();
+        zero.parallelStream()
+                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
+                .findFirst()
+                .ifPresent(r -> assertEquals(0L, r.getCount()));
+    }
+
+    @Test
+    public void testCalculateStatisticsLong_Fail() {
+        // Mode not calculable
+        List<String> strings = Arrays.asList("4","3","5","3","4","5");
+
+        strings.stream()
+                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(6L, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3L ,r.getMin());
+                    assertEquals(5L, r.getMax());
+                    assertEquals(24L, r.getSum());
+                    assertThrows(NoSuchElementException.class, r.getMode()::get);
+                });
+
+        strings.parallelStream()
+                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(6L, r.getCount());
+                    assertEquals(4.0 ,r.getAverage());
+                    assertEquals(3L ,r.getMin());
+                    assertEquals(5L, r.getMax());
+                    assertEquals(24L, r.getSum());
+                    assertThrows(NoSuchElementException.class, r.getMode()::get);
+                });
     }
 
     @Test
