@@ -6,28 +6,30 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 @SuppressWarnings("WeakerAccess")
-public class AbstractStatisticalCalculators<T extends Number> implements Consumer<T> {
+public abstract class AbstractStatisticalCalculators<T extends Number> implements Consumer<T> {
 
-    private List<StatisticalCalculator> calculators;
+    private final List<StatisticalCalculator<T,?>> calculators;
+    private final SummaryStatisticsAdapter<T> delegate;
 
-    public AbstractStatisticalCalculators() {
+    public AbstractStatisticalCalculators(final SummaryStatisticsAdapter<T> delegate) {
+        Objects.requireNonNull(delegate,"Summary statistics object required");
         calculators = new ArrayList<>();
+        this.delegate = delegate;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void accept(T t) {
         calculators.forEach(c -> c.add(t));
+        delegate.accept(t);
     }
 
-    @SuppressWarnings("unchecked")
     public void combine(AbstractStatisticalCalculators<T> other) {
         // Source data from the first calculator for now
-        // TODO: Need to refactor calculator container
         if ( other.calculators.size() > 0 )
             other.calculators.get(0).getData()
                     .forEach(v -> calculators
                             .forEach (c -> c.add(v)));
+        delegate.combine(other.delegate);
     }
 
     protected final void add(StatisticalCalculator<T,?> calculator) {
@@ -36,22 +38,22 @@ public class AbstractStatisticalCalculators<T extends Number> implements Consume
     }
 
     public long getCount() {
-        return 0L;
+        return delegate.getCount();
     }
 
     public T getSum() {
-       return null;
+       return delegate.getSum();
     }
 
     public T getMin() {
-        return null;
+        return delegate.getMin();
     }
 
     public T getMax() {
-        return null;
+        return delegate.getMax();
     }
 
     public double getAverage() {
-        return 0.0;
+        return delegate.getAverage();
     }
 }

@@ -33,6 +33,4 @@ public interface StatisticalCalculator<T,R> {
      * @return result of calculation.
      */
     R getResult();
-
-
 }
