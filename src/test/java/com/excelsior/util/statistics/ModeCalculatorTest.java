@@ -1,6 +1,5 @@
 package com.excelsior.util.statistics;
 
-import com.excelsior.util.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,15 +24,15 @@ public class ModeCalculatorTest {
 
         // Odd number of terms
         modeCalculator1 = new ModeCalculator<>();
-        terms1.forEach(t -> modeCalculator1.add(t));
+        terms1.forEach(t -> modeCalculator1.accept(t));
 
         // Even number of terms
         modeCalculator2 = new ModeCalculator<>();
-        terms2.forEach(t -> modeCalculator2.add(t));
+        terms2.forEach(t -> modeCalculator2.accept(t));
 
 
         modeCalculator3 = new ModeCalculator<>();
-        terms3.forEach(t -> modeCalculator3.add(t));
+        terms3.forEach(t -> modeCalculator3.accept(t));
 
         modeCalculator4 = new ModeCalculator<>();
     }
@@ -43,7 +42,6 @@ public class ModeCalculatorTest {
         assertEquals(9, modeCalculator1.getData().size());
         assertEquals(8, modeCalculator2.getData().size());
         assertEquals(0, modeCalculator4.getData().size());
-
     }
 
     @Test
@@ -51,12 +49,12 @@ public class ModeCalculatorTest {
         modeCalculator1.getResult().ifPresent(r -> assertEquals(20L, r));
 
         modeCalculator3.getResult().ifPresent(r -> assertEquals(18L, r));
-
-        assertFalse(modeCalculator4.getResult().isPresent());
     }
 
     @Test
     public void testGetResult_Fail() {
         assertThrows (NoSuchElementException.class, () -> modeCalculator2.getResult().get());
+
+        assertThrows (InsufficientPopulationException.class, () -> modeCalculator4.getResult());
     }
 }

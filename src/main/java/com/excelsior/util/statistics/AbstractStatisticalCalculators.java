@@ -1,6 +1,7 @@
 package com.excelsior.util.statistics;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -19,7 +20,7 @@ public abstract class AbstractStatisticalCalculators<T extends Number> implement
 
     @Override
     public void accept(T t) {
-        calculators.forEach(c -> c.add(t));
+        calculators.forEach(c -> c.accept(t));
         delegate.accept(t);
     }
 
@@ -28,13 +29,14 @@ public abstract class AbstractStatisticalCalculators<T extends Number> implement
         if ( other.calculators.size() > 0 )
             other.calculators.get(0).getData()
                     .forEach(v -> calculators
-                            .forEach (c -> c.add(v)));
+                            .forEach (c -> c.accept(v)));
         delegate.combine(other.delegate);
     }
 
-    protected final void add(StatisticalCalculator<T,?> calculator) {
-        Objects.requireNonNull(calculator);
-        calculators.add(calculator);
+    @SuppressWarnings("unchecked")
+    protected final void add(StatisticalCalculator<T,?>... calculators) {
+        Objects.requireNonNull(calculators);
+        this.calculators.addAll(Arrays.asList(calculators));
     }
 
     public long getCount() {

@@ -6,36 +6,38 @@ import com.excelsior.util.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
-public class ModeCalculator<T extends Number> implements StatisticalCalculator<T,Nullable<T>>{
+public class ModeCalculator<T extends Number> implements StatisticalCalculator<T,Nullable<Double>>{
     private Map<T,Long> modeMap = new HashMap<>();
 
-    public void add(T value) {
+    public void accept(T value) {
         Long count = modeMap.get(value);
         if ( count == null )
             count = 0L;
         modeMap.put(value,++count);
     }
 
-    public Nullable<T> getResult() {
+    public Nullable<Double> getResult() {
+        if ( modeMap.size() == 0 )
+            throw new InsufficientPopulationException("Could not calculate mode");
         List<T> result = modeMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        return isModeCalculable(result) ? Nullable.of(result.get(0)) : Nullable.empty();
+        return isModeCalculable(result) ? Nullable.of(result.get(0).doubleValue()) : Nullable.empty();
     }
 
     public List<T> getData() {
         Holder<List<T>>  result = Holders.writableHolder();
         result.set(new ArrayList<>());
 
-        modeMap.forEach((k,v) -> regenerateData(result.get(),k,v));
-        return Collections.unmodifiableList(result.get());
-    }
+        // Regenerate data to original form
+        modeMap.forEach((k,v) ->
+                LongStream.range(0,v)
+                    .forEach(c -> result.get().add(k)));
 
-    private void regenerateData(final List<T> data, final T key, final long count) {
-        for ( long i = 0; i < count; i++ )
-            data.add(key);
+        return Collections.unmodifiableList(result.get());
     }
 
     private boolean isModeCalculable(List<T> sortedKeys) {

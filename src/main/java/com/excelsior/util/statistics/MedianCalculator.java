@@ -8,11 +8,13 @@ import java.util.stream.Collectors;
 public class MedianCalculator<T extends Number> implements StatisticalCalculator<T,Double> {
     private final List<T> terms = new ArrayList<>();
 
-    public void add(T value) {
+    public void accept(T value) {
         terms.add(value);
     }
 
     public Double getResult() {
+        if ( terms.size() == 0 )
+            throw new InsufficientPopulationException("Could not calculate median");
         List<T> sorted = terms.stream()
                 .sorted()
                 .collect(Collectors.toList());
@@ -28,7 +30,6 @@ public class MedianCalculator<T extends Number> implements StatisticalCalculator
             } else {
                 return 0.0;
             }
-
         }
     }
 

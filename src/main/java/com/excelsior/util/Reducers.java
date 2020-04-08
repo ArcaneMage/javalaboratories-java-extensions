@@ -1,5 +1,6 @@
 package com.excelsior.util;
 
+import com.excelsior.util.statistics.ComprehensiveStatisticalCalculators;
 import com.excelsior.util.statistics.LongStatisticalCalculators;
 
 import java.util.*;

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("WeakerAccess")
 public class MedianCalculatorTest {
@@ -24,15 +25,15 @@ public class MedianCalculatorTest {
 
         // Odd number of terms
         medianCalculator1 = new MedianCalculator<>();
-        terms1.forEach(t -> medianCalculator1.add(t));
+        terms1.forEach(t -> medianCalculator1.accept(t));
 
         // Even number of terms
         medianCalculator2 = new MedianCalculator<>();
-        terms2.forEach(t -> medianCalculator2.add(t));
+        terms2.forEach(t -> medianCalculator2.accept(t));
 
 
         medianCalculator3 = new MedianCalculator<>();
-        terms3.forEach(t -> medianCalculator3.add(t));
+        terms3.forEach(t -> medianCalculator3.accept(t));
 
         medianCalculator4 = new MedianCalculator<>();
     }
@@ -51,8 +52,11 @@ public class MedianCalculatorTest {
         assertEquals(13.5,medianCalculator2.getResult());
 
         assertEquals(17.0,medianCalculator3.getResult());
+    }
 
-        assertEquals(0.0,medianCalculator4.getResult());
+    @Test
+    public void testGetResult_Fail() {
+        assertThrows(InsufficientPopulationException.class, () ->  medianCalculator4.getResult());
     }
 
 }
