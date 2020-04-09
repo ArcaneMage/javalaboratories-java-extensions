@@ -38,7 +38,9 @@ Similarly, there are `NullableInt`,`NullableLong` and `NullableDouble` for `int`
 ### Reducers
 `Reducers` are collectors but with a difference. Most of them return `Stream` objects, and so it is possible to continue
 functional programming within a stream context. Many of the `Collectors` methods have been implemented in `Reducers` class, 
-again as a possible "drop-in" replacement for `Collectors` class.
+again as a possible "drop-in" replacement for `Collectors` class. `Reducers` also support a comprehensive set of statistical
+calculations such as mean, median, mode, standard deviation and much more. Expect to see an expansion of statistical 
+functions in this area over the coming days.  
 
 ```
         List<String> strings = Arrays.asList("9","7","5","76","2","40","101");

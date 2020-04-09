@@ -23,13 +23,9 @@ public class MedianCalculator<T extends Number> implements StatisticalCalculator
         if ( sorted.size() % 2 != 0 ) {
             return sorted.get(index -1).doubleValue();
         } else {
-            if ( sorted.size() > 0 ) {
-                T lterm = sorted.get(index - 1);
-                T rterm = sorted.get(index);
-                return (lterm.doubleValue() + rterm.doubleValue()) / 2.0;
-            } else {
-                return 0.0;
-            }
+            T lterm = sorted.get(index - 1);
+            T rterm = sorted.get(index);
+            return (lterm.doubleValue() + rterm.doubleValue()) / 2.0;
         }
     }
 

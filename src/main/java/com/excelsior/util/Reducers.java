@@ -1,6 +1,8 @@
 package com.excelsior.util;
 
 import com.excelsior.util.statistics.ComprehensiveStatisticalCalculators;
+import com.excelsior.util.statistics.DoubleStatisticalCalculators;
+import com.excelsior.util.statistics.IntStatisticalCalculators;
 import com.excelsior.util.statistics.LongStatisticalCalculators;
 
 import java.util.*;
@@ -266,6 +268,25 @@ public final class Reducers {
         );
     }
 
+    public static <T> Reducer<T,?,Stream<IntStatisticalCalculators>> calculateStatisticsInt(ToIntFunction<? super T> mapper) {
+        return new ReducerImpl<>(
+                IntStatisticalCalculators::new,
+                (a,v) -> a.accept(mapper.applyAsInt(v)),
+                (l,r) -> {l.combine(r); return l;},
+                Stream::of,
+                NO_CHARACTERISTICS
+        );
+    }
+
+    public static <T> Reducer<T,?,Stream<DoubleStatisticalCalculators>> calculateStatisticsDouble(ToDoubleFunction<? super T> mapper) {
+        return new ReducerImpl<>(
+                DoubleStatisticalCalculators::new,
+                (a,v) -> a.accept(mapper.applyAsDouble(v)),
+                (l,r) -> {l.combine(r); return l;},
+                Stream::of,
+                NO_CHARACTERISTICS
+        );
+    }
 
     public static <T> Reducer<T,?,Stream<DoubleSummaryStatistics>> summarizingDouble(ToDoubleFunction<? super T> mapper) {
         return new ReducerImpl<>(

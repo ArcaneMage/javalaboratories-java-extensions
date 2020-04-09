@@ -33,7 +33,7 @@ public abstract class ComprehensiveStatisticalCalculators<T extends Number> exte
     @Override
     public String toString() {
         return String.format(
-                "%s{count=%d, sum=%f, min=%f, average=%f, max=%f, mode=%s, median=%f, variance=%f, standard-deviation=%f}",
+                "%s{count=%d, sum=%s, min=%s, average=%s, max=%s, mode=%s, median=%f, variance=%f, standard-deviation=%f}",
                 this.getClass().getSimpleName(),
                 getCount(),
                 getSum(),

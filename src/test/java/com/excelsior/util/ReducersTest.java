@@ -139,7 +139,88 @@ public class ReducersTest {
     }
 
     @Test
-    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public void testCalculateStatisticsDouble_Pass() {
+        List<String> strings = Arrays.asList("3.0","4.0","4.0","5.0");
+
+        strings.stream()
+                .collect(Reducers.calculateStatisticsDouble(Double::parseDouble))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(4L, r.getCount());
+                    assertEquals(4.0,r.getAverage());
+                    assertEquals(3.0,r.getMin());
+                    assertEquals(5.0, r.getMax());
+                    assertEquals(16.0, r.getSum());
+                    assertEquals(4.0, r.getMode().get());
+                    assertEquals(4.0, r.getMedian());
+                    assertEquals(0.7071067811865476, r.getStandardDeviation());
+                    assertEquals(0.5, r.getVariance());
+                });
+
+        strings.parallelStream()
+                .collect(Reducers.calculateStatisticsDouble(Double::parseDouble))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(4L, r.getCount());
+                    assertEquals(4.0,r.getAverage());
+                    assertEquals(3.0,r.getMin());
+                    assertEquals(5.0, r.getMax());
+                    assertEquals(16.0, r.getSum());
+                    assertEquals(4.0, r.getMode().get());
+                    assertEquals(4.0, r.getMedian());
+                    assertEquals(0.7071067811865476, r.getStandardDeviation());
+                    assertEquals(0.5, r.getVariance());
+                });
+
+        List<String> zero = Collections.emptyList();
+        zero.parallelStream()
+                .collect(Reducers.calculateStatisticsDouble(Double::parseDouble))
+                .findFirst()
+                .ifPresent(r -> assertEquals(0L, r.getCount()));
+    }
+
+    @Test
+    public void testCalculateStatisticsInt_Pass() {
+        List<String> strings = Arrays.asList("3","4","4","5");
+
+        strings.stream()
+                .collect(Reducers.calculateStatisticsInt(Integer::parseInt))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(4L, r.getCount());
+                    assertEquals(4,r.getAverage());
+                    assertEquals(3,r.getMin());
+                    assertEquals(5, r.getMax());
+                    assertEquals(16, r.getSum());
+                    assertEquals(4, r.getMode().get());
+                    assertEquals(4.0, r.getMedian());
+                    assertEquals(0.7071067811865476, r.getStandardDeviation());
+                    assertEquals(0.5, r.getVariance());
+                });
+
+        strings.parallelStream()
+                .collect(Reducers.calculateStatisticsInt(Integer::parseInt))
+                .findFirst()
+                .ifPresent(r -> {
+                    assertEquals(4L, r.getCount());
+                    assertEquals(4.0,r.getAverage());
+                    assertEquals(3,r.getMin());
+                    assertEquals(5, r.getMax());
+                    assertEquals(16, r.getSum());
+                    assertEquals(4, r.getMode().get());
+                    assertEquals(4.0, r.getMedian());
+                    assertEquals(0.7071067811865476, r.getStandardDeviation());
+                    assertEquals(0.5, r.getVariance());
+                });
+
+        List<String> zero = Collections.emptyList();
+        zero.parallelStream()
+                .collect(Reducers.calculateStatisticsInt(Integer::parseInt))
+                .findFirst()
+                .ifPresent(r -> assertEquals(0L, r.getCount()));
+    }
+
+    @Test
     public void testCalculateStatisticsLong_Pass() {
         List<String> strings = Arrays.asList("3","4","4","5");
 
@@ -148,12 +229,14 @@ public class ReducersTest {
                 .findFirst()
                 .ifPresent(r -> {
                     assertEquals(4L, r.getCount());
-                    assertEquals(4.0 ,r.getAverage());
-                    assertEquals(3L ,r.getMin());
+                    assertEquals(4.0,r.getAverage());
+                    assertEquals(3L,r.getMin());
                     assertEquals(5L, r.getMax());
                     assertEquals(16L, r.getSum());
                     assertEquals(4L, r.getMode().get());
-                    assertEquals(4L, r.getMedian());
+                    assertEquals(4.0, r.getMedian());
+                    assertEquals(0.7071067811865476, r.getStandardDeviation());
+                    assertEquals(0.5, r.getVariance());
                 });
 
         strings.parallelStream()
@@ -161,79 +244,21 @@ public class ReducersTest {
                 .findFirst()
                 .ifPresent(r -> {
                     assertEquals(4L, r.getCount());
-                    assertEquals(4.0 ,r.getAverage());
-                    assertEquals(3L ,r.getMin());
+                    assertEquals(4.0, r.getAverage());
+                    assertEquals(3L, r.getMin());
                     assertEquals(5L, r.getMax());
                     assertEquals(16L, r.getSum());
                     assertEquals(4L, r.getMode().get());
-                    assertEquals(4L, r.getMedian());
+                    assertEquals(4.0, r.getMedian());
+                    assertEquals(0.7071067811865476, r.getStandardDeviation());
+                    assertEquals(0.5, r.getVariance());
                 });
-
-        // Mode is calculable: minimum sample, repeated values
-        strings = Arrays.asList("5","5","5");
-
-        strings.stream()
-                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
-                .findFirst()
-                .ifPresent(r -> {
-                    assertEquals(3L, r.getCount());
-                    assertEquals(5.0 ,r.getAverage());
-                    assertEquals(5L ,r.getMin());
-                    assertEquals(5L, r.getMax());
-                    assertEquals(15L, r.getSum());
-                    assertEquals(5L, r.getMode().get());
-                    assertEquals(5L, r.getMedian());
-                });
-
-        strings.parallelStream()
-                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
-                .findFirst()
-                .ifPresent(r -> {
-                    assertEquals(3L, r.getCount());
-                    assertEquals(5.0 ,r.getAverage());
-                    assertEquals(5L ,r.getMin());
-                    assertEquals(5L, r.getMax());
-                    assertEquals(15L, r.getSum());
-                    assertEquals(5L, r.getMode().get());
-                    assertEquals(5L, r.getMedian());
-                });
-
 
         List<String> zero = Collections.emptyList();
         zero.parallelStream()
                 .collect(Reducers.calculateStatisticsLong(Long::parseLong))
                 .findFirst()
                 .ifPresent(r -> assertEquals(0L, r.getCount()));
-    }
-
-    @Test
-    public void testCalculateStatisticsLong_Fail() {
-        // Mode not calculable
-        List<String> strings = Arrays.asList("4","3","5","3","4","5");
-
-        strings.stream()
-                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
-                .findFirst()
-                .ifPresent(r -> {
-                    assertEquals(6L, r.getCount());
-                    assertEquals(4.0 ,r.getAverage());
-                    assertEquals(3L ,r.getMin());
-                    assertEquals(5L, r.getMax());
-                    assertEquals(24L, r.getSum());
-                    assertThrows(NoSuchElementException.class, r.getMode()::get);
-                });
-
-        strings.parallelStream()
-                .collect(Reducers.calculateStatisticsLong(Long::parseLong))
-                .findFirst()
-                .ifPresent(r -> {
-                    assertEquals(6L, r.getCount());
-                    assertEquals(4.0 ,r.getAverage());
-                    assertEquals(3L ,r.getMin());
-                    assertEquals(5L, r.getMax());
-                    assertEquals(24L, r.getSum());
-                    assertThrows(NoSuchElementException.class, r.getMode()::get);
-                });
     }
 
     @Test
