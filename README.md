@@ -2,6 +2,31 @@
 
 This a library of Java utilities to aid programming with lambda just that a little bit more joyful, particularly for 
 Java-8 developers but not exclusively. 
+### Handlers
+Handlers class provides a comprehensive set of factory methods to handle checked exceptions within lambda expressions.
+Lambdas are generally short and concise, but checked exceptions can sometimes cause the lambda expression to look unwieldy. 
+This class has many useful methods that compliment common functional interfaces. Each method wraps the function object 
+into a function that transforms the checked exception to a `RuntimeException` object.
+
+For example, here is an example of a method performing file input/output:
+```
+        public void writeFile(String file) throws IOException {
+            ...
+        }
+ 
+        Consumer<String> consumer = s -> {
+            try {
+                writeFile(s)
+            } catch (IOException e) {
+                ...
+            }
+        }
+ 
+        ...becomes...
+ 
+        Consumer<String> consumer = Handlers.consumer(s -> writeFile(s));
+```
+
 ### Holder
 `Holder` class is a simple container, which is generally useful for mutating values within a lambda expression -- the
 holder object is an effectively final object allowing its contents to be mutated.
