@@ -199,7 +199,7 @@ public final class StopWatch {
             throw new IllegalStateException("Not in the correct state(s): "+ Arrays.toString(states));
     }
 
-    public class Cycles {
+    public final class Cycles {
         private long count;
         private long time;
 
