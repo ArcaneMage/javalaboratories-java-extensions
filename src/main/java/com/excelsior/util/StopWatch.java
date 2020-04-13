@@ -29,12 +29,12 @@ import static java.lang.Math.round;
  *          StopWatch stopWatch2 = StopWatch.watch("methodTwo");
  *
  *          // This is a common usecase of the StopWatch
- *          stopWatch.time(() -> doSomethingMethod(1000));
+ *          stopWatch.setTime(() -> doSomethingMethod(1000));
  *
  *          // Here is aother sceanario where the for each loop is measured.
  *          List<Integer> numbers = Arrays.asList(1,2,3,4);
  *
- *          numbers.forEach(stopWatch2.time(n -> doSomethingMethod2(n)));
+ *          numbers.forEach(stopWatch2.setTime(n -> doSomethingMethod2(n)));
  *
  *          // This command will print statistics for all StopWatch instances
  *          System.out.println(StopWatch.print());
@@ -89,12 +89,12 @@ public final class StopWatch {
         this.cycles = new Cycles();
     }
 
-    public void time(Runnable runnable) {
+    public void time(final Runnable runnable) {
         Objects.requireNonNull(runnable,"Expected a runnable object");
         action(s -> runnable.run()).accept(null);
     }
 
-    public <T> Consumer<T> time(Consumer<? super T> action) {
+    public <T> Consumer<T> time(final Consumer<? super T> action) {
         Objects.requireNonNull(action,"Expected a consumer function");
         return action(action);
     }
@@ -122,6 +122,7 @@ public final class StopWatch {
     }
 
     public long getTime() {
+        verify(State.STOPPED);
         return cycles.getTime();
     }
 
@@ -155,7 +156,7 @@ public final class StopWatch {
         if ( getState() == State.STAND_BY || getState() == State.RUNNING ) {
             return String.format("StopWatch[name='%s',state='%s',cycles=%s]",name,state,cycles);
         } else {
-            return String.format("StopWatch[name='%s',time=%d,seconds=%.5f,millis=%d,total-percentile=%d,state='%s',cycles=%s]",
+            return String.format("StopWatch[name='%s',setTime=%d,seconds=%.5f,millis=%d,total-percentile=%d,state='%s',cycles=%s]",
                     name,getTime(),getTimeInSeconds(),getTimeInMillis(),getTotalPercentile(),state,cycles);
         }
     }
@@ -169,9 +170,8 @@ public final class StopWatch {
                 state = State.RUNNING;
                 consumer.accept(s);
             } finally {
-                cycles.increment();
                 long time = System.nanoTime() - start;
-                this.cycles.time += time;
+                cycles.setTime(time);
                 sumTotal += time;
                 state = State.STOPPED;
             }
@@ -213,24 +213,22 @@ public final class StopWatch {
             return (getTime() / (double) count) / (1000.0 * 1000000.0);
         }
 
-        public void reset() {
-            if ( state == State.STAND_BY ) return;
-            verify(State.STOPPED);
-            count = 0;
-        }
-
         public String toString() {
             return String.format("Cycles[count=%d]", count);
         }
 
         public long getTime() {
-            verify(State.STOPPED);
             return time;
         }
 
-        void increment() {
+        private void setTime(long value) {
             verify(State.RUNNING);
+            time += value;
             count++;
+        }
+
+        private void reset() {
+            count = 0;
         }
     }
 }
