@@ -69,11 +69,14 @@ public class StopWatchTest {
             }
         });
 
-        assertEquals(1,stopWatch5.getCycles().getValue());
+        assertEquals(1,stopWatch5.getCycles().getCount());
 
-        List<Integer> numbers = Arrays.asList(1,2,3,4);
+        List<Integer> numbers = Arrays.asList(1,2,3);
         StopWatch stopWatch6 = StopWatch.watch("MethodSix");
-        numbers.forEach(stopWatch6.timeForEach(s -> logger.info("testTime_Pass(): logging forEach loop {}",s)));
+        numbers.forEach(stopWatch6.time(s -> {
+            logger.info("testTime_Pass(): logging forEach loop {}",s);
+            doSomethingVoidMethod(100);
+        }));
 
         logger.info('\n'+StopWatch.print());
     }
@@ -159,7 +162,7 @@ public class StopWatchTest {
     @Test
     public void testToString_Pass() {
         String sw = stopWatch1.toString();
-        assertEquals("StopWatch[name='MethodOne',state='STAND_BY',cycles=Cycles[value=0]]", stopWatch1.toString());
+        assertEquals("StopWatch[name='MethodOne',state='STAND_BY',cycles=Cycles[count=0]]", stopWatch1.toString());
 
         stopWatch1.time(() -> doSomethingVoidMethod(125));
         String sw2 = stopWatch1.toString();

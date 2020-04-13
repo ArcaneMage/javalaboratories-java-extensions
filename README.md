@@ -60,7 +60,6 @@ available in the `Optional` class in Java-11/13 but it also includes new feature
     List<Person> list = person.toList();
 ```
 Similarly, there are `NullableInt`,`NullableLong` and `NullableDouble` for `int`,`long` and `double` types respectively.
-
 ### Reducers
 `Reducers` are collectors but with a difference. Most of them return `Stream` objects, and so it is possible to continue
 functional programming within a stream context. Many of the `Collectors` methods have been implemented in `Reducers` class, 
@@ -81,8 +80,38 @@ functions in this area over the coming days.
                 
         Outputs: 9 7 5 76 2 40 101 = 240         
 ```
+### StopWatch
+StopWatch provides a convenient means for timings of methods. There are no explicit methods to start and stop the 
+timings, because these are naturally determined through the process of invoking the function that is currently
+being timed. In other words, calling the function will start the `StopWatch` and when the function comes to a 
+natural/unnatural conclusion, the `StopWatch` is automatically stopped. Number of instances of `StopWatch` is unlimited,
+and if the instances are related, useful statistics are available via the class' methods or the `StopWatch.print()` 
+method to print pre-formatted data into a string. Every instance has a unique name, which is useful when reviewing the 
+statistics. Use the `StopWatch.time(Runnable)` or the `StopWatch.time(Consumer)` method to start the timings, the latter is 
+particularly useful for `Collection.forEach(Consumer)` and/or streams.
+```
+         StopWatch stopWatch = StopWatch.watch("methodOne");
+         StopWatch stopWatch2 = StopWatch.watch("methodTwo");
+ 
+         // This is a common usecase of the StopWatch
+         stopWatch.time(() -> doSomethingMethod(1000));
+ 
+         // Here is aother sceanario where the for each loop is measured.
+         List<Integer> numbers = Arrays.asList(1,2,3,4);
+    
+         numbers.forEach(stopWatch2.time(n -> doSomethingMethod2(n)));
+    
+         // This command will print statistics for all StopWatch instances
+         System.out.println(StopWatch.print());
+    
+         // Output :-
+    
+         Method                       Time (s)    %       Cycles Cycle Time(s)
+         --------------------------------------------------------------------
+         MethodOne                     0.50371   8%            1      0.50371
+         MethodTwo                     1.00451  92%            4      0.25113
 
+```
 ## Feedback
-
 Development is ongoing. I have many ideas in the pipeline, and of course will consider your ideas and recommendations. 
 If you encounter any bugs, please raise an issue(s).
