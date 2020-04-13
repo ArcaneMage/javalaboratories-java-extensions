@@ -81,14 +81,14 @@ functions in this area over the coming days.
         Outputs: 9 7 5 76 2 40 101 = 240         
 ```
 ### StopWatch
-StopWatch provides a convenient means for timings of methods. There are no explicit methods to start and stop the 
-timings, because these are naturally determined through the process of invoking the function that is currently
-being timed. In other words, calling the function will start the `StopWatch` and when the function comes to a 
+StopWatch provides a convenient means for timings of methods. There are no explicit methods in the class to start and 
+stop the timings, because these are naturally determined through the process of invoking the function that is currently
+being timed. In other words, executing the function will start the `StopWatch` and when the function comes to a 
 natural/unnatural conclusion, the `StopWatch` is automatically stopped. Number of instances of `StopWatch` is unlimited,
-and if the instances are related, useful statistics are available via the class' methods or the `StopWatch.print()` 
-method to print pre-formatted data into a string. Every instance has a unique name, which is useful when reviewing the 
-statistics. Use the `StopWatch.time(Runnable)` or the `StopWatch.time(Consumer)` method to start the timings, the latter is 
-particularly useful for `Collection.forEach(Consumer)` and/or streams.
+and so useful statistics are available of all the timed functions via the class' methods or via the `StopWatch.print()` 
+method which prints pre-formatted data into a string. Every `StopWatch` instance has a unique name, which is useful when 
+reviewing the statistics. Use the `StopWatch.time(Runnable)` or the `StopWatch.time(Consumer)` method to start the timings,
+the latter is particularly useful for `Collection.forEach(Consumer)` and/or streams.
 ```
          StopWatch stopWatch = StopWatch.watch("methodOne");
          StopWatch stopWatch2 = StopWatch.watch("methodTwo");
