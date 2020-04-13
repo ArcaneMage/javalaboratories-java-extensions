@@ -47,6 +47,7 @@ import static java.lang.Math.round;
  *          MethodTwo                     1.00451  92%            4      0.25113
  *     }
  * </pre>
+ * @Author Kevin Henry, Excelsior Software
  */
 @SuppressWarnings("WeakerAccess")
 public final class StopWatch {
@@ -111,6 +112,7 @@ public final class StopWatch {
     }
 
     public Cycles getCycles() {
+        verify(State.STOPPED);
         return cycles;
     }
 
