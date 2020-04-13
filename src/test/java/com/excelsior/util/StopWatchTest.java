@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
@@ -48,38 +51,42 @@ public class StopWatchTest {
         stopWatch1.time(() -> doSomethingVoidMethod(500));
         assertTrue(stopWatch1.getTimeInSeconds() <= 0.510);
 
-        stopWatch2.time(s -> doSomethingVoidMethod(1000));
+        stopWatch2.time(() -> doSomethingVoidMethod(1000));
         assertTrue(stopWatch2.getTimeInSeconds() <= 1.010);
 
         // Nested timers
-        stopWatch3.time(s -> {
+        stopWatch3.time(() -> {
             doSomethingVoidMethod(1500);
             StopWatch stopWatch4 = StopWatch.watch("MethodFour");
-            stopWatch4.time(s2 -> doSomethingVoidMethod(1000));
+            stopWatch4.time(() -> doSomethingVoidMethod(1000));
         });
         assertTrue(stopWatch3.getTimeInSeconds() <= 2.6);
 
         StopWatch stopWatch5 = StopWatch.watch("MethodFive");
-        stopWatch5.time(s -> {
+        stopWatch5.time(() -> {
             for (int i = 0; i < 5; i++) {
                 doSomethingVoidMethod(125);
-                s.getCycles().increment();
             }
         });
 
-        assertEquals(6,stopWatch5.getCycles().getValue());
+        assertEquals(1,stopWatch5.getCycles().getValue());
+
+        List<Integer> numbers = Arrays.asList(1,2,3,4);
+        StopWatch stopWatch6 = StopWatch.watch("MethodSix");
+        numbers.forEach(stopWatch6.timeForEach(s -> logger.info("testTime_Pass(): logging forEach loop {}",s)));
+
         logger.info('\n'+StopWatch.print());
     }
 
     @Test
     public void testTimeMillis_Pass() {
-        stopWatch1.time(s -> doSomethingVoidMethod(500));
+        stopWatch1.time(() -> doSomethingVoidMethod(500));
         assertTrue(stopWatch1.getTimeInMillis() <= 510);
     }
 
     @Test
     public void testTotalPercentile_Pass() {
-        stopWatch1.time(s -> doSomethingVoidMethod(125));
+        stopWatch1.time(() -> doSomethingVoidMethod(125));
         assertEquals(100, stopWatch1.getTotalPercentile());
     }
 
@@ -89,11 +96,11 @@ public class StopWatchTest {
 
         assertTrue(sw.contains("STAND_BY"));
 
-        stopWatch1.time(s -> doSomethingVoidMethod(500));
+        stopWatch1.time(() -> doSomethingVoidMethod(500));
 
-        stopWatch2.time(s -> doSomethingVoidMethod(1000));
+        stopWatch2.time(() -> doSomethingVoidMethod(1000));
 
-        stopWatch3.time(s -> doSomethingVoidMethod(1500));
+        stopWatch3.time(() -> doSomethingVoidMethod(1500));
 
         // Test long names
         StopWatch stopWatch4 = StopWatch.watch("MethodThreeWhichHasALongNameThatIsGreaterThanExpected");
@@ -109,7 +116,7 @@ public class StopWatchTest {
         stopWatch1.reset();
         assertEquals(State.STAND_BY,stopWatch1.getState());
 
-        stopWatch1.time(s -> doSomethingVoidMethod(500));
+        stopWatch1.time(() -> doSomethingVoidMethod(500));
         assertTrue(stopWatch1.getTimeInSeconds() <= 0.510);
         assertEquals(State.STOPPED,stopWatch1.getState());
 
@@ -119,9 +126,9 @@ public class StopWatchTest {
 
     @Test
     public void testReset_Fail() {
-        stopWatch1.time(s -> {
+        stopWatch1.time(() -> {
             doSomethingVoidMethod(125);
-            assertThrows(IllegalStateException.class, s::reset);
+            assertThrows(IllegalStateException.class, stopWatch1::reset);
         });
 
     }
@@ -132,20 +139,20 @@ public class StopWatchTest {
         stopWatch1.reset();
 
         assertEquals(State.STAND_BY,stopWatch1.getState());
-        stopWatch1.time(s -> {
+        stopWatch1.time(() -> {
             doSomethingVoidMethod(125);
-            assertEquals(State.RUNNING,s.getState());
+            assertEquals(State.RUNNING,stopWatch1.getState());
         });
         assertEquals(State.STOPPED,stopWatch1.getState());
     }
 
     @Test
     public void testStates_Fail() {
-        stopWatch1.time(s -> {
+        stopWatch1.time(() -> {
             doSomethingVoidMethod(125);
-            assertThrows(IllegalStateException.class, () -> s.time(s2 -> doSomethingVoidMethod(125)));
-            assertThrows(IllegalStateException.class, s::getTime);
-            assertThrows(IllegalStateException.class, s::reset);
+            assertThrows(IllegalStateException.class, () -> stopWatch1.time(() -> doSomethingVoidMethod(125)));
+            assertThrows(IllegalStateException.class, stopWatch1::getTime);
+            assertThrows(IllegalStateException.class, stopWatch1::reset);
         });
     }
 
@@ -154,7 +161,7 @@ public class StopWatchTest {
         String sw = stopWatch1.toString();
         assertEquals("StopWatch[name='MethodOne',state='STAND_BY',cycles=Cycles[value=0]]", stopWatch1.toString());
 
-        stopWatch1.time(s -> doSomethingVoidMethod(125));
+        stopWatch1.time(() -> doSomethingVoidMethod(125));
         String sw2 = stopWatch1.toString();
         assertNotEquals(sw,sw2);
         assertTrue(sw2.startsWith("StopWatch"));

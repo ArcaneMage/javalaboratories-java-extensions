@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.function.*;
 
 /**
- * Handlers class provides a comprehensive set of factory methods to handle
- * checked exceptions within lambda expressions.
+ * Handlers class provides a broad set of wrapper methods to handle checked
+ * exceptions within lambda expressions.
  * <p>
  * Lambdas are generally short and concise, but checked exceptions can
  * sometimes cause the lambda expression to look unwieldy. This class has many

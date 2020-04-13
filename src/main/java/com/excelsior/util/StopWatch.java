@@ -9,13 +9,6 @@ import static java.lang.Math.round;
 public final class StopWatch {
     public enum State {STAND_BY, RUNNING, STOPPED}
 
-    public interface Cycles {
-        long getValue();
-        void increment();
-        double getTimeInSeconds();
-        void reset();
-    }
-
     private static Map<String,StopWatch> watches = new LinkedHashMap<>();
     private static long sumTotal = 0L;
 
@@ -51,27 +44,17 @@ public final class StopWatch {
         this.name = name;
         this.state = State.STAND_BY;
         this.time = 0;
-        this.cycles = new CyclesImpl();
+        this.cycles = new Cycles();
     }
 
-    public void time(Runnable runnable) {
-        Objects.requireNonNull(runnable,"Expected a runnable function");
-        time(s -> runnable.run());
+    public <T> void time(Runnable runnable) {
+        Objects.requireNonNull(runnable,"Expected a runnable object");
+        Consumer<T> action = action(s -> runnable.run());
+        action.accept(null);
     }
 
-    public void time(Consumer<? super StopWatch> consumer) {
-        Objects.requireNonNull(consumer,"Expected a consumer function");
-        verify(State.STAND_BY);
-        long start = System.nanoTime();
-        try {
-            state = State.RUNNING;
-            getCycles().increment();
-            consumer.accept(this);
-        } finally {
-            time = System.nanoTime() - start;
-            state = State.STOPPED;
-            sumTotal += time;
-        }
+    public <T> Consumer<T> timeForEach(Consumer<? super T> action) {
+        return action(action);
     }
 
     @Override
@@ -135,6 +118,25 @@ public final class StopWatch {
         }
     }
 
+    public <T> Consumer<T> action(Consumer<? super T> consumer) {
+        Objects.requireNonNull(consumer,"Expected a consumer function");
+        verify(State.STAND_BY);
+        return s -> {
+            verify(State.STAND_BY,State.STOPPED);
+            long start = System.nanoTime();
+            try {
+                state = State.RUNNING;
+                consumer.accept(s);
+            } finally {
+                getCycles().increment();
+                long time = System.nanoTime() - start;
+                this.time += time;
+                sumTotal += time;
+                state = State.STOPPED;
+            }
+        };
+    }
+
     private String printStats() {
         String result;
         String name = getName();
@@ -149,26 +151,21 @@ public final class StopWatch {
         return result;
     }
 
-    private void verify(State state) {
-        if ( this.state != state )
-            throw new IllegalStateException("Not in "+state+" state");
+    private void verify(State... states) {
+        boolean found = Arrays.stream(states)
+                .anyMatch(state -> this.state == state);
+        if (!found)
+            throw new IllegalStateException("Not in the correct state(s): "+ Arrays.toString(states));
     }
 
-    private class CyclesImpl implements Cycles {
+    public class Cycles {
         private long value;
 
-        @Override
+        private Cycles() {}
         public long getValue() {
             return value;
         }
 
-        @Override
-        public void increment() {
-            verify(State.RUNNING);
-            value++;
-        }
-
-        @Override
         public double getTimeInSeconds() {
             return (StopWatch.this.getTime() / (double) value) / (1000.0 * 1000000.0);
         }
@@ -181,6 +178,11 @@ public final class StopWatch {
 
         public String toString() {
             return String.format("Cycles[value=%d]", value);
+        }
+
+        void increment() {
+            verify(State.RUNNING);
+            value++;
         }
     }
 }
