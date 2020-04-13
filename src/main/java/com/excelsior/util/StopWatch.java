@@ -95,6 +95,7 @@ public final class StopWatch {
     }
 
     public <T> Consumer<T> time(Consumer<? super T> action) {
+        Objects.requireNonNull(action,"Expected a consumer function");
         return action(action);
     }
 
@@ -160,7 +161,6 @@ public final class StopWatch {
     }
 
     private <T> Consumer<T> action(Consumer<? super T> consumer) {
-        Objects.requireNonNull(consumer,"Expected a consumer function");
         verify(State.STAND_BY);
         return s -> {
             verify(State.STAND_BY,State.STOPPED);

@@ -3,6 +3,7 @@ package com.excelsior.core.handlers;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.function.*;
 
 /**
@@ -167,7 +168,7 @@ public final class Handlers {
     }
 
     /**
-     * Wraps operator {@link ThrowableUnaryOperator} into a {@link UnaryOperator} function,
+     * Wraps unaryOperator {@link ThrowableUnaryOperator} into a {@link UnaryOperator} function,
      * which handles the checked exceptions.
      *
      * @param unaryOperator function that throws a checked exception.
@@ -188,7 +189,7 @@ public final class Handlers {
     }
 
     /**
-     * Wraps operator {@link ThrowableBinaryOperator} into a {@link BinaryOperator} function,
+     * Wraps binaryOperator {@link ThrowableBinaryOperator} into a {@link BinaryOperator} function,
      * which handles the checked exceptions.
      *
      * @param binaryOperator function that throws a checked exception.
@@ -208,6 +209,45 @@ public final class Handlers {
         };
     }
 
+    /**
+     * Wraps operator {@link ThrowableCallable} into a {@link Callable} function,
+     * which handles the checked exceptions.
+     *
+     * @param callable function that throws a checked exception.
+     * @param <T> type of input into the operation.
+     * @return callable object that handles the exception.
+     */
+    public static <T, E extends Throwable> Callable<T> callable(ThrowableCallable<T,E> callable) {
+        Objects.requireNonNull(callable);
+        return () -> {
+            T result = null;
+            try {
+                result = callable.call();
+            } catch (Throwable throwable) {
+                handle(throwable);
+            }
+            return result;
+        };
+    }
+
+    /**
+     * Wraps runnable {@link ThrowableRunnable} into a {@link Runnable} function,
+     * which handles the checked exceptions.
+     *
+     * @param runnable function that throws a checked exception.
+     * @return runnable object that handles the exception.
+     */
+    public static <E extends Throwable> Runnable runnable(ThrowableRunnable<E> runnable) {
+        Objects.requireNonNull(runnable);
+        return () -> {
+            try {
+                runnable.run();
+            } catch(Throwable throwable) {
+                handle(throwable);
+            }
+        };
+    }
+
     private static void handle (Throwable t) {
         if ( t instanceof RuntimeException)
             throw (RuntimeException) t;
@@ -216,9 +256,8 @@ public final class Handlers {
             throw new UncheckedIOException((IOException) t);
 
 
-        if (t instanceof Exception) {
+        if (t instanceof Exception)
             throw new RuntimeException(t);
-        }
 
         if (t instanceof Error)
             throw new RuntimeException(t);

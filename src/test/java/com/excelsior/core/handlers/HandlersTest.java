@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.function.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,6 +74,25 @@ public class HandlersTest {
         assertNotNull(function);
 
         assertEquals(255,function.apply("testFunction_Pass - doSomethingMethod"));
+    }
+
+    @Test
+    public void testCallable_Pass() {
+        Callable<Integer> callable = Handlers.callable(() -> doSomethingMethod("testCallable_Pass - doSomethingMethod"));
+        assertNotNull(callable);
+
+        try {
+            assertEquals(255, callable.call());
+        } catch (Exception e) {
+            // Unhandled
+        }
+    }
+
+    @Test
+    public void testRunnable_Pass() {
+        Runnable runnable = Handlers.runnable(() -> doSomethingMethod("testRunnable_Pass - doSomethingMethod"));
+        runnable.run();
+        assertNotNull(runnable);
     }
 
     @Test
@@ -194,6 +214,37 @@ public class HandlersTest {
         BinaryOperator<String> binaryOperator4  = Handlers.binaryOperator((a, b) -> {doSomethingMethodThrowsError(a); return null;});
         assertThrows(RuntimeException.class, () -> binaryOperator4.apply("testBinaryOperation_Fail - doSomethingMethodThrowsError",""));
     }
+
+    @Test
+    public void testCallable_Fail() {
+        Callable<Integer> callable = Handlers.callable(() -> { doSomethingMethodThrowsException("testCallable_Fail - doSomethingMethodThrowsException"); return 128;});
+        assertThrows(RuntimeException.class, callable::call);
+
+        Callable<Integer> callable2 = Handlers.callable(() -> { doSomethingMethodThrowsIOException("testCallable_Fail - doSomethingMethodThrowsIOException"); return 128;});
+        assertThrows(RuntimeException.class, callable2::call);
+
+        Callable<Integer> callable3 = Handlers.callable(() -> { doSomethingMethodThrowsRuntimeException("testCallable_Fail - doSomethingMethodThrowsRuntimeException"); return 128;});
+        assertThrows(RuntimeException.class, callable3::call);
+
+        Callable<Integer> callable4 = Handlers.callable(() -> { doSomethingMethodThrowsError("testCallable_Fail - doSomethingMethodThrowsError"); return 128;});
+        assertThrows(RuntimeException.class, callable4::call);
+    }
+
+    @Test
+    public void testRunnable_Fail() {
+        Runnable runtime = Handlers.runnable(() -> doSomethingMethodThrowsException("testRunnable_Fail - doSomethingMethodThrowsException"));
+        assertThrows(RuntimeException.class, runtime::run);
+
+        Runnable runtime2 = Handlers.runnable(() -> doSomethingMethodThrowsIOException("testRunnable_Fail - doSomethingMethodThrowsIOException"));
+        assertThrows(RuntimeException.class, runtime2::run);
+
+        Runnable runtime3 = Handlers.runnable(() -> doSomethingMethodThrowsRuntimeException("testRunnable_Fail - doSomethingMethodThrowsRuntimeException"));
+        assertThrows(RuntimeException.class, runtime3::run);
+
+        Runnable runtime4 = Handlers.runnable(() -> doSomethingMethodThrowsError("testRunnable_Fail - doSomethingMethodThrowsError"));
+        assertThrows(RuntimeException.class, runtime4::run);
+    }
+
 
     private int doSomethingMethod(String s) {
         logger.info("doSomethingMethod: Received message value: {}",s);
