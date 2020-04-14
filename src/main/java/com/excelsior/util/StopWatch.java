@@ -34,7 +34,7 @@ import static java.lang.Math.round;
  *          // Here is aother sceanario where the for each loop is measured.
  *          List<Integer> numbers = Arrays.asList(1,2,3,4);
  *
- *          numbers.forEach(stopWatch2.setTime(n -> doSomethingMethod2(n)));
+ *          numbers.forEach(stopWatch2.time(n -> doSomethingMethod2(n)));
  *
  *          // This command will print statistics for all StopWatch instances
  *          System.out.println(StopWatch.print());
