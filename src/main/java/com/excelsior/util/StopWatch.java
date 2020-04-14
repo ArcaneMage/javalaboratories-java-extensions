@@ -162,7 +162,7 @@ public final class StopWatch {
     }
 
     private <T> Consumer<T> action(Consumer<? super T> consumer) {
-        verify(State.STAND_BY);
+        verify(State.STAND_BY,State.STOPPED);
         return s -> {
             verify(State.STAND_BY,State.STOPPED);
             long start = System.nanoTime();
@@ -228,7 +228,7 @@ public final class StopWatch {
         }
 
         private void reset() {
-            count = 0;
+            count = 0L;
             time = 0L;
         }
     }
