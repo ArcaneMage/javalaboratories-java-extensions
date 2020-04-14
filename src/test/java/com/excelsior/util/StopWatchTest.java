@@ -79,6 +79,8 @@ public class StopWatchTest {
         }));
 
         assertEquals(3, stopWatch6.getCycles().getCount());
+        assertTrue(stopWatch6.getTimeInSeconds() <= 0.319);
+        assertTrue(stopWatch6.getCycles().getMeanTimeInSeconds() <= 0.109);
 
         logger.info('\n'+StopWatch.print());
     }
