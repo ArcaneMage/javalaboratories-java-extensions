@@ -43,8 +43,8 @@ import static java.lang.Math.round;
  *
  *          Method                       Time (s)    %       Cycles Cycle Time(s)
  *          --------------------------------------------------------------------
- *          MethodOne                     0.50371   8%            1      0.50371
- *          MethodTwo                     1.00451  92%            4      0.25113
+ *          methodOne                     0.50371   8%            1      0.50371
+ *          methodTwo                     1.00451  92%            4      0.25113
  *     }
  * </pre>
  * @author Kevin Henry, Excelsior Software
