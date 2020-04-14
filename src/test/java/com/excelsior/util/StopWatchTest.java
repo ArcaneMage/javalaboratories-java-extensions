@@ -48,6 +48,9 @@ public class StopWatchTest {
 
     @Test
     public void testTime_Pass() {
+        assertEquals(State.STAND_BY,stopWatch1.getState());
+        assertEquals(0L,stopWatch1.getTime());
+
         stopWatch1.time(() -> doSomethingVoidMethod(500));
         assertTrue(stopWatch1.getTimeInSeconds() <= 0.510);
 
@@ -101,7 +104,7 @@ public class StopWatchTest {
     public void testPrint_Pass() {
         String sw = StopWatch.print();
 
-        assertTrue(sw.contains("STAND_BY"));
+        assertTrue(!sw.contains("RUNNING"));
 
         stopWatch1.time(() -> doSomethingVoidMethod(500));
 
@@ -166,7 +169,8 @@ public class StopWatchTest {
     @Test
     public void testToString_Pass() {
         String sw = stopWatch1.toString();
-        assertEquals("StopWatch[name='MethodOne',state='STAND_BY',cycles=Cycles[count=0]]", stopWatch1.toString());
+        assertEquals("StopWatch[name='MethodOne',setTime=0,seconds=0.00000,millis=0,total-percentile=0,state='STAND_BY'," +
+                "cycles=Cycles[count=0]]", stopWatch1.toString());
 
         stopWatch1.time(() -> doSomethingVoidMethod(125));
         String sw2 = stopWatch1.toString();
