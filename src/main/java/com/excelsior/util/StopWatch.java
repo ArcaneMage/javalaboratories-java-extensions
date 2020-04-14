@@ -146,7 +146,7 @@ public final class StopWatch {
         if ( state == State.STAND_BY )
             return;
         verify(State.STOPPED);
-        sumTotal -= getTime();
+        sumTotal -= cycles.getTime();
         cycles.reset();
         state = State.STAND_BY;
     }
@@ -187,7 +187,7 @@ public final class StopWatch {
             result = String.format("%-24s %14s", name, ">> "+getState())+" <<";
         else {
             result = String.format("%-24s %12.5f %3d%% %12d %12.5f", name, getTimeInSeconds(), getTotalPercentile(),
-                    getCycles().getCount(), getCycles().getTimeInSeconds());
+                    getCycles().getCount(), getCycles().getMeanTimeInSeconds());
         }
         return result;
     }
@@ -209,7 +209,7 @@ public final class StopWatch {
             return count;
         }
 
-        public double getTimeInSeconds() {
+        public double getMeanTimeInSeconds() {
             return (getTime() / (double) count) / (1000.0 * 1000000.0);
         }
 
@@ -229,6 +229,7 @@ public final class StopWatch {
 
         private void reset() {
             count = 0;
+            time = 0L;
         }
     }
 }

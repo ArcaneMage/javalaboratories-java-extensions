@@ -60,7 +60,7 @@ public class StopWatchTest {
             StopWatch stopWatch4 = StopWatch.watch("MethodFour");
             stopWatch4.time(() -> doSomethingVoidMethod(1000));
         });
-        assertTrue(stopWatch3.getTimeInSeconds() <= 2.6);
+        assertTrue(stopWatch3.getTimeInSeconds() <= 2.51);
 
         StopWatch stopWatch5 = StopWatch.watch("MethodFive");
         stopWatch5.time(() -> {
@@ -77,6 +77,8 @@ public class StopWatchTest {
             logger.info("testTime_Pass(): logging forEach loop {}",s);
             doSomethingVoidMethod(100);
         }));
+
+        assertEquals(3, stopWatch6.getCycles().getCount());
 
         logger.info('\n'+StopWatch.print());
     }
