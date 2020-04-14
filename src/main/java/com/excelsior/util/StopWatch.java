@@ -29,7 +29,7 @@ import static java.lang.Math.round;
  *          StopWatch stopWatch2 = StopWatch.watch("methodTwo");
  *
  *          // This is a common usecase of the StopWatch
- *          stopWatch.setTime(() -> doSomethingMethod(1000));
+ *          stopWatch.time(() -> doSomethingMethod(1000));
  *
  *          // Here is aother sceanario where the for each loop is measured.
  *          List<Integer> numbers = Arrays.asList(1,2,3,4);
