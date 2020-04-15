@@ -108,8 +108,8 @@ the latter is particularly useful for `Collection.forEach(Consumer)` and/or stre
     
          Method                       Time (s)    %       Cycles Cycle Time(s)
          --------------------------------------------------------------------
-         MethodOne                     0.50371   8%            1      0.50371
-         MethodTwo                     1.00451  92%            4      0.25113
+         methodOne                00:00:00.504   8%            1 00:00:00.504
+         methodTwo                00:00:01.451  92%            4 00:00:00.363
 
 ```
 ## Feedback
