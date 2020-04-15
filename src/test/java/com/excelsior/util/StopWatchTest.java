@@ -56,7 +56,7 @@ public class StopWatchTest {
         assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 508);
 
         stopWatch2.time(() -> doSomethingVoidMethod(1000));
-        assertTrue(stopWatch2.getTime(TimeUnit.SECONDS) == 1);
+        assertEquals(1, stopWatch2.getTime(TimeUnit.SECONDS));
 
         // Nested timers
         stopWatch3.time(() -> {
@@ -64,7 +64,7 @@ public class StopWatchTest {
             StopWatch stopWatch4 = StopWatch.watch("MethodFour");
             stopWatch4.time(() -> doSomethingVoidMethod(1000));
         });
-        assertTrue(stopWatch3.getTime(TimeUnit.SECONDS) == 2);
+        assertEquals(2, stopWatch3.getTime(TimeUnit.SECONDS));
 
         StopWatch stopWatch5 = StopWatch.watch("MethodFive");
         stopWatch5.time(() -> {
@@ -103,21 +103,21 @@ public class StopWatchTest {
 
     @Test
     public void testPrint_Pass() {
-        String sw = StopWatch.print();
+        assertTrue(!StopWatch.print().contains("RUNNING"));
 
-        assertTrue(!sw.contains("RUNNING"));
-
-        stopWatch1.time(() -> doSomethingVoidMethod(500));
+        stopWatch1.time(() -> {
+            assertTrue(StopWatch.print().contains("RUNNING"));
+            doSomethingVoidMethod(500);
+        });
 
         stopWatch2.time(() -> doSomethingVoidMethod(1000));
 
         stopWatch3.time(() -> doSomethingVoidMethod(1500));
 
         // Test long names
-        StopWatch stopWatch4 = StopWatch.watch("MethodThreeWhichHasALongNameThatIsGreaterThanExpected");
-        sw = StopWatch.print();
-        assertTrue(sw.contains("MethodThreeWhichHasAL..."));
-        logger.info('\n'+sw);
+        StopWatch.watch("MethodThreeWhichHasALongNameThatIsGreaterThanExpected");
+        assertTrue(StopWatch.print().contains("MethodThreeWhichHasAL..."));
+        logger.info('\n'+StopWatch.print());
     }
 
     @Test
@@ -173,17 +173,13 @@ public class StopWatchTest {
         assertEquals("StopWatch[name='MethodOne',time=0,millis=0,seconds=0,total-percentile=0,state='STAND_BY'," +
                 "cycles=Cycles[count=0]]", stopWatch1.toString());
 
-        stopWatch1.time(() -> doSomethingVoidMethod(125));
+        stopWatch1.time(() -> {
+            assertTrue(stopWatch1.toString().contains("RUNNING"));
+            doSomethingVoidMethod(125);
+        });
         String sw2 = stopWatch1.toString();
         assertNotEquals(sw,sw2);
         assertTrue(sw2.startsWith("StopWatch"));
-    }
-
-    private int doSomethingIntMethod(long millis) throws Exception {
-        doSomethingVoidMethod(millis);
-        if ( millis > 600 )
-            throw new Exception();
-        return 1;
     }
 
     private void doSomethingVoidMethod(long millis) {
