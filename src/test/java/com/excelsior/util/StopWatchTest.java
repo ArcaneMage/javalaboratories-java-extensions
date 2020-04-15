@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -52,10 +53,10 @@ public class StopWatchTest {
         assertEquals(0L,stopWatch1.getTime());
 
         stopWatch1.time(() -> doSomethingVoidMethod(500));
-        assertTrue(stopWatch1.getTimeInSeconds() <= 0.510);
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 508);
 
         stopWatch2.time(() -> doSomethingVoidMethod(1000));
-        assertTrue(stopWatch2.getTimeInSeconds() <= 1.010);
+        assertTrue(stopWatch2.getTime(TimeUnit.SECONDS) == 1);
 
         // Nested timers
         stopWatch3.time(() -> {
@@ -63,7 +64,7 @@ public class StopWatchTest {
             StopWatch stopWatch4 = StopWatch.watch("MethodFour");
             stopWatch4.time(() -> doSomethingVoidMethod(1000));
         });
-        assertTrue(stopWatch3.getTimeInSeconds() <= 2.51);
+        assertTrue(stopWatch3.getTime(TimeUnit.SECONDS) == 2);
 
         StopWatch stopWatch5 = StopWatch.watch("MethodFive");
         stopWatch5.time(() -> {
@@ -82,8 +83,8 @@ public class StopWatchTest {
         }));
 
         assertEquals(3, stopWatch6.getCycles().getCount());
-        assertTrue(stopWatch6.getTimeInSeconds() <= 0.319);
-        assertTrue(stopWatch6.getCycles().getMeanTimeInSeconds() <= 0.109);
+        assertTrue(stopWatch6.getTime(TimeUnit.MILLISECONDS) <= 319);
+        assertTrue(stopWatch6.getCycles().getMeanTime(TimeUnit.MILLISECONDS) <= 109);
 
         logger.info('\n'+StopWatch.print());
     }
@@ -91,7 +92,7 @@ public class StopWatchTest {
     @Test
     public void testTimeMillis_Pass() {
         stopWatch1.time(() -> doSomethingVoidMethod(500));
-        assertTrue(stopWatch1.getTimeInMillis() <= 510);
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 510);
     }
 
     @Test
@@ -127,7 +128,7 @@ public class StopWatchTest {
         assertEquals(State.STAND_BY,stopWatch1.getState());
 
         stopWatch1.time(() -> doSomethingVoidMethod(500));
-        assertTrue(stopWatch1.getTimeInSeconds() <= 0.510);
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 510);
         assertEquals(State.STOPPED,stopWatch1.getState());
 
         stopWatch1.reset();
@@ -169,7 +170,7 @@ public class StopWatchTest {
     @Test
     public void testToString_Pass() {
         String sw = stopWatch1.toString();
-        assertEquals("StopWatch[name='MethodOne',setTime=0,seconds=0.00000,millis=0,total-percentile=0,state='STAND_BY'," +
+        assertEquals("StopWatch[name='MethodOne',time=0,millis=0,seconds=0,total-percentile=0,state='STAND_BY'," +
                 "cycles=Cycles[count=0]]", stopWatch1.toString());
 
         stopWatch1.time(() -> doSomethingVoidMethod(125));

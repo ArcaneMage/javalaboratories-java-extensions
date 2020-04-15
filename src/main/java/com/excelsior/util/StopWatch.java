@@ -1,6 +1,7 @@
 package com.excelsior.util;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static java.lang.Math.round;
@@ -125,12 +126,12 @@ public final class StopWatch {
         return cycles.getTime();
     }
 
-    public long getTimeInMillis() {
-        return round(getTime() / 1000000.0);
+    public long getTime(TimeUnit unit) {
+        return unit.convert(getTime(),TimeUnit.NANOSECONDS);
     }
 
-    public double getTimeInSeconds() {
-        return getTime() / (1000.0 * 1000000.0);
+    public String getTimeAsString() {
+        return formatTimeUnits(getTime());
     }
 
     public int getTotalPercentile() {
@@ -155,8 +156,8 @@ public final class StopWatch {
         if ( getState() == State.RUNNING ) {
             return String.format("StopWatch[name='%s',state='%s',cycles=%s]",name,state,cycles);
         } else {
-            return String.format("StopWatch[name='%s',setTime=%d,seconds=%.5f,millis=%d,total-percentile=%d,state='%s',cycles=%s]",
-                    name,getTime(),getTimeInSeconds(),getTimeInMillis(),getTotalPercentile(),state,cycles);
+            return String.format("StopWatch[name='%s',time=%d,millis=%d,seconds=%d,total-percentile=%d,state='%s',cycles=%s]",
+                    name,getTime(),getTime(TimeUnit.MILLISECONDS),getTime(TimeUnit.SECONDS),getTotalPercentile(),state,cycles);
         }
     }
 
@@ -185,8 +186,8 @@ public final class StopWatch {
         if ( getState() == State.RUNNING )
             result = String.format("%-24s %14s", name, ">> "+getState())+" <<";
         else {
-            result = String.format("%-24s %12.5f %3d%% %12d %12.5f", name, getTimeInSeconds(), getTotalPercentile(),
-                    getCycles().getCount(), getCycles().getMeanTimeInSeconds());
+            result = String.format("%-24s %12s %3d%% %12d %12s", name, getTimeAsString(), getTotalPercentile(),
+                    getCycles().getCount(), getCycles().getMeanTimeAsString());
         }
         return result;
     }
@@ -196,6 +197,14 @@ public final class StopWatch {
                 .anyMatch(state -> this.state == state);
         if (!found)
             throw new IllegalStateException("Not in the correct state(s): "+ Arrays.toString(states));
+    }
+
+    private static String formatTimeUnits(long nanos) {
+        return String.format("%02d:%02d:%02d.%03d",
+                TimeUnit.HOURS.convert(nanos,TimeUnit.NANOSECONDS) % 24,
+                TimeUnit.MINUTES.convert(nanos,TimeUnit.NANOSECONDS) % 60,
+                TimeUnit.SECONDS.convert(nanos, TimeUnit.NANOSECONDS) % 60,
+                TimeUnit.MILLISECONDS.convert(nanos,TimeUnit.NANOSECONDS) % 1000);
     }
 
     public final class Cycles {
@@ -208,12 +217,20 @@ public final class StopWatch {
             return count;
         }
 
-        public double getMeanTimeInSeconds() {
-            return count == 0L ? 0L : (getTime() / (double) count) / (1000.0 * 1000000.0);
-        }
-
         public String toString() {
             return String.format("Cycles[count=%d]", count);
+        }
+
+        public long getMeanTime() {
+            return count == 0L ? 0L : (getTime() / count);
+        }
+
+        public long getMeanTime(TimeUnit unit) {
+            return unit.convert(getMeanTime(),TimeUnit.NANOSECONDS);
+        }
+
+        public String getMeanTimeAsString() {
+            return formatTimeUnits(getMeanTime());
         }
 
         public long getTime() {
