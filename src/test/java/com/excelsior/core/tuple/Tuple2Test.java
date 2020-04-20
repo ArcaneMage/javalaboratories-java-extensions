@@ -17,17 +17,19 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("WeakerAccess")
 public class Tuple2Test {
 
-    private Tuple2 aTuple;
+    private Tuple2<String,String> tuple;
+    private Tuple2<Integer,Integer> tuple_2;
 
     @BeforeEach
     public void setup() {
-        aTuple = Tuple.of("John","Doe");
+        tuple = Tuple.of("John","Doe");
+        tuple_2 = Tuple.of(1,2);
     }
 
     @Test
     public void testOf_Pass() {
-        assertEquals("John", aTuple.value1());
-        assertEquals("Doe", aTuple.value2());
+        assertEquals("John", tuple.value1());
+        assertEquals("Doe", tuple.value2());
     }
 
     @Test
@@ -42,45 +44,45 @@ public class Tuple2Test {
 
     @Test
     public void testIndexOf_Pass() {
-        assertEquals(0, aTuple.indexOf("John"));
-        assertEquals(1, aTuple.indexOf("Doe"));
-        assertEquals(-1, aTuple.indexOf(null));
-        assertEquals(-1, aTuple.indexOf(999));
+        assertEquals(0, tuple.indexOf("John"));
+        assertEquals(1, tuple.indexOf("Doe"));
+        assertEquals(-1, tuple.indexOf(null));
+        assertEquals(-1, tuple.indexOf(999));
     }
 
     @Test
     public void testEquals_Pass() {
         Tuple2 aTuple = Tuple.of("John","Doe");
-        assertEquals(this.aTuple,aTuple);
+        assertEquals(this.tuple,aTuple);
 
         Tuple2 aTuple_3 = Tuple.of("Adrian","Wall");
-        assertNotEquals(this.aTuple,aTuple_3);
+        assertNotEquals(this.tuple,aTuple_3);
     }
 
     @Test
     public void testHashCode_Pass() {
         Tuple2 aTuple = Tuple.of("John","Doe");
-        assertEquals(this.aTuple.hashCode(),aTuple.hashCode());
+        assertEquals(this.tuple.hashCode(),aTuple.hashCode());
 
         Tuple2 aTuple_2 = Tuple.of("Adrian","Wall");
-        assertNotEquals(this.aTuple.hashCode(),aTuple_2.hashCode());
+        assertNotEquals(this.tuple.hashCode(),aTuple_2.hashCode());
     }
 
     @Test
     public void testGet_Pass() {
-        assertEquals("John", aTuple.get(0));
-        assertEquals("Doe", aTuple.get(1));
+        assertEquals("John", tuple.get(0));
+        assertEquals("Doe", tuple.get(1));
     }
 
     @Test
     public void testGet_Fail() {
-        assertThrows(IndexOutOfBoundsException.class, () -> aTuple.get(-1));
-        assertThrows(IndexOutOfBoundsException.class, () -> aTuple.get(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> tuple.get(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> tuple.get(2));
     }
 
     @Test
     public void testIterator_Pass() {
-        Iterator iter = aTuple.iterator();
+        Iterator iter = tuple.iterator();
 
         boolean found = false;
         while ( iter.hasNext() ) {
@@ -95,7 +97,7 @@ public class Tuple2Test {
 
     @Test
     public void testIterator_Fail() {
-        Iterator iter = aTuple.iterator();
+        Iterator iter = tuple.iterator();
 
         while ( iter.hasNext() )
             iter.next();
@@ -124,7 +126,7 @@ public class Tuple2Test {
         // Sort equal tuples
         Tuple2 aTuple_7 = Tuple.of("John","Doe");
         Tuple2 aTuple_8 = Tuple.of("James","Brown");
-        list = Arrays.asList(aTuple_7,this.aTuple,aTuple_8);
+        list = Arrays.asList(aTuple_7,this.tuple,aTuple_8);
 
         Collections.sort(list);
         assertEquals(aTuple_8,list.get(0));
@@ -134,18 +136,18 @@ public class Tuple2Test {
     @Test
     @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
     public void testCompareTo_Fail() {
-        assertThrows(NullPointerException.class, () -> aTuple.compareTo(null));
+        assertThrows(NullPointerException.class, () -> tuple.compareTo(null));
 
         Tuple2 aTable_2 = Tuple.of("John","Doe");
         aTable_2.add(43);
-        List<Tuple2> list = Arrays.asList(aTuple,aTable_2);
+        List<Tuple2> list = Arrays.asList(tuple,aTable_2);
 
         assertThrows(ClassCastException.class,() -> Collections.sort(list));
     }
 
     @Test
     public void testToArray_Pass() {
-        Object[] array = aTuple.toArray();
+        Object[] array = tuple.toArray();
 
         assertEquals("John",array[0]);
         assertEquals("Doe",array[1]);
@@ -153,7 +155,7 @@ public class Tuple2Test {
 
     @Test
     public void testToList_Pass() {
-        List<?> list = aTuple.toList();
+        List<?> list = tuple.toList();
 
         assertEquals(2,list.size());
         assertEquals("John",list.get(0));
@@ -162,7 +164,7 @@ public class Tuple2Test {
 
     @Test
     public void testToMap_Pass() {
-        Map<String,?> map = aTuple.toMap(k -> "index"+k);
+        Map<String,?> map = tuple.toMap(k -> "index"+k);
 
         assertEquals("John",map.get("index0"));
         assertEquals("Doe",map.get("index1"));
@@ -174,7 +176,7 @@ public class Tuple2Test {
         ByteArrayOutputStream ostream = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(ostream);
 
-        out.writeObject(aTuple);
+        out.writeObject(tuple);
         out.close();
         ostream.close();
 
@@ -194,56 +196,64 @@ public class Tuple2Test {
 
     @Test
     public void testJoin_Pass() {
-        Tuple2 aTuple = Tuple.of(1,2);
-
-        Tuple3 aTuple3 = aTuple.join(Tuple.of(3));
+        Tuple3 aTuple3 = tuple_2.join(Tuple.of(3));
         assertEquals(aTuple3,Tuple.of(1,2,3));
 
-        Tuple4 aTuple4 = aTuple.join(Tuple.of(3,4));
+        Tuple4 aTuple4 = tuple_2.join(Tuple.of(3,4));
         assertEquals(aTuple4,Tuple.of(1,2,3,4));
 
-        Tuple5 aTuple5 = aTuple.join(Tuple.of(3,4,5));
+        Tuple5 aTuple5 = tuple_2.join(Tuple.of(3,4,5));
         assertEquals(aTuple5,Tuple.of(1,2,3,4,5));
 
-        Tuple6 aTuple6 = aTuple.join(Tuple.of(3,4,5,6));
+        Tuple6 aTuple6 = tuple_2.join(Tuple.of(3,4,5,6));
         assertEquals(aTuple6,Tuple.of(1,2,3,4,5,6));
 
-        Tuple7 aTuple7 = aTuple.join(Tuple.of(3,4,5,6,7));
+        Tuple7 aTuple7 = tuple_2.join(Tuple.of(3,4,5,6,7));
         assertEquals(aTuple7,Tuple.of(1,2,3,4,5,6,7));
 
-        Tuple8 aTuple8 = aTuple.join(Tuple.of(3,4,5,6,7,8));
+        Tuple8 aTuple8 = tuple_2.join(Tuple.of(3,4,5,6,7,8));
         assertEquals(aTuple8,Tuple.of(1,2,3,4,5,6,7,8));
 
-        Tuple9 aTuple9 = aTuple.join(Tuple.of(3,4,5,6,7,8,9));
+        Tuple9 aTuple9 = tuple_2.join(Tuple.of(3,4,5,6,7,8,9));
         assertEquals(aTuple9,Tuple.of(1,2,3,4,5,6,7,8,9));
 
-        Tuple10 aTuple10 = aTuple.join(Tuple.of(3,4,5,6,7,8,9,10));
+        Tuple10 aTuple10 = tuple_2.join(Tuple.of(3,4,5,6,7,8,9,10));
         assertEquals(aTuple10,Tuple.of(1,2,3,4,5,6,7,8,9,10));
 
-        Tuple11 aTuple11 = aTuple.join(Tuple.of(3,4,5,6,7,8,9,10,11));
+        Tuple11 aTuple11 = tuple_2.join(Tuple.of(3,4,5,6,7,8,9,10,11));
         assertEquals(aTuple11,Tuple.of(1,2,3,4,5,6,7,8,9,10,11));
 
-        Tuple12 aTuple12 = aTuple.join(Tuple.of(3,4,5,6,7,8,9,10,11,12));
+        Tuple12 aTuple12 = tuple_2.join(Tuple.of(3,4,5,6,7,8,9,10,11,12));
         assertEquals(aTuple12,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12));
 
-        Tuple13 aTuple13 = aTuple.join(Tuple.of(3,4,5,6,7,8,9,10,11,12,13));
+        Tuple13 aTuple13 = tuple_2.join(Tuple.of(3,4,5,6,7,8,9,10,11,12,13));
         assertEquals(aTuple13,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13));
 
-        Tuple14 aTuple14 = aTuple.join(Tuple.of(3,4,5,6,7,8,9,10,11,12,13,14));
+        Tuple14 aTuple14 = tuple_2.join(Tuple.of(3,4,5,6,7,8,9,10,11,12,13,14));
         assertEquals(aTuple14,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14));
 
-        Tuple15 aTuple15 = aTuple.join(Tuple.of(3,4,5,6,7,8,9,10,11,12,13,14,15));
+        Tuple15 aTuple15 = tuple_2.join(Tuple.of(3,4,5,6,7,8,9,10,11,12,13,14,15));
         assertEquals(aTuple15,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15));
 
-        Tuple16 aTuple16 = aTuple.join(Tuple.of(3,4,5,6,7,8,9,10,11,12,13,14,15,16));
+        Tuple16 aTuple16 = tuple_2.join(Tuple.of(3,4,5,6,7,8,9,10,11,12,13,14,15,16));
         assertEquals(aTuple16,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16));
     }
 
     @Test
     public void testTruncate_Pass() {
-        Tuple2 aTuple = Tuple.of(1,2);
-
-        Tuple1 aTuple1 = aTuple.truncate1();
+        Tuple1 aTuple1 = tuple_2.truncate1();
         assertEquals(Tuple.of(1),aTuple1);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testTestTransform_Pass() {
+        Tuple2 aTuple2;
+
+        aTuple2 = tuple_2.transform1(a -> 0);
+        assertEquals(Tuple.of(0,2),aTuple2);
+
+        aTuple2 = tuple_2.transform2(a -> 0);
+        assertEquals(Tuple.of(1,0),aTuple2);
     }
 }

@@ -1,6 +1,8 @@
 package com.excelsior.core.tuple;
 
 
+import java.util.function.Function;
+
 public final class Tuple6<T1,T2,T3,T4,T5,T6> extends TupleContainer implements Tuple {
     private T1 t1;
     private T2 t2;
@@ -102,4 +104,28 @@ public final class Tuple6<T1,T2,T3,T4,T5,T6> extends TupleContainer implements T
     public Tuple5<T1,T2,T3,T4,T5> truncate5() {
         return new Tuple5<>(t1,t2,t3,t4,t5);
     }
+
+    public <R> Tuple6<R,T2,T3,T4,T5,T6> transform1(Function<? super T1,? extends R> function) {
+        return new Tuple6<>(function.apply(t1),t2,t3,t4,t5,t6);
+    }
+
+    public <R> Tuple6<T1,R,T3,T4,T5,T6> transform2(Function<? super T2,? extends R> function) {
+        return new Tuple6<>(t1,function.apply(t2),t3,t4,t5,t6);
+    }
+
+    public <R> Tuple6<T1,T2,R,T4,T5,T6> transform3(Function<? super T3,? extends R> function) {
+        return new Tuple6<>(t1,t2,function.apply(t3),t4,t5,t6);
+    }
+    public <R> Tuple6<T1,T2,T3,R,T5,T6> transform4(Function<? super T4,? extends R> function) {
+        return new Tuple6<>(t1,t2,t3,function.apply(t4),t5,t6);
+    }
+
+    public <R> Tuple6<T1,T2,T3,T4,R,T6> transform5(Function<? super T5,? extends R> function) {
+        return new Tuple6<>(t1,t2,t3,t4,function.apply(t5),t6);
+    }
+
+    public <R> Tuple6<T1,T2,T3,T4,T5,R> transform6(Function<? super T6,? extends R> function) {
+        return new Tuple6<>(t1,t2,t3,t4,t5,function.apply(t6));
+    }
 }
+

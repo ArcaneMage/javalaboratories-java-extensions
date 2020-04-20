@@ -1,5 +1,7 @@
 package com.excelsior.core.tuple;
 
+import java.util.function.Function;
+
 public final class Tuple1<T1> extends TupleContainer implements Tuple  {
     private final T1 t1;
 
@@ -70,6 +72,10 @@ public final class Tuple1<T1> extends TupleContainer implements Tuple  {
 
     public <T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple15<T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> tuple) {
         return new Tuple16<>(t1,tuple.value1(),tuple.value2(),tuple.value3(),tuple.value4(),tuple.value5(),tuple.value6(),tuple.value7(),tuple.value8(),tuple.value9(),tuple.value10(),tuple.value11(),tuple.value12(),tuple.value13(),tuple.value14(),tuple.value15());
+    }
+
+    public <R> Tuple1<R> transform1(Function<? super T1,? extends R> function) {
+        return new Tuple1<>(function.apply(t1));
     }
 }
 

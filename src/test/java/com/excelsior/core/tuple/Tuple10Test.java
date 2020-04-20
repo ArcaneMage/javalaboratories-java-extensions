@@ -78,4 +78,40 @@ public class Tuple10Test {
         Tuple9 aTuple9 = tuple.truncate9();
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9),aTuple9);
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testTestTransform_Pass() {
+        Tuple10 aTuple10;
+
+        aTuple10 = tuple.transform1(a -> 0);
+        assertEquals(Tuple.of(0,2,3,4,5,6,7,8,9,10),aTuple10);
+
+        aTuple10 = tuple.transform2(a -> 0);
+        assertEquals(Tuple.of(1,0,3,4,5,6,7,8,9,10),aTuple10);
+
+        aTuple10 = tuple.transform3(a -> 0);
+        assertEquals(Tuple.of(1,2,0,4,5,6,7,8,9,10),aTuple10);
+
+        aTuple10 = tuple.transform4(a -> 0);
+        assertEquals(Tuple.of(1,2,3,0,5,6,7,8,9,10),aTuple10);
+
+        aTuple10 = tuple.transform5(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,0,6,7,8,9,10),aTuple10);
+
+        aTuple10 = tuple.transform6(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,5,0,7,8,9,10),aTuple10);
+
+        aTuple10 = tuple.transform7(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,5,6,0,8,9,10),aTuple10);
+
+        aTuple10 = tuple.transform8(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,0,9,10),aTuple10);
+
+        aTuple10 = tuple.transform9(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,0,10),aTuple10);
+
+        aTuple10 = tuple.transform10(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,0),aTuple10);
+    }
 }

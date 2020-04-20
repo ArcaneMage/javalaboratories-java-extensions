@@ -133,17 +133,6 @@ public abstract class TupleContainer implements  Comparable<TupleContainer>, Ite
         return -1;
     }
 
-    public Object get(int index) {
-        validateNodeIndex(index);
-        Object result = null;
-        int i = 0;
-        for ( Node node = head; node != null && result == null; node = node.next ) {
-            if ( index == i ) result = node.element;
-            else i++;
-        }
-        return result;
-    }
-
     public int depth() { return depth; }
 
     public <K> Map<K,?> toMap(Function<? super Integer,? extends K> keyMapper) {
@@ -187,6 +176,17 @@ public abstract class TupleContainer implements  Comparable<TupleContainer>, Ite
     final TupleContainer addFirst(Object element) {
         linkToFirstNode(element);
         return this;
+    }
+
+    final Object get(int index) {
+        validateNodeIndex(index);
+        Object result = null;
+        int i = 0;
+        for ( Node node = head; node != null && result == null; node = node.next ) {
+            if ( index == i ) result = node.element;
+            else i++;
+        }
+        return result;
     }
 
     private Node linkToFirstNode(Object element) {

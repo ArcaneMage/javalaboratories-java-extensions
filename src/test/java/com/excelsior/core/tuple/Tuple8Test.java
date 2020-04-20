@@ -76,4 +76,34 @@ public class Tuple8Test {
         Tuple7 aTuple7 = tuple.truncate7();
         assertEquals(Tuple.of(1,2,3,4,5,6,7),aTuple7);
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testTestTransform_Pass() {
+        Tuple8 aTuple8;
+
+        aTuple8 = tuple.transform1(a -> 0);
+        assertEquals(Tuple.of(0,2,3,4,5,6,7,8),aTuple8);
+
+        aTuple8 = tuple.transform2(a -> 0);
+        assertEquals(Tuple.of(1,0,3,4,5,6,7,8),aTuple8);
+
+        aTuple8 = tuple.transform3(a -> 0);
+        assertEquals(Tuple.of(1,2,0,4,5,6,7,8),aTuple8);
+
+        aTuple8 = tuple.transform4(a -> 0);
+        assertEquals(Tuple.of(1,2,3,0,5,6,7,8),aTuple8);
+
+        aTuple8 = tuple.transform5(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,0,6,7,8),aTuple8);
+
+        aTuple8 = tuple.transform6(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,5,0,7,8),aTuple8);
+
+        aTuple8 = tuple.transform7(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,5,6,0,8),aTuple8);
+
+        aTuple8 = tuple.transform8(a -> 0);
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,0),aTuple8);
+     }
 }

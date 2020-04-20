@@ -66,4 +66,13 @@ public class Tuple1Test {
         Tuple16 aTuple16 = tuple.join(Tuple.of(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16));
         assertEquals(aTuple16,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16));
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testTestTransform_Pass() {
+        Tuple1 aTuple1;
+
+        aTuple1 = tuple.transform1(a -> 0);
+        assertEquals(Tuple.of(0),aTuple1);
+    }
 }

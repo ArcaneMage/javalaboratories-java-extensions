@@ -72,4 +72,22 @@ public class Tuple4Test {
         Tuple3 aTuple3 = tuple.truncate3();
         assertEquals(Tuple.of(1,2,3),aTuple3);
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testTestTransform_Pass() {
+        Tuple4 aTuple4;
+
+        aTuple4 = tuple.transform1(a -> 0);
+        assertEquals(Tuple.of(0,2,3,4),aTuple4);
+
+        aTuple4 = tuple.transform2(a -> 0);
+        assertEquals(Tuple.of(1,0,3,4),aTuple4);
+
+        aTuple4 = tuple.transform3(a -> 0);
+        assertEquals(Tuple.of(1,2,0,4),aTuple4);
+
+        aTuple4 = tuple.transform4(a -> 0);
+        assertEquals(Tuple.of(1,2,3,0),aTuple4);
+    }
 }
