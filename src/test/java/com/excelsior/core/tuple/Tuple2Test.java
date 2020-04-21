@@ -1,5 +1,9 @@
 package com.excelsior.core.tuple;
 
+import com.excelsior.core.Nullable;
+import com.excelsior.util.Holder;
+import com.excelsior.util.Holders;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,9 +14,9 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Note: Tuple2 tests will test all methods of the {@link TupleContainer} class, which
+ * Note: Tuple2 tests will test all methods of the {@link AbstractTuple} class, which
  * will NOT be retested in other tuple unit tests, for example serialization,
- * {@link TupleContainer#add} and others.
+ * {@link AbstractTuple#add} and others.
  */
 @SuppressWarnings("WeakerAccess")
 public class Tuple2Test {
@@ -195,6 +199,24 @@ public class Tuple2Test {
     }
 
     @Test
+    public void testToTuple_Pass() {
+       List<String> list = Arrays.asList("John","Doe");
+
+       Nullable<Tuple2<String,String>> maybeTuple = Tuple2.toTuple(list);
+
+       maybeTuple.ifPresentOrElse(tuple -> {
+           assertEquals("John",tuple.value1());
+           assertEquals("Doe",tuple.value2());
+       }, Assertions::fail);
+
+
+       list = Arrays.asList("John");
+       maybeTuple = Tuple2.toTuple(list);
+
+       assertTrue(maybeTuple.isEmpty());
+    }
+
+    @Test
     public void testJoin_Pass() {
         Tuple3 aTuple3 = tuple_2.join(Tuple.of(3));
         assertEquals(aTuple3,Tuple.of(1,2,3));
@@ -246,7 +268,6 @@ public class Tuple2Test {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testTestTransform_Pass() {
         Tuple2 aTuple2;
 

@@ -1,13 +1,21 @@
 package com.excelsior.core.tuple;
 
+import com.excelsior.core.Nullable;
+
 import java.util.function.Function;
 
-public final class Tuple1<T1> extends TupleContainer implements Tuple  {
+public final class Tuple1<T1> extends AbstractTuple {
     private final T1 t1;
 
     public Tuple1(T1 t1) {
         super(t1);
         this.t1 = t1;
+    }
+
+    public static <T> Nullable<Tuple1<T>> toTuple(Iterable<T> iterable) {
+        @SuppressWarnings("unchecked")
+        Nullable<Tuple1<T>> result = (Nullable<Tuple1<T>>) Tuple.toTuple(1,iterable);
+        return result;
     }
 
     public T1 value1() {

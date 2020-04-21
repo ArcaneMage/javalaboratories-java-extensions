@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.function.Function;
 
 @SuppressWarnings("WeakerAccess")
-public abstract class TupleContainer implements  Comparable<TupleContainer>, Iterable<Object>, Serializable  {
+public abstract class AbstractTuple implements Tuple, Comparable<AbstractTuple>, Iterable<Object>, Serializable  {
 
     public static final long serialVersionUID = 6627930356619406060L;
 
@@ -32,20 +32,20 @@ public abstract class TupleContainer implements  Comparable<TupleContainer>, Ite
     private transient Node head;
     private transient Node tail;
 
-    TupleContainer() {
+    AbstractTuple() {
         depth = 0;
         head = null;
         tail = null;
     }
 
-    TupleContainer(Object... elements) {
+    AbstractTuple(Object... elements) {
         this();
         for (Object element : elements)
             add(element);
     }
 
     @Override
-    public int compareTo(TupleContainer o) {
+    public int compareTo(AbstractTuple o) {
         if ( o == null )
             throw new NullPointerException();
 
@@ -65,7 +65,6 @@ public abstract class TupleContainer implements  Comparable<TupleContainer>, Ite
             Object e2 = iter2.next();
             result = Comparators.compare(e1,e2);
         }
-
         return result;
     }
 
@@ -97,7 +96,7 @@ public abstract class TupleContainer implements  Comparable<TupleContainer>, Ite
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TupleContainer objects = (TupleContainer) o;
+        AbstractTuple objects = (AbstractTuple) o;
 
         if ( depth != objects.depth)
             return false;
@@ -168,12 +167,12 @@ public abstract class TupleContainer implements  Comparable<TupleContainer>, Ite
         return String.format("%s=[%s]",this.getClass().getSimpleName(),joiner.toString());
     }
 
-    final TupleContainer add(Object element) {
+    final AbstractTuple add(Object element) {
         linkToLastNode(element);
         return this;
     }
 
-    final TupleContainer addFirst(Object element) {
+    final AbstractTuple addFirst(Object element) {
         linkToFirstNode(element);
         return this;
     }

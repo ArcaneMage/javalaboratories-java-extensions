@@ -1,9 +1,11 @@
 package com.excelsior.core.tuple;
 
 
+import com.excelsior.core.Nullable;
+
 import java.util.function.Function;
 
-public final class Tuple7<T1,T2,T3,T4,T5,T6,T7> extends TupleContainer implements Tuple {
+public final class Tuple7<T1,T2,T3,T4,T5,T6,T7> extends AbstractTuple {
     private T1 t1;
     private T2 t2;
     private T3 t3;
@@ -21,6 +23,12 @@ public final class Tuple7<T1,T2,T3,T4,T5,T6,T7> extends TupleContainer implement
         this.t5 = t5;
         this.t6 = t6;
         this.t7 = t7;
+    }
+
+    public static <T> Nullable<Tuple7<T,T,T,T,T,T,T>> toTuple(Iterable<T> iterable) {
+        @SuppressWarnings("unchecked")
+        Nullable<Tuple7<T,T,T,T,T,T,T>> result = (Nullable<Tuple7<T,T,T,T,T,T,T>>) Tuple.toTuple(7,iterable);
+        return result;
     }
 
     public T1 value1() {

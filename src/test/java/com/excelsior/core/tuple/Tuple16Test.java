@@ -1,9 +1,15 @@
 package com.excelsior.core.tuple;
 
+import com.excelsior.core.Nullable;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Tuple16Test {
 
@@ -32,6 +38,23 @@ public class Tuple16Test {
         assertEquals(14,tuple.value14());
         assertEquals(15,tuple.value15());
         assertEquals(16,tuple.value16());
+    }
+
+    @Test
+    public void testToTuple_Pass() {
+        List<Integer> list = Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
+
+        Nullable<Tuple16<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer,
+                Integer, Integer, Integer, Integer, Integer, Integer>>
+                maybeTuple = Tuple16.toTuple(list);
+
+        maybeTuple.ifPresentOrElse(tuple -> assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16), tuple),
+                Assertions::fail);
+
+        list = Arrays.asList(1);
+        maybeTuple = Tuple16.toTuple(list);
+
+        assertTrue(maybeTuple.isEmpty());
     }
 
     @Test

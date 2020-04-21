@@ -1,9 +1,11 @@
 package com.excelsior.core.tuple;
 
 
+import com.excelsior.core.Nullable;
+
 import java.util.function.Function;
 
-public final class Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13> extends TupleContainer implements Tuple {
+public final class Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13> extends AbstractTuple {
     private T1 t1;
     private T2 t2;
     private T3 t3;
@@ -34,7 +36,13 @@ public final class Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13> extends T
         this.t12 = t12;
         this.t13 = t13;
     }
-
+    
+    public static <T> Nullable<Tuple13<T,T,T,T,T,T,T,T,T,T,T,T,T>> toTuple(Iterable<T> iterable) {
+        @SuppressWarnings("unchecked")
+        Nullable<Tuple13<T,T,T,T,T,T,T,T,T,T,T,T,T>> result = (Nullable<Tuple13<T,T,T,T,T,T,T,T,T,T,T,T,T>>) Tuple.toTuple(13,iterable);
+        return result;
+    }
+    
     public T1 value1() {
         return t1;
     }

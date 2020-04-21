@@ -1,9 +1,11 @@
 package com.excelsior.core.tuple;
 
 
+import com.excelsior.core.Nullable;
+
 import java.util.function.Function;
 
-public final class Tuple2<T1,T2> extends TupleContainer implements Tuple {
+public final class Tuple2<T1,T2> extends AbstractTuple {
     private T1 t1;
     private T2 t2;
 
@@ -11,6 +13,12 @@ public final class Tuple2<T1,T2> extends TupleContainer implements Tuple {
         super(t1,t2);
         this.t1 = t1;
         this.t2 = t2;
+    }
+
+    public static <T> Nullable<Tuple2<T,T>> toTuple(Iterable<T> iterable) {
+        @SuppressWarnings("unchecked")
+        Nullable<Tuple2<T,T>> result = (Nullable<Tuple2<T,T>>) Tuple.toTuple(2,iterable);
+        return result;
     }
 
     public T1 value1() {
