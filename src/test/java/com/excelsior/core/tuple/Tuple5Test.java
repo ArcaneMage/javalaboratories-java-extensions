@@ -82,7 +82,6 @@ public class Tuple5Test {
         assertTrue(maybeTuple.isEmpty());
     }
 
-
     @Test
     public void testTruncate_Pass() {
         Tuple1 aTuple1 = tuple.truncate1();
