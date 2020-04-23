@@ -115,10 +115,10 @@ the latter is particularly useful for `Collection.forEach(Consumer)` and/or stre
 ### Tuples
 A tuple can be considered as a container of ordered elements of different types. Each element may not relate to each
 other but collectively they have meaning. They are particularly useful for methods in that they enable them to 
-return multiple values as single tuple object, as well as passing several values to a method in a single argument(s). The
-tuple has many abilities including `join`, `truncate`, `transform`, `toMap` and much more. Another particularly useful 
-feature of the tuples is that are immutable, making them thread-safe. Morever, they all implement the `Iterable`, 
-`Serializable` and `Comparable` interfaces, and so they are sortable and their contents can be traversed easily. Here 
+return multiple values as a single tuple object, as well as passing several values to a method in a single argument(s).
+The tuple has many abilities including `join`, `truncate`, `transform`, `toMap` and much more. Another particularly useful 
+feature of the tuples is that are immutable, making them thread-safe. Moreover, they all implement the `Iterable`, 
+`Serializable`, and `Comparable` interfaces, and so they are sortable and their contents can be traversed easily. Here 
 are some examples of usage:
 ```
          // Creating tuple with a depth of 2
