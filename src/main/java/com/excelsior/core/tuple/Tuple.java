@@ -2,12 +2,47 @@ package com.excelsior.core.tuple;
 
 import com.excelsior.core.Nullable;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 
-public interface Tuple {
+/**
+ * A tuple implements this interface.
+ * <p>
+ * A tuple is a container whose elements are NOT necessarily of the same type.
+ * However, they are powerful in that they provide a mechanism for functions
+ * to return multiple values and/or pass multiple values as single tuple
+ * method argument. They do not always relate to each other but collectively
+ * they have some meaning.
+ * <p>
+ * Up to 16 tuple types are currently supported and are created with the aid of
+ * factory methods, {@link Tuple#of}, defined in this interface. There are many
+ * operations available on tuples including the ability to convert elements to
+ * to a {@link List}, {@link Map} and to an array.
+ * <p>
+ * All tuples are immutable, comparable, iterable and serializable.
+ * @see Tuple1
+ * @see Tuple2
+ * @see Tuple3
+ * @see Tuple4
+ * @see Tuple5
+ * @see Tuple6
+ * @see Tuple7
+ * @see Tuple8
+ * @see Tuple9
+ * @see Tuple10
+ * @see Tuple11
+ * @see Tuple12
+ * @see Tuple13
+ * @see Tuple14
+ * @see Tuple15
+ * @see Tuple15
+ *
+ * @author Kevin Henry
+ */
+public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable {
 
-    static <T1> Tuple1 of(T1 t1) {
+    static <T1> Tuple1<T1> of(T1 t1) {
         return new Tuple1<>(t1);
     }
 
@@ -71,7 +106,7 @@ public interface Tuple {
         return new Tuple16<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16);
     }
 
-    static <T> Nullable<? extends Tuple> toTuple(int depth, Iterable<T> iterable) {
+    static <T> Nullable<? extends Tuple> fromIterable(Iterable<T> iterable, int depth) {
         Nullable<Tuple> result = Nullable.empty();
         Iterator<T> iter = iterable.iterator();
         try {
@@ -99,6 +134,8 @@ public interface Tuple {
         }
         return result;
     }
+
+    boolean contains(Object object);
 
     int depth();
 

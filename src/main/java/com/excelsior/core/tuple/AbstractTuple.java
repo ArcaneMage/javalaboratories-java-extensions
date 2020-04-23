@@ -3,12 +3,23 @@ package com.excelsior.core.tuple;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 
+
+/**
+ * All tuples inherit from this class.
+ * <p>
+ * The tuple is considered to be a container. It currently uses a simple doubly
+ * linked list data structure. A decision was made to use this approach rather
+ * than reusing {@link LinkedList} because it is important to reduce the overhead
+ * of the structure of the tuple as well as minimise typing where possible in
+ * concrete classes. This class implements serialisation, comparison and iteration.
+ * <p>
+ * This class and derived classes are immutable.
+ */
 @SuppressWarnings("WeakerAccess")
-public abstract class AbstractTuple implements Tuple, Comparable<AbstractTuple>, Iterable<Object>, Serializable  {
+public abstract class AbstractTuple implements Tuple  {
 
     public static final long serialVersionUID = 6627930356619406060L;
 
@@ -45,12 +56,12 @@ public abstract class AbstractTuple implements Tuple, Comparable<AbstractTuple>,
     }
 
     @Override
-    public int compareTo(AbstractTuple o) {
+    public int compareTo(Tuple o) {
         if ( o == null )
             throw new NullPointerException();
 
         // Tuple must be of the same depth for now -- may reconsider
-        if ( this.depth != o.depth )
+        if ( this.depth() != o.depth() )
             throw new ClassCastException();
 
         if ( this.equals(o) )
@@ -66,6 +77,11 @@ public abstract class AbstractTuple implements Tuple, Comparable<AbstractTuple>,
             result = Comparators.compare(e1,e2);
         }
         return result;
+    }
+
+    @Override
+    public boolean contains(Object element) {
+        return indexOf(element) > -1;
     }
 
     public boolean isEmpty() {

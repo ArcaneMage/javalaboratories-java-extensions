@@ -112,6 +112,48 @@ the latter is particularly useful for `Collection.forEach(Consumer)` and/or stre
          methodTwo                00:00:01.451  92%            4 00:00:00.363
 
 ```
+### Tuples
+A tuple can be considered as a container of ordered elements of different types. Each element may not relate to each
+other but collectively they have meaning. They are particularly useful for methods in that they enable them to 
+return multiple values as single tuple object, as well as passing several values to a method in a single argument(s). The
+tuple has many abilities including `join`, `truncate`, `transform`, `toMap` and much more. Another particularly useful 
+feature of the tuples is that are immutable, making them thread-safe. Morever, they all implement the `Iterable`, 
+`Serializable` and `Comparable` interfaces, and so they are sortable and their contents can be traversed easily. Here 
+are some examples of usage:
+```
+         // Creating tuple with a depth of 2
+         Tuple2<String,Integer> person = Tuple.of("James",12);
+         
+        // Retrieve values
+        logger.info("Name: {}",person.value1());
+        logger.info("Grade: {}",person.value2());
+        
+        // Outputs :-
+        [main] INFO com.excelsior.core.tuple.TupleTest - Name: James
+        [main] INFO com.excelsior.core.tuple.TupleTest - Grade: 12
+        
+        // Setting values using a transformer method: Transform 2nd element
+        Tuple2<String,Integer> modified = person.transform2(s -> 16);
+        logger.info("Name: {}",modified.value1());
+        logger.info("Grade: {}",modified.value2());
+        
+        // Outputs :-
+        [main] INFO com.excelsior.core.tuple.TupleTest - Name: James
+        [main] INFO com.excelsior.core.tuple.TupleTest - Grade: 16
+        
+        // Create tuple from a collection
+        List<String> people = Arrays.asList("James","Carl","Andrea","Sharon");
+
+        Nullable<Tuple4<String,String,String,String>> maybeTuple = Tuple4.fromIterable(people);
+        maybeTuple.ifPresent(tuple -> tuple.forEach(name -> logger.info("Name: {}",name)));
+        
+        // Outputs :-
+        [main] INFO com.excelsior.core.tuple.TupleTest - Name: James
+        [main] INFO com.excelsior.core.tuple.TupleTest - Name: Carl
+        [main] INFO com.excelsior.core.tuple.TupleTest - Name: Andrea
+        [main] INFO com.excelsior.core.tuple.TupleTest - Name: Sharon
+```
+
 ## Feedback
 Development is ongoing. I have many ideas in the pipeline, and of course will consider your ideas and recommendations. 
 If you encounter any bugs, please raise an issue(s).

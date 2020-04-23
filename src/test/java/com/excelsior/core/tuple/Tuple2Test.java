@@ -1,8 +1,6 @@
 package com.excelsior.core.tuple;
 
 import com.excelsior.core.Nullable;
-import com.excelsior.util.Holder;
-import com.excelsior.util.Holders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -199,10 +197,10 @@ public class Tuple2Test {
     }
 
     @Test
-    public void testToTuple_Pass() {
+    public void testFromIterable_Pass() {
        List<String> list = Arrays.asList("John","Doe");
 
-       Nullable<Tuple2<String,String>> maybeTuple = Tuple2.toTuple(list);
+       Nullable<Tuple2<String,String>> maybeTuple = Tuple2.fromIterable(list);
 
        maybeTuple.ifPresentOrElse(tuple -> {
            assertEquals("John",tuple.value1());
@@ -211,7 +209,7 @@ public class Tuple2Test {
 
 
        list = Arrays.asList("John");
-       maybeTuple = Tuple2.toTuple(list);
+       maybeTuple = Tuple2.fromIterable(list);
 
        assertTrue(maybeTuple.isEmpty());
     }
@@ -270,6 +268,11 @@ public class Tuple2Test {
     @Test
     public void testTestTransform_Pass() {
         Tuple2 aTuple2;
+
+        List<String> list = tuple_2.transform((a,b) -> Arrays.asList("Item :"+a,"Item :"+b));
+
+        assertEquals("Item :1",list.get(0));
+        assertEquals("Item :2",list.get(1));
 
         aTuple2 = tuple_2.transform1(a -> 0);
         assertEquals(Tuple.of(0,2),aTuple2);

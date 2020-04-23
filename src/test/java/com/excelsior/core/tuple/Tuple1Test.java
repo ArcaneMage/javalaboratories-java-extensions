@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Tuple1Test {
 
-    private Tuple1 tuple;
+    private Tuple1<Integer> tuple;
 
     @BeforeEach
     public void setup() {
@@ -75,26 +75,29 @@ public class Tuple1Test {
     }
 
     @Test
-    public void testToTuple_Pass() {
+    public void testFromIterable_Pass() {
         List<Integer> list = Arrays.asList(1);
 
         Nullable<Tuple1<Integer>>
-                maybeTuple = Tuple1.toTuple(list);
+                maybeTuple = Tuple1.fromIterable(list);
 
         maybeTuple.ifPresentOrElse(tuple -> assertEquals(Tuple.of(1), tuple),
                 Assertions::fail);
 
         list = Collections.emptyList();
-        maybeTuple = Tuple1.toTuple(list);
+        maybeTuple = Tuple1.fromIterable(list);
 
         assertTrue(maybeTuple.isEmpty());
     }
 
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testTestTransform_Pass() {
         Tuple1 aTuple1;
+
+        String s = tuple.transform(a -> "Item :"+a);
+
+        assertEquals("Item :1",s);
 
         aTuple1 = tuple.transform1(a -> 0);
         assertEquals(Tuple.of(0),aTuple1);

@@ -67,17 +67,17 @@ public class Tuple5Test {
 
 
     @Test
-    public void testToTuple_Pass() {
+    public void testFromIterable_Pass() {
         List<Integer> list = Arrays.asList(1,2,3,4,5);
 
         Nullable<Tuple5<Integer, Integer, Integer, Integer, Integer>>
-                maybeTuple = Tuple5.toTuple(list);
+                maybeTuple = Tuple5.fromIterable(list);
 
         maybeTuple.ifPresentOrElse(tuple -> assertEquals(Tuple.of(1,2,3,4,5), tuple),
                 Assertions::fail);
 
         list = Arrays.asList(1);
-        maybeTuple = Tuple5.toTuple(list);
+        maybeTuple = Tuple5.fromIterable(list);
 
         assertTrue(maybeTuple.isEmpty());
     }
