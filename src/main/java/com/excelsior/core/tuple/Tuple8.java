@@ -87,6 +87,14 @@ public final class Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> extends AbstractTuple {
 
     /**
      * Joins a tuple to this tuple.
+     * @param value a tuple object.
+     */
+    public <T> Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T> join(T value) {
+        return new Tuple9<>(t1,t2,t3,t4,t5,t6,t7,t8,value);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
      * @param tuple a tuple object.
      */
     public <T9> Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9> join(Tuple1<T9> tuple) {

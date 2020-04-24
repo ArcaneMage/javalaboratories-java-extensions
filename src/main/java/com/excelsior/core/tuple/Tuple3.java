@@ -55,6 +55,13 @@ public final class Tuple3<T1,T2,T3> extends AbstractTuple {
     }
 
     /**
+     * Joins a value to the end of this tuple.
+     */
+    public <T> Tuple4<T1,T2,T3,T> join(T value) {
+        return new Tuple4<>(t1,t2,t3,value);
+    }
+
+    /**
      * Joins a tuple to this tuple.
      * @param tuple a tuple object.
      */

@@ -112,6 +112,14 @@ public final class Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13> extends A
 
     /**
      * Joins a tuple to this tuple.
+     * @param value a tuple object.
+     */
+    public <T> Tuple14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T> join(T value) {
+        return new Tuple14<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,value);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
      * @param tuple a tuple object.
      */
     public <T14> Tuple14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14> join(Tuple1<T14> tuple) {

@@ -216,8 +216,11 @@ public class Tuple2Test {
 
     @Test
     public void testJoin_Pass() {
-        Tuple3 aTuple3 = tuple_2.join(Tuple.of(3));
-        assertEquals(aTuple3,Tuple.of(1,2,3));
+        Tuple3 aTuple3_1 = tuple_2.join("end-of-tuple");
+        assertEquals("end-of-tuple",aTuple3_1.value3());
+
+        Tuple3 aTuple3_2 = tuple_2.join(Tuple.of(3));
+        assertEquals(aTuple3_2,Tuple.of(1,2,3));
 
         Tuple4 aTuple4 = tuple_2.join(Tuple.of(3,4));
         assertEquals(aTuple4,Tuple.of(1,2,3,4));

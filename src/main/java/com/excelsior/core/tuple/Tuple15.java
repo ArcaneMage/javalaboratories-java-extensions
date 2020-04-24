@@ -122,6 +122,14 @@ public final class Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> e
 
     /**
      * Joins a tuple to this tuple.
+     * @param value a tuple object.
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T> join(T value) {
+        return new Tuple16<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,value);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
      * @param tuple a tuple object.
      */
     public <T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple1<T16> tuple) {

@@ -30,8 +30,11 @@ public class Tuple4Test {
     
     @Test
     public void testJoin_Pass() {
-        Tuple5 aTuple5 = tuple.join(Tuple.of(5));
-        assertEquals(aTuple5,Tuple.of(1,2,3,4,5));
+        Tuple5 aTuple5_1 = tuple.join("end-of-tuple");
+        assertEquals("end-of-tuple",aTuple5_1.value5());
+
+        Tuple5 aTuple5_2 = tuple.join(Tuple.of(5));
+        assertEquals(aTuple5_2,Tuple.of(1,2,3,4,5));
 
         Tuple6 aTuple6 = tuple.join(Tuple.of(5,6));
         assertEquals(aTuple6,Tuple.of(1,2,3,4,5,6));

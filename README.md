@@ -121,8 +121,8 @@ feature of tuples is that they are immutable, making them thread-safe. Moreover,
 `Serializable`, and `Comparable` interfaces, allowing their contents can be traversed easily, sortable in 
 collections and persistable. Here are some examples of usage:
 ```
-         // Creating tuple with a depth of 2
-         Tuple2<String,Integer> person = Tuple.of("James",12);
+        // Creating tuple with a depth of 2
+        Tuple2<String,Integer> person = Tuple.of("James",12);
          
         // Retrieve values
         logger.info("Name: {}",person.value1());
