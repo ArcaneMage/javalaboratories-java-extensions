@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Tuple5Test {
 
-    private Tuple5 tuple;
+    private Tuple5<Integer,Integer,Integer,Integer,Integer> tuple;
 
     @BeforeEach
     public void setup() {
@@ -83,6 +83,33 @@ public class Tuple5Test {
         maybeTuple = Tuple5.fromIterable(list);
 
         assertTrue(maybeTuple.isEmpty());
+    }
+
+    @Test
+    public void testSplice_Pass() {
+        Tuple2<Tuple1<Integer>,Tuple4<Integer,Integer,Integer,Integer>>
+                spliced1 = tuple.splice1();
+        assertEquals(2, spliced1.depth());
+        assertEquals(1, spliced1.value1().value1());
+        assertEquals(5, spliced1.value2().value4());
+
+        Tuple2<Tuple2<Integer,Integer>,Tuple3<Integer,Integer,Integer>>
+                spliced2 = tuple.splice2();
+        assertEquals(2, spliced2.depth());
+        assertEquals(1, spliced2.value1().value1());
+        assertEquals(5, spliced2.value2().value3());
+
+        Tuple2<Tuple3<Integer,Integer,Integer>,Tuple2<Integer,Integer>>
+                spliced3 = tuple.splice3();
+        assertEquals(2, spliced3.depth());
+        assertEquals(1, spliced3.value1().value1());
+        assertEquals(5, spliced3.value2().value2());
+
+        Tuple2<Tuple4<Integer,Integer,Integer,Integer>,Tuple1<Integer>>
+                spliced4 = tuple.splice4();
+        assertEquals(2, spliced4.depth());
+        assertEquals(1, spliced4.value1().value1());
+        assertEquals(5, spliced4.value2().value1());
     }
 
     @Test

@@ -70,9 +70,7 @@ public final class Tuple14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14> exten
      * @return A tuple in {@link Nullable} object container.
      */
     public static <T> Nullable<Tuple14<T,T,T,T,T,T,T,T,T,T,T,T,T,T>> fromIterable(Iterable<T> iterable) {
-        @SuppressWarnings("unchecked")
-        Nullable<Tuple14<T,T,T,T,T,T,T,T,T,T,T,T,T,T>> result = (Nullable<Tuple14<T,T,T,T,T,T,T,T,T,T,T,T,T,T>>) Tuple.fromIterable(iterable, 14);
-        return result;
+        return Tuples.fromIterable(iterable, 14);
     }
     
     public T1 value1() {
@@ -139,6 +137,71 @@ public final class Tuple14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14> exten
     public <T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple2<T15,T16> tuple) {
         return new Tuple16<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,tuple.value1(),tuple.value2());
     }
+    
+    /**
+     * Splices this tuple into two partitions at element position 1
+     */
+    public Tuple2<Tuple1<T1>,Tuple13<T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>> splice1() { return splice(1); }
+
+    /**
+     * Splices this tuple into two partitions at element position 2
+     */
+    public Tuple2<Tuple2<T1,T2>,Tuple12<T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>> splice2() { return splice(2); }
+
+    /**
+     * Splices this tuple into two partitions at element position 3
+     */
+    public Tuple2<Tuple3<T1,T2,T3>,Tuple11<T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>> splice3() { return splice(3); }
+
+    /**
+     * Splices this tuple into two partitions at element position 4
+     */
+    public Tuple2<Tuple4<T1,T2,T3,T4>,Tuple10<T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>> splice4() { return splice(4); }
+
+    /**
+     * Splices this tuple into two partitions at element position 5
+     */
+    public Tuple2<Tuple5<T1,T2,T3,T4,T5>,Tuple9<T6,T7,T8,T9,T10,T11,T12,T13,T14>> splice5() { return splice(5); }
+
+    /**
+     * Splices this tuple into two partitions at element position 6
+     */
+    public Tuple2<Tuple6<T1,T2,T3,T4,T5,T6>,Tuple8<T7,T8,T9,T10,T11,T12,T13,T14>> splice6() { return splice(6); }
+
+    /**
+     * Splices this tuple into two partitions at element position 7
+     */
+    public Tuple2<Tuple7<T1,T2,T3,T4,T5,T6,T7>,Tuple7<T8,T9,T10,T11,T12,T13,T14>> splice7() { return splice(7); }
+
+    /**
+     * Splices this tuple into two partitions at element position 8
+     */
+    public Tuple2<Tuple8<T1,T2,T3,T4,T5,T6,T7,T8>,Tuple6<T9,T10,T11,T12,T13,T14>> splice8() { return splice(8); }
+
+    /**
+     * Splices this tuple into two partitions at element position 9
+     */
+    public Tuple2<Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9>,Tuple5<T10,T11,T12,T13,T14>> splice9() { return splice(9); }
+
+    /**
+     * Splices this tuple into two partitions at element position 10
+     */
+    public Tuple2<Tuple10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>,Tuple4<T11,T12,T13,T14>> splice10() { return splice(10); }
+
+    /**
+     * Splices this tuple into two partitions at element position 11
+     */
+    public Tuple2<Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>,Tuple3<T12,T13,T14>> splice11() { return splice(11); }
+
+    /**
+     * Splices this tuple into two partitions at element position 12
+     */
+    public Tuple2<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>,Tuple2<T13,T14>> splice12() { return splice(12); }
+
+    /**
+     * Splices this tuple into two partitions at element position 13
+     */
+    public Tuple2<Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>,Tuple1<T14>> splice13() { return splice(13); }
 
     /**
      * Truncates remaining tuples to a depth of 1

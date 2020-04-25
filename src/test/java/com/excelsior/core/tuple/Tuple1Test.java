@@ -9,8 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Tuple1Test {
 
@@ -93,6 +92,10 @@ public class Tuple1Test {
         assertTrue(maybeTuple.isEmpty());
     }
 
+    @Test
+    public void testSplice_Fail() {
+        assertThrows(UnsupportedOperationException.class, () -> tuple.splice(1));
+    }
 
     @Test
     public void testTestTransform_Pass() {

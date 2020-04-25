@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Tuple4Test {
 
-    private Tuple4 tuple;
+    private Tuple4<Integer,Integer,Integer,Integer> tuple;
 
     @BeforeEach
     public void setup() {
@@ -84,6 +84,27 @@ public class Tuple4Test {
         maybeTuple = Tuple4.fromIterable(list);
 
         assertTrue(maybeTuple.isEmpty());
+    }
+
+    @Test
+    public void testSplice_Pass() {
+        Tuple2<Tuple1<Integer>,Tuple3<Integer,Integer,Integer>>
+                spliced1 = tuple.splice1();
+        assertEquals(2, spliced1.depth());
+        assertEquals(1, spliced1.value1().value1());
+        assertEquals(4, spliced1.value2().value3());
+
+        Tuple2<Tuple2<Integer,Integer>,Tuple2<Integer,Integer>>
+                spliced2 = tuple.splice2();
+        assertEquals(2, spliced2.depth());
+        assertEquals(1, spliced2.value1().value1());
+        assertEquals(4, spliced2.value2().value2());
+
+        Tuple2<Tuple3<Integer,Integer,Integer>,Tuple1<Integer>>
+                spliced3 = tuple.splice3();
+        assertEquals(2, spliced3.depth());
+        assertEquals(1, spliced3.value1().value1());
+        assertEquals(4, spliced3.value2().value1());
     }
 
     @Test

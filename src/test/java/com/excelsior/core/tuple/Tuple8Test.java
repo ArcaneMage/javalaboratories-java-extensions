@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Tuple8Test {
 
-    private Tuple8 tuple;
+    private Tuple8<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer> tuple;
 
     @BeforeEach
     public void setup() {
@@ -78,6 +78,51 @@ public class Tuple8Test {
         assertTrue(maybeTuple.isEmpty());
     }
 
+    @Test
+    public void testSplice_Pass() {
+        Tuple2<Tuple1<Integer>,Tuple7<Integer,Integer,Integer,Integer,Integer,Integer,Integer>>
+                spliced1 = tuple.splice1();
+        assertEquals(2, spliced1.depth());
+        assertEquals(1, spliced1.value1().value1());
+        assertEquals(8, spliced1.value2().value7());
+
+        Tuple2<Tuple2<Integer,Integer>,Tuple6<Integer,Integer,Integer,Integer,Integer,Integer>>
+                spliced2 = tuple.splice2();
+        assertEquals(2, spliced2.depth());
+        assertEquals(1, spliced2.value1().value1());
+        assertEquals(8, spliced2.value2().value6());
+
+        Tuple2<Tuple3<Integer,Integer,Integer>,Tuple5<Integer,Integer,Integer,Integer,Integer>>
+                spliced3 = tuple.splice3();
+        assertEquals(2, spliced3.depth());
+        assertEquals(1, spliced3.value1().value1());
+        assertEquals(8, spliced3.value2().value5());
+
+        Tuple2<Tuple4<Integer,Integer,Integer,Integer>,Tuple4<Integer,Integer,Integer,Integer>>
+                spliced4 = tuple.splice4();
+        assertEquals(2, spliced4.depth());
+        assertEquals(1, spliced4.value1().value1());
+        assertEquals(8, spliced4.value2().value4());
+
+        Tuple2<Tuple5<Integer,Integer,Integer,Integer,Integer>,Tuple3<Integer,Integer,Integer>>
+                spliced5 = tuple.splice5();
+        assertEquals(2, spliced5.depth());
+        assertEquals(1, spliced5.value1().value1());
+        assertEquals(8, spliced5.value2().value3());
+
+        Tuple2<Tuple6<Integer,Integer,Integer,Integer,Integer,Integer>,Tuple2<Integer,Integer>>
+                spliced6 = tuple.splice6();
+        assertEquals(2, spliced6.depth());
+        assertEquals(1, spliced6.value1().value1());
+        assertEquals(8, spliced6.value2().value2());
+
+        Tuple2<Tuple7<Integer,Integer,Integer,Integer,Integer,Integer,Integer>,Tuple1<Integer>>
+                spliced7 = tuple.splice7();
+        assertEquals(2, spliced7.depth());
+        assertEquals(1, spliced7.value1().value1());
+        assertEquals(8, spliced7.value2().value1());
+    }
+    
     @Test
     public void testTruncate_Pass() {
         Tuple1 aTuple1 = tuple.truncate1();

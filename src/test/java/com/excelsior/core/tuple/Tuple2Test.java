@@ -197,6 +197,11 @@ public class Tuple2Test {
     }
 
     @Test
+    public void testContains_Pass() {
+        assertTrue(tuple.contains("John"));
+    }
+
+    @Test
     public void testFromIterable_Pass() {
        List<String> list = Arrays.asList("John","Doe");
 
@@ -207,12 +212,20 @@ public class Tuple2Test {
            assertEquals("Doe",tuple.value2());
        }, Assertions::fail);
 
-
        list = Arrays.asList("John");
        maybeTuple = Tuple2.fromIterable(list);
 
        assertTrue(maybeTuple.isEmpty());
     }
+
+    @Test
+    public void testSplice_Pass() {
+        Tuple2<Tuple1<Integer>,Tuple1<Integer>> spliced1 = tuple_2.splice1();
+        assertEquals(2, spliced1.depth());
+        assertEquals(1, spliced1.value1().value1());
+        assertEquals(2, spliced1.value2().value1());
+    }
+
 
     @Test
     public void testJoin_Pass() {

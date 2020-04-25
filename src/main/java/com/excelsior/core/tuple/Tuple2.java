@@ -36,9 +36,7 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      * @return A tuple in {@link Nullable} object container.
      */
     public static <T> Nullable<Tuple2<T,T>> fromIterable(Iterable<T> iterable) {
-        @SuppressWarnings("unchecked")
-        Nullable<Tuple2<T,T>> result = (Nullable<Tuple2<T,T>>) Tuple.fromIterable(iterable, 2);
-        return result;
+        return Tuples.fromIterable(iterable, 2);
     }
 
     public T1 value1() {
@@ -168,6 +166,11 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
     public <T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple14<T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> tuple) {
         return new Tuple16<>(t1,t2,tuple.value1(),tuple.value2(),tuple.value3(),tuple.value4(),tuple.value5(),tuple.value6(),tuple.value7(),tuple.value8(),tuple.value9(),tuple.value10(),tuple.value11(),tuple.value12(),tuple.value13(),tuple.value14());
     }
+
+    /**
+     * Splices this tuple into two partitions at element position 1
+     */
+    public Tuple2<Tuple1<T1>,Tuple1<T2>> splice1() { return splice(1); }
 
     /**
      * Transform this tuple into another object

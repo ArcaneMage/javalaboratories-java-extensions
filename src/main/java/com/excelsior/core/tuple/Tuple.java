@@ -36,7 +36,7 @@ import java.util.function.Function;
  * @see Tuple13
  * @see Tuple14
  * @see Tuple15
- * @see Tuple15
+ * @see Tuple16
  *
  * @author Kevin Henry
  */
@@ -104,35 +104,6 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
 
     static <T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> of(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10, T11 t11, T12 t12, T13 t13, T14 t14, T15 t15, T16 t16) {
         return new Tuple16<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16);
-    }
-
-    static <T> Nullable<? extends Tuple> fromIterable(Iterable<T> iterable, int depth) {
-        Nullable<Tuple> result = Nullable.empty();
-        Iterator<T> iter = iterable.iterator();
-        try {
-            switch (depth) {
-                case 1 : result = Nullable.of(Tuple.of(iter.next())); break;
-                case 2 : result = Nullable.of(Tuple.of(iter.next(),iter.next())); break;
-                case 3 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next())); break;
-                case 4 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 5 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 6 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 7 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 8 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 9 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 10 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 11 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 12 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 13 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 14 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                case 15 : result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next())); break;
-                default:
-                    result = Nullable.of(Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next()));
-            }
-        } catch (NoSuchElementException e) {
-            // Do nothing
-        }
-        return result;
     }
 
     boolean contains(Object object);

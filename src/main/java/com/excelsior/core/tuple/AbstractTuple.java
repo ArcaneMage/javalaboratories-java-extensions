@@ -1,5 +1,7 @@
 package com.excelsior.core.tuple;
 
+import com.excelsior.core.Nullable;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -149,6 +151,16 @@ public abstract class AbstractTuple implements Tuple  {
     }
 
     public int depth() { return depth; }
+
+    public <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position) {
+        if ( position < 1 || position > (depth() -1) )
+            throw new IllegalArgumentException("Position must be non-zero and less than or equal to depth -1");
+        Nullable<? extends Tuple> primary = Tuples.fromIterable(this,0,position);
+        Nullable<? extends Tuple> secondary = Tuples.fromIterable(this,position,depth() - position);
+        @SuppressWarnings("unchecked")
+        Tuple2<Q,R> result = (Tuple2<Q,R>) Tuple.of(primary.get(), secondary.get());
+        return result;
+    }
 
     public <K> Map<K,?> toMap(Function<? super Integer,? extends K> keyMapper) {
         Map<K,Object> result = new LinkedHashMap<>();

@@ -30,9 +30,7 @@ public final class Tuple1<T1> extends AbstractTuple {
      * @return A tuple in {@link Nullable} object container.
      */
     public static <T> Nullable<Tuple1<T>> fromIterable(Iterable<T> iterable) {
-        @SuppressWarnings("unchecked")
-        Nullable<Tuple1<T>> result = (Nullable<Tuple1<T>>) Tuple.fromIterable(iterable, 1);
-        return result;
+        return Tuples.fromIterable(iterable, 1);
     }
 
     public T1 value1() {
@@ -166,6 +164,11 @@ public final class Tuple1<T1> extends AbstractTuple {
      */
     public <T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple15<T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> tuple) {
         return new Tuple16<>(t1,tuple.value1(),tuple.value2(),tuple.value3(),tuple.value4(),tuple.value5(),tuple.value6(),tuple.value7(),tuple.value8(),tuple.value9(),tuple.value10(),tuple.value11(),tuple.value12(),tuple.value13(),tuple.value14(),tuple.value15());
+    }
+
+    @Override
+    public <Q extends Tuple,R extends Tuple> Tuple2<Q, R> splice(int position) {
+        throw new UnsupportedOperationException("Tuple1 does not support this method");
     }
 
     /**
