@@ -14,10 +14,10 @@ public final class Tuples {
     @SuppressWarnings("unchecked")
     static <T,U extends Tuple> Nullable<U> fromIterable(Iterable<T> iterable, int start, int depth) {
         Iterator<T> iter = iterable.iterator();
-        int position = 0;
         U result = null;
         try {
-            while ( iter.hasNext() && position++ < start )
+            int i = 0;
+            while ( iter.hasNext() && i++ < start )
                 iter.next();
 
             switch (depth) {
