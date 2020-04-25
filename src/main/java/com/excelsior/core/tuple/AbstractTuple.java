@@ -155,11 +155,9 @@ public abstract class AbstractTuple implements Tuple  {
     public <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position) {
         if ( position < 1 || position > (depth() -1) )
             throw new IllegalArgumentException("Position must be non-zero and less than or equal to depth -1");
-        Nullable<Tuple> primary = Tuples.fromIterable(this,0,position);
-        Nullable<Tuple> secondary = Tuples.fromIterable(this,position,depth() - position);
-        @SuppressWarnings("unchecked")
-        Tuple2<Q,R> result = (Tuple2<Q,R>) Tuple.of(primary.get(), secondary.get());
-        return result;
+        Nullable<Q> primary = Tuples.fromIterable(this,0,position);
+        Nullable<R> secondary = Tuples.fromIterable(this,position,depth() - position);
+        return Tuple.of(primary.get(),secondary.get());
     }
 
     public <K> Map<K,?> toMap(Function<? super Integer,? extends K> keyMapper) {
