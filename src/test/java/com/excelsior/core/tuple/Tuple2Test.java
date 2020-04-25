@@ -226,6 +226,11 @@ public class Tuple2Test {
         assertEquals(2, spliced1.value2().value1());
     }
 
+    @Test
+    public void testSplice_Fail() {
+        assertThrows(IllegalArgumentException.class, () -> tuple_2.splice(0));
+        assertThrows(IllegalArgumentException.class, () -> tuple_2.splice(2));
+    }
 
     @Test
     public void testJoin_Pass() {
