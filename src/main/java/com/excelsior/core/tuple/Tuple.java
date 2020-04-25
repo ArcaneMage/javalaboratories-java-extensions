@@ -1,7 +1,5 @@
 package com.excelsior.core.tuple;
 
-import com.excelsior.core.Nullable;
-
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
