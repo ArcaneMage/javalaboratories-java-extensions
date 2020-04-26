@@ -40,6 +40,8 @@ import java.util.function.Function;
  */
 public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable {
 
+    static int MAX_TUPLES = 16;
+
     static <T1> Tuple1<T1> of(T1 t1) {
         return new Tuple1<>(t1);
     }

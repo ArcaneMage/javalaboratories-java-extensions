@@ -281,6 +281,11 @@ public class Tuple2Test {
     }
 
     @Test
+    public void testJoin_Fail() {
+        assertThrows(TuplesOverflowException.class, () -> tuple_2.join(Tuple.of(3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)));
+    }
+
+    @Test
     public void testTruncate_Pass() {
         Tuple1 aTuple1 = tuple_2.truncate1();
         assertEquals(Tuple.of(1),aTuple1);

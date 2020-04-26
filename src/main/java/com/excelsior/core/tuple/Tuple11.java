@@ -99,54 +99,6 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
     public T11 value11() { return t11; }
 
     /**
-     * Joins a tuple to this tuple.
-     * @param value a tuple object.
-     */
-    public <T> Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> join(T value) {
-        return new Tuple12<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,value);
-    }
-
-    /**
-     * Joins a tuple to this tuple.
-     * @param tuple a tuple object.
-     */
-    public <T12> Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12> join(Tuple1<T12> tuple) {
-        return new Tuple12<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,tuple.value1());
-    }
-
-    /**
-     * Joins a tuple to this tuple.
-     * @param tuple a tuple object.
-     */
-    public <T12,T13> Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13> join(Tuple2<T12,T13> tuple) {
-        return new Tuple13<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,tuple.value1(),tuple.value2());
-    }
-
-    /**
-     * Joins a tuple to this tuple.
-     * @param tuple a tuple object.
-     */
-    public <T12,T13,T14> Tuple14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14> join(Tuple3<T12,T13,T14> tuple) {
-        return new Tuple14<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,tuple.value1(),tuple.value2(),tuple.value3());
-    }
-
-    /**
-     * Joins a tuple to this tuple.
-     * @param tuple a tuple object.
-     */
-    public <T12,T13,T14,T15> Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> join(Tuple4<T12,T13,T14,T15> tuple) {
-        return new Tuple15<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,tuple.value1(),tuple.value2(),tuple.value3(),tuple.value4());
-    }
-
-    /**
-     * Joins a tuple to this tuple.
-     * @param tuple a tuple object.
-     */
-    public <T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple5<T12,T13,T14,T15,T16> tuple) {
-        return new Tuple16<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,tuple.value1(),tuple.value2(),tuple.value3(),tuple.value4(),tuple.value5());
-    }
-
-    /**
      * Splices this tuple into two partitions at element position 1
      */
     public Tuple2<Tuple1<T1>,Tuple10<T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>> splice1() { return splice(1); }

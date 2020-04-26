@@ -160,6 +160,28 @@ public abstract class AbstractTuple implements Tuple  {
         return Tuple.of(primary.get(),secondary.get());
     }
 
+    public <Q, R extends Tuple> R join(Q that) {
+        return join(Tuple.of(that));
+    }
+
+    public <Q extends Tuple, R extends Tuple> R join(Q that) {
+        Objects.requireNonNull(that);
+        int depth = this.depth + that.depth();
+        if ( depth > MAX_TUPLES )
+            throw new TuplesOverflowException();
+        Object[] o = new Object[depth];
+        Iterator<?> iter = this.iterator();
+        int i = 0;
+        while ( iter.hasNext() ) o[i++] = iter.next();
+        iter = that.iterator();
+        while ( iter.hasNext() ) o[i++] = iter.next();
+
+        Nullable<R> result = Tuples.fromIterable(Arrays.asList(o),o.length);
+        return result.get();
+    }
+
+
+
     public <K> Map<K,?> toMap(Function<? super Integer,? extends K> keyMapper) {
         Map<K,Object> result = new LinkedHashMap<>();
         int i = 0;

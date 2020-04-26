@@ -115,30 +115,6 @@ public final class Tuple14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14> exten
 
 
     /**
-     * Joins a tuple to this tuple.
-     * @param value a tuple object.
-     */
-    public <T> Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T> join(T value) {
-        return new Tuple15<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,value);
-    }
-
-    /**
-     * Joins a tuple to this tuple.
-     * @param tuple a tuple object.
-     */
-    public <T15> Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> join(Tuple1<T15> tuple) {
-        return new Tuple15<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,tuple.value1());
-    }
-
-    /**
-     * Joins a tuple to this tuple.
-     * @param tuple a tuple object.
-     */
-    public <T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple2<T15,T16> tuple) {
-        return new Tuple16<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,tuple.value1(),tuple.value2());
-    }
-    
-    /**
      * Splices this tuple into two partitions at element position 1
      */
     public Tuple2<Tuple1<T1>,Tuple13<T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>> splice1() { return splice(1); }
