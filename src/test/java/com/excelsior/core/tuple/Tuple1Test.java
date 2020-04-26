@@ -94,7 +94,7 @@ public class Tuple1Test {
 
     @Test
     public void testSplice_Fail() {
-        assertThrows(UnsupportedOperationException.class, () -> tuple.splice(1));
+        assertThrows(IllegalArgumentException.class, () -> tuple.splice(1));
     }
 
     @Test

@@ -37,11 +37,6 @@ public final class Tuple1<T1> extends AbstractTuple {
         return t1;
     }
 
-    @Override
-    public <Q extends Tuple,R extends Tuple> Tuple2<Q, R> splice(int position) {
-        throw new UnsupportedOperationException("Tuple1 does not support this method");
-    }
-
     /**
      * Transform this tuple into another object
      * @param function function that performs the transformation
@@ -62,4 +57,3 @@ public final class Tuple1<T1> extends AbstractTuple {
         return new Tuple1<>(function.apply(t1));
     }
 }
-

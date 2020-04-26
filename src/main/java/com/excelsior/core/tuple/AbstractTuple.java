@@ -152,35 +152,33 @@ public abstract class AbstractTuple implements Tuple  {
 
     public int depth() { return depth; }
 
-    public <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position) {
-        if ( position < 1 || position > (depth() -1) )
-            throw new IllegalArgumentException("Position must be non-zero and less than or equal to depth -1");
-        Nullable<Q> primary = Tuples.fromIterable(this,0,position);
-        Nullable<R> secondary = Tuples.fromIterable(this,position,depth() - position);
-        return Tuple.of(primary.get(),secondary.get());
-    }
-
-    public <Q, R extends Tuple> R join(Q that) {
-        return join(Tuple.of(that));
+    public <Q, R extends Tuple> R join(Q value) {
+        return join(Tuple.of(value));
     }
 
     public <Q extends Tuple, R extends Tuple> R join(Q that) {
         Objects.requireNonNull(that);
         int depth = this.depth + that.depth();
-        if ( depth > MAX_TUPLES )
+        if ( depth > MAX_DEPTH )
             throw new TuplesOverflowException();
-        Object[] o = new Object[depth];
-        Iterator<?> iter = this.iterator();
-        int i = 0;
-        while ( iter.hasNext() ) o[i++] = iter.next();
-        iter = that.iterator();
-        while ( iter.hasNext() ) o[i++] = iter.next();
-
-        Nullable<R> result = Tuples.fromIterable(Arrays.asList(o),o.length);
+        Object[] objects = toObjects(this,that);
+        Nullable<R> result = Tuples.fromIterable(Arrays.asList(objects),objects.length);
         return result.get();
     }
 
+    public <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position) {
+        verify(position);
+        Nullable<Q> primary = Tuples.fromIterable(this,0,position);
+        Nullable<R> secondary = Tuples.fromIterable(this,position,depth() - position);
+        return Tuple.of(primary.get(),secondary.get());
+    }
 
+    public <T extends Tuple> T truncate(int position) {
+        verify(position);
+        Object[] objects = toObjects(this);
+        Nullable<T> result = Tuples.fromIterable(Arrays.asList(objects),position);
+        return result.get();
+    }
 
     public <K> Map<K,?> toMap(Function<? super Integer,? extends K> keyMapper) {
         Map<K,Object> result = new LinkedHashMap<>();
@@ -273,6 +271,21 @@ public abstract class AbstractTuple implements Tuple  {
         }
     }
 
+    private Object[] toObjects(final Tuple... tuples) {
+        // Calculate depth
+        int depth = 0;
+        for ( Tuple tuple : tuples )
+            depth += tuple.depth();
+        // Convert to objects
+        Object[] result = new Object[depth];
+        int i = 0;
+        for ( Tuple tuple : tuples ) {
+            Iterator<?> iter = tuple.iterator();
+            while (iter.hasNext()) result[i++] = iter.next();
+        }
+        return result;
+    }
+
     private void validateNodeIndex(int index) {
         if ( index < 0 || index > depth -1)
             throw new IndexOutOfBoundsException();
@@ -283,6 +296,11 @@ public abstract class AbstractTuple implements Tuple  {
         out.writeInt(this.depth);
         for (Node node = head; node != null; node = node.next)
             out.writeObject(node.element);
+    }
+
+    private void verify(int position) {
+        if ( position < 1 || position > (depth() -1) )
+            throw new IllegalArgumentException("Position must be non-zero and less than depth");
     }
 }
 

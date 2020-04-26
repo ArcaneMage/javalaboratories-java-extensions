@@ -220,7 +220,7 @@ public class Tuple2Test {
 
     @Test
     public void testSplice_Pass() {
-        Tuple2<Tuple1<Integer>,Tuple1<Integer>> spliced1 = tuple_2.splice1();
+        Tuple2<Tuple1<Integer>,Tuple1<Integer>> spliced1 = tuple_2.splice(1);
         assertEquals(2, spliced1.depth());
         assertEquals(1, spliced1.value1().value1());
         assertEquals(2, spliced1.value2().value1());
@@ -287,8 +287,8 @@ public class Tuple2Test {
 
     @Test
     public void testTruncate_Pass() {
-        Tuple1 aTuple1 = tuple_2.truncate1();
-        assertEquals(Tuple.of(1),aTuple1);
+        Tuple1 aTuple1_2 = tuple_2.truncate(1);
+        assertEquals(Tuple.of(1),aTuple1_2);
     }
 
     @Test

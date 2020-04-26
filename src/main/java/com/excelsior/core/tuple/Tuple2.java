@@ -48,18 +48,6 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
     }
 
     /**
-     * Joins a value to the end of this tuple.
-     */
-  /*  public <T> Tuple3<T1,T2,T> join(T value) {
-        return new Tuple3<>(t1,t2,value);
-    }
-*/
-    /**
-     * Splices this tuple into two partitions at element position 1
-     */
-    public Tuple2<Tuple1<T1>,Tuple1<T2>> splice1() { return splice(1); }
-
-    /**
      * Transform this tuple into another object
      * @param function function that performs the transformation
      * @param <R> return type of transformation
@@ -67,13 +55,6 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      */
     public <R> R transform(BiFunction<? super T1,? super T2,? extends R> function) {
         return function.apply(t1,t2);
-    }
-
-    /**
-     * Truncates remaining tuples to a depth of 1
-     */
-    public Tuple1<T1> truncate1() {
-        return new Tuple1<>(t1);
     }
 
     /**

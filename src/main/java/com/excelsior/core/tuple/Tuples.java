@@ -2,7 +2,6 @@ package com.excelsior.core.tuple;
 
 import com.excelsior.core.Nullable;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 

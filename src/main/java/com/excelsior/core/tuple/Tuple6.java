@@ -74,66 +74,6 @@ public final class Tuple6<T1,T2,T3,T4,T5,T6> extends AbstractTuple {
     }
 
     /**
-     * Splices this tuple into two partitions at element position 1
-     */
-    public Tuple2<Tuple1<T1>,Tuple5<T2,T3,T4,T5,T6>> splice1() { return splice(1); }
-
-    /**
-     * Splices this tuple into two partitions at element position 2
-     */
-    public Tuple2<Tuple2<T1,T2>,Tuple4<T3,T4,T5,T6>> splice2() { return splice(2); }
-
-    /**
-     * Splices this tuple into two partitions at element position 3
-     */
-    public Tuple2<Tuple3<T1,T2,T3>,Tuple3<T4,T5,T6>> splice3() { return splice(3); }
-
-    /**
-     * Splices this tuple into two partitions at element position 4
-     */
-    public Tuple2<Tuple4<T1,T2,T3,T4>,Tuple2<T5,T6>> splice4() { return splice(4); }
-
-    /**
-     * Splices this tuple into two partitions at element position 5
-     */
-    public Tuple2<Tuple5<T1,T2,T3,T4,T5>,Tuple1<T6>> splice5() { return splice(5); }
-
-    /**
-     * Truncates remaining tuples to a depth of 1
-     */
-    public Tuple1<T1> truncate1() {
-        return new Tuple1<>(t1);
-    }
-
-    /**
-     * Truncates remaining tuples to a depth of 2
-     */
-    public Tuple2<T1,T2> truncate2() {
-        return new Tuple2<>(t1,t2);
-    }
-
-    /**
-     * Truncates remaining tuples to a depth of 3
-     */
-    public Tuple3<T1,T2,T3> truncate3() {
-        return new Tuple3<>(t1,t2,t3);
-    }
-
-    /**
-     * Truncates remaining tuples to a depth of 4
-     */
-    public Tuple4<T1,T2,T3,T4> truncate4() {
-        return new Tuple4<>(t1,t2,t3,t4);
-    }
-
-    /**
-     * Truncates remaining tuples to a depth of 5
-     */
-    public Tuple5<T1,T2,T3,T4,T5> truncate5() {
-        return new Tuple5<>(t1,t2,t3,t4,t5);
-    }
-
-    /**
      * Transform an element in this tuple into another object.
      * @param function function that performs the transformation
      * @param <R> return type of transformed element
