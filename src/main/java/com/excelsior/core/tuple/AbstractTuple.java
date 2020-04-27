@@ -152,16 +152,12 @@ public abstract class AbstractTuple implements Tuple  {
 
     public int depth() { return depth; }
 
-    public <Q, R extends Tuple> R join(Q value) {
-        return join(Tuple.of(value));
-    }
-
     public <Q extends Tuple, R extends Tuple> R join(Q that) {
         Objects.requireNonNull(that);
         int depth = this.depth + that.depth();
         if ( depth > MAX_DEPTH )
-            throw new TuplesOverflowException();
-        Object[] objects = toObjects(this,that);
+            throw new TupleOverflowException();
+        Object[] objects = getObjects(this,that);
         Nullable<R> result = Tuples.fromIterable(Arrays.asList(objects),objects.length);
         return result.get();
     }
@@ -175,9 +171,20 @@ public abstract class AbstractTuple implements Tuple  {
 
     public <T extends Tuple> T truncate(int position) {
         verify(position);
-        Object[] objects = toObjects(this);
+        Object[] objects = getObjects(this);
         Nullable<T> result = Tuples.fromIterable(Arrays.asList(objects),position);
         return result.get();
+    }
+
+    public <Q,R extends Tuple> R add(int position, Q value) {
+        if ( this.depth + 1 > MAX_DEPTH )
+            throw new TupleOverflowException();
+        if ( position == 1 ) {
+            return Tuple.of(value).join(this);
+        } else {
+            Tuple2<Tuple,Tuple> spliced = this.splice(position -1);
+            return spliced.value1().join(value).join(spliced.value2());
+        }
     }
 
     public <K> Map<K,?> toMap(Function<? super Integer,? extends K> keyMapper) {
@@ -234,6 +241,21 @@ public abstract class AbstractTuple implements Tuple  {
         return result;
     }
 
+    private Object[] getObjects(final Tuple... tuples) {
+        // Calculate depth
+        int depth = 0;
+        for ( Tuple tuple : tuples )
+            depth += tuple.depth();
+        // Convert to objects
+        Object[] result = new Object[depth];
+        int i = 0;
+        for ( Tuple tuple : tuples ) {
+            Iterator<?> iter = tuple.iterator();
+            while (iter.hasNext()) result[i++] = iter.next();
+        }
+        return result;
+    }
+
     private Node linkToFirstNode(Object element) {
         Node link;
         if ( isEmpty() ) {
@@ -269,21 +291,6 @@ public abstract class AbstractTuple implements Tuple  {
             Object element = in.readObject();
             linkToLastNode(element);
         }
-    }
-
-    private Object[] toObjects(final Tuple... tuples) {
-        // Calculate depth
-        int depth = 0;
-        for ( Tuple tuple : tuples )
-            depth += tuple.depth();
-        // Convert to objects
-        Object[] result = new Object[depth];
-        int i = 0;
-        for ( Tuple tuple : tuples ) {
-            Iterator<?> iter = tuple.iterator();
-            while (iter.hasNext()) result[i++] = iter.next();
-        }
-        return result;
     }
 
     private void validateNodeIndex(int index) {

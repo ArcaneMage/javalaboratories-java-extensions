@@ -40,6 +40,12 @@ public class Tuple15Test {
     }
 
     @Test
+    public void testAdd_Pass() {
+        Tuple16 tuple3 = tuple.add(1,"a");
+        assertEquals(Tuple.of("a",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),tuple3);
+    }
+
+    @Test
     public void testJoin_Pass() {
         Tuple16 aTuple16_1 = tuple.join("end-of-tuple");
         assertEquals("end-of-tuple",aTuple16_1.value16());

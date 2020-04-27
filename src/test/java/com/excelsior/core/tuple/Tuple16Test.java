@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Tuple16Test {
 
@@ -39,6 +38,11 @@ public class Tuple16Test {
         assertEquals(14,tuple.value14());
         assertEquals(15,tuple.value15());
         assertEquals(16,tuple.value16());
+    }
+
+    @Test
+    public void testAdd_Fail() {
+        assertThrows(TupleOverflowException.class, () -> tuple.add(1,"a"));
     }
 
     @Test

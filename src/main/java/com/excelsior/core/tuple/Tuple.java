@@ -106,11 +106,23 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
         return new Tuple16<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16);
     }
 
+    <Q,R extends Tuple> R add(int position, Q value);
+
     boolean contains(Object object);
 
     int depth();
 
     int indexOf(Object object);
+
+    default <Q, R extends Tuple> R join(Q value) {
+        return join(Tuple.of(value));
+    }
+
+    <Q extends Tuple, R extends Tuple> R join(Q that);
+
+    <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position);
+
+    <T extends Tuple> T truncate(int position);
 
     Object[] toArray();
 

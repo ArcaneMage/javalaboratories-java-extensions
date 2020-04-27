@@ -39,6 +39,18 @@ public class Tuple13Test {
     }
 
     @Test
+    public void testAdd_Pass() {
+        Tuple14 tuple3 = tuple.add(1,"a");
+        assertEquals(Tuple.of("a",1,2,3,4,5,6,7,8,9,10,11,12,13),tuple3);
+
+        Tuple15 tuple4 = tuple3.add(2,"b");
+        assertEquals(Tuple.of("a","b",1,2,3,4,5,6,7,8,9,10,11,12,13),tuple4);
+
+        Tuple16 tuple5 = tuple4.add(3,"c");
+        assertEquals(Tuple.of("a","b","c",1,2,3,4,5,6,7,8,9,10,11,12,13),tuple5);
+    }
+    
+    @Test
     public void testJoin_Pass() {
         Tuple14 aTuple14_1 = tuple.join("end-of-tuple");
         assertEquals("end-of-tuple",aTuple14_1.value14());
