@@ -152,6 +152,19 @@ collections and persistable. Here are some examples of usage:
         [main] INFO com.excelsior.core.tuple.TupleTest - Name: Carl
         [main] INFO com.excelsior.core.tuple.TupleTest - Name: Andrea
         [main] INFO com.excelsior.core.tuple.TupleTest - Name: Sharon
+        
+        // Splicing
+        Tuple4<String,String,String,String> party = maybeTuple.get();
+        Tuple2<Tuple2<String,String>,Tuple2<String,String>> teams = party.splice(3);
+
+        teams.value1().forEach(member -> logger.info("Boy: {}",member));
+        teams.value2().forEach(member -> logger.info("Girl: {}",member));
+        
+        // Outputs :-        
+        [main] INFO com.excelsior.core.tuple.TupleTest - Boy: James
+        [main] INFO com.excelsior.core.tuple.TupleTest - Boy: Carl
+        [main] INFO com.excelsior.core.tuple.TupleTest - Girl: Andrea
+        [main] INFO com.excelsior.core.tuple.TupleTest - Girl: Sharon                       
 ```
 
 ## Feedback

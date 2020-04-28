@@ -9,7 +9,7 @@ import java.util.function.Function;
  * This tuple is a special tuple that is a container of zero elements.
  * <p>
  * Some operations on tuples may result in instantiation of this tuple to signify
- * that computation has resulted in a empty Tuple.
+ * that computation has resulted in an empty Tuple.
  * <p>
  * However, it is possible to perform joins on this tuple.
  * @see Tuple#add(int, Object)
@@ -122,7 +122,6 @@ public class Tuple0 implements Tuple {
         if ( o == null )
             throw new NullPointerException();
 
-        // Tuple must be of the same depth for now -- may reconsider
         if ( this.depth() != o.depth() )
             throw new ClassCastException();
 

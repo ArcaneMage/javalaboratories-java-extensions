@@ -39,10 +39,15 @@ public class TupleTest {
         maybeTuple.ifPresent(tuple -> tuple.forEach(name -> logger.info("Name: {}",name)));
 
         // To collection
-
         Tuple4<String,Integer,String,Integer> data = Tuple.of("A1",1,"A2",2);
         List<?> list = data.toList();
         logger.info("Tuple to list -> {}",list);
 
+        // Splicing
+        Tuple4<String,String,String,String> party = maybeTuple.get();
+        Tuple2<Tuple2<String,String>,Tuple2<String,String>> teams = party.splice(3);
+
+        teams.value1().forEach(member -> logger.info("Boy: {}",member));
+        teams.value2().forEach(member -> logger.info("Girl: {}",member));
     }
 }
