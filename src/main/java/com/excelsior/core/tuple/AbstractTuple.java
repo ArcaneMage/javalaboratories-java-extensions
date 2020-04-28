@@ -159,6 +159,7 @@ public abstract class AbstractTuple implements Tuple  {
     /**
      * {@inheritDoc}
      */
+    @Override
     public <Q,R extends Tuple> R add(int position, Q value) {
         if ( this.depth + 1 > MAX_DEPTH )
             throw new TupleOverflowException();
@@ -173,11 +174,23 @@ public abstract class AbstractTuple implements Tuple  {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int depth() { return depth; }
 
     /**
      * {@inheritDoc}
      */
+    @Override
+    public <T extends Tuple> T hop(int position) {
+        verify(position);
+        Nullable<T> hopped = Tuples.fromIterable(this,position,depth() - position + 1);
+        return hopped.get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public <Q extends Tuple, R extends Tuple> R join(Q that) {
         Objects.requireNonNull(that);
         int depth = this.depth + that.depth();
@@ -191,6 +204,7 @@ public abstract class AbstractTuple implements Tuple  {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int positionOf(Object object) {
         return indexOf(object) + 1;
     }
@@ -198,26 +212,26 @@ public abstract class AbstractTuple implements Tuple  {
     /**
      * {@inheritDoc}
      */
+    @Override
     public <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position) {
         verify(position);
-        Nullable<Q> primary = Tuples.fromIterable(this,0,position -1);
-        Nullable<R> secondary = Tuples.fromIterable(this,position,depth() - position + 1);
-        return Tuple.of(primary.get(),secondary.get());
+        return Tuple.of(truncate(position),hop(position));
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public <T extends Tuple> T truncate(int position) {
         verify(position);
-        Object[] objects = getObjects(this);
-        Nullable<T> result = Tuples.fromIterable(Arrays.asList(objects),position -1);
+        Nullable<T> result = Tuples.fromIterable(this,position -1);
         return result.get();
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public <K> Map<K,?> toMap(Function<? super Integer,? extends K> keyMapper) {
         Map<K,Object> result = new LinkedHashMap<>();
         int i = 0;
@@ -230,6 +244,7 @@ public abstract class AbstractTuple implements Tuple  {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object[] toArray() {
         Object[] result = new Object[depth];
         int i = 0;
@@ -241,6 +256,7 @@ public abstract class AbstractTuple implements Tuple  {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<?> toList() {
         List<Object> result = new ArrayList<>();
         for ( Node node = head; node != null; node = node.next )
@@ -251,6 +267,7 @@ public abstract class AbstractTuple implements Tuple  {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(",");
         for (Object o : this)

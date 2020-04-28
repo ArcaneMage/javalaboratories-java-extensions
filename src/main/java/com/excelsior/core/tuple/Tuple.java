@@ -195,6 +195,21 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      */
     <Q,R extends Tuple> R add(int position, Q value);
 
+
+    /**
+     * Returns a tuple with elements from {@code position} to the end of this tuple.
+     * <p>
+     * This method is similar to {@link Tuple#truncate(int)}, but rather truncating
+     * from the right, truncation in this method is performed from the left. An
+     * example would be the following: given the tuple {@code [1,2,3,4,5]}, hopping
+     * to {@code position 3}, will result in a new tuple {@code [3,4,5]}.
+     *
+     * @param position to which to hop.
+     * @param <T> type of tuple returned
+     * @return
+     */
+    <T extends Tuple> T hop(int position);
+
     /**
      * Determines whether this tuple contains an {@code object}.
      * <p>

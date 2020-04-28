@@ -60,6 +60,14 @@ public class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
+    public <T extends Tuple> T hop(int poistion) {
+        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public <Q extends Tuple, R extends Tuple> R join(Q that) {
         Objects.requireNonNull(that);
         Nullable<R> result = Tuples.fromIterable(that,that.depth());

@@ -7,6 +7,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("WeakerAccess")
 public class Tuple0Test {
 
     private Tuple0 tuple;
@@ -31,6 +32,11 @@ public class Tuple0Test {
     @Test
     public void testDepth_Pass() {
         assertEquals(0,tuple.depth());
+    }
+
+    @Test
+    public void testHop_Fail() {
+        assertThrows(UnsupportedOperationException.class, () -> tuple.hop(1));
     }
 
     @Test
