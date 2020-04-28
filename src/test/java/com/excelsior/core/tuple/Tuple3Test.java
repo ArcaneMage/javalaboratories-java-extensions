@@ -132,30 +132,38 @@ public class Tuple3Test {
 
     @Test
     public void testSplice_Pass() {
-        Tuple2<Tuple1<Integer>,Tuple2<Integer,Integer>>
+        Tuple2<Tuple0,Tuple3<Integer,Integer,Integer>>
                 spliced1 = tuple.splice(1);
         assertEquals(2, spliced1.depth());
-        assertEquals(1, spliced1.value1().value1());
-        assertEquals(3, spliced1.value2().value2());
+        assertEquals(0, spliced1.value1().depth());
+        assertEquals(3, spliced1.value2().value3());
 
-        Tuple2<Tuple2<Integer,Integer>,Tuple1<Integer>>
+        Tuple2<Tuple1<Integer>,Tuple2<Integer,Integer>>
                 spliced2 = tuple.splice(2);
         assertEquals(2, spliced2.depth());
         assertEquals(1, spliced2.value1().value1());
-        assertEquals(3, spliced2.value2().value1());
+        assertEquals(3, spliced2.value2().value2());
+
+        Tuple2<Tuple2<Integer,Integer>,Tuple1<Integer>>
+                spliced3 = tuple.splice(3);
+        assertEquals(2, spliced3.depth());
+        assertEquals(1, spliced3.value1().value1());
+        assertEquals(3, spliced3.value2().value1());
     }
 
     @Test
     public void testTruncate_Pass() {
-        Tuple1 aTuple1 = tuple.truncate(1);
+        Tuple0 aTuple0 = tuple.truncate(1);
+        assertEquals(Tuple.of(),aTuple0);
+
+        Tuple1 aTuple1 = tuple.truncate(2);
         assertEquals(Tuple.of(1),aTuple1);
 
-        Tuple2 aTuple2 = tuple.truncate(2);
+        Tuple2 aTuple2 = tuple.truncate(3);
         assertEquals(Tuple.of(1,2),aTuple2);
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testTestTransform_Pass() {
         Tuple3 aTuple3;
 

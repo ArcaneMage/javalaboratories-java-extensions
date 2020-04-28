@@ -126,6 +126,12 @@ public class Tuple1Test {
     }
 
     @Test
+    public void testTruncate_Pass() {
+        Tuple0 aTuple0 = tuple.truncate(1);
+        assertEquals(Tuple.of(),aTuple0);
+    }
+
+    @Test
     public void testFromIterable_Pass() {
         List<Integer> list = Arrays.asList(1);
 
@@ -142,8 +148,17 @@ public class Tuple1Test {
     }
 
     @Test
+    public void testSplice_Pass() {
+        Tuple2<Tuple0,Tuple1<Integer>>
+                spliced1 = tuple.splice(1);
+        assertEquals(2, spliced1.depth());
+        assertEquals(0, spliced1.value1().depth());
+        assertEquals(1, spliced1.value2().value1());
+    }
+
+    @Test
     public void testSplice_Fail() {
-        assertThrows(IllegalArgumentException.class, () -> tuple.splice(1));
+        assertThrows(IllegalArgumentException.class, () -> tuple.splice(2));
     }
 
     @Test

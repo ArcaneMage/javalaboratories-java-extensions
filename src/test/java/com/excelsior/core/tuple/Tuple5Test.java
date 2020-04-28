@@ -123,43 +123,52 @@ public class Tuple5Test {
 
     @Test
     public void testSplice_Pass() {
-        Tuple2<Tuple1<Integer>,Tuple4<Integer,Integer,Integer,Integer>>
+        Tuple2<Tuple0,Tuple5<Integer,Integer,Integer,Integer,Integer>>
                 spliced1 = tuple.splice(1);
         assertEquals(2, spliced1.depth());
-        assertEquals(1, spliced1.value1().value1());
-        assertEquals(5, spliced1.value2().value4());
+        assertEquals(0, spliced1.value1().depth());
+        assertEquals(5, spliced1.value2().value5());
 
-        Tuple2<Tuple2<Integer,Integer>,Tuple3<Integer,Integer,Integer>>
+        Tuple2<Tuple1<Integer>,Tuple4<Integer,Integer,Integer,Integer>>
                 spliced2 = tuple.splice(2);
         assertEquals(2, spliced2.depth());
         assertEquals(1, spliced2.value1().value1());
-        assertEquals(5, spliced2.value2().value3());
+        assertEquals(5, spliced2.value2().value4());
 
-        Tuple2<Tuple3<Integer,Integer,Integer>,Tuple2<Integer,Integer>>
+        Tuple2<Tuple2<Integer,Integer>,Tuple3<Integer,Integer,Integer>>
                 spliced3 = tuple.splice(3);
         assertEquals(2, spliced3.depth());
         assertEquals(1, spliced3.value1().value1());
-        assertEquals(5, spliced3.value2().value2());
+        assertEquals(5, spliced3.value2().value3());
 
-        Tuple2<Tuple4<Integer,Integer,Integer,Integer>,Tuple1<Integer>>
+        Tuple2<Tuple3<Integer,Integer,Integer>,Tuple2<Integer,Integer>>
                 spliced4 = tuple.splice(4);
         assertEquals(2, spliced4.depth());
         assertEquals(1, spliced4.value1().value1());
-        assertEquals(5, spliced4.value2().value1());
+        assertEquals(5, spliced4.value2().value2());
+
+        Tuple2<Tuple4<Integer,Integer,Integer,Integer>,Tuple1<Integer>>
+                spliced5 = tuple.splice(5);
+        assertEquals(2, spliced5.depth());
+        assertEquals(1, spliced5.value1().value1());
+        assertEquals(5, spliced5.value2().value1());
     }
 
     @Test
     public void testTruncate_Pass() {
-        Tuple1 aTuple1 = tuple.truncate(1);
+        Tuple0 aTuple0 = tuple.truncate(1);
+        assertEquals(Tuple.of(),aTuple0);
+
+        Tuple1 aTuple1 = tuple.truncate(2);
         assertEquals(Tuple.of(1),aTuple1);
 
-        Tuple2 aTuple2 = tuple.truncate(2);
+        Tuple2 aTuple2 = tuple.truncate(3);
         assertEquals(Tuple.of(1,2),aTuple2);
 
-        Tuple3 aTuple3 = tuple.truncate(3);
+        Tuple3 aTuple3 = tuple.truncate(4);
         assertEquals(Tuple.of(1,2,3),aTuple3);
 
-        Tuple4 aTuple4 = tuple.truncate(4);
+        Tuple4 aTuple4 = tuple.truncate(5);
         assertEquals(Tuple.of(1,2,3,4),aTuple4);
     }
 

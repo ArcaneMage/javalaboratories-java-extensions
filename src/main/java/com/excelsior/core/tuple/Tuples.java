@@ -16,11 +16,12 @@ public final class Tuples {
         Iterator<E> iter = iterable.iterator();
         T result = null;
         try {
-            int i = 0;
+            int i = 1;
             while ( iter.hasNext() && i++ < start )
                 iter.next();
 
             switch (depth) {
+                case 0 : result = (T) Tuple.of(); break;
                 case 1 : result = (T) Tuple.of(iter.next()); break;
                 case 2 : result = (T) Tuple.of(iter.next(),iter.next()); break;
                 case 3 : result = (T) Tuple.of(iter.next(),iter.next(),iter.next()); break;
@@ -36,8 +37,7 @@ public final class Tuples {
                 case 13 : result = (T) Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next()); break;
                 case 14 : result = (T) Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next()); break;
                 case 15 : result = (T) Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next()); break;
-                default:
-                    result = (T) Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next());
+                case 16 : result = (T) Tuple.of(iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next(),iter.next()); break;
             }
         } catch (NoSuchElementException e) {
             // Handled

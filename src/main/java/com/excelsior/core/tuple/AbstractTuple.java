@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 
 /**
- * All tuples inherit from this class.
+ * Tuples inherit from this class.
  * <p>
  * The tuple is considered to be a container. It currently uses a simple doubly
  * linked list data structure. A decision was made to use this approach rather
@@ -19,6 +19,8 @@ import java.util.function.Function;
  * concrete classes. This class implements serialisation, comparison and iteration.
  * <p>
  * This class and derived classes are immutable.
+ * <p>
+ * //TODO: Introduce copy constructors for tuples.
  */
 @SuppressWarnings("WeakerAccess")
 public abstract class AbstractTuple implements Tuple  {
@@ -57,6 +59,9 @@ public abstract class AbstractTuple implements Tuple  {
             add(element);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int compareTo(Tuple o) {
         if ( o == null )
@@ -81,6 +86,9 @@ public abstract class AbstractTuple implements Tuple  {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean contains(Object element) {
         return indexOf(element) > -1;
@@ -90,6 +98,9 @@ public abstract class AbstractTuple implements Tuple  {
         return head == null && tail == null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Iterator<Object> iterator() {
         return new Iterator<Object>() {
@@ -110,13 +121,16 @@ public abstract class AbstractTuple implements Tuple  {
         };
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AbstractTuple objects = (AbstractTuple) o;
+        Tuple objects = (Tuple) o;
 
-        if ( depth != objects.depth)
+        if ( this.depth() != objects.depth())
             return false;
 
         Iterator iter1 = this.iterator();
@@ -131,6 +145,9 @@ public abstract class AbstractTuple implements Tuple  {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         int result = 1;
@@ -139,19 +156,28 @@ public abstract class AbstractTuple implements Tuple  {
         return result;
     }
 
-    public int indexOf(Object element) {
-        int result = 0;
-        for (Node node = head; node != null; node = node.next) {
-            if ( (element == null && node.element == null) ||
-                    (element != null && element.equals(node.element)) )
-                return result;
-            result++;
+    /**
+     * {@inheritDoc}
+     */
+    public <Q,R extends Tuple> R add(int position, Q value) {
+        if ( this.depth + 1 > MAX_DEPTH )
+            throw new TupleOverflowException();
+        if ( position == 1 ) {
+            return Tuple.of(value).join(this);
+        } else {
+            Tuple2<Tuple,Tuple> spliced = this.splice(position);
+            return spliced.value1().join(value).join(spliced.value2());
         }
-        return -1;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public int depth() { return depth; }
 
+    /**
+     * {@inheritDoc}
+     */
     public <Q extends Tuple, R extends Tuple> R join(Q that) {
         Objects.requireNonNull(that);
         int depth = this.depth + that.depth();
@@ -162,31 +188,36 @@ public abstract class AbstractTuple implements Tuple  {
         return result.get();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public int positionOf(Object object) {
+        return indexOf(object) + 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position) {
         verify(position);
-        Nullable<Q> primary = Tuples.fromIterable(this,0,position);
-        Nullable<R> secondary = Tuples.fromIterable(this,position,depth() - position);
+        Nullable<Q> primary = Tuples.fromIterable(this,0,position -1);
+        Nullable<R> secondary = Tuples.fromIterable(this,position,depth() - position + 1);
         return Tuple.of(primary.get(),secondary.get());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public <T extends Tuple> T truncate(int position) {
         verify(position);
         Object[] objects = getObjects(this);
-        Nullable<T> result = Tuples.fromIterable(Arrays.asList(objects),position);
+        Nullable<T> result = Tuples.fromIterable(Arrays.asList(objects),position -1);
         return result.get();
     }
 
-    public <Q,R extends Tuple> R add(int position, Q value) {
-        if ( this.depth + 1 > MAX_DEPTH )
-            throw new TupleOverflowException();
-        if ( position == 1 ) {
-            return Tuple.of(value).join(this);
-        } else {
-            Tuple2<Tuple,Tuple> spliced = this.splice(position -1);
-            return spliced.value1().join(value).join(spliced.value2());
-        }
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     public <K> Map<K,?> toMap(Function<? super Integer,? extends K> keyMapper) {
         Map<K,Object> result = new LinkedHashMap<>();
         int i = 0;
@@ -196,6 +227,9 @@ public abstract class AbstractTuple implements Tuple  {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Object[] toArray() {
         Object[] result = new Object[depth];
         int i = 0;
@@ -204,6 +238,9 @@ public abstract class AbstractTuple implements Tuple  {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public List<?> toList() {
         List<Object> result = new ArrayList<>();
         for ( Node node = head; node != null; node = node.next )
@@ -211,6 +248,9 @@ public abstract class AbstractTuple implements Tuple  {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String toString() {
         StringJoiner joiner = new StringJoiner(",");
         for (Object o : this)
@@ -228,6 +268,17 @@ public abstract class AbstractTuple implements Tuple  {
     final AbstractTuple addFirst(Object element) {
         linkToFirstNode(element);
         return this;
+    }
+
+    final int indexOf(Object element) {
+        int result = 0;
+        for (Node node = head; node != null; node = node.next) {
+            if ( (element == null && node.element == null) ||
+                    (element != null && element.equals(node.element)) )
+                return result;
+            result++;
+        }
+        return -1;
     }
 
     final Object get(int index) {
@@ -306,8 +357,8 @@ public abstract class AbstractTuple implements Tuple  {
     }
 
     private void verify(int position) {
-        if ( position < 1 || position > (depth() -1) )
-            throw new IllegalArgumentException("Position must be non-zero and less than depth");
+        if ( position < 1 || position > (depth()) )
+            throw new IllegalArgumentException("Position must be non-zero and less than or equal depth");
     }
 }
 

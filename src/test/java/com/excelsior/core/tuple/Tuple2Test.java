@@ -177,6 +177,10 @@ public class Tuple2Test {
         Tuple3 tuple3 = tuple_2.add(1,"a");
         assertEquals(Tuple.of("a",1,2),tuple3);
 
+        // Test addition at end
+        Tuple3 tuple3_2 = tuple_2.add(2,"a");
+        assertEquals(Tuple.of(1,"a",2),tuple3_2);
+
         Tuple4 tuple4 = tuple3.add(2,"b");
         assertEquals(Tuple.of("a","b",1,2),tuple4);
 
@@ -242,6 +246,11 @@ public class Tuple2Test {
     }
 
     @Test
+    public void testPositionOf_Pass() {
+        assertEquals(2,tuple_2.positionOf(2));
+    }
+
+    @Test
     public void testContains_Pass() {
         assertTrue(tuple.contains("John"));
     }
@@ -265,16 +274,23 @@ public class Tuple2Test {
 
     @Test
     public void testSplice_Pass() {
-        Tuple2<Tuple1<Integer>,Tuple1<Integer>> spliced1 = tuple_2.splice(1);
+        Tuple2<Tuple0,Tuple2<Integer,Integer>>
+                spliced1 = tuple_2.splice(1);
         assertEquals(2, spliced1.depth());
-        assertEquals(1, spliced1.value1().value1());
-        assertEquals(2, spliced1.value2().value1());
+        assertEquals(0, spliced1.value1().depth());
+        assertEquals(2, spliced1.value2().value2());
+
+        Tuple2<Tuple1<Integer>,Tuple1<Integer>>
+                spliced2 = tuple_2.splice(2);
+        assertEquals(2, spliced2.depth());
+        assertEquals(1, spliced2.value1().value1());
+        assertEquals(2, spliced2.value2().value1());
     }
 
     @Test
     public void testSplice_Fail() {
         assertThrows(IllegalArgumentException.class, () -> tuple_2.splice(0));
-        assertThrows(IllegalArgumentException.class, () -> tuple_2.splice(2));
+        assertThrows(IllegalArgumentException.class, () -> tuple_2.splice(3));
     }
 
     @Test
@@ -332,8 +348,11 @@ public class Tuple2Test {
 
     @Test
     public void testTruncate_Pass() {
-        Tuple1 aTuple1_2 = tuple_2.truncate(1);
-        assertEquals(Tuple.of(1),aTuple1_2);
+        Tuple0 aTuple0 = tuple_2.truncate(1);
+        assertEquals(Tuple.of(),aTuple0);
+
+        Tuple1 aTuple1 = tuple_2.truncate(2);
+        assertEquals(Tuple.of(1),aTuple1);
     }
 
     @Test
