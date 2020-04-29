@@ -41,6 +41,9 @@ public class Tuple0Test {
 
     @Test
     public void testJoin_Pass() {
+        Tuple0 aTuple0 = tuple.join(Tuple.of());
+        assertEquals(Tuple.of(),aTuple0);
+
         Tuple1 aTuple1 = tuple.join(Tuple.of(1));
         assertEquals(aTuple1,Tuple.of(1));
 
@@ -87,6 +90,11 @@ public class Tuple0Test {
     @Test
     public void testToString_Pass() {
         assertEquals("Tuple0=[]",tuple.toString());
+    }
+
+    @Test
+    public void testRemove_Fail() {
+        assertThrows(UnsupportedOperationException.class, () -> tuple.remove(1));
     }
 
     @Test

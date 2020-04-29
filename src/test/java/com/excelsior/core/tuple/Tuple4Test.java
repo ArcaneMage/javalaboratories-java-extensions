@@ -153,6 +153,18 @@ public class Tuple4Test {
     }
 
     @Test
+    public void testRemove_Pass() {
+        Tuple3 tuple3 = tuple.remove(4);
+        assertEquals(Tuple.of(1,2,3),tuple3);
+
+        Tuple3 tuple3_2 = tuple.remove(2);
+        assertEquals(Tuple.of(1,3,4),tuple3_2);
+
+        Tuple3 tuple3_3 = tuple.remove(1);
+        assertEquals(Tuple.of(2,3,4),tuple3_3);
+    }
+    
+    @Test
     public void testTruncate_Pass() {
         Tuple0 aTuple0 = tuple.truncate(1);
         assertEquals(Tuple.of(),aTuple0);

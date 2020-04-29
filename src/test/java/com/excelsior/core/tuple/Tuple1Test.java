@@ -132,6 +132,12 @@ public class Tuple1Test {
     }
 
     @Test
+    public void testRemove_Pass() {
+        Tuple0 tuple1 = tuple.remove(1);
+        assertEquals(Tuple.of(), tuple1);
+    }
+
+    @Test
     public void testFromIterable_Pass() {
         List<Integer> list = Arrays.asList(1);
 

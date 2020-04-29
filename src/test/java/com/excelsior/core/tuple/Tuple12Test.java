@@ -160,7 +160,19 @@ public class Tuple12Test {
         assertEquals(1, spliced12.value1().value1());
         assertEquals(12, spliced12.value2().value1());
     }
-    
+
+    @Test
+    public void testRemove_Pass() {
+        Tuple11 tuple11 = tuple.remove(12);
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11),tuple11);
+
+        Tuple11 tuple11_2 = tuple.remove(7);
+        assertEquals(Tuple.of(1,2,3,4,5,6,8,9,10,11,12),tuple11_2);
+
+        Tuple11 tuple11_3 = tuple.remove(1);
+        assertEquals(Tuple.of(2,3,4,5,6,7,8,9,10,11,12),tuple11_3);
+    }
+
     @Test
     public void testTruncate_Pass() {
         Tuple0 aTuple0 = tuple.truncate(1);

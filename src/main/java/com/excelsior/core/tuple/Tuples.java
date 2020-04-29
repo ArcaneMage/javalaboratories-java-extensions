@@ -7,6 +7,9 @@ import java.util.NoSuchElementException;
 
 public final class Tuples {
 
+    @SuppressWarnings("unchecked")
+    static <T> T emptyTuple() { return (T) Tuple.of(); }
+
     public static <T extends Tuple,E> Nullable<T> fromIterable(Iterable<E> iterable, int depth) {
         return fromIterable(iterable, 0, depth);
     }
@@ -21,7 +24,7 @@ public final class Tuples {
                 iter.next();
 
             switch (depth) {
-                case 0 : result = (T) Tuple.of(); break;
+                case 0 : result = emptyTuple(); break;
                 case 1 : result = (T) Tuple.of(iter.next()); break;
                 case 2 : result = (T) Tuple.of(iter.next(),iter.next()); break;
                 case 3 : result = (T) Tuple.of(iter.next(),iter.next(),iter.next()); break;

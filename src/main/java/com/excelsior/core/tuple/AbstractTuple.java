@@ -213,15 +213,6 @@ public abstract class AbstractTuple implements Tuple  {
      * {@inheritDoc}
      */
     @Override
-    public <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position) {
-        verify(position);
-        return Tuple.of(truncate(position),hop(position));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public <T extends Tuple> T truncate(int position) {
         verify(position);
         Nullable<T> result = Tuples.fromIterable(this,position -1);
@@ -275,6 +266,16 @@ public abstract class AbstractTuple implements Tuple  {
             else joiner.add(o.toString());
 
         return String.format("%s=[%s]",this.getClass().getSimpleName(),joiner.toString());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T extends Tuple> T remove(Object element) {
+        int position = positionOf(element);
+        Tuple2<Tuple,Tuple> spliced = splice(position);
+        return spliced.value1().join(position < depth() ? spliced.value2().hop(2) : Tuples.emptyTuple());
     }
 
     final AbstractTuple add(Object element) {

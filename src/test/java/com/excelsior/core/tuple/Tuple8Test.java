@@ -155,6 +155,18 @@ public class Tuple8Test {
         assertEquals(1, spliced8.value1().value1());
         assertEquals(8, spliced8.value2().value1());
     }
+
+    @Test
+    public void testRemove_Pass() {
+        Tuple7 tuple7 = tuple.remove(8);
+        assertEquals(Tuple.of(1,2,3,4,5,6,7),tuple7);
+
+        Tuple7 tuple7_2 = tuple.remove(7);
+        assertEquals(Tuple.of(1,2,3,4,5,6,8),tuple7_2);
+
+        Tuple7 tuple7_3 = tuple.remove(1);
+        assertEquals(Tuple.of(2,3,4,5,6,7,8),tuple7_3);
+    }
     
     @Test
     public void testTruncate_Pass() {

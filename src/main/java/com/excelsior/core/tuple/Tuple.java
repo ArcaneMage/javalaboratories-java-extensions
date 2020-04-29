@@ -186,7 +186,8 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * than {@code MAX_DEPTH}, the method will throw {@link TupleOverflowException}
      * exception.
      * @param position non-zero, positive value that indicates physical
-     *                 position to place the value.
+     *                 position to place the value. This parameter must be less than
+     *                 or equal to {@link this#depth()}
      * @param value the value to add to this tuple.
      * @param <Q> type of value.
      * @param <R> type of tuple returned.
@@ -204,9 +205,10 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * example would be the following: given the tuple {@code [1,2,3,4,5]}, hopping
      * to {@code position 3}, will result in a new tuple {@code [3,4,5]}.
      *
-     * @param position to which to hop.
+     * @param position non-zero, positive value to which to hop. This parameter must
+     *                 be less than or equal to {@link this#depth()}
      * @param <T> type of tuple returned
-     * @return
+     * @return new resultant tuple
      */
     <T extends Tuple> T hop(int position);
 
@@ -262,7 +264,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * merged contents.
      * <p>
      * If teh combined depth of both this and {@code that} tuple is greater
-     * that {@ode MAX_DEPTH}, the exception {@link TupleOverflowException}
+     * that {@code MAX_DEPTH}, the exception {@link TupleOverflowException}
      * is thrown.
      * @param that is a tuple whose contents are to be merged with this tuple's
      *             contents.
@@ -282,15 +284,18 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * {@link Tuple2} container. Use the methods of {@link Tuple2} to access the
      * sliced the tuples.
      *
-     * @param position is the location in this tuple with which to perform the
-     *                 slicing.
+     * @param position is the location in this tuple at which to perform the
+     *                 slicing. This parameter must be less than or equal to
+     *                 {@link this#depth()}
      * @param <Q>      type of the first tuple in the returned {@link Tuple2}
      *           container.
      * @param <R>      type of the second tuple in the returned {@link Tuple2}
      *           container.
      * @return a new {@link Tuple2} containing tuple slices.
      */
-    <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position);
+    default <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position) {
+        return Tuple.of(truncate(position),hop(position));
+    }
 
     /**
      * Truncates this tuple at {@code position}
@@ -299,7 +304,9 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * elements discarded. For example the tuple {@code [1,2,3,4,5]} truncated at
      * {@code position} 3 would result in a new tuple {@code [1,2]}
      *
-     * @param position the truncation position
+     * @param position is a non-zero, positive value at which truncation is
+     *                 performed. This parameter must be less than or equal to
+     *                 {@link this#depth()}
      * @param <T> type of tuple returned.
      * @return a new truncated tuple.
      */
@@ -313,21 +320,40 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      */
     Object[] toArray();
 
-    /**
-     * Returns an {@link Map<K,?>} of elements within this tuple.
-     * <p>
-     * Implement the function that returns a key value for a given index of the
-     * element in the tuple.
-     * @param keyMapper Function that returns a key value for a tuple element.
-     * @param <K> type of returned value.
-     * @return a {@link Map<K,?>} object.
-     */
-    <K> Map<K, ?> toMap(Function<? super Integer, ? extends K> keyMapper);
 
     /**
      * Returns a {@link List<?>} object representing the contents of this tuple.
      * @return a {@link List<?>} object.
      */
     List<?> toList();
+
+    /**
+     * Returns an {@link Map<K,?>} of elements within this tuple.
+     * <p>
+     * Implement the function that returns a key value for a given index of the
+     * element in the tuple.
+     *
+     * @param keyMapper Function that returns a key value for a tuple element.
+     * @param <K> type of returned value.
+     * @return a {@link Map<K,?>} object.
+     */
+    <K> Map<K, ?> toMap(Function<? super Integer, ? extends K> keyMapper);
+
+
+    /**
+     * Removes an element/object from this tuple.
+     * <p>
+     * The first occurrence of the object is removed from the tuple and a new
+     * resultant tuple is returned without the specified element. A match is
+     * determined with the {@link Object#equals(Object)} method.
+     * <p>
+     * Initially, the position of the object is calculated, so if the object
+     * does not exist, then this will result in an exception being thrown.
+     *
+     * @param element Object to be removed.
+     * @param <T> type of tuple returned.
+     * @return tuple without the specified {@code element}
+     */
+    <T extends Tuple> T remove(Object element);
 
 }

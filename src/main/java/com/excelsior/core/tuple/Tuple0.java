@@ -78,14 +78,6 @@ public class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public <Q extends Tuple, R extends Tuple> Tuple2<Q, R> splice(int position) {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public <T extends Tuple> T truncate(int position) {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
@@ -102,14 +94,6 @@ public class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public <K> Map<K, ?> toMap(Function<? super Integer, ? extends K> keyMapper) {
-        return Collections.emptyMap();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public List<?> toList() {
         return Collections.emptyList();
     }
@@ -118,8 +102,24 @@ public class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
+    public <K> Map<K, ?> toMap(Function<? super Integer, ? extends K> keyMapper) {
+        return Collections.emptyMap();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return "Tuple0=[]";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T extends Tuple> T remove(Object position) {
+        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
     /**

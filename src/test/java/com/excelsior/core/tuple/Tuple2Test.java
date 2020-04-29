@@ -347,13 +347,22 @@ public class Tuple2Test {
     }
 
     @Test
-    public void testTruncate_Pass() {
-        Tuple0 aTuple0 = tuple_2.truncate(1);
-        assertEquals(Tuple.of(),aTuple0);
+    public void testRemove_Pass() {
+        Tuple1 tuple1 = tuple_2.remove(2);
+        assertEquals(Tuple.of(1),tuple1);
 
-        Tuple1 aTuple1 = tuple_2.truncate(2);
-        assertEquals(Tuple.of(1),aTuple1);
+        Tuple1 tuple1_2 = tuple_2.remove(1);
+        assertEquals(Tuple.of(2),tuple1_2);
+
+        Tuple0 tuple0 = tuple1_2.remove(2);
+        assertEquals(Tuple.of(),tuple0);
     }
+
+    @Test
+    public void testRemove_Fail() {
+        assertThrows(IllegalArgumentException.class, () -> tuple_2.remove("does-not-exist"));
+    }
+
 
     @Test
     public void testTestTransform_Pass() {
