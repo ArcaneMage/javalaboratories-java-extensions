@@ -178,17 +178,17 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
     }
 
     /**
-     * Adds a value to this tuple at element position.
+     * Adds a value to the tuple at element position.
      * <p>
      * The parameter {@code position} is a positive value that is greater than
-     * 0 and less than the depth of this tuple. If the addition of the value
+     * 0 and less than the depth of the tuple. If the addition of the value
      * results in potentially creating a tuple that has a depth that is greater
      * than {@code MAX_DEPTH}, the method will throw {@link TupleOverflowException}
      * exception.
      * @param position non-zero, positive value that indicates physical
      *                 position to place the value. This parameter must be less than
      *                 or equal to {@link this#depth()}
-     * @param value the value to add to this tuple.
+     * @param value the value to add to the tuple.
      * @param <Q> type of value.
      * @param <R> type of tuple returned.
      * @return a new tuple with the appropriate type and depth to accommodate
@@ -198,7 +198,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
 
 
     /**
-     * Returns a tuple with elements from {@code position} to the end of this tuple.
+     * Returns a tuple with elements from {@code position} to the end of the tuple.
      * <p>
      * This method is similar to {@link Tuple#truncate(int)}, but rather truncating
      * from the right, truncation in this method is performed from the left. An
@@ -257,16 +257,16 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
     }
 
     /**
-     * Joins a {@code that} tuple to this tuple, resulting in a new tuple.
+     * Joins a {@code that} tuple to the tuple, resulting in a new tuple.
      * <p>
-     * The (@code that) tuple contents are appended to the end this tuple, thus
+     * The (@code that) tuple contents are appended to the end the tuple, thus
      * creating a new tuple with the appropriate depth to accommodate the
      * merged contents.
      * <p>
      * If teh combined depth of both this and {@code that} tuple is greater
      * that {@code MAX_DEPTH}, the exception {@link TupleOverflowException}
      * is thrown.
-     * @param that is a tuple whose contents are to be merged with this tuple's
+     * @param that is a tuple whose contents are to be merged with the tuple's
      *             contents.
      * @param <Q> the type of the tuple.
      * @param <R> the type of the new tuple returned.
@@ -275,7 +275,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
     <Q extends Tuple, R extends Tuple> R join(Q that);
 
     /**
-     * Splices or cuts this tuple into two smaller tuples at {@code position}.
+     * Splices or cuts the tuple into two smaller tuples at {@code position}.
      * <p>
      * This method is almost the direct opposite to the join, except that the
      * resultant tuple returned is a container of two smaller tuples. For example,
@@ -284,7 +284,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * {@link Tuple2} container. Use the methods of {@link Tuple2} to access the
      * sliced the tuples.
      *
-     * @param position is the location in this tuple at which to perform the
+     * @param position is the location in the tuple at which to perform the
      *                 slicing. This parameter must be less than or equal to
      *                 {@link this#depth()}
      * @param <Q>      type of the first tuple in the returned {@link Tuple2}
@@ -298,7 +298,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
     }
 
     /**
-     * Truncates this tuple at {@code position}
+     * Truncates the tuple at {@code position}
      * <p>
      * Method returns a new truncated tuple, a tuple that has had the remaining
      * elements discarded. For example the tuple {@code [1,2,3,4,5]} truncated at
@@ -341,7 +341,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
 
 
     /**
-     * Removes an element/object from this tuple.
+     * Removes an element/object from the tuple.
      * <p>
      * The first occurrence of the object is removed from the tuple and a new
      * resultant tuple is returned without the specified element. A match is
