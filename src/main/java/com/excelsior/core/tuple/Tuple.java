@@ -185,6 +185,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * results in potentially creating a tuple that has a depth that is greater
      * than {@code MAX_DEPTH}, the method will throw {@link TupleOverflowException}
      * exception.
+     *
      * @param position non-zero, positive value that indicates physical
      *                 position to place the value. This parameter must be less than
      *                 or equal to {@link this#depth()}
@@ -218,6 +219,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * A tuple is a container of objects of different types. Use this method
      * to determine whether the {@code object} exists within the container;
      * {@code true} is returned to indicate existence.
+     *
      * @param object element with which to search.
      * @return true when the object exists in the container.
      */
@@ -320,7 +322,6 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      */
     Object[] toArray();
 
-
     /**
      * Returns a {@link List<?>} object representing the contents of this tuple.
      * @return a {@link List<?>} object.
@@ -339,8 +340,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      */
     <K> Map<K, ?> toMap(Function<? super Integer, ? extends K> keyMapper);
 
-
-    /**
+   /**
      * Removes an element/object from the tuple.
      * <p>
      * The first occurrence of the object is removed from the tuple and a new
@@ -350,10 +350,10 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * Initially, the position of the object is calculated, so if the object
      * does not exist, then this will result in an exception being thrown.
      *
-     * @param element Object to be removed.
+     * @param object Object to be removed.
      * @param <T> type of tuple returned.
      * @return tuple without the specified {@code element}
      */
-    <T extends Tuple> T remove(Object element);
+    <T extends Tuple> T remove(Object object);
 
 }

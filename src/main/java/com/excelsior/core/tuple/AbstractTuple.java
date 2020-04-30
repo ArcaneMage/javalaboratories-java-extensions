@@ -272,8 +272,8 @@ public abstract class AbstractTuple implements Tuple  {
      * {@inheritDoc}
      */
     @Override
-    public <T extends Tuple> T remove(Object element) {
-        int position = positionOf(element);
+    public <T extends Tuple> T remove(Object object) {
+        int position = positionOf(object);
         Tuple2<Tuple,Tuple> spliced = splice(position);
         return spliced.value1().join(position < depth() ? spliced.value2().hop(2) : Tuples.emptyTuple());
     }

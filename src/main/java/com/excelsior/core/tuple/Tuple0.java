@@ -118,7 +118,7 @@ public class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public <T extends Tuple> T remove(Object position) {
+    public <T extends Tuple> T remove(Object object) {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
