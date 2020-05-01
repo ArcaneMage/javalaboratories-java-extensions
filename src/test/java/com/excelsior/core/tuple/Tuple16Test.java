@@ -46,6 +46,12 @@ public class Tuple16Test {
     }
 
     @Test
+    public void testJoin_Pass() {
+        Tuple16 aTuple16 = tuple.join(Tuple.of());
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16),aTuple16);
+    }
+
+    @Test
     public void testFromIterable_Pass() {
         List<Integer> list = Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
 

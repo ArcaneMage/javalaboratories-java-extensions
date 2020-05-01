@@ -16,7 +16,8 @@ import java.util.function.Function;
  * linked list data structure. A decision was made to use this approach rather
  * than reusing {@link LinkedList} because it is important to reduce the overhead
  * of the structure of the tuple as well as minimise typing where possible in
- * concrete classes. This class implements serialisation, comparison and iteration.
+ * concrete classes. This class implements {@link Comparable},
+ * {@link java.io.Serializable} and {@link Iterable} interfaces.
  * <p>
  * This class and derived classes are immutable.
  * <p>

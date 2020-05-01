@@ -82,11 +82,81 @@ public final class Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9> extends AbstractTuple {
         return t6;
     }
 
-    public T7 value7() { return t7; }
+    public T7 value7() {
+        return t7;
+    }
 
-    public T8 value8() { return t8; }
+    public T8 value8() {
+        return t8;
+    }
 
-    public T9 value9() { return t9; }
+    public T9 value9() {
+        return t9;
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param tuple a tuple object.
+     */
+    public Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9> join(Tuple0 tuple) {
+        return super.join(tuple);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param tuple a tuple object.
+     */
+    public <T10> Tuple10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> join(Tuple1<T10> tuple) {
+        return super.join(tuple);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param tuple a tuple object.
+     */
+    public <T10,T11> Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> join(Tuple2<T10,T11> tuple) {
+        return super.join(tuple);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param tuple a tuple object.
+     */
+    public <T10,T11,T12> Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12> join(Tuple3<T10,T11,T12> tuple) {
+        return super.join(tuple);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param tuple a tuple object.
+     */
+    public <T10,T11,T12,T13> Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13> join(Tuple4<T10,T11,T12,T13> tuple) {
+        return super.join(tuple);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param tuple a tuple object.
+     */
+    public <T10,T11,T12,T13,T14> Tuple14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14> join(Tuple5<T10,T11,T12,T13,T14> tuple) {
+        return super.join(tuple);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param tuple a tuple object.
+     */
+    public <T10,T11,T12,T13,T14,T15> Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> join(Tuple6<T10,T11,T12,T13,T14,T15> tuple) {
+        return super.join(tuple);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param tuple a tuple object.
+     */
+    public <T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple7<T10,T11,T12,T13,T14,T15,T16> tuple) {
+        return super.join(tuple);
+    }
 
     /**
      * Transform an element in this tuple into another object.

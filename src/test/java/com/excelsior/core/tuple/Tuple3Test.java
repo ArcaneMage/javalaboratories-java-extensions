@@ -83,47 +83,50 @@ public class Tuple3Test {
 
     @Test
     public void testJoin_Pass() {
+        Tuple3 aTuple3 = tuple.join(Tuple.of());
+        assertEquals(Tuple.of(1,2,3), aTuple3);
+
         Tuple4 aTuple4_1 = tuple.join("end-of-tuple");
         assertEquals("end-of-tuple",aTuple4_1.value4());
 
         Tuple4 aTuple4_2 = tuple.join(Tuple.of(4));
-        assertEquals(aTuple4_2,Tuple.of(1,2,3,4));
+        assertEquals(Tuple.of(1,2,3,4),aTuple4_2);
 
         Tuple5 aTuple5 = tuple.join(Tuple.of(4,5));
-        assertEquals(aTuple5,Tuple.of(1,2,3,4,5));
+        assertEquals(Tuple.of(1,2,3,4,5),aTuple5);
 
         Tuple6 aTuple6 = tuple.join(Tuple.of(4,5,6));
-        assertEquals(aTuple6,Tuple.of(1,2,3,4,5,6));
+        assertEquals(Tuple.of(1,2,3,4,5,6),aTuple6);
 
         Tuple7 aTuple7 = tuple.join(Tuple.of(4,5,6,7));
-        assertEquals(aTuple7,Tuple.of(1,2,3,4,5,6,7));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7),aTuple7);
 
         Tuple8 aTuple8 = tuple.join(Tuple.of(4,5,6,7,8));
-        assertEquals(aTuple8,Tuple.of(1,2,3,4,5,6,7,8));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8),aTuple8);
 
         Tuple9 aTuple9 = tuple.join(Tuple.of(4,5,6,7,8,9));
-        assertEquals(aTuple9,Tuple.of(1,2,3,4,5,6,7,8,9));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9),aTuple9);
 
         Tuple10 aTuple10 = tuple.join(Tuple.of(4,5,6,7,8,9,10));
-        assertEquals(aTuple10,Tuple.of(1,2,3,4,5,6,7,8,9,10));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10),aTuple10);
 
         Tuple11 aTuple11 = tuple.join(Tuple.of(4,5,6,7,8,9,10,11));
-        assertEquals(aTuple11,Tuple.of(1,2,3,4,5,6,7,8,9,10,11));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11),aTuple11);
 
         Tuple12 aTuple12 = tuple.join(Tuple.of(4,5,6,7,8,9,10,11,12));
-        assertEquals(aTuple12,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12),aTuple12);
 
         Tuple13 aTuple13 = tuple.join(Tuple.of(4,5,6,7,8,9,10,11,12,13));
-        assertEquals(aTuple13,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13),aTuple13);
 
         Tuple14 aTuple14 = tuple.join(Tuple.of(4,5,6,7,8,9,10,11,12,13,14));
-        assertEquals(aTuple14,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14),aTuple14);
 
         Tuple15 aTuple15 = tuple.join(Tuple.of(4,5,6,7,8,9,10,11,12,13,14,15));
-        assertEquals(aTuple15,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),aTuple15);
 
         Tuple16 aTuple16 = tuple.join(Tuple.of(4,5,6,7,8,9,10,11,12,13,14,15,16));
-        assertEquals(aTuple16,Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16));
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16),aTuple16);
     }
 
     @Test
