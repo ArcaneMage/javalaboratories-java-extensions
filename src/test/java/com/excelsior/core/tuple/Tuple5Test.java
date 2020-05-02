@@ -125,33 +125,33 @@ public class Tuple5Test {
     }
 
     @Test
-    public void testSplice_Pass() {
+    public void testSpliceAt_Pass() {
         Tuple2<Tuple0,Tuple5<Integer,Integer,Integer,Integer,Integer>>
-                spliced1 = tuple.splice(1);
+                spliced1 = tuple.spliceAt1();
         assertEquals(2, spliced1.depth());
         assertEquals(0, spliced1.value1().depth());
         assertEquals(5, spliced1.value2().value5());
 
         Tuple2<Tuple1<Integer>,Tuple4<Integer,Integer,Integer,Integer>>
-                spliced2 = tuple.splice(2);
+                spliced2 = tuple.spliceAt2();
         assertEquals(2, spliced2.depth());
         assertEquals(1, spliced2.value1().value1());
         assertEquals(5, spliced2.value2().value4());
 
         Tuple2<Tuple2<Integer,Integer>,Tuple3<Integer,Integer,Integer>>
-                spliced3 = tuple.splice(3);
+                spliced3 = tuple.spliceAt3();
         assertEquals(2, spliced3.depth());
         assertEquals(1, spliced3.value1().value1());
         assertEquals(5, spliced3.value2().value3());
 
         Tuple2<Tuple3<Integer,Integer,Integer>,Tuple2<Integer,Integer>>
-                spliced4 = tuple.splice(4);
+                spliced4 = tuple.spliceAt4();
         assertEquals(2, spliced4.depth());
         assertEquals(1, spliced4.value1().value1());
         assertEquals(5, spliced4.value2().value2());
 
         Tuple2<Tuple4<Integer,Integer,Integer,Integer>,Tuple1<Integer>>
-                spliced5 = tuple.splice(5);
+                spliced5 = tuple.spliceAt5();
         assertEquals(2, spliced5.depth());
         assertEquals(1, spliced5.value1().value1());
         assertEquals(5, spliced5.value2().value1());

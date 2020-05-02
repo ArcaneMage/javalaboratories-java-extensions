@@ -242,15 +242,15 @@ public class Tuple2Test {
     }
 
     @Test
-    public void testSplice_Pass() {
+    public void testSpliceAt_Pass() {
         Tuple2<Tuple0,Tuple2<Integer,Integer>>
-                spliced1 = tuple_2.splice(1);
+                spliced1 = tuple_2.spliceAt1();
         assertEquals(2, spliced1.depth());
         assertEquals(0, spliced1.value1().depth());
         assertEquals(2, spliced1.value2().value2());
 
         Tuple2<Tuple1<Integer>,Tuple1<Integer>>
-                spliced2 = tuple_2.splice(2);
+                spliced2 = tuple_2.spliceAt2();
         assertEquals(2, spliced2.depth());
         assertEquals(1, spliced2.value1().value1());
         assertEquals(2, spliced2.value2().value1());

@@ -158,81 +158,81 @@ public class Tuple13Test {
     }
 
     @Test
-    public void testSplice_Pass() {
+    public void testSpliceAt_Pass() {
         Tuple2<Tuple0,Tuple13<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,
-                Integer,Integer,Integer,Integer>> spliced1 = tuple.splice(1);
+                Integer,Integer,Integer,Integer>> spliced1 = tuple.spliceAt1();
         assertEquals(2, spliced1.depth());
         assertEquals(0, spliced1.value1().depth());
         assertEquals(13, spliced1.value2().value13());
 
         Tuple2<Tuple1<Integer>,Tuple12<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,
-                Integer,Integer,Integer,Integer>> spliced2 = tuple.splice(2);
+                Integer,Integer,Integer,Integer>> spliced2 = tuple.spliceAt2();
         assertEquals(2, spliced2.depth());
         assertEquals(1, spliced2.value1().value1());
         assertEquals(13, spliced2.value2().value12());
 
         Tuple2<Tuple2<Integer,Integer>,Tuple11<Integer,Integer,Integer,Integer,Integer,Integer,Integer,
-                Integer,Integer,Integer,Integer>> spliced3 = tuple.splice(3);
+                Integer,Integer,Integer,Integer>> spliced3 = tuple.spliceAt3();
         assertEquals(2, spliced3.depth());
         assertEquals(1, spliced3.value1().value1());
         assertEquals(13, spliced3.value2().value11());
 
         Tuple2<Tuple3<Integer,Integer,Integer>,Tuple10<Integer,Integer,Integer,Integer,Integer,Integer,
-                Integer,Integer,Integer,Integer>> spliced4 = tuple.splice(4);
+                Integer,Integer,Integer,Integer>> spliced4 = tuple.spliceAt4();
         assertEquals(2, spliced4.depth());
         assertEquals(1, spliced4.value1().value1());
         assertEquals(13, spliced4.value2().value10());
 
         Tuple2<Tuple4<Integer,Integer,Integer,Integer>,Tuple9<Integer,Integer,Integer,Integer,Integer,
-                Integer,Integer,Integer,Integer>> spliced5 = tuple.splice(5);
+                Integer,Integer,Integer,Integer>> spliced5 = tuple.spliceAt5();
         assertEquals(2, spliced5.depth());
         assertEquals(1, spliced5.value1().value1());
         assertEquals(13, spliced5.value2().value9());
 
         Tuple2<Tuple5<Integer,Integer,Integer,Integer,Integer>,Tuple8<Integer,Integer,Integer,Integer,
-                Integer,Integer,Integer,Integer>> spliced6 = tuple.splice(6);
+                Integer,Integer,Integer,Integer>> spliced6 = tuple.spliceAt6();
         assertEquals(2, spliced6.depth());
         assertEquals(1, spliced6.value1().value1());
         assertEquals(13, spliced6.value2().value8());
 
         Tuple2<Tuple6<Integer,Integer,Integer,Integer,Integer,Integer>,Tuple7<Integer,Integer,Integer,
-                Integer,Integer,Integer,Integer>> spliced7 = tuple.splice(7);
+                Integer,Integer,Integer,Integer>> spliced7 = tuple.spliceAt7();
         assertEquals(2, spliced7.depth());
         assertEquals(1, spliced7.value1().value1());
         assertEquals(13, spliced7.value2().value7());
 
         Tuple2<Tuple7<Integer,Integer,Integer,Integer,Integer,Integer,Integer>,Tuple6<Integer,Integer,
-                Integer,Integer,Integer,Integer>> spliced8 = tuple.splice(8);
+                Integer,Integer,Integer,Integer>> spliced8 = tuple.spliceAt8();
         assertEquals(2, spliced8.depth());
         assertEquals(1, spliced8.value1().value1());
         assertEquals(13, spliced8.value2().value6());
 
         Tuple2<Tuple8<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer>,Tuple5<Integer,
-                Integer,Integer,Integer,Integer>> spliced9 = tuple.splice(9);
+                Integer,Integer,Integer,Integer>> spliced9 = tuple.spliceAt9();
         assertEquals(2, spliced9.depth());
         assertEquals(1, spliced9.value1().value1());
         assertEquals(13, spliced9.value2().value5());
 
         Tuple2<Tuple9<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer>,
-                Tuple4<Integer,Integer,Integer,Integer>> spliced10 = tuple.splice(10);
+                Tuple4<Integer,Integer,Integer,Integer>> spliced10 = tuple.spliceAt10();
         assertEquals(2, spliced10.depth());
         assertEquals(1, spliced10.value1().value1());
         assertEquals(13, spliced10.value2().value4());
 
         Tuple2<Tuple10<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer>,
-                Tuple3<Integer,Integer,Integer>> spliced11 = tuple.splice(11);
+                Tuple3<Integer,Integer,Integer>> spliced11 = tuple.spliceAt11();
         assertEquals(2, spliced11.depth());
         assertEquals(1, spliced11.value1().value1());
         assertEquals(13, spliced11.value2().value3());
 
         Tuple2<Tuple11<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer>,
-                Tuple2<Integer,Integer>> spliced12 = tuple.splice(12);
+                Tuple2<Integer,Integer>> spliced12 = tuple.spliceAt12();
         assertEquals(2, spliced12.depth());
         assertEquals(1, spliced12.value1().value1());
         assertEquals(13, spliced12.value2().value2());
 
         Tuple2<Tuple12<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer>,
-                Tuple1<Integer>> spliced13 = tuple.splice(13);
+                Tuple1<Integer>> spliced13 = tuple.spliceAt13();
         assertEquals(2, spliced13.depth());
         assertEquals(1, spliced13.value1().value1());
         assertEquals(13, spliced13.value2().value1());

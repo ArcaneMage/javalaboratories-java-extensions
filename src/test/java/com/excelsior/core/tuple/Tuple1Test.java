@@ -117,9 +117,9 @@ public class Tuple1Test {
     }
 
     @Test
-    public void testSplice_Pass() {
+    public void testSpliceAt_Pass() {
         Tuple2<Tuple0,Tuple1<Integer>>
-                spliced1 = tuple.splice(1);
+                spliced1 = tuple.spliceAt1();
         assertEquals(2, spliced1.depth());
         assertEquals(0, spliced1.value1().depth());
         assertEquals(1, spliced1.value2().value1());
