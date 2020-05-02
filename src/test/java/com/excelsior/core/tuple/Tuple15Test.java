@@ -40,13 +40,51 @@ public class Tuple15Test {
     }
 
     @Test
-    public void testAdd_Pass() {
-        Tuple16 tuple3_1 = tuple.add(1,"a");
-        assertEquals(Tuple.of("a",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),tuple3_1);
+    public void testAddAt_Pass() {
+        Tuple16 tuple16 = tuple.addAt1("a");
+        assertEquals(Tuple.of("a",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),tuple16);
 
-        // Test add element at end
-        Tuple16 tuple3_2 = tuple.add(15,"a");
-        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,"a",15),tuple3_2);
+        tuple16 = tuple.addAt2("a");
+        assertEquals(Tuple.of(1,"a",2,3,4,5,6,7,8,9,10,11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt3("a");
+        assertEquals(Tuple.of(1,2,"a",3,4,5,6,7,8,9,10,11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt4("a");
+        assertEquals(Tuple.of(1,2,3,"a",4,5,6,7,8,9,10,11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt5("a");
+        assertEquals(Tuple.of(1,2,3,4,"a",5,6,7,8,9,10,11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt6("a");
+        assertEquals(Tuple.of(1,2,3,4,5,"a",6,7,8,9,10,11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt7("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,"a",7,8,9,10,11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt8("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,"a",8,9,10,11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt9("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,"a",9,10,11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt10("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,"a",10,11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt11("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,"a",11,12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt12("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,"a",12,13,14,15),tuple16);
+
+        tuple16 = tuple.addAt13("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,"a",13,14,15),tuple16);
+
+        tuple16 = tuple.addAt14("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,"a",14,15),tuple16);
+
+        tuple16 = tuple.addAt15("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,"a",15),tuple16);
     }
 
     @Test

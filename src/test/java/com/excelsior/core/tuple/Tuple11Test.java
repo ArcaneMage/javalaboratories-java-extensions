@@ -36,21 +36,39 @@ public class Tuple11Test {
     }
 
     @Test
-    public void testAdd_Pass() {
-        Tuple12 tuple3 = tuple.add(1,"a");
-        assertEquals(Tuple.of("a",1,2,3,4,5,6,7,8,9,10,11),tuple3);
+    public void testAddAt_Pass() {
+        Tuple12 tuple12 = tuple.addAt1("a");
+        assertEquals(Tuple.of("a",1,2,3,4,5,6,7,8,9,10,11),tuple12);
 
-        Tuple13 tuple4 = tuple3.add(2,"b");
-        assertEquals(Tuple.of("a","b",1,2,3,4,5,6,7,8,9,10,11),tuple4);
+        tuple12 = tuple.addAt2("a");
+        assertEquals(Tuple.of(1,"a",2,3,4,5,6,7,8,9,10,11),tuple12);
 
-        Tuple14 tuple5 = tuple4.add(3,"c");
-        assertEquals(Tuple.of("a","b","c",1,2,3,4,5,6,7,8,9,10,11),tuple5);
+        tuple12 = tuple.addAt3("a");
+        assertEquals(Tuple.of(1,2,"a",3,4,5,6,7,8,9,10,11),tuple12);
 
-        Tuple15 tuple6 = tuple5.add(4,"d");
-        assertEquals(Tuple.of("a","b","c","d",1,2,3,4,5,6,7,8,9,10,11),tuple6);
+        tuple12 = tuple.addAt4("a");
+        assertEquals(Tuple.of(1,2,3,"a",4,5,6,7,8,9,10,11),tuple12);
 
-        Tuple16 tuple7 = tuple6.add(5,"e");
-        assertEquals(Tuple.of("a","b","c","d","e",1,2,3,4,5,6,7,8,9,10,11),tuple7);
+        tuple12 = tuple.addAt5("a");
+        assertEquals(Tuple.of(1,2,3,4,"a",5,6,7,8,9,10,11),tuple12);
+
+        tuple12 = tuple.addAt6("a");
+        assertEquals(Tuple.of(1,2,3,4,5,"a",6,7,8,9,10,11),tuple12);
+
+        tuple12 = tuple.addAt7("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,"a",7,8,9,10,11),tuple12);
+
+        tuple12 = tuple.addAt8("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,"a",8,9,10,11),tuple12);
+
+        tuple12 = tuple.addAt9("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,"a",9,10,11),tuple12);
+
+        tuple12 = tuple.addAt10("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,"a",10,11),tuple12);
+
+        tuple12 = tuple.addAt11("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,"a",11),tuple12);
     }
     
     @Test

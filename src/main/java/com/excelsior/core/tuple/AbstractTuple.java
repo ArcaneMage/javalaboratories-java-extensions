@@ -161,7 +161,7 @@ public abstract class AbstractTuple implements Tuple  {
      * {@inheritDoc}
      */
     @Override
-    public <Q,R extends Tuple> R add(int position, Q value) {
+    public <Q,R extends Tuple> R add(int position, final Q value) {
         if ( this.depth + 1 > MAX_DEPTH )
             throw new TupleOverflowException();
         if ( position == 1 ) {
@@ -192,7 +192,7 @@ public abstract class AbstractTuple implements Tuple  {
      * {@inheritDoc}
      */
     @Override
-    public <Q extends Tuple, R extends Tuple> R join(Q that) {
+    public <Q extends Tuple, R extends Tuple> R join(final Q that) {
         Objects.requireNonNull(that);
         int depth = this.depth + that.depth();
         if ( depth > MAX_DEPTH )

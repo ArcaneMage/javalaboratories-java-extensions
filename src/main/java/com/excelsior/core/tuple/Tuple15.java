@@ -136,6 +136,110 @@ public final class Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> e
         return t15;
     }
 
+    /**
+     * Add value position 1
+     */
+    public <T> Tuple16<T,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> addAt1(T value) {
+        return add(1,value);
+    }
+
+    /**
+     * Add value position 2
+     */
+    public <T> Tuple16<T1,T,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> addAt2(T value) {
+        return add(2,value);
+    }
+
+    /**
+     * Add value position 3
+     */
+    public <T> Tuple16<T1,T2,T,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> addAt3(T value) {
+        return add(3,value);
+    }
+
+    /**
+     * Add value position 4
+     */
+    public <T> Tuple16<T1,T2,T3,T,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> addAt4(T value) {
+        return add(4,value);
+    }
+
+    /**
+     * Add value position 5
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> addAt5(T value) {
+        return add(5,value);
+    }
+
+    /**
+     * Add value position 6
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> addAt6(T value) {
+        return add(6,value);
+    }
+
+    /**
+     * Add value position 7
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T,T7,T8,T9,T10,T11,T12,T13,T14,T15> addAt7(T value) {
+        return add(7,value);
+    }
+
+    /**
+     * Add value position 8
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T7,T,T8,T9,T10,T11,T12,T13,T14,T15> addAt8(T value) {
+        return add(8,value);
+    }
+
+    /**
+     * Add value position 9
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T,T9,T10,T11,T12,T13,T14,T15> addAt9(T value) {
+        return add(9,value);
+    }
+
+    /**
+     * Add value position 10
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T,T10,T11,T12,T13,T14,T15> addAt10(T value) {
+        return add(10,value);
+    }
+
+    /**
+     * Add value position 11
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T,T11,T12,T13,T14,T15> addAt11(T value) {
+        return add(11,value);
+    }
+
+    /**
+     * Add value position 12
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T,T12,T13,T14,T15> addAt12(T value) {
+        return add(12,value);
+    }
+
+    /**
+     * Add value position 13
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T,T13,T14,T15> addAt13(T value) {
+        return add(13,value);
+    }
+
+    /**
+     * Add value position 14
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T,T14,T15> addAt14(T value) {
+        return add(14,value);
+    }
+
+    /**
+     * Add value position 15
+     */
+    public <T> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T,T15> addAt15(T value) {
+        return add(15,value);
+    }
 
     /**
      * Joins a tuple to this tuple.

@@ -195,7 +195,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * @return a new tuple with the appropriate type and depth to accommodate
      * the added value.
      */
-    <Q,R extends Tuple> R add(int position, Q value);
+    <Q,R extends Tuple> R add(int position, final Q value);
 
 
     /**
@@ -254,7 +254,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * @param <R> the type of the new tuple returned.
      * @return a new tuple with the appropriate depth to house the value.
      */
-    default <Q, R extends Tuple> R join(Q value) {
+    default <Q, R extends Tuple> R join(final Q value) {
         return join(Tuple.of(value));
     }
 
@@ -273,8 +273,9 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * @param <Q> the type of the tuple.
      * @param <R> the type of the new tuple returned.
      * @return a new tuple with the appropriate depth to house the value.
+     * @throws NullPointerException if {@code that} is null.
      */
-    <Q extends Tuple, R extends Tuple> R join(Q that);
+    <Q extends Tuple, R extends Tuple> R join(final Q that);
 
     /**
      * Splices or cuts the tuple into two smaller tuples at {@code position}.

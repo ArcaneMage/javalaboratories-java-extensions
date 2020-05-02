@@ -40,12 +40,48 @@ public class Tuple14Test {
     }
 
     @Test
-    public void testAdd_Pass() {
-        Tuple15 tuple3 = tuple.add(1,"a");
-        assertEquals(Tuple.of("a",1,2,3,4,5,6,7,8,9,10,11,12,13,14),tuple3);
+    public void testAddAt_Pass() {
+        Tuple15 tuple15 = tuple.addAt1("a");
+        assertEquals(Tuple.of("a",1,2,3,4,5,6,7,8,9,10,11,12,13,14),tuple15);
 
-        Tuple16 tuple4 = tuple3.add(2,"b");
-        assertEquals(Tuple.of("a","b",1,2,3,4,5,6,7,8,9,10,11,12,13,14),tuple4);
+        tuple15 = tuple.addAt2("a");
+        assertEquals(Tuple.of(1,"a",2,3,4,5,6,7,8,9,10,11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt3("a");
+        assertEquals(Tuple.of(1,2,"a",3,4,5,6,7,8,9,10,11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt4("a");
+        assertEquals(Tuple.of(1,2,3,"a",4,5,6,7,8,9,10,11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt5("a");
+        assertEquals(Tuple.of(1,2,3,4,"a",5,6,7,8,9,10,11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt6("a");
+        assertEquals(Tuple.of(1,2,3,4,5,"a",6,7,8,9,10,11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt7("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,"a",7,8,9,10,11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt8("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,"a",8,9,10,11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt9("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,"a",9,10,11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt10("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,"a",10,11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt11("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,"a",11,12,13,14),tuple15);
+
+        tuple15 = tuple.addAt12("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,"a",12,13,14),tuple15);
+
+        tuple15 = tuple.addAt13("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,"a",13,14),tuple15);
+
+        tuple15 = tuple.addAt14("a");
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,"a",14),tuple15);
     }
     
     @Test

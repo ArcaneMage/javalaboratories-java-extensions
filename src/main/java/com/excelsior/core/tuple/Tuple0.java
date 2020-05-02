@@ -28,7 +28,7 @@ public class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public <Q, R extends Tuple> R add(int position, Q value) {
+    public <Q, R extends Tuple> R add(int position, final Q value) {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
@@ -68,7 +68,7 @@ public class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public <Q extends Tuple, R extends Tuple> R join(Q that) {
+    public <Q extends Tuple, R extends Tuple> R join(final Q that) {
         Objects.requireNonNull(that);
         Nullable<R> result = Tuples.fromIterable(that,that.depth());
         return result.get();

@@ -66,6 +66,45 @@ public final class Tuple5<T1,T2,T3,T4,T5> extends AbstractTuple {
         return t5;
     }
 
+    /**
+     * Add value at position 1
+     */
+    public <T> Tuple6<T,T1,T2,T3,T4,T5> addAt1(T value) {
+        return add(1,value);
+    }
+
+    /**
+     * Add value at position 2
+     */
+    public <T> Tuple6<T1,T,T2,T3,T4,T5> addAt2(T value) {
+        return add(2,value);
+    }
+
+    /**
+     * Add value at position 3
+     */
+    public <T> Tuple6<T1,T2,T,T3,T4,T5> addAt3(T value) {
+        return add(3,value);
+    }
+
+    /**
+     * Add value at position 4
+     */
+    public <T> Tuple6<T1,T2,T3,T,T4,T5> addAt4(T value) {
+        return add(4,value);
+    }
+
+    /**
+     * Add value at position 5
+     */
+    public <T> Tuple6<T1,T2,T3,T4,T,T5> addAt5(T value) {
+        return add(5,value);
+    }
+
+    /**
+     * Joins a value to this tuple.
+     * @param tuple a tuple object.
+     */
     public Tuple5<T1,T2,T3,T4,T5> join (Tuple0 tuple) {
         return super.join(tuple);
     }

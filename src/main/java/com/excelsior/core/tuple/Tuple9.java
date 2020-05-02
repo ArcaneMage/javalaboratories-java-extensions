@@ -95,6 +95,69 @@ public final class Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9> extends AbstractTuple {
     }
 
     /**
+     * Add value at position 1
+     */
+    public <T> Tuple10<T,T1,T2,T3,T4,T5,T6,T7,T8,T9> addAt1(T value) {
+        return add(1,value);
+    }
+
+    /**
+     * Add value at position 2
+     */
+    public <T> Tuple10<T1,T,T2,T3,T4,T5,T6,T7,T8,T9> addAt2(T value) {
+        return add(2,value);
+    }
+
+    /**
+     * Add value at position 3
+     */
+    public <T> Tuple10<T1,T2,T,T3,T4,T5,T6,T7,T8,T9> addAt3(T value) {
+        return add(3,value);
+    }
+
+    /**
+     * Add value at position 4
+     */
+    public <T> Tuple10<T1,T2,T3,T,T4,T5,T6,T7,T8,T9> addAt4(T value) {
+        return add(4,value);
+    }
+
+    /**
+     * Add value at position 5
+     */
+    public <T> Tuple10<T1,T2,T3,T4,T,T5,T6,T7,T8,T9> addAt5(T value) {
+        return add(5,value);
+    }
+
+    /**
+     * Add value at position 6
+     */
+    public <T> Tuple10<T1,T2,T3,T4,T5,T,T6,T7,T8,T9> addAt6(T value) {
+        return add(6,value);
+    }
+
+    /**
+     * Add value at position 7
+     */
+    public <T> Tuple10<T1,T2,T3,T4,T5,T6,T,T7,T8,T9> addAt7(T value) {
+        return add(7,value);
+    }
+
+    /**
+     * Add value at position 8
+     */
+    public <T> Tuple10<T1,T2,T3,T4,T5,T6,T7,T,T8,T9> addAt8(T value) {
+        return add(8,value);
+    }
+
+    /**
+     * Add value at position 9
+     */
+    public <T> Tuple10<T1,T2,T3,T4,T5,T6,T7,T8,T,T9> addAt9(T value) {
+        return add(9,value);
+    }
+
+    /**
      * Joins a tuple to this tuple.
      * @param tuple a tuple object.
      */

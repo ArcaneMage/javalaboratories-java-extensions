@@ -48,6 +48,20 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
     }
 
     /**
+     * Add value at position 1
+     */
+    public <T> Tuple3<T,T1,T2> addAt1(T value) {
+        return add(1,value);
+    }
+
+    /**
+     * Add value at position 2
+     */
+    public <T> Tuple3<T1,T,T2> addAt2(T value) {
+        return add(2,value);
+    }
+
+    /**
      * Joins a tuple to this tuple.
      * @param tuple a tuple object.
      */
