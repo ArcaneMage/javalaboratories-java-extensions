@@ -68,6 +68,39 @@ public class Tuple10Test {
     }
     
     @Test
+    public void testHopTo_Pass() {
+        Tuple10 tuple10 = tuple.hopTo1();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10), tuple10);
+
+        Tuple9 tuple9 = tuple.hopTo2();
+        assertEquals(Tuple.of(2,3,4,5,6,7,8,9,10), tuple9);
+
+        Tuple8 tuple8 = tuple.hopTo3();
+        assertEquals(Tuple.of(3,4,5,6,7,8,9,10), tuple8);
+
+        Tuple7 tuple7 = tuple.hopTo4();
+        assertEquals(Tuple.of(4,5,6,7,8,9,10), tuple7);
+
+        Tuple6 tuple6 = tuple.hopTo5();
+        assertEquals(Tuple.of(5,6,7,8,9,10), tuple6);
+
+        Tuple5 tuple5 = tuple.hopTo6();
+        assertEquals(Tuple.of(6,7,8,9,10), tuple5);
+
+        Tuple4 tuple4 = tuple.hopTo7();
+        assertEquals(Tuple.of(7,8,9,10), tuple4);
+
+        Tuple3 tuple3 = tuple.hopTo8();
+        assertEquals(Tuple.of(8,9,10), tuple3);
+
+        Tuple2 tuple2 = tuple.hopTo9();
+        assertEquals(Tuple.of(9,10), tuple2);
+
+        Tuple1 tuple1 = tuple.hopTo10();
+        assertEquals(Tuple.of(10), tuple1);
+    }
+    
+    @Test
     public void testJoin_Pass() {
         Tuple10 aTuple10 = tuple.join(Tuple.of());
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10),aTuple10);

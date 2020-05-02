@@ -40,15 +40,15 @@ public class Tuple3Test {
     }
 
     @Test
-    public void testHop_Pass() {
-        Tuple1 tuple1 = tuple.hop(3);
-        assertEquals(Tuple.of(3),tuple1);
+    public void testHopTo_Pass() {
+        Tuple3 tuple3 = tuple.hopTo1();
+        assertEquals(Tuple.of(1,2,3), tuple3);
 
-        Tuple2 tuple2 = tuple.hop(2);
-        assertEquals(Tuple.of(2,3),tuple2);
+        Tuple2 tuple2 = tuple.hopTo2();
+        assertEquals(Tuple.of(2,3), tuple2);
 
-        Tuple3 tuple3 = tuple.hop(1);
-        assertEquals(Tuple.of(1,2,3),tuple3);
+        Tuple1 tuple1 = tuple.hopTo3();
+        assertEquals(Tuple.of(3), tuple1);
     }
 
     @Test

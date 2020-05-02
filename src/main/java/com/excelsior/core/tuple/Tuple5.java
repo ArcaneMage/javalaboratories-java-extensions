@@ -102,6 +102,41 @@ public final class Tuple5<T1,T2,T3,T4,T5> extends AbstractTuple {
     }
 
     /**
+     * Hop to position/value 1
+     */
+    public Tuple5<T1,T2,T3,T4,T5> hopTo1() {
+        return hop(1);
+    }
+
+    /**
+     * Hop to position/value 2
+     */
+    public Tuple4<T2,T3,T4,T5> hopTo2() {
+        return hop(2);
+    }
+
+    /**
+     * Hop to position/value 3
+     */
+    public Tuple3<T3,T4,T5> hopTo3() {
+        return hop(3);
+    }
+
+    /**
+     * Hop to position/value 4
+     */
+    public Tuple2<T4,T5> hopTo4() {
+        return hop(4);
+    }
+
+    /**
+     * Hop to position/value 5
+     */
+    public Tuple1<T5> hopTo5() {
+        return hop(5);
+    }
+
+    /**
      * Joins a value to this tuple.
      * @param tuple a tuple object.
      */
@@ -195,6 +230,41 @@ public final class Tuple5<T1,T2,T3,T4,T5> extends AbstractTuple {
      */
     public <T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple11<T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> tuple) {
         return super.join(tuple);
+    }
+
+    /**
+     * Splices at positions 1
+     */
+    public Tuple2<Tuple0,Tuple5<T1,T2,T3,T4,T5>> spliceAt1() {
+        return splice(1);
+    }
+
+    /**
+     * Splices at positions 2
+     */
+    public Tuple2<Tuple1<T1>,Tuple4<T2,T3,T4,T5>> spliceAt2() {
+        return splice(2);
+    }
+
+    /**
+     * Splices at positions 3
+     */
+    public Tuple2<Tuple2<T1,T2>,Tuple3<T3,T4,T5>> spliceAt3() {
+        return splice(3);
+    }
+
+    /**
+     * Splices at positions 4
+     */
+    public Tuple2<Tuple3<T1,T2,T3>,Tuple2<T4,T5>> spliceAt4() {
+        return splice(4);
+    }
+
+    /**
+     * Splices at positions 5
+     */
+    public Tuple2<Tuple4<T1,T2,T3,T4>,Tuple1<T5>> spliceAt5() {
+        return splice(5);
     }
 
     /**

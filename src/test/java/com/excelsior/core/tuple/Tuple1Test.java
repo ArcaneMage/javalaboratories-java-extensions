@@ -26,9 +26,15 @@ public class Tuple1Test {
     }
 
     @Test
-    public void testAdd_Pass() {
+    public void testAddAt_Pass() {
         Tuple2 tuple2 = tuple.addAt1("a");
         assertEquals(Tuple.of("a",1),tuple2);
+    }
+
+    @Test
+    public void testHopTo_Pass() {
+        Tuple1 tuple1 = tuple.hopTo1();
+        assertEquals(Tuple.of(1), tuple1);
     }
 
     @Test

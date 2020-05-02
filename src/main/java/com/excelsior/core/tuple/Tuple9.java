@@ -158,6 +158,69 @@ public final class Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9> extends AbstractTuple {
     }
 
     /**
+     * Hop to position/value 1
+     */
+    public Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9> hopTo1() {
+        return hop(1);
+    }
+
+    /**
+     * Hop to position/value 2
+     */
+    public Tuple8<T2,T3,T4,T5,T6,T7,T8,T9> hopTo2() {
+        return hop(2);
+    }
+
+    /**
+     * Hop to position/value 3
+     */
+    public Tuple7<T3,T4,T5,T6,T7,T8,T9> hopTo3() {
+        return hop(3);
+    }
+
+    /**
+     * Hop to position/value 4
+     */
+    public Tuple6<T4,T5,T6,T7,T8,T9> hopTo4() {
+        return hop(4);
+    }
+
+    /**
+     * Hop to position/value 5
+     */
+    public Tuple5<T5,T6,T7,T8,T9> hopTo5() {
+        return hop(5);
+    }
+
+    /**
+     * Hop to position/value 6
+     */
+    public Tuple4<T6,T7,T8,T9> hopTo6() {
+        return hop(6);
+    }
+
+    /**
+     * Hop to position/value 7
+     */
+    public Tuple3<T7,T8,T9> hopTo7() {
+        return hop(7);
+    }
+
+    /**
+     * Hop to position/value 8
+     */
+    public Tuple2<T8,T9> hopTo8() {
+        return hop(8);
+    }
+
+    /**
+     * Hop to position/value 9
+     */
+    public Tuple1<T9> hopTo9() {
+        return hop(9);
+    }
+
+    /**
      * Joins a tuple to this tuple.
      * @param tuple a tuple object.
      */
@@ -219,6 +282,69 @@ public final class Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9> extends AbstractTuple {
      */
     public <T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple7<T10,T11,T12,T13,T14,T15,T16> tuple) {
         return super.join(tuple);
+    }
+
+    /**
+     * Splices at positions 1
+     */
+    public Tuple2<Tuple0,Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9>> spliceAt1() {
+        return splice(1);
+    }
+
+    /**
+     * Splices at positions 2
+     */
+    public Tuple2<Tuple1<T1>,Tuple8<T2,T3,T4,T5,T6,T7,T8,T9>> spliceAt2() {
+        return splice(2);
+    }
+
+    /**
+     * Splices at positions 3
+     */
+    public Tuple2<Tuple2<T1,T2>,Tuple7<T3,T4,T5,T6,T7,T8,T9>> spliceAt3() {
+        return splice(3);
+    }
+
+    /**
+     * Splices at positions 4
+     */
+    public Tuple2<Tuple3<T1,T2,T3>,Tuple6<T4,T5,T6,T7,T8,T9>> spliceAt4() {
+        return splice(4);
+    }
+
+    /**
+     * Splices at positions 5
+     */
+    public Tuple2<Tuple4<T1,T2,T3,T4>,Tuple5<T5,T6,T7,T8,T9>> spliceAt5() {
+        return splice(5);
+    }
+
+    /**
+     * Splices at positions 6
+     */
+    public Tuple2<Tuple5<T1,T2,T3,T4,T5>,Tuple4<T6,T7,T8,T9>> spliceAt6() {
+        return splice(6);
+    }
+
+    /**
+     * Splices at positions 7
+     */
+    public Tuple2<Tuple6<T1,T2,T3,T4,T5,T6>,Tuple3<T7,T8,T9>> spliceAt7() {
+        return splice(7);
+    }
+
+    /**
+     * Splices at positions 8
+     */
+    public Tuple2<Tuple7<T1,T2,T3,T4,T5,T6,T7>,Tuple2<T8,T9>> spliceAt8() {
+        return splice(8);
+    }
+
+    /**
+     * Splices at positions 9
+     */
+    public Tuple2<Tuple8<T1,T2,T3,T4,T5,T6,T7,T8>,Tuple1<T9>> spliceAt9() {
+        return splice(9);
     }
 
     /**

@@ -144,6 +144,62 @@ public final class Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> extends AbstractTuple {
     }
 
     /**
+     * Hop to position/value 1
+     */
+    public Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> hopTo1() {
+        return hop(1);
+    }
+
+    /**
+     * Hop to position/value 2
+     */
+    public Tuple7<T2,T3,T4,T5,T6,T7,T8> hopTo2() {
+        return hop(2);
+    }
+
+    /**
+     * Hop to position/value 3
+     */
+    public Tuple6<T3,T4,T5,T6,T7,T8> hopTo3() {
+        return hop(3);
+    }
+
+    /**
+     * Hop to position/value 4
+     */
+    public Tuple5<T4,T5,T6,T7,T8> hopTo4() {
+        return hop(4);
+    }
+
+    /**
+     * Hop to position/value 5
+     */
+    public Tuple4<T5,T6,T7,T8> hopTo5() {
+        return hop(5);
+    }
+
+    /**
+     * Hop to position/value 6
+     */
+    public Tuple3<T6,T7,T8> hopTo6() {
+        return hop(6);
+    }
+
+    /**
+     * Hop to position/value 7
+     */
+    public Tuple2<T7,T8> hopTo7() {
+        return hop(7);
+    }
+
+    /**
+     * Hop to position/value 8
+     */
+    public Tuple1<T8> hopTo8() {
+        return hop(8);
+    }
+
+    /**
      * Joins a tuple to this tuple.
      * @param tuple a tuple object.
      */
@@ -215,6 +271,61 @@ public final class Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> extends AbstractTuple {
         return super.join(tuple);
     }
 
+    /**
+     * Splices at positions 1
+     */
+    public Tuple2<Tuple0,Tuple8<T1,T2,T3,T4,T5,T6,T7,T8>> spliceAt1() {
+        return splice(1);
+    }
+
+    /**
+     * Splices at positions 2
+     */
+    public Tuple2<Tuple1<T1>,Tuple7<T2,T3,T4,T5,T6,T7,T8>> spliceAt2() {
+        return splice(2);
+    }
+
+    /**
+     * Splices at positions 3
+     */
+    public Tuple2<Tuple2<T1,T2>,Tuple6<T3,T4,T5,T6,T7,T8>> spliceAt3() {
+        return splice(3);
+    }
+
+    /**
+     * Splices at positions 4
+     */
+    public Tuple2<Tuple3<T1,T2,T3>,Tuple5<T4,T5,T6,T7,T8>> spliceAt4() {
+        return splice(4);
+    }
+
+    /**
+     * Splices at positions 5
+     */
+    public Tuple2<Tuple4<T1,T2,T3,T4>,Tuple4<T5,T6,T7,T8>> spliceAt5() {
+        return splice(5);
+    }
+
+    /**
+     * Splices at positions 6
+     */
+    public Tuple2<Tuple5<T1,T2,T3,T4,T5>,Tuple3<T6,T7,T8>> spliceAt6() {
+        return splice(6);
+    }
+
+    /**
+     * Splices at positions 7
+     */
+    public Tuple2<Tuple6<T1,T2,T3,T4,T5,T6>,Tuple2<T7,T8>> spliceAt7() {
+        return splice(7);
+    }
+
+    /**
+     * Splices at positions 8
+     */
+    public Tuple2<Tuple7<T1,T2,T3,T4,T5,T6,T7>,Tuple1<T8>> spliceAt8() {
+        return splice(8);
+    }
 
     /**
      * Transform an element in this tuple into another object.

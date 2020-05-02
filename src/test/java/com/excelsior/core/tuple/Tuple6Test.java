@@ -50,6 +50,27 @@ public class Tuple6Test {
         tuple7 = tuple.addAt6("a");
         assertEquals(Tuple.of(1,2,3,4,5,"a",6),tuple7);
     }
+
+    @Test
+    public void testHopTo_Pass() {
+        Tuple6 tuple6 = tuple.hopTo1();
+        assertEquals(Tuple.of(1,2,3,4,5,6), tuple6);
+
+        Tuple5 tuple5 = tuple.hopTo2();
+        assertEquals(Tuple.of(2,3,4,5,6), tuple5);
+
+        Tuple4 tuple4 = tuple.hopTo3();
+        assertEquals(Tuple.of(3,4,5,6), tuple4);
+
+        Tuple3 tuple3 = tuple.hopTo4();
+        assertEquals(Tuple.of(4,5,6), tuple3);
+
+        Tuple2 tuple2 = tuple.hopTo5();
+        assertEquals(Tuple.of(5,6), tuple2);
+
+        Tuple1 tuple1 = tuple.hopTo6();
+        assertEquals(Tuple.of(6), tuple1);
+    }    
     
     @Test
     public void testJoin_Pass() {

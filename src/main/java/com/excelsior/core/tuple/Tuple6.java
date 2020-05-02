@@ -114,7 +114,49 @@ public final class Tuple6<T1,T2,T3,T4,T5,T6> extends AbstractTuple {
     public <T> Tuple7<T1,T2,T3,T4,T5,T,T6> addAt6(T value) {
         return add(6,value);
     }
+    
+    /**
+     * Hop to position/value 1
+     */
+    public Tuple6<T1,T2,T3,T4,T5,T6> hopTo1() {
+        return hop(1);
+    }
 
+    /**
+     * Hop to position/value 2
+     */
+    public Tuple5<T2,T3,T4,T5,T6> hopTo2() {
+        return hop(2);
+    }
+
+    /**
+     * Hop to position/value 3
+     */
+    public Tuple4<T3,T4,T5,T6> hopTo3() {
+        return hop(3);
+    }
+
+    /**
+     * Hop to position/value 4
+     */
+    public Tuple3<T4,T5,T6> hopTo4() {
+        return hop(4);
+    }
+
+    /**
+     * Hop to position/value 5
+     */
+    public Tuple2<T5,T6> hopTo5() {
+        return hop(5);
+    }
+
+    /**
+     * Hop to position/value 6
+     */
+    public Tuple1<T6> hopTo6() {
+        return hop(6);
+    }
+    
     /**
      * Joins a tuple to this tuple.
      * @param tuple a tuple object.
@@ -201,6 +243,48 @@ public final class Tuple6<T1,T2,T3,T4,T5,T6> extends AbstractTuple {
      */
     public <T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple10<T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> tuple) {
         return super.join(tuple);
+    }
+
+    /**
+     * Splices at positions 1
+     */
+    public Tuple2<Tuple0,Tuple6<T1,T2,T3,T4,T5,T6>> spliceAt1() {
+        return splice(1);
+    }
+
+    /**
+     * Splices at positions 2
+     */
+    public Tuple2<Tuple1<T1>,Tuple5<T2,T3,T4,T5,T6>> spliceAt2() {
+        return splice(2);
+    }
+
+    /**
+     * Splices at positions 3
+     */
+    public Tuple2<Tuple2<T1,T2>,Tuple4<T3,T4,T5,T6>> spliceAt3() {
+        return splice(3);
+    }
+
+    /**
+     * Splices at positions 4
+     */
+    public Tuple2<Tuple3<T1,T2,T3>,Tuple3<T4,T5,T6>> spliceAt4() {
+        return splice(4);
+    }
+
+    /**
+     * Splices at positions 5
+     */
+    public Tuple2<Tuple4<T1,T2,T3,T4>,Tuple2<T5,T6>> spliceAt5() {
+        return splice(5);
+    }
+
+    /**
+     * Splices at positions 6
+     */
+    public Tuple2<Tuple5<T1,T2,T3,T4,T5>,Tuple1<T6>> spliceAt6() {
+        return splice(6);
     }
 
     /**

@@ -62,6 +62,20 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
     }
 
     /**
+     * Hop to position/value 1
+     */
+    public Tuple2<T1,T2> hopTo1() {
+        return hop(1);
+    }
+
+    /**
+     * Hop to position/value 2
+     */
+    public Tuple1<T2> hopTo2() {
+        return hop(2);
+    }
+
+    /**
      * Joins a tuple to this tuple.
      * @param tuple a tuple object.
      */
@@ -180,6 +194,20 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      */
     public <T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> join(Tuple14<T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> tuple) {
         return super.join(tuple);
+    }
+
+    /**
+     * Splices at positions 1
+     */
+    public Tuple2<Tuple0,Tuple2<T1,T2>> spliceAt1() {
+        return splice(1);
+    }
+
+    /**
+     * Splices at positions 2
+     */
+    public Tuple2<Tuple1<T1>,Tuple1<T2>> spliceAt2() {
+        return splice(2);
     }
 
     /**

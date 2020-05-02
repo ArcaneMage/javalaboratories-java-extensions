@@ -233,6 +233,15 @@ public class Tuple2Test {
     }
 
     @Test
+    public void testHopTo_Pass() {
+        Tuple2 tuple2 = tuple_2.hopTo1();
+        assertEquals(Tuple.of(1,2), tuple2);
+
+        Tuple1 tuple1 = tuple_2.hopTo2();
+        assertEquals(Tuple.of(2), tuple1);
+    }
+
+    @Test
     public void testSplice_Pass() {
         Tuple2<Tuple0,Tuple2<Integer,Integer>>
                 spliced1 = tuple_2.splice(1);
