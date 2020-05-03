@@ -335,6 +335,14 @@ public class Tuple2Test {
         assertThrows(IllegalArgumentException.class, () -> tuple_2.remove("does-not-exist"));
     }
 
+    @Test
+    public void testTruncateAt_Pass() {
+        Tuple0 aTuple0 = tuple_2.truncateAt1();
+        assertEquals(Tuple.of(),aTuple0);
+
+        Tuple1 aTuple1 = tuple_2.truncateAt2();
+        assertEquals(Tuple.of(1),aTuple1);
+    }
 
     @Test
     public void testTestTransform_Pass() {

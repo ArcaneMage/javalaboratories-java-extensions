@@ -197,36 +197,8 @@ public class Tuple8Test {
         Tuple7 tuple7_3 = tuple.remove(1);
         assertEquals(Tuple.of(2,3,4,5,6,7,8),tuple7_3);
     }
-    
-    @Test
-    public void testTruncate_Pass() {
-        Tuple0 aTuple0 = tuple.truncate(1);
-        assertEquals(Tuple.of(),aTuple0);
-
-        Tuple1 aTuple1 = tuple.truncate(2);
-        assertEquals(Tuple.of(1),aTuple1);
-
-        Tuple2 aTuple2 = tuple.truncate(3);
-        assertEquals(Tuple.of(1,2),aTuple2);
-
-        Tuple3 aTuple3 = tuple.truncate(4);
-        assertEquals(Tuple.of(1,2,3),aTuple3);
-
-        Tuple4 aTuple4 = tuple.truncate(5);
-        assertEquals(Tuple.of(1,2,3,4),aTuple4);
-
-        Tuple5 aTuple5 = tuple.truncate(6);
-        assertEquals(Tuple.of(1,2,3,4,5),aTuple5);
-
-        Tuple6 aTuple6 = tuple.truncate(7);
-        assertEquals(Tuple.of(1,2,3,4,5,6),aTuple6);
-
-        Tuple7 aTuple7 = tuple.truncate(8);
-        assertEquals(Tuple.of(1,2,3,4,5,6,7),aTuple7);
-    }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testTestTransform_Pass() {
         Tuple8 aTuple8;
 
@@ -254,4 +226,31 @@ public class Tuple8Test {
         aTuple8 = tuple.transform8(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,0),aTuple8);
      }
+
+    @Test
+    public void testTruncateAt_Pass() {
+        Tuple0 aTuple0 = tuple.truncateAt1();
+        assertEquals(Tuple.of(),aTuple0);
+
+        Tuple1 aTuple1 = tuple.truncateAt2();
+        assertEquals(Tuple.of(1),aTuple1);
+
+        Tuple2 aTuple2 = tuple.truncateAt3();
+        assertEquals(Tuple.of(1,2),aTuple2);
+
+        Tuple3 aTuple3 = tuple.truncateAt4();
+        assertEquals(Tuple.of(1,2,3),aTuple3);
+
+        Tuple4 aTuple4 = tuple.truncateAt5();
+        assertEquals(Tuple.of(1,2,3,4),aTuple4);
+
+        Tuple5 aTuple5 = tuple.truncateAt6();
+        assertEquals(Tuple.of(1,2,3,4,5),aTuple5);
+
+        Tuple6 aTuple6 = tuple.truncateAt7();
+        assertEquals(Tuple.of(1,2,3,4,5,6),aTuple6);
+
+        Tuple7 aTuple7 = tuple.truncateAt8();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7),aTuple7);
+    }
 }

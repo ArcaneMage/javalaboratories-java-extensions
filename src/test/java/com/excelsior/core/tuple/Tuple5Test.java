@@ -168,27 +168,26 @@ public class Tuple5Test {
         Tuple4 tuple4_3 = tuple.remove(1);
         assertEquals(Tuple.of(2,3,4,5),tuple4_3);
     }
-    
+
     @Test
-    public void testTruncate_Pass() {
-        Tuple0 aTuple0 = tuple.truncate(1);
+    public void testTruncateAt_Pass() {
+        Tuple0 aTuple0 = tuple.truncateAt1();
         assertEquals(Tuple.of(),aTuple0);
 
-        Tuple1 aTuple1 = tuple.truncate(2);
+        Tuple1 aTuple1 = tuple.truncateAt2();
         assertEquals(Tuple.of(1),aTuple1);
 
-        Tuple2 aTuple2 = tuple.truncate(3);
+        Tuple2 aTuple2 = tuple.truncateAt3();
         assertEquals(Tuple.of(1,2),aTuple2);
 
-        Tuple3 aTuple3 = tuple.truncate(4);
+        Tuple3 aTuple3 = tuple.truncateAt4();
         assertEquals(Tuple.of(1,2,3),aTuple3);
 
-        Tuple4 aTuple4 = tuple.truncate(5);
+        Tuple4 aTuple4 = tuple.truncateAt5();
         assertEquals(Tuple.of(1,2,3,4),aTuple4);
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testTestTransform_Pass() {
         Tuple5 aTuple5;
 

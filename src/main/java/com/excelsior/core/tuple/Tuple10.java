@@ -466,4 +466,74 @@ public final class Tuple10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> extends AbstractTuple
     public <R> Tuple10<T1,T2,T3,T4,T5,T6,T7,T8,T9,R> transform10(Function<? super T10,? extends R> function) {
         return new Tuple10<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,function.apply(t10));
     }
+
+    /**
+     * Truncates tuples at position 1
+     */
+    public Tuple0 truncateAt1() {
+        return truncate(1);
+    }
+
+    /**
+     * Truncates tuples at position 2
+     */
+    public Tuple1<T1> truncateAt2() {
+        return truncate(2);
+    }
+
+    /**
+     * Truncates tuples at position 3
+     */
+    public Tuple2<T1,T2> truncateAt3() {
+        return truncate(3);
+    }
+
+    /**
+     * Truncates tuples at position 4
+     */
+    public Tuple3<T1,T2,T3> truncateAt4() {
+        return truncate(4);
+    }
+
+    /**
+     * Truncates tuples at position 5
+     */
+    public Tuple4<T1,T2,T3,T4> truncateAt5() {
+        return truncate(5);
+    }
+
+    /**
+     * Truncates tuples at position 6
+     */
+    public Tuple5<T1,T2,T3,T4,T5> truncateAt6() {
+        return truncate(6);
+    }
+
+    /**
+     * Truncates tuples at position 7
+     */
+    public Tuple6<T1,T2,T3,T4,T5,T6> truncateAt7() {
+        return truncate(7);
+    }
+
+    /**
+     * Truncates tuples at position 8
+     */
+    public Tuple7<T1,T2,T3,T4,T5,T6,T7> truncateAt8() {
+        return truncate(8);
+    }
+
+    /**
+     * Truncates tuples at position 9
+     */
+    public Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> truncateAt9() {
+        return truncate(9);
+    }
+
+    /**
+     * Truncates tuples at position 10
+     */
+    public Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9> truncateAt10() {
+        return truncate(10);
+    }
 }

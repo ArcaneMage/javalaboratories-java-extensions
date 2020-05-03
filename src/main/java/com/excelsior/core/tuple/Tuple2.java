@@ -239,4 +239,18 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
     public <R> Tuple2<T1,R> transform2(Function<? super T2,? extends R> function) {
         return new Tuple2<>(t1,function.apply(t2));
     }
+
+    /**
+     * Truncates tuples at position 1
+     */
+    public Tuple0 truncateAt1() {
+        return truncate(1);
+    }
+
+    /**
+     * Truncates tuples at position 2
+     */
+    public Tuple1<T1> truncateAt2() {
+        return truncate(2);
+    }
 }

@@ -89,8 +89,8 @@ public class Tuple1Test {
     }
 
     @Test
-    public void testTruncate_Pass() {
-        Tuple0 aTuple0 = tuple.truncate(1);
+    public void testTruncateAt_Pass() {
+        Tuple0 aTuple0 = tuple.truncateAt1();
         assertEquals(Tuple.of(),aTuple0);
     }
 

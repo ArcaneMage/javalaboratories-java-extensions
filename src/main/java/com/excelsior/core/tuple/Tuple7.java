@@ -376,4 +376,53 @@ public final class Tuple7<T1,T2,T3,T4,T5,T6,T7> extends AbstractTuple {
     public <R> Tuple7<T1,T2,T3,T4,T5,T6,R> transform7(Function<? super T7,? extends R> function) {
         return new Tuple7<>(t1,t2,t3,t4,t5,t6,function.apply(t7));
     }
+
+    /**
+     * Truncates tuples at position 1
+     */
+    public Tuple0 truncateAt1() {
+        return truncate(1);
+    }
+
+    /**
+     * Truncates tuples at position 2
+     */
+    public Tuple1<T1> truncateAt2() {
+        return truncate(2);
+    }
+
+    /**
+     * Truncates tuples at position 3
+     */
+    public Tuple2<T1,T2> truncateAt3() {
+        return truncate(3);
+    }
+
+    /**
+     * Truncates tuples at position 4
+     */
+    public Tuple3<T1,T2,T3> truncateAt4() {
+        return truncate(4);
+    }
+
+    /**
+     * Truncates tuples at position 5
+     */
+    public Tuple4<T1,T2,T3,T4> truncateAt5() {
+        return truncate(5);
+    }
+
+    /**
+     * Truncates tuples at position 6
+     */
+    public Tuple5<T1,T2,T3,T4,T5> truncateAt6() {
+        return truncate(6);
+    }
+
+    /**
+     * Truncates tuples at position 7
+     */
+    public Tuple6<T1,T2,T3,T4,T5,T6> truncateAt7() {
+        return truncate(7);
+    }
 }

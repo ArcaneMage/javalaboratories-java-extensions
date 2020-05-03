@@ -316,4 +316,39 @@ public final class Tuple5<T1,T2,T3,T4,T5> extends AbstractTuple {
     public <R> Tuple5<T1,T2,T3,T4,R> transform5(Function<? super T5,? extends R> function) {
         return new Tuple5<>(t1,t2,t3,t4,function.apply(t5));
     }
+
+    /**
+     * Truncates tuples at position 1
+     */
+    public Tuple0 truncateAt1() {
+        return truncate(1);
+    }
+
+    /**
+     * Truncates tuples at position 2
+     */
+    public Tuple1<T1> truncateAt2() {
+        return truncate(2);
+    }
+
+    /**
+     * Truncates tuples at position 3
+     */
+    public Tuple2<T1,T2> truncateAt3() {
+        return truncate(3);
+    }
+
+    /**
+     * Truncates tuples at position 4
+     */
+    public Tuple3<T1,T2,T3> truncateAt4() {
+        return truncate(4);
+    }
+
+    /**
+     * Truncates tuples at position 5
+     */
+    public Tuple4<T1,T2,T3,T4> truncateAt5() {
+        return truncate(5);
+    }
 }
