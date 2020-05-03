@@ -20,11 +20,9 @@ import java.util.function.Function;
  * {@link java.io.Serializable} and {@link Iterable} interfaces.
  * <p>
  * This class and derived classes are immutable.
- * <p>
- * //TODO: Introduce copy constructors for tuples.
  */
 @SuppressWarnings("WeakerAccess")
-public abstract class AbstractTuple implements Tuple  {
+public abstract class AbstractTuple implements Tuple {
 
     public static final long serialVersionUID = 6627930356619406060L;
 
@@ -71,7 +69,7 @@ public abstract class AbstractTuple implements Tuple  {
         if ( this.equals(o) )
             return 0;
 
-        // Sort by depth first
+        // Compare by depth (sort by depth first)
         int result = this.depth() - o.depth();
         if ( result != 0 )
             return result;

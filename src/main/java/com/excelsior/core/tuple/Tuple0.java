@@ -130,7 +130,7 @@ public class Tuple0 implements Tuple {
         if ( o == null )
             throw new NullPointerException();
 
-        // Sort by depth first
+        // Compare by depth (sort by depth first)
         int result = this.depth() - o.depth();
         if ( result != 0 )
             return result;
