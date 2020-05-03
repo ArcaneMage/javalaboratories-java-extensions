@@ -314,7 +314,7 @@ public final class Tuple7<T1,T2,T3,T4,T5,T6,T7> extends AbstractTuple {
      * @param <R> return tye of the transformed element
      * @return resultant object transformed by this map function.
      */
-    public <R> R map(Function7<T1,T2,T3,T4,T5,T6,T7,R> function) {
+    public <R> R map(Function7<? super T1,? super T2,? super T3,? super T4,? super T5,? super T6,? super T7,? extends R> function) {
         return function.apply(t1,t2,t3,t4,t5,t6,t7);
     }
 
