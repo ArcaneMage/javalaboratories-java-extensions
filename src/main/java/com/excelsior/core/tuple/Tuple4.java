@@ -252,7 +252,7 @@ public final class Tuple4<T1,T2,T3,T4> extends AbstractTuple {
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple4<R,T2,T3,T4> transform1(Function<? super T1,? extends R> function) {
+    public <R> Tuple4<R,T2,T3,T4> mapAt1(Function<? super T1,? extends R> function) {
         return new Tuple4<>(function.apply(t1),t2,t3,t4);
     }
 
@@ -262,7 +262,7 @@ public final class Tuple4<T1,T2,T3,T4> extends AbstractTuple {
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple4<T1,R,T3,T4> transform2(Function<? super T2,? extends R> function) {
+    public <R> Tuple4<T1,R,T3,T4> mapAt2(Function<? super T2,? extends R> function) {
         return new Tuple4<>(t1,function.apply(t2),t3,t4);
     }
 
@@ -272,7 +272,7 @@ public final class Tuple4<T1,T2,T3,T4> extends AbstractTuple {
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple4<T1,T2,R,T4> transform3(Function<? super T3,? extends R> function) {
+    public <R> Tuple4<T1,T2,R,T4> mapAt3(Function<? super T3,? extends R> function) {
         return new Tuple4<>(t1,t2,function.apply(t3),t4);
     }
 
@@ -282,7 +282,7 @@ public final class Tuple4<T1,T2,T3,T4> extends AbstractTuple {
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple4<T1,T2,T3,R> transform4(Function<? super T4,? extends R> function) {
+    public <R> Tuple4<T1,T2,T3,R> mapAt4(Function<? super T4,? extends R> function) {
         return new Tuple4<>(t1,t2,t3,function.apply(t4));
     }
 

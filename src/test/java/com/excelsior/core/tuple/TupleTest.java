@@ -27,7 +27,7 @@ public class TupleTest {
 
 
         // Setting Values
-        Tuple2<String,Integer> modified = person.transform2(s -> 16);
+        Tuple2<String,Integer> modified = person.mapAt2(s -> 16);
         logger.info("Name: {}",modified.value1());
         logger.info("Grade: {}",modified.value2());
 

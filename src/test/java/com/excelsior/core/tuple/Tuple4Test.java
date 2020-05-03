@@ -174,19 +174,19 @@ public class Tuple4Test {
     }
 
     @Test
-    public void testTestTransform_Pass() {
+    public void testMapAt_Pass() {
         Tuple4 aTuple4;
 
-        aTuple4 = tuple.transform1(a -> 0);
+        aTuple4 = tuple.mapAt1(a -> 0);
         assertEquals(Tuple.of(0,2,3,4),aTuple4);
 
-        aTuple4 = tuple.transform2(a -> 0);
+        aTuple4 = tuple.mapAt2(a -> 0);
         assertEquals(Tuple.of(1,0,3,4),aTuple4);
 
-        aTuple4 = tuple.transform3(a -> 0);
+        aTuple4 = tuple.mapAt3(a -> 0);
         assertEquals(Tuple.of(1,2,0,4),aTuple4);
 
-        aTuple4 = tuple.transform4(a -> 0);
+        aTuple4 = tuple.mapAt4(a -> 0);
         assertEquals(Tuple.of(1,2,3,0),aTuple4);
     }
 }

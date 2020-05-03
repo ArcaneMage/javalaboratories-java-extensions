@@ -216,7 +216,7 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      * @param <R> return type of transformation
      * @return transformed object.
      */
-    public <R> R transform(BiFunction<? super T1,? super T2,? extends R> function) {
+    public <R> R map(BiFunction<? super T1,? super T2,? extends R> function) {
         return function.apply(t1,t2);
     }
 
@@ -226,7 +226,7 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple2<R,T2> transform1(Function<? super T1,? extends R> function) {
+    public <R> Tuple2<R,T2> mapAt1(Function<? super T1,? extends R> function) {
         return new Tuple2<>(function.apply(t1),t2);
     }
 
@@ -236,7 +236,7 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple2<T1,R> transform2(Function<? super T2,? extends R> function) {
+    public <R> Tuple2<T1,R> mapAt2(Function<? super T2,? extends R> function) {
         return new Tuple2<>(t1,function.apply(t2));
     }
 

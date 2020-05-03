@@ -188,22 +188,22 @@ public class Tuple5Test {
     }
 
     @Test
-    public void testTestTransform_Pass() {
+    public void testMapAt_Pass() {
         Tuple5 aTuple5;
 
-        aTuple5 = tuple.transform1(a -> 0);
+        aTuple5 = tuple.mapAt1(a -> 0);
         assertEquals(Tuple.of(0,2,3,4,5),aTuple5);
 
-        aTuple5 = tuple.transform2(a -> 0);
+        aTuple5 = tuple.mapAt2(a -> 0);
         assertEquals(Tuple.of(1,0,3,4,5),aTuple5);
 
-        aTuple5 = tuple.transform3(a -> 0);
+        aTuple5 = tuple.mapAt3(a -> 0);
         assertEquals(Tuple.of(1,2,0,4,5),aTuple5);
 
-        aTuple5 = tuple.transform4(a -> 0);
+        aTuple5 = tuple.mapAt4(a -> 0);
         assertEquals(Tuple.of(1,2,3,0,5),aTuple5);
 
-        aTuple5 = tuple.transform5(a -> 0);
+        aTuple5 = tuple.mapAt5(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,0),aTuple5);
     }
 }

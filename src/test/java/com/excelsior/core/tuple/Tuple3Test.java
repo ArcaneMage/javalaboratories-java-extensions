@@ -161,16 +161,16 @@ public class Tuple3Test {
     }
 
     @Test
-    public void testTestTransform_Pass() {
+    public void testMapAt_Pass() {
         Tuple3 aTuple3;
 
-        aTuple3 = tuple.transform1(a -> 0);
+        aTuple3 = tuple.mapAt1(a -> 0);
         assertEquals(Tuple.of(0,2,3),aTuple3);
 
-        aTuple3 = tuple.transform2(a -> 0);
+        aTuple3 = tuple.mapAt2(a -> 0);
         assertEquals(Tuple.of(1,0,3),aTuple3);
 
-        aTuple3 = tuple.transform3(a -> 0);
+        aTuple3 = tuple.mapAt3(a -> 0);
         assertEquals(Tuple.of(1,2,0),aTuple3);
     }
 }

@@ -266,40 +266,40 @@ public class Tuple11Test {
     }
     
     @Test
-    public void testTestTransform_Pass() {
+    public void testMapAt_Pass() {
         Tuple11 aTuple11;
 
-        aTuple11 = tuple.transform1(a -> 0);
+        aTuple11 = tuple.mapAt1(a -> 0);
         assertEquals(Tuple.of(0,2,3,4,5,6,7,8,9,10,11),aTuple11);
 
-        aTuple11 = tuple.transform2(a -> 0);
+        aTuple11 = tuple.mapAt2(a -> 0);
         assertEquals(Tuple.of(1,0,3,4,5,6,7,8,9,10,11),aTuple11);
 
-        aTuple11 = tuple.transform3(a -> 0);
+        aTuple11 = tuple.mapAt3(a -> 0);
         assertEquals(Tuple.of(1,2,0,4,5,6,7,8,9,10,11),aTuple11);
 
-        aTuple11 = tuple.transform4(a -> 0);
+        aTuple11 = tuple.mapAt4(a -> 0);
         assertEquals(Tuple.of(1,2,3,0,5,6,7,8,9,10,11),aTuple11);
 
-        aTuple11 = tuple.transform5(a -> 0);
+        aTuple11 = tuple.mapAt5(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,0,6,7,8,9,10,11),aTuple11);
 
-        aTuple11 = tuple.transform6(a -> 0);
+        aTuple11 = tuple.mapAt6(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,0,7,8,9,10,11),aTuple11);
 
-        aTuple11 = tuple.transform7(a -> 0);
+        aTuple11 = tuple.mapAt7(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,0,8,9,10,11),aTuple11);
 
-        aTuple11 = tuple.transform8(a -> 0);
+        aTuple11 = tuple.mapAt8(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,0,9,10,11),aTuple11);
 
-        aTuple11 = tuple.transform9(a -> 0);
+        aTuple11 = tuple.mapAt9(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,0,10,11),aTuple11);
 
-        aTuple11 = tuple.transform10(a -> 0);
+        aTuple11 = tuple.mapAt10(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,0,11),aTuple11);
 
-        aTuple11 = tuple.transform11(a -> 0);
+        aTuple11 = tuple.mapAt11(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,0),aTuple11);
     }
 }

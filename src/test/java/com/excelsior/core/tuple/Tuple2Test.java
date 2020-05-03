@@ -345,18 +345,20 @@ public class Tuple2Test {
     }
 
     @Test
-    public void testTestTransform_Pass() {
-        Tuple2 aTuple2;
-
-        List<String> list = tuple_2.transform((a,b) -> Arrays.asList("Item :"+a,"Item :"+b));
+    public void testMap_Pass() {
+        List<String> list = tuple_2.map((a,b) -> Arrays.asList("Item :"+a,"Item :"+b));
 
         assertEquals("Item :1",list.get(0));
         assertEquals("Item :2",list.get(1));
+    }
 
-        aTuple2 = tuple_2.transform1(a -> 0);
+    @Test
+    public void testMapAt_Pass() {
+        Tuple2 aTuple2;
+        aTuple2 = tuple_2.mapAt1(a -> 0);
         assertEquals(Tuple.of(0,2),aTuple2);
 
-        aTuple2 = tuple_2.transform2(a -> 0);
+        aTuple2 = tuple_2.mapAt2(a -> 0);
         assertEquals(Tuple.of(1,0),aTuple2);
     }
 }

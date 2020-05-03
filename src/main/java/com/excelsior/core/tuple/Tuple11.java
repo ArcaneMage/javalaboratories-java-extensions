@@ -393,7 +393,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<R,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> transform1(Function<? super T1,? extends R> function) {
+    public <R> Tuple11<R,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> mapAt1(Function<? super T1,? extends R> function) {
         return new Tuple11<>(function.apply(t1),t2,t3,t4,t5,t6,t7,t8,t9,t10,t11);
     }
 
@@ -403,7 +403,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,R,T3,T4,T5,T6,T7,T8,T9,T10,T11> transform2(Function<? super T2,? extends R> function) {
+    public <R> Tuple11<T1,R,T3,T4,T5,T6,T7,T8,T9,T10,T11> mapAt2(Function<? super T2,? extends R> function) {
         return new Tuple11<>(t1,function.apply(t2),t3,t4,t5,t6,t7,t8,t9,t10,t11);
     }
 
@@ -413,7 +413,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,T2,R,T4,T5,T6,T7,T8,T9,T10,T11> transform3(Function<? super T3,? extends R> function) {
+    public <R> Tuple11<T1,T2,R,T4,T5,T6,T7,T8,T9,T10,T11> mapAt3(Function<? super T3,? extends R> function) {
         return new Tuple11<>(t1,t2,function.apply(t3),t4,t5,t6,t7,t8,t9,t10,t11);
     }
 
@@ -423,7 +423,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,T2,T3,R,T5,T6,T7,T8,T9,T10,T11> transform4(Function<? super T4,? extends R> function) {
+    public <R> Tuple11<T1,T2,T3,R,T5,T6,T7,T8,T9,T10,T11> mapAt4(Function<? super T4,? extends R> function) {
         return new Tuple11<>(t1,t2,t3,function.apply(t4),t5,t6,t7,t8,t9,t10,t11);
     }
 
@@ -433,7 +433,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,T2,T3,T4,R,T6,T7,T8,T9,T10,T11> transform5(Function<? super T5,? extends R> function) {
+    public <R> Tuple11<T1,T2,T3,T4,R,T6,T7,T8,T9,T10,T11> mapAt5(Function<? super T5,? extends R> function) {
         return new Tuple11<>(t1,t2,t3,t4,function.apply(t5),t6,t7,t8,t9,t10,t11);
     }
 
@@ -443,7 +443,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,T2,T3,T4,T5,R,T7,T8,T9,T10,T11> transform6(Function<? super T6,? extends R> function) {
+    public <R> Tuple11<T1,T2,T3,T4,T5,R,T7,T8,T9,T10,T11> mapAt6(Function<? super T6,? extends R> function) {
         return new Tuple11<>(t1,t2,t3,t4,t5,function.apply(t6),t7,t8,t9,t10,t11);
     }
 
@@ -453,7 +453,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,T2,T3,T4,T5,T6,R,T8,T9,T10,T11> transform7(Function<? super T7,? extends R> function) {
+    public <R> Tuple11<T1,T2,T3,T4,T5,T6,R,T8,T9,T10,T11> mapAt7(Function<? super T7,? extends R> function) {
         return new Tuple11<>(t1,t2,t3,t4,t5,t6,function.apply(t7),t8,t9,t10,t11);
     }
 
@@ -463,7 +463,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,T2,T3,T4,T5,T6,T7,R,T9,T10,T11> transform8(Function<? super T8,? extends R> function) {
+    public <R> Tuple11<T1,T2,T3,T4,T5,T6,T7,R,T9,T10,T11> mapAt8(Function<? super T8,? extends R> function) {
         return new Tuple11<>(t1,t2,t3,t4,t5,t6,t7,function.apply(t8),t9,t10,t11);
     }
 
@@ -473,7 +473,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,R,T10,T11> transform9(Function<? super T9,? extends R> function) {
+    public <R> Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,R,T10,T11> mapAt9(Function<? super T9,? extends R> function) {
         return new Tuple11<>(t1,t2,t3,t4,t5,t6,t7,t8,function.apply(t9),t10,t11);
     }
 
@@ -483,7 +483,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,R,T11> transform10(Function<? super T10,? extends R> function) {
+    public <R> Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,R,T11> mapAt10(Function<? super T10,? extends R> function) {
         return new Tuple11<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,function.apply(t10),t11);
     }
 
@@ -493,7 +493,7 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      * @param <R> return type of transformed element
      * @return a tuple with transformed element.
      */
-    public <R> Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,R> transform11(Function<? super T11,? extends R> function) {
+    public <R> Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,R> mapAt11(Function<? super T11,? extends R> function) {
         return new Tuple11<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,function.apply(t11));
     }
 

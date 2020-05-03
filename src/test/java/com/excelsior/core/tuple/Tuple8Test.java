@@ -199,31 +199,31 @@ public class Tuple8Test {
     }
 
     @Test
-    public void testTestTransform_Pass() {
+    public void testMapAt_Pass() {
         Tuple8 aTuple8;
 
-        aTuple8 = tuple.transform1(a -> 0);
+        aTuple8 = tuple.mapAt1(a -> 0);
         assertEquals(Tuple.of(0,2,3,4,5,6,7,8),aTuple8);
 
-        aTuple8 = tuple.transform2(a -> 0);
+        aTuple8 = tuple.mapAt2(a -> 0);
         assertEquals(Tuple.of(1,0,3,4,5,6,7,8),aTuple8);
 
-        aTuple8 = tuple.transform3(a -> 0);
+        aTuple8 = tuple.mapAt3(a -> 0);
         assertEquals(Tuple.of(1,2,0,4,5,6,7,8),aTuple8);
 
-        aTuple8 = tuple.transform4(a -> 0);
+        aTuple8 = tuple.mapAt4(a -> 0);
         assertEquals(Tuple.of(1,2,3,0,5,6,7,8),aTuple8);
 
-        aTuple8 = tuple.transform5(a -> 0);
+        aTuple8 = tuple.mapAt5(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,0,6,7,8),aTuple8);
 
-        aTuple8 = tuple.transform6(a -> 0);
+        aTuple8 = tuple.mapAt6(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,0,7,8),aTuple8);
 
-        aTuple8 = tuple.transform7(a -> 0);
+        aTuple8 = tuple.mapAt7(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,0,8),aTuple8);
 
-        aTuple8 = tuple.transform8(a -> 0);
+        aTuple8 = tuple.mapAt8(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,0),aTuple8);
      }
 

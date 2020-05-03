@@ -293,46 +293,46 @@ public class Tuple13Test {
     }
 
     @Test
-    public void testTestTransform_Pass() {
+    public void testMapAt_Pass() {
         Tuple13 aTuple13;
 
-        aTuple13 = tuple.transform1(a -> 0);
+        aTuple13 = tuple.mapAt1(a -> 0);
         assertEquals(Tuple.of(0,2,3,4,5,6,7,8,9,10,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform2(a -> 0);
+        aTuple13 = tuple.mapAt2(a -> 0);
         assertEquals(Tuple.of(1,0,3,4,5,6,7,8,9,10,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform3(a -> 0);
+        aTuple13 = tuple.mapAt3(a -> 0);
         assertEquals(Tuple.of(1,2,0,4,5,6,7,8,9,10,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform4(a -> 0);
+        aTuple13 = tuple.mapAt4(a -> 0);
         assertEquals(Tuple.of(1,2,3,0,5,6,7,8,9,10,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform5(a -> 0);
+        aTuple13 = tuple.mapAt5(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,0,6,7,8,9,10,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform6(a -> 0);
+        aTuple13 = tuple.mapAt6(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,0,7,8,9,10,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform7(a -> 0);
+        aTuple13 = tuple.mapAt7(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,0,8,9,10,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform8(a -> 0);
+        aTuple13 = tuple.mapAt8(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,0,9,10,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform9(a -> 0);
+        aTuple13 = tuple.mapAt9(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,0,10,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform10(a -> 0);
+        aTuple13 = tuple.mapAt10(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,0,11,12,13),aTuple13);
 
-        aTuple13 = tuple.transform11(a -> 0);
+        aTuple13 = tuple.mapAt11(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,0,12,13),aTuple13);
 
-        aTuple13 = tuple.transform12(a -> 0);
+        aTuple13 = tuple.mapAt12(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,0,13),aTuple13);
 
-        aTuple13 = tuple.transform13(a -> 0);
+        aTuple13 = tuple.mapAt13(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,0),aTuple13);
     }
 }

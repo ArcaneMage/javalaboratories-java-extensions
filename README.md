@@ -116,7 +116,7 @@ the latter is particularly useful for `Collection.forEach(Consumer)` and/or stre
 A tuple can be considered as a container of ordered elements of different types. Each element may not relate to each
 other but collectively they have meaning. They are particularly useful for methods in that they enable them to 
 return multiple values as a single tuple object, as well as passing several values to a method in a single argument(s).
-The tuple has many abilities including `join`, `truncate`, `transform`, `toMap` and much more. Another particularly useful 
+The tuple has many abilities including `join`, `truncateAt`, `mapAt`, `toMap` and much more. Another particularly useful 
 feature of tuples is that they are immutable, making them thread-safe. Moreover, they all implement the `Iterable`, 
 `Serializable`, and `Comparable` interfaces, allowing their contents can be traversed easily, sortable in 
 collections and persistable. Here are some examples of usage:
@@ -132,8 +132,8 @@ collections and persistable. Here are some examples of usage:
         [main] INFO com.excelsior.core.tuple.TupleTest - Name: James
         [main] INFO com.excelsior.core.tuple.TupleTest - Grade: 12
         
-        // Setting values using a transformer method: Transform 2nd element
-        Tuple2<String,Integer> modified = person.transform2(s -> 16);
+        // Setting values using a mapAt method: Transform 2nd element
+        Tuple2<String,Integer> modified = person.mapAt2(s -> 16);
         logger.info("Name: {}",modified.value1());
         logger.info("Grade: {}",modified.value2());
         

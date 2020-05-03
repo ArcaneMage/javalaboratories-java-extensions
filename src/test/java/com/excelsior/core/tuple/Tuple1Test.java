@@ -131,14 +131,15 @@ public class Tuple1Test {
     }
 
     @Test
-    public void testTestTransform_Pass() {
-        Tuple1 aTuple1;
-
-        String s = tuple.transform(a -> "Item :"+a);
-
+    public void testMap_Pass() {
+        String s = tuple.map(a -> "Item :"+a);
         assertEquals("Item :1",s);
+    }
 
-        aTuple1 = tuple.transform1(a -> 0);
+    @Test
+    public void testMapAt_Pass() {
+        Tuple1 aTuple1;
+        aTuple1 = tuple.mapAt1(a -> 0);
         assertEquals(Tuple.of(0),aTuple1);
     }
 }
