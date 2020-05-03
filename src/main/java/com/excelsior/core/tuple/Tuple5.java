@@ -2,6 +2,7 @@ package com.excelsior.core.tuple;
 
 
 import com.excelsior.core.Nullable;
+import com.excelsior.core.function.Function5;
 
 import java.util.function.Function;
 
@@ -265,6 +266,16 @@ public final class Tuple5<T1,T2,T3,T4,T5> extends AbstractTuple {
      */
     public Tuple2<Tuple4<T1,T2,T3,T4>,Tuple1<T5>> spliceAt5() {
         return splice(5);
+    }
+
+    /**
+     * Transform this tuple into another object.
+     * @param function performs the transformation.
+     * @param <R> return tye of the transformed element
+     * @return resultant object transformed by this map function.
+     */
+    public <R> R map(Function5<T1,T2,T3,T4,T5,R> function) {
+        return function.apply(t1,t2,t3,t4,t5);
     }
 
     /**

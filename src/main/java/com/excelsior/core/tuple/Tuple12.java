@@ -2,6 +2,7 @@ package com.excelsior.core.tuple;
 
 
 import com.excelsior.core.Nullable;
+import com.excelsior.core.function.Function12;
 
 import java.util.function.Function;
 
@@ -406,6 +407,16 @@ public final class Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12> extends Abstr
      */
     public Tuple2<Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>,Tuple1<T12>> spliceAt12() {
         return splice(12);
+    }
+
+    /**
+     * Transform this tuple into another object.
+     * @param function performs the transformation.
+     * @param <R> return tye of the transformed element
+     * @return resultant object transformed by this map function.
+     */
+    public <R> R map(Function12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,R> function) {
+        return function.apply(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12);
     }
 
     /**
