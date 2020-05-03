@@ -264,7 +264,14 @@ public class Tuple11Test {
         Tuple10 aTuple10 = tuple.truncateAt11();
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10),aTuple10);
     }
-    
+
+    @Test
+    public void testMap_Pass() {
+        String mapped = tuple.map((a,b,c,d,e,f,g,h,i,j,k) -> String.format("(%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",
+                a,b,c,d,e,f,g,h,i,j,k));
+        assertEquals("(1,2,3,4,5,6,7,8,9,10,11)",mapped);
+    }
+
     @Test
     public void testMapAt_Pass() {
         Tuple11 aTuple11;

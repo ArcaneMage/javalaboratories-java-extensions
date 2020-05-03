@@ -200,6 +200,12 @@ public class Tuple6Test {
     }
 
     @Test
+    public void testMap_Pass() {
+        String mapped = tuple.map((a,b,c,d,e,f) -> String.format("(%d,%d,%d,%d,%d,%d)", a,b,c,d,e,f));
+        assertEquals("(1,2,3,4,5,6)",mapped);
+    }
+
+    @Test
     public void testMapAt_Pass() {
         Tuple6 aTuple6;
 

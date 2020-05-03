@@ -306,6 +306,13 @@ public class Tuple14Test {
     }
 
     @Test
+    public void testMap_Pass() {
+        String mapped = tuple.map((a,b,c,d,e,f,g,h,i,j,k,l,m,n) -> String.format("(%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",
+                a,b,c,d,e,f,g,h,i,j,k,l,m,n));
+        assertEquals("(1,2,3,4,5,6,7,8,9,10,11,12,13,14)",mapped);
+    }
+
+    @Test
     public void testMapAt_Pass() {
         Tuple14 aTuple14;
 

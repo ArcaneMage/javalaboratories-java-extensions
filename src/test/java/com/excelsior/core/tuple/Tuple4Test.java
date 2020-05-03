@@ -174,6 +174,12 @@ public class Tuple4Test {
     }
 
     @Test
+    public void testMap_Pass() {
+        String mapped = tuple.map((a,b,c,d) -> String.format("(%d,%d,%d,%d)", a,b,c,d));
+        assertEquals("(1,2,3,4)",mapped);
+    }
+
+    @Test
     public void testMapAt_Pass() {
         Tuple4 aTuple4;
 

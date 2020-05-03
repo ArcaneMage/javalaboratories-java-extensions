@@ -213,6 +213,12 @@ public class Tuple7Test {
     }
 
     @Test
+    public void testMap_Pass() {
+        String mapped = tuple.map((a,b,c,d,e,f,g) -> String.format("(%d,%d,%d,%d,%d,%d,%d)", a,b,c,d,e,f,g));
+        assertEquals("(1,2,3,4,5,6,7)",mapped);
+    }
+
+    @Test
     public void testMapAt_Pass() {
         Tuple7 aTuple7;
 

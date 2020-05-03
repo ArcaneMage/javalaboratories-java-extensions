@@ -161,6 +161,12 @@ public class Tuple3Test {
     }
 
     @Test
+    public void testMap_Pass() {
+        String mapped = tuple.map((a,b,c) -> String.format("(%d,%d,%d)", a,b,c));
+        assertEquals("(1,2,3)",mapped);
+    }
+
+    @Test
     public void testMapAt_Pass() {
         Tuple3 aTuple3;
 

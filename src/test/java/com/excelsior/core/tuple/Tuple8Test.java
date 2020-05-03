@@ -199,6 +199,12 @@ public class Tuple8Test {
     }
 
     @Test
+    public void testMap_Pass() {
+        String mapped = tuple.map((a,b,c,d,e,f,g,h) -> String.format("(%d,%d,%d,%d,%d,%d,%d,%d)", a,b,c,d,e,f,g,h));
+        assertEquals("(1,2,3,4,5,6,7,8)",mapped);
+    }
+
+    @Test
     public void testMapAt_Pass() {
         Tuple8 aTuple8;
 

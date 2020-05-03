@@ -188,6 +188,12 @@ public class Tuple5Test {
     }
 
     @Test
+    public void testMap_Pass() {
+        String mapped = tuple.map((a,b,c,d,e) -> String.format("(%d,%d,%d,%d,%d)", a,b,c,d,e));
+        assertEquals("(1,2,3,4,5)",mapped);
+    }
+
+    @Test
     public void testMapAt_Pass() {
         Tuple5 aTuple5;
 
