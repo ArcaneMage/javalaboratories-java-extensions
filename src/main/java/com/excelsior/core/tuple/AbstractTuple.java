@@ -68,22 +68,24 @@ public abstract class AbstractTuple implements Tuple  {
         if ( o == null )
             throw new NullPointerException();
 
-        // Tuple must be of the same depth for now -- may reconsider
-        if ( this.depth() != o.depth() )
-            throw new ClassCastException();
-
         if ( this.equals(o) )
             return 0;
 
-        int result = 0;
+        // Sort by depth first
+        int result = this.depth() - o.depth();
+        if ( result != 0 )
+            return result;
+
+        // Then by tuple elements
         Iterator<Object> iter1 = this.iterator();
         Iterator<Object> iter2 = o.iterator();
-
-        while ( iter1.hasNext() && iter2.hasNext() && result == 0 ) {
-            Object e1 = iter1.next();
-            Object e2 = iter2.next();
-            result = Comparators.compare(e1,e2);
+        try {
+            while (iter1.hasNext() && iter2.hasNext() && result == 0)
+                result = Comparators.compare(iter1.next(), iter2.next());
+        } catch (ClassCastException e) {
+            throw new TupleComparableException("Element types of tuples, with equal depth, must be in the same order");
         }
+
         return result;
     }
 

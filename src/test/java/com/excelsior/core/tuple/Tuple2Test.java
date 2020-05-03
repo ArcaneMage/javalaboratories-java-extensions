@@ -115,36 +115,45 @@ public class Tuple2Test {
         Tuple2 aTuple_4 = Tuple.of(null,0);
         Tuple2 aTuple_5 = Tuple.of(2,1);
         Tuple2 aTuple_6 = Tuple.of(1,1);
+        Tuple2 aTuple_7 = Tuple.of(1,1);
+        Tuple3 aTuple_8 = Tuple.of(2,1,1);
+        Tuple3 aTuple_9 = Tuple.of(0,3,1);
+        Tuple3 aTuple_10 = Tuple.of(-1,99,1);
+        Tuple2 aTuple_11 = Tuple.of(9,9);
+        Tuple0 aTuple_12 = Tuple.of();
 
-        List<Tuple2> list = Arrays.asList(aTuple, aTuple_2, aTuple_3, aTuple_4, aTuple_5, aTuple_6);
+        List<Tuple> list = Arrays.asList(aTuple, aTuple_2, aTuple_3, aTuple_4, aTuple_5, aTuple_6, aTuple_7,aTuple_8,
+                aTuple_9,aTuple_10,aTuple_11,aTuple_12);
 
-        List<Tuple2> sorted = list.stream()
+        List<Tuple> sorted = list.stream()
                 .sorted()
                 .collect(Collectors.toList());
 
-        assertEquals(aTuple_3, sorted.get(0)); // Top
-        assertEquals(aTuple_4, sorted.get(5)); // Bottom
+        assertEquals(aTuple_12, sorted.get(0)); // Top
+        assertEquals(aTuple_8, sorted.get(11)); // Bottom
 
         // Sort equal tuples
-        Tuple2 aTuple_7 = Tuple.of("John","Doe");
-        Tuple2 aTuple_8 = Tuple.of("James","Brown");
-        list = Arrays.asList(aTuple_7,this.tuple,aTuple_8);
+        Tuple2 aTuple_13 = Tuple.of("John","Doe");
+        Tuple2 aTuple_14 = Tuple.of("James","Brown");
+        list = Arrays.asList(aTuple_13,this.tuple,aTuple_14);
 
         Collections.sort(list);
-        assertEquals(aTuple_8,list.get(0));
-        assertEquals(aTuple_7,list.get(2));
+        assertEquals(aTuple_14,list.get(0));
+        assertEquals(aTuple_13,list.get(2));
     }
 
     @Test
-    @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void testCompareTo_Fail() {
         assertThrows(NullPointerException.class, () -> tuple.compareTo(null));
 
-        Tuple2 aTable_2 = Tuple.of("John","Doe");
-        aTable_2.add(43);
-        List<Tuple2> list = Arrays.asList(tuple,aTable_2);
+        Tuple2<String,Integer> aTuple_2 = Tuple.of("John",29);
+        Tuple2<String,Integer> aTuple_3 = Tuple.of("James",22);
+        Tuple3<String,String,Integer> aTuple_4 = Tuple.of("James","Charles",22);
+        Tuple3<String,Integer,String> aTuple_5 = Tuple.of("James",22,"Charles");
+        List<Tuple> list = Arrays.asList(aTuple_4,aTuple_2,aTuple_3,aTuple_5);
 
-        assertThrows(ClassCastException.class,() -> Collections.sort(list));
+        assertThrows(TupleComparableException.class,() -> Collections.sort(list));
     }
 
     @Test

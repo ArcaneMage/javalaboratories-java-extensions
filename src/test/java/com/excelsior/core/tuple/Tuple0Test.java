@@ -105,7 +105,6 @@ public class Tuple0Test {
     @Test
     public void testCompareTo_Fail() {
         assertThrows(NullPointerException.class, () -> tuple.compareTo(null));
-        assertThrows(ClassCastException.class, () -> tuple.compareTo(Tuple.of(1)));
     }
 
     @Test
