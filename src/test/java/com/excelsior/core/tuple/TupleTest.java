@@ -45,7 +45,7 @@ public class TupleTest {
 
         // Splicing
         Tuple4<String,String,String,String> party = maybeTuple.get();
-        Tuple2<Tuple2<String,String>,Tuple2<String,String>> teams = party.splice(3);
+        Tuple2<Tuple2<String,String>,Tuple2<String,String>> teams = party.spliceAt3();
 
         teams.value1().forEach(member -> logger.info("Boy: {}",member));
         teams.value2().forEach(member -> logger.info("Girl: {}",member));

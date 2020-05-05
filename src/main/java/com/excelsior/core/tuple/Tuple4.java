@@ -2,7 +2,6 @@ package com.excelsior.core.tuple;
 
 
 import com.excelsior.core.Nullable;
-import com.excelsior.core.function.Function3;
 import com.excelsior.core.function.Function4;
 
 import java.util.function.Function;

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static com.excelsior.core.tuple.Tuple.of;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
@@ -15,7 +16,7 @@ public class Tuple0Test {
 
     @BeforeEach
     public void setup() {
-        tuple = Tuple.of();
+        tuple = of();
         value = new Object();
     }
 
@@ -35,26 +36,33 @@ public class Tuple0Test {
     }
 
     @Test
+    public void testFilter_Pass() {
+        tuple
+            .filter(o -> o.equals("nothing"))
+            .match(Tuples.emptyTuple(), t -> assertEquals(0,of().depth()));
+    }
+
+    @Test
     public void testHop_Fail() {
         assertThrows(UnsupportedOperationException.class, () -> tuple.hop(1));
     }
 
     @Test
     public void testJoin_Pass() {
-        Tuple0 aTuple0 = tuple.join(Tuple.of());
-        assertEquals(Tuple.of(),aTuple0);
+        Tuple0 aTuple0 = tuple.join(of());
+        assertEquals(of(),aTuple0);
 
-        Tuple1 aTuple1 = tuple.join(Tuple.of(1));
-        assertEquals(aTuple1,Tuple.of(1));
+        Tuple1 aTuple1 = tuple.join(of(1));
+        assertEquals(aTuple1, of(1));
 
-        Tuple2 aTuple2 = tuple.join(Tuple.of(1,2));
-        assertEquals(aTuple2,Tuple.of(1,2));
+        Tuple2 aTuple2 = tuple.join(of(1,2));
+        assertEquals(aTuple2, of(1,2));
 
-        Tuple3 aTuple3 = tuple.join(Tuple.of(1,2,3));
-        assertEquals(aTuple3,Tuple.of(1,2,3));
+        Tuple3 aTuple3 = tuple.join(of(1,2,3));
+        assertEquals(aTuple3, of(1,2,3));
 
-        Tuple6 aTuple6 = aTuple3.join(Tuple.of(1,2,3));
-        assertEquals(Tuple.of(1,2,3,1,2,3), aTuple6);
+        Tuple6 aTuple6 = aTuple3.join(of(1,2,3));
+        assertEquals(of(1,2,3,1,2,3), aTuple6);
     }
 
     @Test
@@ -99,7 +107,7 @@ public class Tuple0Test {
 
     @Test
     public void testCompareTo_Pass() {
-        assertEquals(0, tuple.compareTo(Tuple.of()));
+        assertEquals(0, tuple.compareTo(of()));
     }
 
     @Test
@@ -109,12 +117,12 @@ public class Tuple0Test {
 
     @Test
     public void testEquals_Pass() {
-        assertEquals(Tuple.of(),tuple);
+        assertEquals(of(),tuple);
     }
 
     @Test
     public void testHashCode_Pass() {
-        assertEquals(Tuple.of().hashCode(), tuple.hashCode());
+        assertEquals(of().hashCode(), tuple.hashCode());
     }
 
     @Test

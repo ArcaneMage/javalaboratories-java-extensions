@@ -2,7 +2,9 @@ package com.excelsior.core.tuple;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * A tuple implements this interface.
@@ -236,6 +238,21 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
     int depth();
 
     /**
+     * Filters each element of this tuple based on the outcome of the {@code
+     * predicate}.
+     * <p>
+     * Each element is passed to the {@code predicate} function for evaluation.
+     * If the outcome of the evaluation is {@code false}, the current element is
+     * excluded (filtered out) from the tuple. A new tuple is returned with
+     * filtered elements.
+     *
+     * @param predicate function that evaluates each element for filtration.
+     * @param <R> type of returned tuple.
+     * @return returned tuple with filtered elements.
+     */
+     <R extends Tuple> R filter(Predicate<Object> predicate);
+
+    /**
      * Returns non-zero based position of an element within this tuple container.
      * <p>
      * @param object element with which to search.
@@ -276,6 +293,35 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * @throws NullPointerException if {@code that} is null.
      */
     <Q extends Tuple, R extends Tuple> R join(final Q that);
+
+    /**
+     * Tests whether given {@code tuple} is equal to this {@code tuple}, and if
+     * true, the {@code consumer} function is executed.
+     * <p>
+     * This is particularly useful if the tuple type is unknown and when discovered,
+     * the {@code consumer} function is performed.
+     * <pre>
+     * {@code
+     *      tuple
+     *        .match(of("John","Wellington"), a -> System.out.println(a.value1()))
+     *        .match(of("Alex","Wall",23), a -> System.out.println(a.value1()))
+     * }
+     * </pre>
+     * @param tuple {@code tuple} to test.
+     * @param consumer function to execute if match is found.
+     * @param <U> type of tuple to test.
+     * @param <T> type of this tuple.
+     * @return this tuple -- useful for multiple matches.
+     */
+    @SuppressWarnings("unchecked")
+    default <U extends Tuple,T extends Tuple> T match(U tuple, Consumer<? super U> consumer) {
+        Objects.requireNonNull(consumer);
+        T result = (T) this;
+        if ( this.equals(tuple) )
+            consumer.accept((U) this);
+
+        return result;
+    }
 
     /**
      * Splices or cuts the tuple into two smaller tuples at {@code position}.

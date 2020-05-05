@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 
 /**
@@ -69,7 +71,7 @@ public abstract class AbstractTuple implements Tuple {
         if ( this.equals(o) )
             return 0;
 
-        // Compare by depth (sort by depth first)
+        // Compare depth (sort by depth first)
         int result = this.depth() - o.depth();
         if ( result != 0 )
             return result;
@@ -177,6 +179,21 @@ public abstract class AbstractTuple implements Tuple {
      */
     @Override
     public int depth() { return depth; }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <R extends Tuple> R filter(Predicate<Object> predicate) {
+        Objects.requireNonNull(predicate);
+        Object[] f = new Object[depth];
+        int i = 0;
+        for ( Object element : this )
+            if (predicate.test(element))
+                f[i++] = element;
+        Nullable<R> result = Tuples.fromIterable(Arrays.asList(f),i);
+        return result.get();
+    }
 
     /**
      * {@inheritDoc}

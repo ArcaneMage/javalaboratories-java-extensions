@@ -4,6 +4,7 @@ import com.excelsior.core.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * This tuple is a special tuple that is a container of zero elements.
@@ -16,7 +17,7 @@ import java.util.function.Function;
  * @see Tuple#splice(int)
  * @see Tuple#truncate(int)
  */
-public class Tuple0 implements Tuple {
+public final class Tuple0 implements Tuple {
 
     public static final long serialVersionUID = -1202062103023587399L;
 
@@ -46,6 +47,10 @@ public class Tuple0 implements Tuple {
     @Override
     public int depth() {
         return 0;
+    }
+
+    public <R extends Tuple> R filter(Predicate<Object> predicate) {
+        return Tuples.emptyTuple();
     }
 
     /**
@@ -130,7 +135,7 @@ public class Tuple0 implements Tuple {
         if ( o == null )
             throw new NullPointerException();
 
-        // Compare by depth (sort by depth first)
+        // Compare depth (sort by depth first)
         int result = this.depth() - o.depth();
         if ( result != 0 )
             return result;
