@@ -314,7 +314,7 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * @return this tuple -- useful for multiple matches.
      */
     @SuppressWarnings("unchecked")
-    default <U extends Tuple,T extends Tuple> T match(U tuple, Consumer<? super U> consumer) {
+    default <U extends Tuple,T extends Tuple> T match(final U tuple, final Consumer<? super U> consumer) {
         Objects.requireNonNull(consumer);
         T result = (T) this;
         if ( this.equals(tuple) )
