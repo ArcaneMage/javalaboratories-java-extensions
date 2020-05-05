@@ -70,11 +70,15 @@ public class Tuple2Test {
 
     @Test
     public void testFilter_Pass() {
+        Holder<Boolean> match = Holders.writableHolder();
+        match.set(false);
+
         tuple
             .filter(o -> o.equals("Doe"))
-            .match(of("Doe"), t -> assertEquals("Doe",t.value1()));
-    }
+            .match(of("Doe"), t -> match.set("Doe".equals(t.value1())));
 
+        assertTrue(match.get());
+    }
 
     @Test
     public void testMatch_Pass() {
@@ -85,7 +89,10 @@ public class Tuple2Test {
         aTuple
             .match(of("Adrian","Wall"), t -> logger.info("Matched on Adrian Wall"))
             .match(of(1,2,3), t -> logger.info("Matched on 1,2,3 tuple"))
-            .match(of("John","Doe"), t -> { logger.info("Matched on {} {}",t.value1(),t.value2()); holder.set(true); });
+            .match(of("John","Doe"), t -> {
+                logger.info("Matched on {} {}",t.value1(),t.value2());
+                holder.set("Doe".equals(t.value2()));
+            });
 
         assertTrue(holder.get());
     }
