@@ -181,4 +181,10 @@ public final class Tuple0 implements Tuple {
             }
         };
     }
+
+    @Override
+    public <T> T value(int position) {
+        throw new IllegalArgumentException();
+    }
+
 }

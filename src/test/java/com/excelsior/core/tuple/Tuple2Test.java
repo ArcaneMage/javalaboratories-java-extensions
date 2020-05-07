@@ -13,6 +13,7 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.excelsior.core.tuple.Matcher.when;
 import static com.excelsior.core.tuple.Tuple.of;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -73,9 +74,9 @@ public class Tuple2Test {
         Holder<Boolean> match = Holders.writableHolder();
         match.set(false);
 
-        tuple
+       tuple
             .filter(o -> o.equals("Doe"))
-            .match(of("Doe"), t -> match.set("Doe".equals(t.value1())));
+            .match(when("Doe"), t -> match.set("Doe".equals(t.value(1))) );
 
         assertTrue(match.get());
     }
@@ -83,18 +84,21 @@ public class Tuple2Test {
     @Test
     public void testMatch_Pass() {
         Tuple aTuple = tuple;
-        Holder<Boolean> holder = Holders.writableHolder();
-        holder.set(false);
-
+        Holder<Integer> holder = Holders.writableHolder();
+        holder.set(0);
         aTuple
-            .match(of("Adrian","Wall"), t -> logger.info("Matched on Adrian Wall"))
-            .match(of(1,2,3), t -> logger.info("Matched on 1,2,3 tuple"))
-            .match(of("John","Doe"), t -> {
-                logger.info("Matched on {} {}",t.value1(),t.value2());
-                holder.set("Doe".equals(t.value2()));
+            .match(when("Adrian","Wall"), t -> logger.info("Matched on Adrian Wall"))
+            .match(when(1,2,3), t -> logger.info("Matched on 1,2,3 tuple"))
+            .match(when("John"), t -> {
+                logger.info("Matched \"John\" on {} {}",t,t.value(2));
+                holder.set(holder.get()+1);
+            })
+            .match(when("John","Doe"), t -> {
+                logger.info("Matched on \"John Doe\" {} {}",t,t.value(2));
+                holder.set(holder.get()+1);
             });
 
-        assertTrue(holder.get());
+        assertEquals(2, holder.get());
     }
 
     @Test

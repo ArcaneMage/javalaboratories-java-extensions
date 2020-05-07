@@ -1,9 +1,7 @@
 package com.excelsior.core.tuple;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -41,10 +39,7 @@ import java.util.function.Predicate;
  *
  * @author Kevin Henry
  */
-public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable {
-
-    int MAX_DEPTH = 16;
-
+public interface Tuple extends TupleContainer {
     /**
      * Creates a tuple with a depth of 0
      * @return a tuple of encapsulating the element(s)
@@ -216,28 +211,6 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
     <T extends Tuple> T hop(int position);
 
     /**
-     * Determines whether this tuple contains an {@code object}.
-     * <p>
-     * A tuple is a container of objects of different types. Use this method
-     * to determine whether the {@code object} exists within the container;
-     * {@code true} is returned to indicate existence.
-     *
-     * @param object element with which to search.
-     * @return true when the object exists in the container.
-     */
-    boolean contains(Object object);
-
-    /**
-     * Returns the depth of this tuple.
-     * <p>
-     * The depth refers to the maximum number of objects/elements that can be
-     * accommodated in the tuple container. It can be referred to as the size
-     * of the tuple.
-     * @return depth of this tuple.
-     */
-    int depth();
-
-    /**
      * Filters each element of this tuple based on the outcome of the {@code
      * predicate}.
      * <p>
@@ -251,14 +224,6 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * @return returned tuple with filtered elements.
      */
      <R extends Tuple> R filter(Predicate<Object> predicate);
-
-    /**
-     * Returns non-zero based position of an element within this tuple container.
-     * <p>
-     * @param object element with which to search.
-     * @return zero-based position of the object, 0 to indicate not found.
-     */
-    int positionOf(Object object);
 
     /**
      * Joins a {@code value} to a tuple.
@@ -307,18 +272,18 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      *        .match(of("Alex","Wall",23), a -> System.out.println(a.value1()))
      * }
      * </pre>
-     * @param tuple {@code tuple} to test.
+     * @param matcher {@code } matcher object to use with this tuple.
      * @param consumer function to execute if match is found.
-     * @param <U> type of tuple to test.
-     * @param <T> type of this tuple.
+     * @param <Q> type of matcher.
+     * @param <R> type of this tuple.
      * @return this tuple -- useful for multiple matches.
      */
-    @SuppressWarnings("unchecked")
-    default <U extends Tuple,T extends Tuple> T match(final U tuple, final Consumer<? super U> consumer) {
+    default <Q extends Matcher, R extends Tuple> R match(final Q matcher, final Consumer<? super R> consumer) {
         Objects.requireNonNull(consumer);
-        T result = (T) this;
-        if ( this.equals(tuple) )
-            consumer.accept((U) this);
+        @SuppressWarnings("unchecked")
+        R result = (R) this;
+        if (matcher.match(this))
+            consumer.accept(result);
 
         return result;
     }
@@ -360,32 +325,6 @@ public interface Tuple extends Comparable<Tuple>, Iterable<Object>, Serializable
      * @return a new truncated tuple.
      */
     <T extends Tuple> T truncate(int position);
-
-    /**
-     * Returns an object array of elements contained in this tuple.
-     * <p>
-     * If a tuple is considered empty, an array with zero elements is returned.
-     * @return object array.
-     */
-    Object[] toArray();
-
-    /**
-     * Returns a {@link List<?>} object representing the contents of this tuple.
-     * @return a {@link List<?>} object.
-     */
-    List<?> toList();
-
-    /**
-     * Returns an {@link Map<K,?>} of elements within this tuple.
-     * <p>
-     * Implement the function that returns a key value for a given index of the
-     * element in the tuple.
-     *
-     * @param keyMapper Function that returns a key value for a tuple element.
-     * @param <K> type of returned value.
-     * @return a {@link Map<K,?>} object.
-     */
-    <K> Map<K, ?> toMap(Function<? super Integer, ? extends K> keyMapper);
 
    /**
      * Removes an element/object from the tuple.

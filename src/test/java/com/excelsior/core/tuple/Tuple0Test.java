@@ -1,5 +1,6 @@
 package com.excelsior.core.tuple;
 
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +36,8 @@ public class Tuple0Test {
         assertEquals(0,tuple.depth());
     }
 
-    @Test
+    //TODO: Write matcher test for Tuple0
+    @Ignore
     public void testFilter_Pass() {
         tuple
             .filter(o -> o.equals("nothing"))
