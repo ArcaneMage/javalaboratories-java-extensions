@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static com.excelsior.core.tuple.Matcher.when;
 import static com.excelsior.core.tuple.Tuple.of;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,12 +37,11 @@ public class Tuple0Test {
         assertEquals(0,tuple.depth());
     }
 
-    //TODO: Write matcher test for Tuple0
-    @Ignore
+    @Test
     public void testFilter_Pass() {
-        tuple
-            .filter(o -> o.equals("nothing"))
-            .match(Tuples.emptyTuple(), t -> assertEquals(0,of().depth()));
+        Tuple0 tuple0 = tuple.filter(o -> o.equals("nothing"));
+
+        assertEquals(tuple0,tuple);
     }
 
     @Test
@@ -139,4 +139,8 @@ public class Tuple0Test {
         assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
+    @Test
+    public void testValue_Fail() {
+        assertThrows(IllegalArgumentException.class, () -> tuple.value(0));
+    }
 }

@@ -73,32 +73,35 @@ public class Tuple2Test {
     public void testFilter_Pass() {
         Holder<Boolean> match = Holders.writableHolder();
         match.set(false);
-
-       tuple
+        tuple
             .filter(o -> o.equals("Doe"))
             .match(when("Doe"), t -> match.set("Doe".equals(t.value(1))) );
-
         assertTrue(match.get());
     }
 
     @Test
     public void testMatch_Pass() {
         Tuple aTuple = tuple;
-        Holder<Integer> holder = Holders.writableHolder();
-        holder.set(0);
+        Holder<Integer> matches = Holders.writableHolder();
+        matches.set(0);
         aTuple
-            .match(when("Adrian","Wall"), t -> logger.info("Matched on Adrian Wall"))
-            .match(when(1,2,3), t -> logger.info("Matched on 1,2,3 tuple"))
+            .match(when("Adrian","Wall"), t -> {
+                logger.info("Matched on \"Adrian Wall\" -- should not match");
+                matches.set(matches.get()+1);
+            })
+            .match(when(1,2,3), t -> {
+                logger.info("Matched on \"1,2,3\" tuple -- should not match");
+                matches.set(matches.get()+1);
+            })
             .match(when("John"), t -> {
                 logger.info("Matched \"John\" on {} {}",t,t.value(2));
-                holder.set(holder.get()+1);
+                matches.set(matches.get()+1);
             })
             .match(when("John","Doe"), t -> {
                 logger.info("Matched on \"John Doe\" {} {}",t,t.value(2));
-                holder.set(holder.get()+1);
+                matches.set(matches.get()+1);
             });
-
-        assertEquals(2, holder.get());
+        assertEquals(2, matches.get());
     }
 
     @Test

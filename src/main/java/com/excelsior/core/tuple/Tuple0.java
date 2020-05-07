@@ -49,6 +49,10 @@ public final class Tuple0 implements Tuple {
         return 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public <R extends Tuple> R filter(Predicate<Object> predicate) {
         return Tuples.emptyTuple();
     }
@@ -186,5 +190,4 @@ public final class Tuple0 implements Tuple {
     public <T> T value(int position) {
         throw new IllegalArgumentException();
     }
-
 }
