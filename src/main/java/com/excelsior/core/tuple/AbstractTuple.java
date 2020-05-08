@@ -113,8 +113,8 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
         Object[] result = new Object[depth];
         int i = 0;
         for (Tuple tuple : tuples) {
-            Iterator<?> iter = tuple.iterator();
-            while (iter.hasNext()) result[i++] = iter.next();
+            Iterator<?> it = tuple.iterator();
+            while (it.hasNext()) result[i++] = it.next();
         }
         return result;
     }

@@ -22,17 +22,22 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
         boolean result = this.depth() <= tuple.depth(); // Pattern tuple scope adequate? If not, return false.
         if ( result ) {
             int i = 0;
-            Iterator<Object> iter = tuple.iterator();
-            while ( result && iter.hasNext() && i < this.depth()) {
-                Object o = iter.next();
+            Iterator<Object> it = tuple.iterator();
+            while (result && it.hasNext() && i < this.depth()) {
+                Object o = it.next();
                 if (!(o instanceof String)) {
                     // Comparison of elements in tuple pattern and tuple should be of the same type,
                     // if not false is returned
-                    result = this.get(i).equals(o);
+                    Object matcherElement = this.get(i);
+                    if ( matcherElement == null && o == null ) {
+                        result = true;
+                    } else {
+                        result = matcherElement != null && matcherElement.equals(o);
+                    }
                 } else {
                     String element = (String) o;
-                    Pattern p = patterns[i];
-                    result = p != null && p.matcher(element).matches();
+                    Pattern matcherPattern = patterns[i];
+                    result = matcherPattern != null && matcherPattern.matcher(element).matches();
                 }
                 i++;
             }

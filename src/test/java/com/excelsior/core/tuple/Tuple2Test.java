@@ -27,6 +27,7 @@ public class Tuple2Test {
 
     private Tuple2<String,String> tuple;
     private Tuple2<Integer,Integer> tuple_2;
+    private Tuple2<String,String> tuple_3;
 
     Logger logger = LoggerFactory.getLogger(Tuple2Test.class);
 
@@ -34,6 +35,7 @@ public class Tuple2Test {
     public void setup() {
         tuple = of("John","Doe");
         tuple_2 = of(1,2);
+        tuple_3 = of(null,"Wall");
     }
 
     @Test
@@ -81,27 +83,45 @@ public class Tuple2Test {
 
     @Test
     public void testMatch_Pass() {
-        Tuple aTuple = tuple;
-        Holder<Integer> matches = Holders.writableHolder();
-        matches.set(0);
-        aTuple
+        Holder<Integer> found = Holders.writableHolder();
+        found.set(0);
+        tuple
             .match(when("Adrian","Wall"), t -> {
-                logger.info("Matched on \"Adrian Wall\" -- should not match");
-                matches.set(matches.get()+1);
+                logger.info("Matched on \"Adrian,Wall\" tuple -- should not match");
+                found.set(found.get()+1);
             })
             .match(when(1,2,3), t -> {
                 logger.info("Matched on \"1,2,3\" tuple -- should not match");
-                matches.set(matches.get()+1);
+                found.set(found.get()+1);
             })
             .match(when("John"), t -> {
-                logger.info("Matched \"John\" on {} {}",t,t.value(2));
-                matches.set(matches.get()+1);
+                logger.info("Matched \"John\" tuple on: {} {}",t,t.value(2));
+                found.set(found.get()+1);
             })
             .match(when("John","Doe"), t -> {
-                logger.info("Matched on \"John Doe\" {} {}",t,t.value(2));
-                matches.set(matches.get()+1);
+                logger.info("Matched on \"John,Doe\" tuple: {} {}",t,t.value(2));
+                found.set(found.get()+1);
             });
-        assertEquals(2, matches.get());
+        tuple_2
+            .match(when(1,2), t -> {
+                logger.info("Mathed on \"1,2\" tuple");
+                found.set(found.get()+1);
+            })
+            .match(when(1), t -> {
+                logger.info("Matched on \"1\" tuple");
+                found.set(found.get()+1);
+            })
+            .match(when(3,1),t -> {
+                logger.info("Matched on \"3,1\" tuple -- should not match");
+                found.set(found.get()+1);
+            });
+        tuple_3
+           .match(when(null,"Wall"), t -> {
+               logger.info("Matched on \"null,Wall\" tuple: {} {}",t,t.value(2));
+               found.set(found.get()+1);
+           });
+
+        assertEquals(5, found.get());
     }
 
     @Test
@@ -127,11 +147,11 @@ public class Tuple2Test {
 
     @Test
     public void testIterator_Pass() {
-        Iterator iter = tuple.iterator();
+        Iterator it = tuple.iterator();
 
         boolean found = false;
-        while ( iter.hasNext() ) {
-            Object element = iter.next();
+        while ( it.hasNext() ) {
+            Object element = it.next();
             if ( "Doe".equals(element) ) {
                 found = true;
                 break;
@@ -142,12 +162,12 @@ public class Tuple2Test {
 
     @Test
     public void testIterator_Fail() {
-        Iterator iter = tuple.iterator();
+        Iterator it = tuple.iterator();
 
-        while ( iter.hasNext() )
-            iter.next();
+        while ( it.hasNext() )
+            it.next();
 
-        assertThrows(NoSuchElementException.class, iter::next);
+        assertThrows(NoSuchElementException.class, it::next);
     }
 
     @Test

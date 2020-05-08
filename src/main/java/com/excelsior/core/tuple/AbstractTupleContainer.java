@@ -262,8 +262,11 @@ public abstract class AbstractTupleContainer implements TupleContainer {
         validateNodeIndex(index);
         Object result = null;
         int i = 0;
-        for (Node node = head; node != null && result == null; node = node.next ) {
-            if ( index == i ) result = node.element;
+        for (Node node = head; node != null; node = node.next ) {
+            if ( index == i ) {
+                result = node.element;
+                break;
+            }
             else i++;
         }
         return result;

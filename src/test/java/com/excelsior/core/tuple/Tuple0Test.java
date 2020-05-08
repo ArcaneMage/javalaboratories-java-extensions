@@ -129,14 +129,14 @@ public class Tuple0Test {
 
     @Test
     public void testIterator_Pass() {
-        Iterator<Object> iter = tuple.iterator();
-        assertFalse(iter.hasNext());
+        Iterator<Object> it = tuple.iterator();
+        assertFalse(it.hasNext());
     }
 
     @Test
     public void testIterator_Fail() {
-        Iterator<Object> iter = tuple.iterator();
-        assertThrows(NoSuchElementException.class, () -> iter.next());
+        Iterator<Object> it = tuple.iterator();
+        assertThrows(NoSuchElementException.class, () -> it.next());
     }
 
     @Test
