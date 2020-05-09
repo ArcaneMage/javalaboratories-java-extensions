@@ -1,6 +1,8 @@
 package com.excelsior.core.tuple;
 
 import com.excelsior.core.Nullable;
+import com.excelsior.util.Holder;
+import com.excelsior.util.Holders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.excelsior.core.tuple.Matcher.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -231,7 +234,15 @@ public class Tuple8Test {
 
         aTuple8 = tuple.mapAt8(a -> 0);
         assertEquals(Tuple.of(1,2,3,4,5,6,7,0),aTuple8);
-     }
+    }
+
+    @Test
+    public void testMatch_Pass() {
+        Holder<Boolean> found = Holders.writableHolder();
+        found.set(false);
+        tuple.match(when(1), (a,b,c,d,e,f,g,h) -> found.set(true));
+        assertTrue(found.get());
+    }
 
     @Test
     public void testTruncateAt_Pass() {
