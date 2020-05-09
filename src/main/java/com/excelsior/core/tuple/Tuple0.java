@@ -4,7 +4,6 @@ import com.excelsior.core.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * This tuple is a special tuple that is a container of zero elements.

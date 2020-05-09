@@ -121,50 +121,32 @@ feature of tuples is that they are immutable, making them thread-safe. Moreover,
 `Serializable`, and `Comparable` interfaces, allowing their contents can be traversed easily, sortable in 
 collections and persistable. Here are some examples of usage:
 ```
-        // Creating tuple with a depth of 2
-        Tuple2<String,Integer> person = Tuple.of("James",12);
-         
-        // Retrieve values
-        logger.info("Name: {}",person.value1());
-        logger.info("Grade: {}",person.value2());
-        
-        // Outputs :-
-        [main] INFO com.excelsior.core.tuple.TupleTest - Name: James
-        [main] INFO com.excelsior.core.tuple.TupleTest - Grade: 12
-        
-        // Setting values using a mapAt method: Transform 2nd element
-        Tuple2<String,Integer> modified = person.mapAt2(s -> 16);
-        logger.info("Name: {}",modified.value1());
-        logger.info("Grade: {}",modified.value2());
-        
-        // Outputs :-
-        [main] INFO com.excelsior.core.tuple.TupleTest - Name: James
-        [main] INFO com.excelsior.core.tuple.TupleTest - Grade: 16
-        
-        // Create tuple from a collection
-        List<String> people = Arrays.asList("James","Carl","Andrea","Sharon");
+        // earth: ("Earth",7926,92955807), diameter in miles, distance from Sun in miles
+        Tuple3<String,Integer,Integer> earth = of("Earth",7926,92955807);
 
-        Nullable<Tuple4<String,String,String,String>> maybeTuple = Tuple4.fromIterable(people);
-        maybeTuple.ifPresent(tuple -> tuple.forEach(name -> logger.info("Name: {}",name)));
-        
-        // Outputs :-
-        [main] INFO com.excelsior.core.tuple.TupleTest - Name: James
-        [main] INFO com.excelsior.core.tuple.TupleTest - Name: Carl
-        [main] INFO com.excelsior.core.tuple.TupleTest - Name: Andrea
-        [main] INFO com.excelsior.core.tuple.TupleTest - Name: Sharon
-        
-        // Splicing
-        Tuple4<String,String,String,String> party = maybeTuple.get();
-        Tuple2<Tuple2<String,String>,Tuple2<String,String>> teams = party.spliceAt3();
+        // earth.value2(): 7926
+        earth.value2();
 
-        teams.value1().forEach(member -> logger.info("Boy: {}",member));
-        teams.value2().forEach(member -> logger.info("Girl: {}",member));
-        
-        // Outputs :-        
-        [main] INFO com.excelsior.core.tuple.TupleTest - Boy: James
-        [main] INFO com.excelsior.core.tuple.TupleTest - Boy: Carl
-        [main] INFO com.excelsior.core.tuple.TupleTest - Girl: Andrea
-        [main] INFO com.excelsior.core.tuple.TupleTest - Girl: Sharon                       
+        // kmEarth: ("Earth",12756,92955807), diameter in km
+        Tuple3<String,Integer,Integer> kmEarth = earth.mapAt2(t -> Math.round((t / (float) 0.621371)));
+
+        // earthMoon: ("Earth",7926,92955807,"Moon",9128), joined moon, diameter of 2159
+        Tuple5<String,Integer,Integer,String,Integer> earthMoon = earth.join(of("Moon",2159));
+
+        // planetaryBodies: (("Earth",7926,92955807),("Moon",9128))
+        Tuple2<Tuple3<String,Integer,Integer>,Tuple2<String,Integer>> planetaryBodies = earthMoon.spliceAt4();
+
+        // earth: ("Earth",7926,92955807)
+        earth = planetaryBodies.value1();
+
+        // moon: ("Moon",9128,92900000), added moon distance from Sun
+        Tuple3<String,Integer,Integer> moon = planetaryBodies.value2().join(92900000);
+
+        // home: ("Earth")
+        Tuple1<String> home = earth.truncateAt2();
+
+        // Outputs: "Earth's distance from Sun 92955807"
+        earth.match(when("^Earth$"),(a,b,c) -> logger.info("Earth's distance from Sun {}",c));
 ```
 
 ## Feedback
