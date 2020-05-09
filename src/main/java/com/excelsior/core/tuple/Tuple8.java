@@ -2,8 +2,10 @@ package com.excelsior.core.tuple;
 
 
 import com.excelsior.core.Nullable;
+import com.excelsior.core.function.Consumer8;
 import com.excelsior.core.function.Function8;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -416,6 +418,33 @@ public final class Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> extends AbstractTuple {
      */
     public <R> Tuple8<T1,T2,T3,T4,T5,T6,T7,R> mapAt8(Function<? super T8,? extends R> function) {
         return new Tuple8<>(t1,t2,t3,t4,t5,t6,t7,function.apply(t8));
+    }
+
+    /**
+     * Tests whether given {@code tuple} is equal to this {@code tuple}, and if
+     * true, the {@code consumer} function is executed.
+     * <p>
+     * This is particularly useful if the tuple contents are unknown and when
+     * discovered, the {@code consumer} function is performed.
+     * <pre>
+     * {@code
+     *      tuple
+     *        .match(when("John","Wellington"), (a,b,c,d,e,f,g,h,i) -> System.out.println(a))
+     *        .match(when("Alex","Wall",23), (a,b,c,d,e,f,g,h,i) -> System.out.println(b))
+     * }
+     * </pre>
+     * @param matcher object to use with this tuple.
+     * @param consumer function to execute if match is found.
+     * @param <Q> type of matcher.
+     * @return this tuple -- useful for multiple matches.
+     */
+    public <Q extends Matcher> Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> match(final Q matcher, final Consumer8<? super T1,? super T2,? super T3,? super T4,? super T5,? super T6,? super T7,? super T8> consumer) {
+        Objects.requireNonNull(consumer);
+        Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> result = this;
+        if (matcher.match(this))
+            consumer.accept(t1,t2,t3,t4,t5,t6,t7,t8);
+
+        return result;
     }
 
     /**

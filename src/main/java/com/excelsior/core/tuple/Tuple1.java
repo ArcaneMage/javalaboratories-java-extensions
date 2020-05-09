@@ -2,6 +2,8 @@ package com.excelsior.core.tuple;
 
 import com.excelsior.core.Nullable;
 
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -193,6 +195,31 @@ public final class Tuple1<T1> extends AbstractTuple {
      */
     public <R> Tuple1<R> mapAt1(Function<? super T1,? extends R> function) {
         return new Tuple1<>(function.apply(t1));
+    }
+
+    /**
+     * Tests whether given {@code tuple} is equal to this {@code tuple}, and if
+     * true, the {@code consumer} function is executed.
+     * <p>
+     * <pre>
+     * {@code
+     *      tuple
+     *        .match(when("John","Wellington"), a -> System.out.println(a))
+     *        .match(when("Alex","Wall",23), a -> System.out.println(a))
+     * }
+     * </pre>
+     * @param matcher object to use with this tuple.
+     * @param consumer function to execute if match is found.
+     * @param <Q> type of matcher.
+     * @return this tuple -- useful for multiple matches.
+     */
+    public <Q extends Matcher> Tuple1<T1> match(final Q matcher, final Consumer<? super T1> consumer) {
+        Objects.requireNonNull(consumer);
+        Tuple1<T1> result = this;
+        if (matcher.match(this))
+            consumer.accept(t1);
+
+        return result;
     }
 
     /**

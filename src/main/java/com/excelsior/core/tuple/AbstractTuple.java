@@ -49,21 +49,6 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      * {@inheritDoc}
      */
     @Override
-    public <R extends Tuple> R filter(Predicate<Object> predicate) {
-        Objects.requireNonNull(predicate);
-        Object[] f = new Object[this.depth()];
-        int i = 0;
-        for (Object element : this)
-            if (predicate.test(element))
-                f[i++] = element;
-        Nullable<R> result = Tuples.fromIterable(Arrays.asList(f), i);
-        return result.get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public <T extends Tuple> T hop(int position) {
         verify(position);
         Nullable<T> hopped = Tuples.fromIterable(this, position, depth() - position + 1);

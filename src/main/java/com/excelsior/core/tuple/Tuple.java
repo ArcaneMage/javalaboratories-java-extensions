@@ -211,21 +211,6 @@ public interface Tuple extends TupleContainer {
     <T extends Tuple> T hop(int position);
 
     /**
-     * Filters each element of this tuple based on the outcome of the {@code
-     * predicate}.
-     * <p>
-     * Each element is passed to the {@code predicate} function for evaluation.
-     * If the outcome of the evaluation is {@code false}, the current element is
-     * excluded (filtered out) from the tuple. A new tuple is returned with
-     * filtered elements.
-     *
-     * @param predicate function that evaluates each element for filtration.
-     * @param <R> type of returned tuple.
-     * @return returned tuple with filtered elements.
-     */
-     <R extends Tuple> R filter(Predicate<Object> predicate);
-
-    /**
      * Joins a {@code value} to a tuple.
      * <p>
      * The (@code value) is appended to the end the tuple, thus creating a new
@@ -258,35 +243,6 @@ public interface Tuple extends TupleContainer {
      * @throws NullPointerException if {@code that} is null.
      */
     <Q extends Tuple, R extends Tuple> R join(final Q that);
-
-    /**
-     * Tests whether given {@code tuple} is equal to this {@code tuple}, and if
-     * true, the {@code consumer} function is executed.
-     * <p>
-     * This is particularly useful if the tuple type is unknown and when discovered,
-     * the {@code consumer} function is performed.
-     * <pre>
-     * {@code
-     *      tuple
-     *        .match(of("John","Wellington"), a -> System.out.println(a.value1()))
-     *        .match(of("Alex","Wall",23), a -> System.out.println(a.value1()))
-     * }
-     * </pre>
-     * @param matcher {@code } matcher object to use with this tuple.
-     * @param consumer function to execute if match is found.
-     * @param <Q> type of matcher.
-     * @param <R> type of this tuple.
-     * @return this tuple -- useful for multiple matches.
-     */
-    default <Q extends Matcher, R extends Tuple> R match(final Q matcher, final Consumer<? super R> consumer) {
-        Objects.requireNonNull(consumer);
-        @SuppressWarnings("unchecked")
-        R result = (R) this;
-        if (matcher.match(this))
-            consumer.accept(result);
-
-        return result;
-    }
 
     /**
      * Splices or cuts the tuple into two smaller tuples at {@code position}.

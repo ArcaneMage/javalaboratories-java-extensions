@@ -6,14 +6,14 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractMatcher extends AbstractTupleContainer implements Matcher {
 
-    private Pattern[] patterns;
+    private Pattern[] matchPatterns;
 
     AbstractMatcher(Object... elements) {
         super(elements);
-        patterns = new java.util.regex.Pattern[depth()];
+        matchPatterns = new Pattern[depth()];
         int i = 0;
         for ( Object o : this )
-            patterns[i++] = o instanceof String ? java.util.regex.Pattern.compile(o.toString()) : null;
+            matchPatterns[i++] = o instanceof String ? Pattern.compile(o.toString()) : null;
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
                     }
                 } else {
                     String element = (String) o;
-                    Pattern matcherPattern = patterns[i];
+                    Pattern matcherPattern = matchPatterns[i];
                     result = matcherPattern != null && matcherPattern.matcher(element).matches();
                 }
                 i++;

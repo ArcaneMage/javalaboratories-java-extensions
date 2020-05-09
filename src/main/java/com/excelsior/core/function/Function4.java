@@ -1,7 +1,7 @@
 package com.excelsior.core.function;
 
 /**
- * Represents a function that accepts three parameters and returns a result.
+ * Represents a function that accepts 4 parameters and returns a result.
  * <p>
  * This is a functional interface whose functional method is
  * {@link Function4#apply(Object, Object, Object, Object)}.

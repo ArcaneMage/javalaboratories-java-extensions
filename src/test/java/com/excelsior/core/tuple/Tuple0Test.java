@@ -1,12 +1,10 @@
 package com.excelsior.core.tuple;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static com.excelsior.core.tuple.Matcher.when;
 import static com.excelsior.core.tuple.Tuple.of;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,13 +33,6 @@ public class Tuple0Test {
     @Test
     public void testDepth_Pass() {
         assertEquals(0,tuple.depth());
-    }
-
-    @Test
-    public void testFilter_Pass() {
-        Tuple0 tuple0 = tuple.filter(o -> o.equals("nothing"));
-
-        assertEquals(tuple0,tuple);
     }
 
     @Test

@@ -72,52 +72,42 @@ public class Tuple2Test {
     }
 
     @Test
-    public void testFilter_Pass() {
-        Holder<Boolean> match = Holders.writableHolder();
-        match.set(false);
-        tuple
-            .filter(o -> o.equals("Doe"))
-            .match(when("Doe"), t -> match.set("Doe".equals(t.value(1))) );
-        assertTrue(match.get());
-    }
-
-    @Test
     public void testMatch_Pass() {
         Holder<Integer> found = Holders.writableHolder();
         found.set(0);
         tuple
-            .match(when("Adrian","Wall"), t -> {
+            .match(when("Adrian","Wall"), (a,b) -> {
                 logger.info("Matched on \"Adrian,Wall\" tuple -- should not match");
                 found.set(found.get()+1);
             })
-            .match(when(1,2,3), t -> {
+            .match(when(1,2,3), (a,b) -> {
                 logger.info("Matched on \"1,2,3\" tuple -- should not match");
                 found.set(found.get()+1);
             })
-            .match(when("John"), t -> {
-                logger.info("Matched \"John\" tuple on: {} {}",t,t.value(2));
+            .match(when("John"), (a,b) -> {
+                logger.info("Matched \"John\" tuple on: {} {}",a,b);
                 found.set(found.get()+1);
             })
-            .match(when("John","Doe"), t -> {
-                logger.info("Matched on \"John,Doe\" tuple: {} {}",t,t.value(2));
+            .match(when("John","Doe"), (a,b) -> {
+                logger.info("Matched on \"John,Doe\" tuple: {} {}",a,b);
                 found.set(found.get()+1);
             });
         tuple_2
-            .match(when(1,2), t -> {
+            .match(when(1,2), (a,b) -> {
                 logger.info("Mathed on \"1,2\" tuple");
                 found.set(found.get()+1);
             })
-            .match(when(1), t -> {
+            .match(when(1), (a,b) -> {
                 logger.info("Matched on \"1\" tuple");
                 found.set(found.get()+1);
             })
-            .match(when(3,1),t -> {
+            .match(when(3,1),(a,b) -> {
                 logger.info("Matched on \"3,1\" tuple -- should not match");
                 found.set(found.get()+1);
             });
         tuple_3
-           .match(when(null,"Wall"), t -> {
-               logger.info("Matched on \"null,Wall\" tuple: {} {}",t,t.value(2));
+           .match(when(null,"Wall"), (a,b) -> {
+               logger.info("Matched on \"null,Wall\" tuple: {} {}",a,b);
                found.set(found.get()+1);
            });
 

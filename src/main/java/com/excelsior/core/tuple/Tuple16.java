@@ -2,8 +2,10 @@ package com.excelsior.core.tuple;
 
 
 import com.excelsior.core.Nullable;
+import com.excelsior.core.function.Consumer16;
 import com.excelsior.core.function.Function16;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -544,6 +546,33 @@ public final class Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T1
      */
     public <R> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,R> mapAt16(Function<? super T16,? extends R> function) {
         return new Tuple16<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,function.apply(t16));
+    }
+
+    /**
+     * Tests whether given {@code tuple} is equal to this {@code tuple}, and if
+     * true, the {@code consumer} function is executed.
+     * <p>
+     * This is particularly useful if the tuple contents are unknown and when
+     * discovered, the {@code consumer} function is performed.
+     * <pre>
+     * {@code
+     *      tuple
+     *        .match(when("John","Wellington"), (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q) -> System.out.println(a))
+     *        .match(when("Alex","Wall",23), (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q) -> System.out.println(b))
+     * }
+     * </pre>
+     * @param matcher object to use with this tuple.
+     * @param consumer function to execute if match is found.
+     * @param <Q> type of matcher.
+     * @return this tuple -- useful for multiple matches.
+     */
+    public <Q extends Matcher> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> match(final Q matcher, final Consumer16<? super T1,? super T2,? super T3,? super T4,? super T5,? super T6,? super T7,? super T8,? super T9,? super T10,? super T11,? super T12,? super T13,? super T14,? super T15,? super T16> consumer) {
+        Objects.requireNonNull(consumer);
+        Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> result = this;
+        if (matcher.match(this))
+            consumer.accept(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16);
+
+        return result;
     }
 
     /**

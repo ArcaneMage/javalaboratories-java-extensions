@@ -1,24 +1,24 @@
 package com.excelsior.core.function;
 
 /**
- * Represents a function that accepts 3 parameters and returns a result.
+ * Represents a consumer function that accepts 5 parameters.
  * <p>
  * This is a functional interface whose functional method is
- * {@link Function3#apply(Object, Object, Object)}.
+ * {@link Consumer4#accept(Object, Object, Object, Object)}.
  * @param <T1> type of first parameter
  * @param <T2> type of second parameter
  * @param <T3> type of third parameter
- * @param <R> type of returned value
+ * @param <T4> type of fourth parameter
  */
 @FunctionalInterface
-public interface Function3<T1,T2,T3,R> {
+public interface Consumer4<T1,T2,T3,T4> {
 
     /**
-     * Applies this method to the given parameters.
+     * Performs the operation with the given parameters.
      * @param t1 first parameter
      * @param t2 second parameter
      * @param t3 third parameter
-     * @return the result of the function
+     * @param t4 fourth parameter
      */
-    R apply(T1 t1,T2 t2, T3 t3);
+    void accept(T1 t1, T2 t2, T3 t3, T4 t4);
 }

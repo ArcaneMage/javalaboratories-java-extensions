@@ -1,11 +1,12 @@
 package com.excelsior.core.function;
 
 /**
- * Represents a function that accepts 14 parameters and returns a result.
+ * Represents a consumer function that accepts 16 parameters.
  * <p>
  * This is a functional interface whose functional method is
- * {@link Function14#apply(Object, Object, Object, Object, Object, Object,
- * Object, Object, Object, Object, Object, Object, Object, Object)} apply}.
+ * {@link Consumer16#accept(Object, Object, Object, Object, Object, Object,
+ * Object, Object, Object, Object, Object, Object, Object, Object, Object,
+ * Object)} apply}.
  * @param <T1> type of first parameter
  * @param <T2> type of second parameter
  * @param <T3> type of third parameter
@@ -20,14 +21,14 @@ package com.excelsior.core.function;
  * @param <T12> type of twelfth parameter
  * @param <T13> type of thirteenth parameter
  * @param <T14> type of fourteenth parameter
- *
- * @param <R> type of returned value
+ * @param <T15> type of fifteenth parameter
+ * @param <T16> type of sixteenth parameter
  */
 @FunctionalInterface
-public interface Function14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,R> {
+public interface Consumer16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> {
 
     /**
-     * Applies this method to the given parameters.
+     * Performs the operation with the given parameters.
      * @param t1 first parameter
      * @param t2 second parameter
      * @param t3 third parameter
@@ -42,7 +43,8 @@ public interface Function14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,R> {
      * @param t12 twelfth parameter
      * @param t13 thirteenth parameter
      * @param t14 fourteenth parameter
-     * @return the result of the function
+     * @param t15 fifteenth parameter
+     * @param t16 sixteenth parameter
      */
-    R apply(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10, T11 t11, T12 t12, T13 t13, T14 t14);
+    void accept(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10, T11 t11, T12 t12, T13 t13, T14 t14, T15 t15, T16 t16);
 }

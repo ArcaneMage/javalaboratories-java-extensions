@@ -1,11 +1,10 @@
 package com.excelsior.core.function;
 
 /**
- * Represents a function that accepts 10 parameters and returns a result.
+ * Represents a consumer function that accepts 8 parameters.
  * <p>
  * This is a functional interface whose functional method is
- * {@link Function10#apply(Object, Object, Object, Object, Object, Object,
- * Object, Object, Object, Object)} apply}.
+ * {@link Consumer8#accept(Object, Object, Object, Object, Object, Object, Object, Object)}.
  * @param <T1> type of first parameter
  * @param <T2> type of second parameter
  * @param <T3> type of third parameter
@@ -14,16 +13,12 @@ package com.excelsior.core.function;
  * @param <T6> type of sixth parameter
  * @param <T7> type of seventh parameter
  * @param <T8> type of eighth parameter
- * @param <T9> type of ninth parameter
- * @param <T10> type of tenth parameter
- *
- * @param <R> type of returned value
  */
 @FunctionalInterface
-public interface Function10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,R> {
+public interface Consumer8<T1,T2,T3,T4,T5,T6,T7,T8> {
 
     /**
-     * Applies this method to the given parameters.
+     * Performs the operation with the given parameters.
      * @param t1 first parameter
      * @param t2 second parameter
      * @param t3 third parameter
@@ -32,9 +27,6 @@ public interface Function10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,R> {
      * @param t6 sixth parameter
      * @param t7 seventh parameter
      * @param t8 eighth parameter
-     * @param t9 ninth parameter
-     * @param t10 tenth parameter
-     * @return the result of the function
      */
-    R apply(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10);
+    void accept(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8);
 }

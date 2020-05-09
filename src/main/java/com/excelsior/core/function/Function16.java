@@ -1,7 +1,7 @@
 package com.excelsior.core.function;
 
 /**
- * Represents a function that accepts three parameters and returns a result.
+ * Represents a function that accepts 16 parameters and returns a result.
  * <p>
  * This is a functional interface whose functional method is
  * {@link Function16#apply(Object, Object, Object, Object, Object, Object,
@@ -11,7 +11,6 @@ package com.excelsior.core.function;
  * @param <T2> type of second parameter
  * @param <T3> type of third parameter
  * @param <T4> type of fourth parameter
- * @param <T5> type of fifth parameter
  * @param <T5> type of fifth parameter
  * @param <T6> type of sixth parameter
  * @param <T7> type of seventh parameter

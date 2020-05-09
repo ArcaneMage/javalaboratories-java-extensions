@@ -8,14 +8,14 @@ import java.util.NoSuchElementException;
 public final class Tuples {
 
     @SuppressWarnings("unchecked")
-    static <T> T emptyTuple() { return (T) Tuple.of(); }
+    public static <T> T emptyTuple() { return (T) Tuple.of(); }
 
     public static <T extends Tuple,E> Nullable<T> fromIterable(Iterable<E> iterable, int depth) {
         return fromIterable(iterable, 0, depth);
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends Tuple,E> Nullable<T> fromIterable(Iterable<E> iterable, int start, int depth) {
+    public static <T extends Tuple,E> Nullable<T> fromIterable(Iterable<E> iterable, int start, int depth) {
         Iterator<E> it = iterable.iterator();
         T result = null;
         try {

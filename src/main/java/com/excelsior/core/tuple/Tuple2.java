@@ -3,8 +3,11 @@ package com.excelsior.core.tuple;
 
 import com.excelsior.core.Nullable;
 
+import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 
 /**
@@ -238,6 +241,33 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      */
     public <R> Tuple2<T1,R> mapAt2(Function<? super T2,? extends R> function) {
         return new Tuple2<>(t1,function.apply(t2));
+    }
+
+    /**
+     * Tests whether given {@code tuple} is equal to this {@code tuple}, and if
+     * true, the {@code consumer} function is executed.
+     * <p>
+     * This is particularly useful if the tuple contents are unknown and when
+     * discovered, the {@code consumer} function is performed.
+     * <pre>
+     * {@code
+     *      tuple
+     *        .match(when("John","Wellington"), (a,b) -> System.out.println(a))
+     *        .match(when("Alex","Wall",23), (a,b) -> System.out.println(b))
+     * }
+     * </pre>
+     * @param matcher object to use with this tuple.
+     * @param consumer function to execute if match is found.
+     * @param <Q> type of matcher.
+     * @return this tuple -- useful for multiple matches.
+     */
+    public <Q extends Matcher> Tuple2<T1,T2> match(final Q matcher, final BiConsumer<? super T1,? super T2> consumer) {
+        Objects.requireNonNull(consumer);
+        Tuple2<T1,T2> result = this;
+        if (matcher.match(this))
+            consumer.accept(t1,t2);
+
+        return result;
     }
 
     /**

@@ -53,14 +53,6 @@ public final class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public <R extends Tuple> R filter(Predicate<Object> predicate) {
-        return Tuples.emptyTuple();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public int positionOf(Object object) {
         return 0;
     }
