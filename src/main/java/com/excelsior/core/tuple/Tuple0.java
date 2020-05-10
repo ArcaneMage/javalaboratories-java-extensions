@@ -47,7 +47,7 @@ public final class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public <Q extends Tuple, R extends Tuple> R join(final Q that) {
+    public <R extends Tuple> R join(final Tuple that) {
         Objects.requireNonNull(that);
         Nullable<R> result = Tuples.fromIterable(that,that.depth());
         return result.get();

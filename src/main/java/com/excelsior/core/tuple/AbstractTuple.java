@@ -47,7 +47,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      * @throws NullPointerException if {@code that} is null.
      */
     @Override
-    public <Q extends Tuple, R extends Tuple> R join(final Q that) {
+    public <R extends Tuple> R join(final Tuple that) {
         Objects.requireNonNull(that);
         int depth = this.depth() + that.depth();
         if (depth > MAX_DEPTH)

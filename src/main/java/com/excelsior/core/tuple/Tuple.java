@@ -37,7 +37,7 @@ import java.util.*;
  *
  * @author Kevin Henry
  */
-public interface Tuple extends TupleContainer, JoinableTuple {
+public interface Tuple extends TupleContainer, JoinableTuple<Tuple> {
     /**
      * Creates a tuple with a depth of 0
      * @return a tuple of encapsulating the element(s)
