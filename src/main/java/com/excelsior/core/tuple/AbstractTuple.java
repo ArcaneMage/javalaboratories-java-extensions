@@ -3,7 +3,6 @@ package com.excelsior.core.tuple;
 import com.excelsior.core.Nullable;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 
 /**
@@ -41,7 +40,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
             return Tuple.of(value).join(this);
         } else {
             Tuple2<Tuple, Tuple> spliced = this.splice(position);
-            return spliced.value1().join(value).join(spliced.value2());
+            return spliced.value1().join(Tuple.of(value)).join(spliced.value2());
         }
     }
 
