@@ -1,8 +1,6 @@
 package com.excelsior.core.tuple;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * A tuple implements this interface.
@@ -39,7 +37,7 @@ import java.util.function.Predicate;
  *
  * @author Kevin Henry
  */
-public interface Tuple extends TupleContainer {
+public interface Tuple extends TupleContainer, JoinableTuple {
     /**
      * Creates a tuple with a depth of 0
      * @return a tuple of encapsulating the element(s)
@@ -173,114 +171,5 @@ public interface Tuple extends TupleContainer {
     static <T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> of(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10, T11 t11, T12 t12, T13 t13, T14 t14, T15 t15, T16 t16) {
         return new Tuple16<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16);
     }
-
-    /**
-     * Adds a value to the tuple at element position.
-     * <p>
-     * The parameter {@code position} is a positive value that is greater than
-     * 0 and less than the depth of the tuple. If the addition of the value
-     * results in potentially creating a tuple that has a depth that is greater
-     * than {@code MAX_DEPTH}, the method will throw {@link TupleOverflowException}
-     * exception.
-     *
-     * @param position non-zero, positive value that indicates physical
-     *                 position to place the value. This parameter must be less than
-     *                 or equal to {@link this#depth()}
-     * @param value the value to add to the tuple.
-     * @param <Q> type of value.
-     * @param <R> type of tuple returned.
-     * @return a new tuple with the appropriate type and depth to accommodate
-     * the added value.
-     */
-    <Q,R extends Tuple> R add(int position, final Q value);
-
-
-    /**
-     * Returns a tuple with elements from {@code position} to the end of the tuple.
-     * <p>
-     * This method is similar to {@link Tuple#truncate(int)}, but rather truncating
-     * from the right, truncation in this method is performed from the left. An
-     * example would be the following: given the tuple {@code [1,2,3,4,5]}, hopping
-     * to {@code position 3}, will result in a new tuple {@code [3,4,5]}.
-     *
-     * @param position non-zero, positive value to which to hop. This parameter must
-     *                 be less than or equal to {@link this#depth()}
-     * @param <T> type of tuple returned
-     * @return new resultant tuple
-     */
-    <T extends Tuple> T hop(int position);
-
-    /**
-     * Joins a {@code that} tuple to the tuple, resulting in a new tuple.
-     * <p>
-     * The (@code that) tuple contents are appended to the end the tuple, thus
-     * creating a new tuple with the appropriate depth to accommodate the
-     * merged contents.
-     * <p>
-     * If teh combined depth of both this and {@code that} tuple is greater
-     * that {@code MAX_DEPTH}, the exception {@link TupleOverflowException}
-     * is thrown.
-     * @param that is a tuple whose contents are to be merged with the tuple's
-     *             contents.
-     * @param <Q> the type of the tuple.
-     * @param <R> the type of the new tuple returned.
-     * @return a new tuple with the appropriate depth to house the value.
-     * @throws NullPointerException if {@code that} is null.
-     */
-    <Q extends Tuple, R extends Tuple> R join(final Q that);
-
-    /**
-     * Splices or cuts the tuple into two smaller tuples at {@code position}.
-     * <p>
-     * This method is almost the direct opposite to the join, except that the
-     * resultant tuple returned is a container of two smaller tuples. For example,
-     * given the tuple {@code [1,2,3,4,5]}. If the tuple is spliced at position 3,
-     * the method will return the following {@code [[1,2],[3,4,5]]} in the
-     * {@link Tuple2} container. Use the methods of {@link Tuple2} to access the
-     * sliced the tuples.
-     *
-     * @param position is the location in the tuple at which to perform the
-     *                 slicing. This parameter must be less than or equal to
-     *                 {@link this#depth()}
-     * @param <Q>      type of the first tuple in the returned {@link Tuple2}
-     *           container.
-     * @param <R>      type of the second tuple in the returned {@link Tuple2}
-     *           container.
-     * @return a new {@link Tuple2} containing tuple slices.
-     */
-    default <Q extends Tuple, R extends Tuple> Tuple2<Q,R> splice(int position) {
-        return Tuple.of(truncate(position),hop(position));
-    }
-
-    /**
-     * Truncates the tuple at {@code position}
-     * <p>
-     * Method returns a new truncated tuple, a tuple that has had the remaining
-     * elements discarded. For example the tuple {@code [1,2,3,4,5]} truncated at
-     * {@code position} 3 would result in a new tuple {@code [1,2]}
-     *
-     * @param position is a non-zero, positive value at which truncation is
-     *                 performed. This parameter must be less than or equal to
-     *                 {@link this#depth()}
-     * @param <T> type of tuple returned.
-     * @return a new truncated tuple.
-     */
-    <T extends Tuple> T truncate(int position);
-
-   /**
-     * Removes an element/object from the tuple.
-     * <p>
-     * The first occurrence of the object is removed from the tuple and a new
-     * resultant tuple is returned without the specified element. A match is
-     * determined with the {@link Object#equals(Object)} method.
-     * <p>
-     * Initially, the position of the object is calculated, so if the object
-     * does not exist, then this will result in an exception being thrown.
-     *
-     * @param object Object to be removed.
-     * @param <T> type of tuple returned.
-     * @return tuple without the specified {@code element}
-     */
-    <T extends Tuple> T remove(Object object);
 
 }

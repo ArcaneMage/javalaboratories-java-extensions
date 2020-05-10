@@ -3,7 +3,8 @@ package com.excelsior.core.tuple;
 import java.util.function.Consumer;
 
 /**
- * Matcher is a special kind of tuple that has pattern matching capabilities.
+ * Matcher is a special kind of tuple container that has pattern matching
+ * capabilities.
  * <p>
  * The {@link Matcher#match(Tuple)} is used to test whether the tuple's
  * elements match the encapsulated pattern, returning (@code true) to indicate

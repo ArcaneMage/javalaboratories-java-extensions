@@ -12,25 +12,12 @@ import java.util.function.Function;
  * that computation has resulted in an empty Tuple.
  * <p>
  * However, it is possible to perform joins on this tuple.
- * @see Tuple#add(int, Object)
- * @see Tuple#splice(int)
- * @see Tuple#truncate(int)
  */
 public final class Tuple0 implements Tuple {
 
     public static final long serialVersionUID = -1202062103023587399L;
 
-    private static final String UNSUPPORTED_OPERATION_MESSAGE = "This is not supported in this tuple";
-
     public Tuple0() { }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <Q, R extends Tuple> R add(int position, final Q value) {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
-    }
 
     /**
      * {@inheritDoc}
@@ -60,26 +47,10 @@ public final class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public <T extends Tuple> T hop(int poistion) {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public <Q extends Tuple, R extends Tuple> R join(final Q that) {
         Objects.requireNonNull(that);
         Nullable<R> result = Tuples.fromIterable(that,that.depth());
         return result.get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T extends Tuple> T truncate(int position) {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
     /**
@@ -112,14 +83,6 @@ public final class Tuple0 implements Tuple {
     @Override
     public String toString() {
         return "Tuple0=[]";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T extends Tuple> T remove(Object object) {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
     /**

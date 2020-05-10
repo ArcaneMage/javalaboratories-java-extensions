@@ -21,11 +21,6 @@ public class Tuple0Test {
     }
 
     @Test
-    public void testAdd_Fail() {
-        assertThrows(UnsupportedOperationException.class, () -> tuple.add(0,value));
-    }
-
-    @Test
     public void testContains_Pass() {
         assertFalse(tuple.contains(value));
     }
@@ -33,11 +28,6 @@ public class Tuple0Test {
     @Test
     public void testDepth_Pass() {
         assertEquals(0,tuple.depth());
-    }
-
-    @Test
-    public void testHop_Fail() {
-        assertThrows(UnsupportedOperationException.class, () -> tuple.hop(1));
     }
 
     @Test
@@ -56,16 +46,6 @@ public class Tuple0Test {
 
         Tuple6 aTuple6 = aTuple3.join(of(1,2,3));
         assertEquals(of(1,2,3,1,2,3), aTuple6);
-    }
-
-    @Test
-    public void testTruncate_Fail() {
-        assertThrows(UnsupportedOperationException.class, () -> tuple.truncate(1));
-    }
-
-    @Test
-    public void testSplice_Fail() {
-        assertThrows(UnsupportedOperationException.class, () -> tuple.splice(0));
     }
 
     @Test
@@ -91,11 +71,6 @@ public class Tuple0Test {
     @Test
     public void testToString_Pass() {
         assertEquals("Tuple0=[]",tuple.toString());
-    }
-
-    @Test
-    public void testRemove_Fail() {
-        assertThrows(UnsupportedOperationException.class, () -> tuple.remove(1));
     }
 
     @Test
