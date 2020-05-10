@@ -8,6 +8,8 @@ import com.excelsior.core.function.Function11;
 import java.util.Objects;
 import java.util.function.Function;
 
+import static com.excelsior.core.tuple.Tuple.*;
+
 /**
  * A tuple with depth of 11
  *
@@ -263,6 +265,14 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
      */
     public Tuple1<T11> hopTo11() {
         return hop(11);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param value a tuple object.
+     */
+    public <T> Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> join(T value) {
+        return join(of(value));
     }
 
     /**

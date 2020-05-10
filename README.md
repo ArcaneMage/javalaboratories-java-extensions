@@ -121,32 +121,38 @@ particularly useful feature of tuples is that they are immutable, making them th
 the `Iterable`, `Serializable`, and `Comparable` interfaces, allowing their contents can be traversed easily, sortable in 
 collections and persistable. Here are some examples of usage:
 ```
-        // earth: ("Earth",7926,92955807), diameter in miles, distance from Sun in miles
-        Tuple3<String,Integer,Integer> earth = of("Earth",7926,92955807);
+        // tupleEarth: ("Earth",7926,92955807), diameter in miles, distance from Sun in miles
+        Tuple3<String,Integer,Integer> tupleEarth = of("Earth",7926,92955807);
 
-        // earth.value2(): 7926
-        earth.value2();
+        // tupleEarth.value2(): 7926
+        tupleEarth.value2();
 
-        // kmEarth: ("Earth",12756,92955807), diameter in km
-        Tuple3<String,Integer,Integer> kmEarth = earth.mapAt2(t -> Math.round((t / (float) 0.621371)));
+        // tupleEarth: ("Earth",12756,92955807), diameter in km
+        Tuple3<String,Integer,Integer> kmEarth = tupleEarth.mapAt2(t -> Math.round((t / (float) 0.621371)));
 
         // earthMoon: ("Earth",7926,92955807,"Moon",2159), joined moon, diameter of 2159
-        Tuple5<String,Integer,Integer,String,Integer> earthMoon = earth.join(of("Moon",2159));
+        Tuple5<String,Integer,Integer,String,Integer> tupleEarthMoon = tupleEarth.join(of("Moon",2159));
 
         // planetaryBodies: (("Earth",7926,92955807),("Moon",2159))
-        Tuple2<Tuple3<String,Integer,Integer>,Tuple2<String,Integer>> planetaryBodies = earthMoon.spliceAt4();
+        Tuple2<Tuple3<String,Integer,Integer>,Tuple2<String,Integer>> tuplePlanetaryBodies = tupleEarthMoon.spliceAt4();
 
-        // earth: ("Earth",7926,92955807)
-        earth = planetaryBodies.value1();
+        // tupleEarth: ("Earth",7926,92955807)
+        tupleEarth = tuplePlanetaryBodies.value1();
 
-        // moon: ("Moon",2159,92900000), added moon distance from Sun
-        Tuple3<String,Integer,Integer> moon = planetaryBodies.value2().join(92900000);
+        // tupleMoon: ("Moon",2159,92900000), added moon distance from Sun
+        Tuple3<String,Integer,Integer> tupleMoon = tuplePlanetaryBodies.value2().join(92900000);
 
-        // home: ("Earth")
-        Tuple1<String> home = earth.truncateAt2();
+        // tupleCoordinates: ("Milky Way","Earth","Europe","England","Blackfriars","London","EC2 1QW")
+        Tuple7<String,String,String,String,String,String,String> tupleCoordinates = tupleEarth
+                .truncateAt2()
+                .addAt1("Milky Way")
+                .join(of("Europe","England","Blackfriars","London","EC2 1QW"));
+
+        // list: ["Milky Way","Earth","Europe","England","Blackfriars","London","EC2 1QW"]
+        List<?> list = tupleCoordinates.toList();
 
         // Outputs: "Earth's distance from Sun 92955807"
-        earth.match(when("^Earth$"),(a,b,c) -> logger.info("Earth's distance from Sun {}",c));
+        tupleEarth.match(when("^Earth$"),(a,b,c) -> logger.info("Earth's distance from Sun {}",c));
 ```
 
 ## Feedback

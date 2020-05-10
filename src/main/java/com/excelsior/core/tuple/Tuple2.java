@@ -8,6 +8,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.excelsior.core.tuple.Tuple.of;
+
 
 /**
  * A tuple with depth of 2
@@ -75,6 +77,14 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      */
     public Tuple1<T2> hopTo2() {
         return hop(2);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param value a tuple object.
+     */
+    public <T> Tuple3<T1,T2,T> join(T value) {
+        return join(of(value));
     }
 
     /**

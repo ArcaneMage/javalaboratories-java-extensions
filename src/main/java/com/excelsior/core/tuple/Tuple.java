@@ -211,21 +211,6 @@ public interface Tuple extends TupleContainer {
     <T extends Tuple> T hop(int position);
 
     /**
-     * Joins a {@code value} to a tuple.
-     * <p>
-     * The (@code value) is appended to the end the tuple, thus creating a new
-     * tuple with the appropriate depth to accommodate the value.
-     * <p>
-     * @param value the value to append to the end of the new tuple.
-     * @param <Q> the type of the value.
-     * @param <R> the type of the new tuple returned.
-     * @return a new tuple with the appropriate depth to house the value.
-     */
-    default <Q, R extends Tuple> R join(final Q value) {
-        return join(Tuple.of(value));
-    }
-
-    /**
      * Joins a {@code that} tuple to the tuple, resulting in a new tuple.
      * <p>
      * The (@code that) tuple contents are appended to the end the tuple, thus

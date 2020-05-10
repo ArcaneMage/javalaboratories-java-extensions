@@ -8,6 +8,8 @@ import com.excelsior.core.function.Function12;
 import java.util.Objects;
 import java.util.function.Function;
 
+import static com.excelsior.core.tuple.Tuple.*;
+
 /**
  * A tuple with depth of 12
  *
@@ -285,6 +287,14 @@ public final class Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12> extends Abstr
      */
     public Tuple1<T12> hopTo12() {
         return hop(12);
+    }
+
+    /**
+     * Joins a tuple to this tuple.
+     * @param value a tuple object.
+     */
+    public <T> Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T> join(T value) {
+        return join(of(value));
     }
 
     /**
