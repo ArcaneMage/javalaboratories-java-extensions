@@ -41,7 +41,6 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      * is thrown.
      * @param that is a tuple whose contents are to be merged with the tuple's
      *             contents.
-     * @param <Q> the type of the tuple.
      * @param <R> the type of the new tuple returned.
      * @return a new tuple with the appropriate depth to house the value.
      * @throws NullPointerException if {@code that} is null.
