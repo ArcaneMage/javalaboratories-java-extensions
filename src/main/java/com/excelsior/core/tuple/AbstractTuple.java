@@ -150,6 +150,23 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
     /**
      * Removes an element/object from the tuple.
      * <p>
+     * {@code position} is the unique location of the element to be removed.
+     *
+     * @param position is a non-zero, positive value of the element to be
+     *                 removed.
+     * @param <T> type of tuple returned.
+     * @return tuple without the specified {@code element}
+     */
+    <T extends Tuple> T remove(int position) {
+        final int HOP_OVER = 2;
+        verify(position);
+        Tuple2<Tuple, Tuple> spliced = splice(position);
+        return spliced.value1().join(position < depth() ? ((AbstractTuple) spliced.value2()).hop(HOP_OVER) : Tuples.emptyTuple());
+    }
+
+    /**
+     * Removes an element/object from the tuple.
+     * <p>
      * The first occurrence of the object is removed from the tuple and a new
      * resultant tuple is returned without the specified element. A match is
      * determined with the {@link Object#equals(Object)} method.
@@ -160,11 +177,11 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      * @param object Object to be removed.
      * @param <T> type of tuple returned.
      * @return tuple without the specified {@code element}
+     * @deprecated Use {@link AbstractTuple#remove(int)}
      */
-    final <T extends Tuple> T remove(Object object) {
-        int position = positionOf(object);
-        Tuple2<Tuple, Tuple> spliced = splice(position);
-        return spliced.value1().join(position < depth() ? ((AbstractTuple) spliced.value2()).hop(2) : Tuples.emptyTuple());
+    @Deprecated
+    <T extends Tuple> T remove(Object object) {
+        return remove(positionOf(object));
     }
 
     private Object[] getObjects(final Tuple... tuples) {

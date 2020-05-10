@@ -233,6 +233,13 @@ public final class Tuple1<T1> extends AbstractTuple {
     }
 
     /**
+     * Remove element at position 1
+     */
+    public Tuple0 removeAt1() {
+        return remove(1);
+    }
+
+    /**
      * Truncates tuples at position 1
      */
     public Tuple0 truncateAt1() {

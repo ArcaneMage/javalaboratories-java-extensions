@@ -548,6 +548,83 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
     }
 
     /**
+     * Remove element at position 1
+     */
+    public Tuple10<T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> removeAt1() {
+        return remove(1);
+    }
+
+    /**
+     * Remove element at position 2
+     */
+    public Tuple10<T1,T3,T4,T5,T6,T7,T8,T9,T10,T11> removeAt2() {
+        return remove(2);
+    }
+
+    /**
+     * Remove element at position 3
+     */
+    public Tuple10<T1,T2,T4,T5,T6,T7,T8,T9,T10,T11> removeAt3() {
+        return remove(3);
+    }
+
+    /**
+     * Remove element at position 4
+     */
+    public Tuple10<T1,T2,T3,T5,T6,T7,T8,T9,T10,T11> removeAt4() {
+        return remove(4);
+    }
+
+    /**
+     * Remove element at position 5
+     */
+    public Tuple10<T1,T2,T3,T4,T6,T7,T8,T9,T10,T11> removeAt5() {
+        return remove(5);
+    }
+
+    /**
+     * Remove element at position 6
+     */
+    public Tuple10<T1,T2,T3,T4,T5,T7,T8,T9,T10,T11> removeAt6() {
+        return remove(6);
+    }
+
+    /**
+     * Remove element at position 7
+     */
+    public Tuple10<T1,T2,T3,T4,T5,T6,T8,T9,T10,T11> removeAt7() {
+        return remove(7);
+    }
+
+    /**
+     * Remove element at position 8
+     */
+    public Tuple10<T1,T2,T3,T4,T5,T6,T7,T9,T10,T11> removeAt8() {
+        return remove(8);
+    }
+
+    /**
+     * Remove element at position 9
+     */
+    public Tuple10<T1,T2,T3,T4,T5,T6,T7,T8,T10,T11> removeAt9() {
+        return remove(9);
+    }
+
+    /**
+     * Remove element at position 10
+     */
+    public Tuple10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T11> removeAt10() {
+        return remove(10);
+    }
+
+    /**
+     * Remove element at position 11
+     */
+    public Tuple10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> removeAt11() {
+        return remove(11);
+    }
+
+    /**
      * Truncates tuples at position 1
      */
     public Tuple0 truncateAt1() {

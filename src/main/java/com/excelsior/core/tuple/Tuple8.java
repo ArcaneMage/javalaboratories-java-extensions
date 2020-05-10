@@ -458,6 +458,62 @@ public final class Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> extends AbstractTuple {
     }
 
     /**
+     * Remove element at position 1
+     */
+    public Tuple7<T2,T3,T4,T5,T6,T7,T8> removeAt1() {
+        return remove(1);
+    }
+
+    /**
+     * Remove element at position 2
+     */
+    public Tuple7<T1,T3,T4,T5,T6,T7,T8> removeAt2() {
+        return remove(2);
+    }
+
+    /**
+     * Remove element at position 3
+     */
+    public Tuple7<T1,T2,T4,T5,T6,T7,T8> removeAt3() {
+        return remove(3);
+    }
+
+    /**
+     * Remove element at position 4
+     */
+    public Tuple7<T1,T2,T3,T5,T6,T7,T8> removeAt4() {
+        return remove(4);
+    }
+
+    /**
+     * Remove element at position 5
+     */
+    public Tuple7<T1,T2,T3,T4,T6,T7,T8> removeAt5() {
+        return remove(5);
+    }
+
+    /**
+     * Remove element at position 6
+     */
+    public Tuple7<T1,T2,T3,T4,T5,T7,T8> removeAt6() {
+        return remove(6);
+    }
+
+    /**
+     * Remove element at position 7
+     */
+    public Tuple7<T1,T2,T3,T4,T5,T6,T8> removeAt7() {
+        return remove(7);
+    }
+
+    /**
+     * Remove element at position 8
+     */
+    public Tuple7<T1,T2,T3,T4,T5,T6,T7> removeAt8() {
+        return remove(8);
+    }
+
+    /**
      * Truncates tuples at position 1
      */
     public Tuple0 truncateAt1() {

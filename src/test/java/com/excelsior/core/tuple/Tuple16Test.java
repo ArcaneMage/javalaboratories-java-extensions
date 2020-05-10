@@ -223,14 +223,53 @@ public class Tuple16Test {
 
     @Test
     public void testRemove_Pass() {
-        Tuple15 tuple15 = tuple.remove(16);
+        Tuple15 tuple15 = tuple.removeAt1();
+        assertEquals(Tuple.of(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt2();
+        assertEquals(Tuple.of(1,3,4,5,6,7,8,9,10,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt3();
+        assertEquals(Tuple.of(1,2,4,5,6,7,8,9,10,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt4();
+        assertEquals(Tuple.of(1,2,3,5,6,7,8,9,10,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt5();
+        assertEquals(Tuple.of(1,2,3,4,6,7,8,9,10,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt6();
+        assertEquals(Tuple.of(1,2,3,4,5,7,8,9,10,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt7();
+        assertEquals(Tuple.of(1,2,3,4,5,6,8,9,10,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt8();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,9,10,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt9();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,10,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt10();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,11,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt11();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,12,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt12();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,13,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt13();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,14,15,16),tuple15);
+
+        tuple15 = tuple.removeAt14();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,15,16),tuple15);
+
+        tuple15 = tuple.removeAt15();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,16),tuple15);
+
+        tuple15 = tuple.removeAt16();
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),tuple15);
-
-        Tuple14 tuple14 = tuple15.remove(10);
-        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,11,12,13,14,15),tuple14);
-
-        Tuple13 tuple13 = tuple14.remove(1);
-        assertEquals(Tuple.of(2,3,4,5,6,7,8,9,11,12,13,14,15),tuple13);
     }
 
     @Test

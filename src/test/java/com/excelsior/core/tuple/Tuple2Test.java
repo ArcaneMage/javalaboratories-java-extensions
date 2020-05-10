@@ -388,7 +388,7 @@ public class Tuple2Test {
         Tuple1 tuple1_2 = tuple_2.remove(1);
         assertEquals(of(2),tuple1_2);
 
-        Tuple0 tuple0 = tuple1_2.remove(2);
+        Tuple0 tuple0 = tuple1_2.remove(1);
         assertEquals(of(),tuple0);
     }
 

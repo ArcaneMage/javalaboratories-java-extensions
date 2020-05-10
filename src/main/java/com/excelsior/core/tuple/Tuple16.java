@@ -576,6 +576,118 @@ public final class Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T1
     }
 
     /**
+     * Remove element at position 1
+     */
+    public Tuple15<T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> removeAt1() {
+        return remove(1);
+    }
+
+    /**
+     * Remove element at position 2
+     */
+    public Tuple15<T1,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> removeAt2() {
+        return remove(2);
+    }
+
+    /**
+     * Remove element at position 3
+     */
+    public Tuple15<T1,T2,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> removeAt3() {
+        return remove(3);
+    }
+
+    /**
+     * Remove element at position 4
+     */
+    public Tuple15<T1,T2,T3,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> removeAt4() {
+        return remove(4);
+    }
+
+    /**
+     * Remove element at position 5
+     */
+    public Tuple15<T1,T2,T3,T4,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> removeAt5() {
+        return remove(5);
+    }
+
+    /**
+     * Remove element at position 6
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16> removeAt6() {
+        return remove(6);
+    }
+
+    /**
+     * Remove element at position 7
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T8,T9,T10,T11,T12,T13,T14,T15,T16> removeAt7() {
+        return remove(7);
+    }
+
+    /**
+     * Remove element at position 8
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T7,T9,T10,T11,T12,T13,T14,T15,T16> removeAt8() {
+        return remove(8);
+    }
+
+    /**
+     * Remove element at position 9
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T10,T11,T12,T13,T14,T15,T16> removeAt9() {
+        return remove(9);
+    }
+
+    /**
+     * Remove element at position 10
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T11,T12,T13,T14,T15,T16> removeAt10() {
+        return remove(10);
+    }
+
+    /**
+     * Remove element at position 11
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T12,T13,T14,T15,T16> removeAt11() {
+        return remove(11);
+    }
+
+    /**
+     * Remove element at position 12
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T13,T14,T15,T16> removeAt12() {
+        return remove(12);
+    }
+
+    /**
+     * Remove element at position 13
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T14,T15,T16> removeAt13() {
+        return remove(13);
+    }
+
+    /**
+     * Remove element at position 14
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T15,T16> removeAt14() {
+        return remove(14);
+    }
+
+    /**
+     * Remove element at position 15
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T16> removeAt15() {
+        return remove(15);
+    }
+
+    /**
+     * Remove element at position 16
+     */
+    public Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15> removeAt16() {
+        return remove(16);
+    }
+
+    /**
      * Truncates tuples at position 1
      */
     public Tuple0 truncateAt1() {
