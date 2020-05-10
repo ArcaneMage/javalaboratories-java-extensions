@@ -99,8 +99,8 @@ public class Tuple1Test {
 
     @Test
     public void testRemove_Pass() {
-        Tuple0 tuple1 = tuple.remove(1);
-        assertEquals(Tuple.of(), tuple1);
+        Tuple0 tuple0 = tuple.removeAt1();
+        assertEquals(Tuple.of(),tuple0);
     }
 
     @Test

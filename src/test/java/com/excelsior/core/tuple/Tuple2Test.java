@@ -382,14 +382,11 @@ public class Tuple2Test {
 
     @Test
     public void testRemove_Pass() {
-        Tuple1 tuple1 = tuple_2.remove(2);
-        assertEquals(of(1),tuple1);
+        Tuple1 tuple1 = tuple_2.removeAt1();
+        assertEquals(Tuple.of(2),tuple1);
 
-        Tuple1 tuple1_2 = tuple_2.remove(1);
-        assertEquals(of(2),tuple1_2);
-
-        Tuple0 tuple0 = tuple1_2.remove(1);
-        assertEquals(of(),tuple0);
+        tuple1 = tuple_2.removeAt2();
+        assertEquals(Tuple.of(1),tuple1);
     }
 
     @Test

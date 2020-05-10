@@ -222,14 +222,38 @@ public class Tuple11Test {
 
     @Test
     public void testRemove_Pass() {
-        Tuple10 tuple10 = tuple.remove(11);
+        Tuple10 tuple10 = tuple.removeAt1();
+        assertEquals(Tuple.of(2,3,4,5,6,7,8,9,10,11),tuple10);
+
+        tuple10 = tuple.removeAt2();
+        assertEquals(Tuple.of(1,3,4,5,6,7,8,9,10,11),tuple10);
+
+        tuple10 = tuple.removeAt3();
+        assertEquals(Tuple.of(1,2,4,5,6,7,8,9,10,11),tuple10);
+
+        tuple10 = tuple.removeAt4();
+        assertEquals(Tuple.of(1,2,3,5,6,7,8,9,10,11),tuple10);
+
+        tuple10 = tuple.removeAt5();
+        assertEquals(Tuple.of(1,2,3,4,6,7,8,9,10,11),tuple10);
+
+        tuple10 = tuple.removeAt6();
+        assertEquals(Tuple.of(1,2,3,4,5,7,8,9,10,11),tuple10);
+
+        tuple10 = tuple.removeAt7();
+        assertEquals(Tuple.of(1,2,3,4,5,6,8,9,10,11),tuple10);
+
+        tuple10 = tuple.removeAt8();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,9,10,11),tuple10);
+
+        tuple10 = tuple.removeAt9();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,10,11),tuple10);
+
+        tuple10 = tuple.removeAt10();
+        assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,11),tuple10);
+
+        tuple10 = tuple.removeAt11();
         assertEquals(Tuple.of(1,2,3,4,5,6,7,8,9,10),tuple10);
-
-        Tuple10 tuple10_2 = tuple.remove(7);
-        assertEquals(Tuple.of(1,2,3,4,5,6,8,9,10,11),tuple10_2);
-
-        Tuple10 tuple10_3 = tuple.remove(1);
-        assertEquals(Tuple.of(2,3,4,5,6,7,8,9,10,11),tuple10_3);
     }
 
     @Test

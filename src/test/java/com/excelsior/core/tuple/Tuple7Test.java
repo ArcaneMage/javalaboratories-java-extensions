@@ -181,14 +181,26 @@ public class Tuple7Test {
 
     @Test
     public void testRemove_Pass() {
-        Tuple6 tuple6 = tuple.remove(7);
+        Tuple6 tuple6 = tuple.removeAt1();
+        assertEquals(Tuple.of(2,3,4,5,6,7),tuple6);
+
+        tuple6 = tuple.removeAt2();
+        assertEquals(Tuple.of(1,3,4,5,6,7),tuple6);
+
+        tuple6 = tuple.removeAt3();
+        assertEquals(Tuple.of(1,2,4,5,6,7),tuple6);
+
+        tuple6 = tuple.removeAt4();
+        assertEquals(Tuple.of(1,2,3,5,6,7),tuple6);
+
+        tuple6 = tuple.removeAt5();
+        assertEquals(Tuple.of(1,2,3,4,6,7),tuple6);
+
+        tuple6 = tuple.removeAt6();
+        assertEquals(Tuple.of(1,2,3,4,5,7),tuple6);
+
+        tuple6 = tuple.removeAt7();
         assertEquals(Tuple.of(1,2,3,4,5,6),tuple6);
-
-        Tuple6 tuple6_2 = tuple.remove(2);
-        assertEquals(Tuple.of(1,3,4,5,6,7),tuple6_2);
-
-        Tuple6 tuple6_3 = tuple.remove(1);
-        assertEquals(Tuple.of(2,3,4,5,6,7),tuple6_3);
     }
 
     @Test
