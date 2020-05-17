@@ -561,7 +561,56 @@ public final class Tuple8<T1,T2,T3,T4,T5,T6,T7,T8> extends AbstractTuple {
     public Tuple8<T2,T3,T4,T5,T6,T7,T8,T1> rotateRight7() {
         return rotateRight(7);
     }
-    
+
+    /**
+     * Rotates this tuple 1 time to the left
+     */
+    public Tuple8<T2,T3,T4,T5,T6,T7,T8,T1> rotateLeft1() {
+        return rotateLeft(1);
+    }
+
+    /**
+     * Rotates this tuple 2 times to the left
+     */
+    public Tuple8<T3,T4,T5,T6,T7,T8,T1,T2> rotateLeft2() {
+        return rotateLeft(2);
+    }
+
+    /**
+     * Rotates this tuple 3 times to the left
+     */
+    public Tuple8<T4,T5,T6,T7,T8,T1,T2,T3> rotateLeft3() {
+        return rotateLeft(3);
+    }
+
+    /**
+     * Rotates this tuple 4 times to the left
+     */
+    public Tuple8<T5,T6,T7,T8,T1,T2,T3,T4> rotateLeft4() {
+        return rotateLeft(4);
+    }
+
+    /**
+     * Rotates this tuple 5 times to the left
+     */
+    public Tuple8<T6,T7,T8,T1,T2,T3,T4,T5> rotateLeft5() {
+        return rotateLeft(5);
+    }
+
+    /**
+     * Rotates this tuple 6 times to the left
+     */
+    public Tuple8<T7,T8,T1,T2,T3,T4,T5,T6> rotateLeft6() {
+        return rotateLeft(6);
+    }
+
+    /**
+     * Rotates this tuple 7 times to the left
+     */
+    public Tuple8<T8,T1,T2,T3,T4,T5,T6,T7> rotateLeft7() {
+        return rotateLeft(7);
+    }
+
     /**
      * Truncates tuples at position 1
      */

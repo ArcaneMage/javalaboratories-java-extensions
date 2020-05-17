@@ -384,7 +384,28 @@ public final class Tuple4<T1,T2,T3,T4> extends AbstractTuple {
     public Tuple4<T2,T3,T4,T1> rotateRight3() {
         return rotateRight(3);
     }
-    
+
+    /**
+     * Rotates this tuple 1 time to the left
+     */
+    public Tuple4<T2,T3,T4,T1> rotateLeft1() {
+        return rotateLeft(1);
+    }
+
+    /**
+     * Rotates this tuple 2 times to the left
+     */
+    public Tuple4<T3,T4,T1,T2> rotateLeft2() {
+        return rotateLeft(2);
+    }
+
+    /**
+     * Rotates this tuple 3 times to the left
+     */
+    public Tuple4<T4,T1,T2,T3> rotateLeft3() {
+        return rotateLeft(3);
+    }
+
     /**
      * Truncates tuples at position 1
      */
