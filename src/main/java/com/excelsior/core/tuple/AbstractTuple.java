@@ -157,11 +157,11 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      * @param <T> type of tuple returned.
      * @return tuple without the specified {@code element}
      */
-    <T extends Tuple> T remove(int position) {
-        final int HOP_OVER = 2;
+    final <T extends Tuple> T remove(int position) {
+        final int HOP_OVER_DELETION = 2;
         verify(position);
         Tuple2<Tuple, Tuple> spliced = splice(position);
-        return spliced.value1().join(position < depth() ? ((AbstractTuple) spliced.value2()).hop(HOP_OVER) : Tuples.emptyTuple());
+        return spliced.value1().join(position < depth() ? ((AbstractTuple) spliced.value2()).hop(HOP_OVER_DELETION) : Tuples.emptyTuple());
     }
 
     /**
@@ -180,8 +180,54 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      * @deprecated Use {@link AbstractTuple#remove(int)}
      */
     @Deprecated
-    <T extends Tuple> T remove(Object object) {
+    final <T extends Tuple> T remove(Object object) {
         return remove(positionOf(object));
+    }
+
+    /**
+     * Rotates the elements in this tuple to the right.
+     * <p>
+     * A new tuple with rotated elements is returned. The example {@code [1,2,3,4]} rotated
+     * to the right would result in {@code [4,1,2,3]}.
+     *
+     * @param <T> type of tuple returned.
+     * @return new tuple with rotated elements.
+     */
+    final <T extends Tuple> T rotateRight(int times) {
+        Object[] elements = getObjects(this);
+        for ( int i = 0; i < times; i++ )
+            rotate(elements,true);
+        Nullable<T> result = Tuples.fromIterable(Arrays.asList(elements),elements.length);
+        return result.get();
+    }
+
+    /**
+     * Rotates the elements in this tuple to the left.
+     * <p>
+     * A new tuple with rotated elements is returned. The example {@code [1,2,3,4]} rotated
+     * to the left would result in {@code [2,3,4,1]}.
+     *
+     * @param <T> type of tuple returned.
+     * @return new tuple with rotated elements.
+     */
+    final <T extends Tuple> T rotateLeft(int times) {
+        Object[] elements = getObjects(this);
+        for ( int i = 0; i < times; i++ )
+            rotate(elements,false);
+        Nullable<T> result = Tuples.fromIterable(Arrays.asList(elements),elements.length);
+        return result.get();
+    }
+
+    private void rotate(Object[] objects, boolean right) {
+        if ( right ) { // rotate right
+            Object overflow = objects[this.depth() -1];
+            System.arraycopy(objects, 0, objects, 1, objects.length - 1);
+            objects[0] = overflow;
+        } else { // rotate left
+            Object underflow = objects[0];
+            System.arraycopy(objects, 1, objects, 0, objects.length - 1);
+            objects[objects.length -1] = underflow;
+        }
     }
 
     private Object[] getObjects(final Tuple... tuples) {

@@ -701,6 +701,90 @@ public final class Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13> extends A
     }
 
     /**
+     * Rotates this tuple 1 time to the right
+     */
+    public Tuple13<T13,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12> rotateRight1() {
+        return rotateRight(1);
+    }
+
+    /**
+     * Rotates this tuple 2 times to the right
+     */
+    public Tuple13<T12,T13,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> rotateRight2() {
+        return rotateRight(2);
+    }
+
+    /**
+     * Rotates this tuple 3 times to the right
+     */
+    public Tuple13<T11,T12,T13,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> rotateRight3() {
+        return rotateRight(3);
+    }
+
+    /**
+     * Rotates this tuple 4 times to the right
+     */
+    public Tuple13<T10,T11,T12,T13,T1,T2,T3,T4,T5,T6,T7,T8,T9> rotateRight4() {
+        return rotateRight(4);
+    }
+
+    /**
+     * Rotates this tuple 5 times to the right
+     */
+    public Tuple13<T9,T10,T11,T12,T13,T1,T2,T3,T4,T5,T6,T7,T8> rotateRight5() {
+        return rotateRight(5);
+    }
+
+    /**
+     * Rotates this tuple 6 times to the right
+     */
+    public Tuple13<T8,T9,T10,T11,T12,T13,T1,T2,T3,T4,T5,T6,T7> rotateRight6() {
+        return rotateRight(6);
+    }
+
+    /**
+     * Rotates this tuple 7 times to the right
+     */
+    public Tuple13<T7,T8,T9,T10,T11,T12,T13,T1,T2,T3,T4,T5,T6> rotateRight7() {
+        return rotateRight(7);
+    }
+
+    /**
+     * Rotates this tuple 8 times to the right
+     */
+    public Tuple13<T6,T7,T8,T9,T10,T11,T12,T13,T1,T2,T3,T4,T5> rotateRight8() {
+        return rotateRight(8);
+    }
+
+    /**
+     * Rotates this tuple 9 times to the right
+     */
+    public Tuple13<T5,T6,T7,T8,T9,T10,T11,T12,T13,T1,T2,T3,T4> rotateRight9() {
+        return rotateRight(9);
+    }
+
+    /**
+     * Rotates this tuple 10 times to the right
+     */
+    public Tuple13<T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T1,T2,T3> rotateRight10() {
+        return rotateRight(10);
+    }
+
+    /**
+     * Rotates this tuple 11 times to the right
+     */
+    public Tuple13<T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T1,T2> rotateRight11() {
+        return rotateRight(11);
+    }
+
+    /**
+     * Rotates this tuple 12 times to the right
+     */
+    public Tuple13<T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T1> rotateRight12() {
+        return rotateRight(12);
+    }
+
+    /**
      * Truncates tuples at position 1
      */
     public Tuple0 truncateAt1() {

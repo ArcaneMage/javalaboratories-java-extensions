@@ -294,6 +294,13 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
     }
 
     /**
+     * Rotates this tuple 1 times to the right
+     */
+    public Tuple2<T2,T1> rotateRight1() {
+        return rotateRight(1);
+    }
+
+    /**
      * Truncates tuples at position 1
      */
     public Tuple0 truncateAt1() {

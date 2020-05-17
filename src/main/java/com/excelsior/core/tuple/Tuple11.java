@@ -625,6 +625,76 @@ public final class Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11> extends AbstractT
     }
 
     /**
+     * Rotates this tuple 1 time to the right
+     */
+    public Tuple11<T11,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> rotateRight1() {
+        return rotateRight(1);
+    }
+
+    /**
+     * Rotates this tuple 2 times to the right
+     */
+    public Tuple11<T10,T11,T1,T2,T3,T4,T5,T6,T7,T8,T9> rotateRight2() {
+        return rotateRight(2);
+    }
+
+    /**
+     * Rotates this tuple 3 times to the right
+     */
+    public Tuple11<T9,T10,T11,T1,T2,T3,T4,T5,T6,T7,T8> rotateRight3() {
+        return rotateRight(3);
+    }
+
+    /**
+     * Rotates this tuple 4 times to the right
+     */
+    public Tuple11<T8,T9,T10,T11,T1,T2,T3,T4,T5,T6,T7> rotateRight4() {
+        return rotateRight(4);
+    }
+
+    /**
+     * Rotates this tuple 5 times to the right
+     */
+    public Tuple11<T7,T8,T9,T10,T11,T1,T2,T3,T4,T5,T6> rotateRight5() {
+        return rotateRight(5);
+    }
+
+    /**
+     * Rotates this tuple 6 times to the right
+     */
+    public Tuple11<T6,T7,T8,T9,T10,T11,T1,T2,T3,T4,T5> rotateRight6() {
+        return rotateRight(6);
+    }
+
+    /**
+     * Rotates this tuple 7 times to the right
+     */
+    public Tuple11<T5,T6,T7,T8,T9,T10,T11,T1,T2,T3,T4> rotateRight7() {
+        return rotateRight(7);
+    }
+
+    /**
+     * Rotates this tuple 8 times to the right
+     */
+    public Tuple11<T4,T5,T6,T7,T8,T9,T10,T11,T1,T2,T3> rotateRight8() {
+        return rotateRight(8);
+    }
+
+    /**
+     * Rotates this tuple 9 times to the right
+     */
+    public Tuple11<T3,T4,T5,T6,T7,T8,T9,T10,T11,T1,T2> rotateRight9() {
+        return rotateRight(9);
+    }
+
+    /**
+     * Rotates this tuple 10 times to the right
+     */
+    public Tuple11<T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T1> rotateRight10() {
+        return rotateRight(10);
+    }
+    
+    /**
      * Truncates tuples at position 1
      */
     public Tuple0 truncateAt1() {
