@@ -270,6 +270,44 @@ public class Tuple12Test {
     }
 
     @Test
+    public void testRotateRight_Pass() {
+        Tuple12 tuple12;
+
+        tuple12 = tuple.rotateRight1();
+        assertEquals(Tuple.of(12,1,2,3,4,5,6,7,8,9,10,11),tuple12);
+
+        tuple12 = tuple.rotateRight2();
+        assertEquals(Tuple.of(11,12,1,2,3,4,5,6,7,8,9,10),tuple12);
+
+        tuple12 = tuple.rotateRight3();
+        assertEquals(Tuple.of(10,11,12,1,2,3,4,5,6,7,8,9),tuple12);
+
+        tuple12 = tuple.rotateRight4();
+        assertEquals(Tuple.of(9,10,11,12,1,2,3,4,5,6,7,8),tuple12);
+
+        tuple12 = tuple.rotateRight5();
+        assertEquals(Tuple.of(8,9,10,11,12,1,2,3,4,5,6,7),tuple12);
+
+        tuple12 = tuple.rotateRight6();
+        assertEquals(Tuple.of(7,8,9,10,11,12,1,2,3,4,5,6),tuple12);
+
+        tuple12 = tuple.rotateRight7();
+        assertEquals(Tuple.of(6,7,8,9,10,11,12,1,2,3,4,5),tuple12);
+
+        tuple12 = tuple.rotateRight8();
+        assertEquals(Tuple.of(5,6,7,8,9,10,11,12,1,2,3,4),tuple12);
+
+        tuple12 = tuple.rotateRight9();
+        assertEquals(Tuple.of(4,5,6,7,8,9,10,11,12,1,2,3),tuple12);
+
+        tuple12 = tuple.rotateRight10();
+        assertEquals(Tuple.of(3,4,5,6,7,8,9,10,11,12,1,2),tuple12);
+
+        tuple12 = tuple.rotateRight11();
+        assertEquals(Tuple.of(2,3,4,5,6,7,8,9,10,11,12,1),tuple12);
+    }
+    
+    @Test
     public void testTruncateAt_Pass() {
         Tuple0 aTuple0 = tuple.truncateAt1();
         assertEquals(Tuple.of(),aTuple0);

@@ -166,10 +166,17 @@ public class Tuple4Test {
     }
 
     @Test
-    public void testRotate_Pass() {
-        Tuple4<Integer,Integer,Integer,Integer> rotated = tuple.rotateRight(2);
+    public void testRotateRight_Pass() {
+        Tuple4 tuple4;
 
-        assertEquals(of(3,4,1,2),rotated);
+        tuple4 = tuple.rotateRight1();
+        assertEquals(Tuple.of(4,1,2,3),tuple4);
+
+        tuple4 = tuple.rotateRight2();
+        assertEquals(Tuple.of(3,4,1,2),tuple4);
+
+        tuple4 = tuple.rotateRight3();
+        assertEquals(Tuple.of(2,3,4,1),tuple4);
     }
 
     @Test

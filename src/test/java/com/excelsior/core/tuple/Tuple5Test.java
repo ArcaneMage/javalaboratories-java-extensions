@@ -179,6 +179,23 @@ public class Tuple5Test {
     }
 
     @Test
+    public void testRotateRight_Pass() {
+        Tuple5 tuple5;
+
+        tuple5 = tuple.rotateRight1();
+        assertEquals(Tuple.of(5,1,2,3,4),tuple5);
+
+        tuple5 = tuple.rotateRight2();
+        assertEquals(Tuple.of(4,5,1,2,3),tuple5);
+
+        tuple5 = tuple.rotateRight3();
+        assertEquals(Tuple.of(3,4,5,1,2),tuple5);
+
+        tuple5 = tuple.rotateRight4();
+        assertEquals(Tuple.of(2,3,4,5,1),tuple5);
+    }
+    
+    @Test
     public void testTruncateAt_Pass() {
         Tuple0 aTuple0 = tuple.truncateAt1();
         assertEquals(Tuple.of(),aTuple0);

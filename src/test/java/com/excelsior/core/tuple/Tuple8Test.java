@@ -217,6 +217,32 @@ public class Tuple8Test {
     }
 
     @Test
+    public void testRotateRight_Pass() {
+        Tuple8 tuple8;
+
+        tuple8 = tuple.rotateRight1();
+        assertEquals(Tuple.of(8,1,2,3,4,5,6,7),tuple8);
+
+        tuple8 = tuple.rotateRight2();
+        assertEquals(Tuple.of(7,8,1,2,3,4,5,6),tuple8);
+
+        tuple8 = tuple.rotateRight3();
+        assertEquals(Tuple.of(6,7,8,1,2,3,4,5),tuple8);
+
+        tuple8 = tuple.rotateRight4();
+        assertEquals(Tuple.of(5,6,7,8,1,2,3,4),tuple8);
+
+        tuple8 = tuple.rotateRight5();
+        assertEquals(Tuple.of(4,5,6,7,8,1,2,3),tuple8);
+
+        tuple8 = tuple.rotateRight6();
+        assertEquals(Tuple.of(3,4,5,6,7,8,1,2),tuple8);
+
+        tuple8 = tuple.rotateRight7();
+        assertEquals(Tuple.of(2,3,4,5,6,7,8,1),tuple8);
+    }
+    
+    @Test
     public void testMap_Pass() {
         String mapped = tuple.map((a,b,c,d,e,f,g,h) -> String.format("(%d,%d,%d,%d,%d,%d,%d,%d)", a,b,c,d,e,f,g,h));
         assertEquals("(1,2,3,4,5,6,7,8)",mapped);
