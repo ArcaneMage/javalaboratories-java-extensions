@@ -161,7 +161,16 @@ public class Tuple3Test {
         tuple3 = tuple.rotateRight2();
         assertEquals(Tuple.of(2,3,1),tuple3);
     }
-    
+
+    @Test
+    public void testRotateLeft_Pass() {
+        Tuple3 tuple3 = tuple.rotateLeft1();
+        assertEquals(Tuple.of(2,3,1),tuple3);
+
+        tuple3 = tuple.rotateLeft2();
+        assertEquals(Tuple.of(3,1,2),tuple3);
+    }
+
     @Test
     public void testTruncateAt_Pass() {
         Tuple0 aTuple0 = tuple.truncateAt1();

@@ -390,18 +390,24 @@ public class Tuple2Test {
     }
 
     @Test
+    public void testRemove_Fail() {
+        assertThrows(IllegalArgumentException.class, () -> tuple_2.remove("does-not-exist"));
+    }
+
+    @Test
     public void testRotateRight_Pass() {
         Tuple2 tuple2;
 
         tuple2 = tuple_2.rotateRight1();
         assertEquals(Tuple.of(2,1),tuple2);
     }
-    
-    @Test
-    public void testRemove_Fail() {
-        assertThrows(IllegalArgumentException.class, () -> tuple_2.remove("does-not-exist"));
-    }
 
+    @Test
+    public void testRotateLeft_Pass() {
+        Tuple2 tuple2 = tuple_2.rotateLeft1();
+        assertEquals(Tuple.of(2,1),tuple2);
+    }
+    
     @Test
     public void testTruncateAt_Pass() {
         Tuple0 aTuple0 = tuple_2.truncateAt1();

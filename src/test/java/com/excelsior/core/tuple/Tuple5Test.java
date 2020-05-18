@@ -214,6 +214,21 @@ public class Tuple5Test {
     }
 
     @Test
+    public void testRotateLeft_Pass() {
+        Tuple5 tuple5 = tuple.rotateLeft1();
+        assertEquals(Tuple.of(2,3,4,5,1),tuple5);
+
+        tuple5 = tuple.rotateLeft2();
+        assertEquals(Tuple.of(3,4,5,1,2),tuple5);
+
+        tuple5 = tuple.rotateLeft3();
+        assertEquals(Tuple.of(4,5,1,2,3),tuple5);
+
+        tuple5 = tuple.rotateLeft4();
+        assertEquals(Tuple.of(5,1,2,3,4),tuple5);
+    }
+    
+    @Test
     public void testMap_Pass() {
         String mapped = tuple.map((a,b,c,d,e) -> String.format("(%d,%d,%d,%d,%d)", a,b,c,d,e));
         assertEquals("(1,2,3,4,5)",mapped);
