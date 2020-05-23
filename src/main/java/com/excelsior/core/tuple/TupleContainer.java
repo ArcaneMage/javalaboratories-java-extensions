@@ -13,7 +13,7 @@ import java.util.function.Function;
  * @see AbstractTupleContainer
  * @see AbstractTuple
  */
-public interface TupleContainer extends Comparable<Tuple>, Iterable<Object>, Serializable {
+public interface TupleContainer extends Comparable<TupleContainer>, Iterable<Object>, Serializable {
 
     int MAX_DEPTH = 16;
 

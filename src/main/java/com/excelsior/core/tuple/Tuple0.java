@@ -89,7 +89,7 @@ public final class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(Tuple o) {
+    public int compareTo(TupleContainer o) {
         if ( o == null )
             throw new NullPointerException();
 

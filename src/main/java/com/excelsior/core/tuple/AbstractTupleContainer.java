@@ -63,7 +63,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(Tuple o) {
+    public int compareTo(TupleContainer o) {
         if ( o == null )
             throw new NullPointerException();
 

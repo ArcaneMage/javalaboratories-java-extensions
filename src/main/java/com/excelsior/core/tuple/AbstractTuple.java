@@ -30,14 +30,14 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
     }
 
     /**
-     * Joins a {@code that} tuple to the tuple, resulting in a new tuple.
+     * Joins {@code that} tuple to this tuple, resulting in a new tuple.
      * <p>
-     * The (@code that) tuple contents are appended to the end the tuple, thus
+     * The {@code that} tuple contents are appended to the end the tuple, thus
      * creating a new tuple with the appropriate depth to accommodate the
      * merged contents.
      * <p>
-     * If teh combined depth of both this and {@code that} tuple is greater
-     * that {@code MAX_DEPTH}, the exception {@link TupleOverflowException}
+     * If the combined depth of both this and {@code that} tuple is greater
+     * than {@code MAX_DEPTH}, the exception {@link TupleOverflowException}
      * is thrown.
      * @param that is a tuple whose contents are to be merged with the tuple's
      *             contents.
@@ -86,12 +86,14 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
     }
 
     /**
-     * Returns a tuple with elements from {@code position} to the end of the tuple.
+     * Returns a tuple containing elements from current {@code position} to the
+     * end of this tuple.
      * <p>
-     * This method is similar to {@link AbstractTuple#truncate(int)}, but rather truncating
-     * from the right, truncation in this method is performed from the left. An
-     * example would be the following: given the tuple {@code [1,2,3,4,5]}, hopping
-     * to {@code position 3}, will result in a new tuple {@code [3,4,5]}.
+     * This method is similar to {@link AbstractTuple#truncate(int)}, but rather
+     * than truncating from the right, truncation in this method is performed from
+     * the left. An example would be the following: given the tuple
+     * {@code [1,2,3,4,5]}, hopping to {@code position 3}, will result in a new
+     * tuple {@code [3,4,5]}.
      *
      * @param position non-zero, positive value to which to hop. This parameter must
      *                 be less than or equal to {@link this#depth()}
