@@ -1,7 +1,7 @@
 # java-extensions
 
-This a library of Java utilities to aid programming with lambda just that a little bit more joyful, particularly for 
-Java-8 developers but not exclusively. 
+This is a library of Java utilities to aid programming with lambda to be just that a little bit more joyful, particularly
+for Java-8 developers but not exclusively. 
 ### Handlers
 Handlers class provides a broad set of wrapper methods to handle checked exceptions within lambda expressions. Lambdas 
 are generally short and concise, but checked exceptions can sometimes cause the lambda expression to look unwieldy. 
