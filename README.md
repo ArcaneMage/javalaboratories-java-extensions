@@ -1,7 +1,21 @@
 # java-extensions
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions)
+
 This is a library of Java utilities to aid programming with lambda to be just that a little bit more joyful, particularly
 for Java-8 developers but not exclusively. 
+
+### Maven Central Repository
+The library is now available for download from Maven Central Repository. In the POM file add the maven dependency 
+configuration below:
+```
+    <dependency>
+      <groupId>org.javalaboratories</groupId>
+      <artifactId>java-extensions</artifactId>
+      <version>1.0.1-RELEASE</version>
+    </dependency>
+```
+
 ### Handlers
 Handlers class provides a broad set of wrapper methods to handle checked exceptions within lambda expressions. Lambdas 
 are generally short and concise, but checked exceptions can sometimes cause the lambda expression to look unwieldy. 
