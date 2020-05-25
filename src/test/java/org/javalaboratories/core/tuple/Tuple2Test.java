@@ -13,8 +13,6 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.javalaboratories.core.tuple.Matcher.when;
-import static org.javalaboratories.core.tuple.Tuple.of;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
