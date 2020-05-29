@@ -258,7 +258,7 @@ public class Tuple6Test {
     public void testMatch_Pass() {
         Holder<Boolean> found = Holders.writableHolder();
         found.set(false);
-        tuple.match(Matcher.when(1), (a, b, c, d, e, f) -> found.set(true));
+        tuple.match(Matcher.all(1), (a, b, c, d, e, f) -> found.set(true));
         assertTrue(found.get());
     }
 

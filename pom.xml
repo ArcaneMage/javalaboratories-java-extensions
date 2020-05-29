@@ -6,7 +6,7 @@
 
     <groupId>org.javalaboratories</groupId>
     <artifactId>java-extensions</artifactId>
-    <version>1.0.1-RELEASE</version>
+    <version>1.0.2-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>This is a library of Java utilities to help programming with lambda

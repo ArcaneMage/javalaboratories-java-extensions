@@ -25,7 +25,7 @@ public interface TupleContainer extends Comparable<TupleContainer>, Iterable<Obj
      * {@code true} is returned to indicate existence.
      *
      * @param element element with which to search.
-     * @return true when the object exists in the container.
+     * @return true all the object exists in the container.
      */
     boolean contains(Object element);
 
@@ -79,7 +79,7 @@ public interface TupleContainer extends Comparable<TupleContainer>, Iterable<Obj
      * All concrete tuple implementations, for example {@link Tuple2}, have direct
      * random access to values via the {@code Tuple2.valueX()}, where X represents
      * the position of the element. Although this method performs the same
-     * operation, it provides access to elements when the concrete type of the
+     * operation, it provides access to elements all the concrete type of the
      * tuple is unknown. However, it is not as efficient as {@code valueX} methods
      * because it has to traverse the data structure in order locate the value.
      * <p>

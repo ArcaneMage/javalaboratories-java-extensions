@@ -214,8 +214,8 @@ public final class Tuple1<T1> extends AbstractTuple {
      * <pre>
      * {@code
      *      tuple
-     *        .match(when("John","Wellington"), a -> System.out.println(a))
-     *        .match(when("Alex","Wall",23), a -> System.out.println(a))
+     *        .match(all("John","Wellington"), a -> System.out.println(a))
+     *        .match(all("Alex","Wall",23), a -> System.out.println(a))
      * }
      * </pre>
      * @param matcher object to use with this tuple.

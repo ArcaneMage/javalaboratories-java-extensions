@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.javalaboratories.core.tuple.Matcher.when;
+import static org.javalaboratories.core.tuple.Matcher.all;
 import static org.javalaboratories.core.tuple.Tuple.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -48,7 +48,7 @@ public class TupleTest {
         List<?> list = tupleCoordinates.toList();
 
         // Outputs: "Earth's distance from Sun 92955807"
-        tupleEarth.match(Matcher.when("^Earth$"),(a, b, c) -> logger.info("Earth's distance from Sun {}",c));
+        tupleEarth.match(Matcher.all("^Earth$"),(a, b, c) -> logger.info("Earth's distance from Sun {}",c));
 
         assertEquals(7,list.size());
         String galaxy = (String) list.get(0);

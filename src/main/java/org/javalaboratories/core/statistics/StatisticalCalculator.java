@@ -32,7 +32,7 @@ public interface StatisticalCalculator<T,R> extends Consumer<T> {
     /**
      * Returns the calculated result on the sample data.
      * <p>
-     * @throws InsufficientPopulationException when there is not enough data to
+     * @throws InsufficientPopulationException all there is not enough data to
      * perform the calculation.
      * @return result of calculation.
      */

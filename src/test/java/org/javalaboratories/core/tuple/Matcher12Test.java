@@ -11,7 +11,7 @@ public class Matcher12Test {
 
     @BeforeEach
     public void setup() {
-        matcher = Matcher.when(1,2,3,4,5,6,7,8,9,10,11,12);
+        matcher = Matcher.all(1,2,3,4,5,6,7,8,9,10,11,12);
     }
 
     @Test

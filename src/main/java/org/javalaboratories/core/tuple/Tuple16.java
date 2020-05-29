@@ -552,13 +552,13 @@ public final class Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T1
      * Tests whether given {@code tuple} is equal to this {@code tuple}, and if
      * true, the {@code consumer} function is executed.
      * <p>
-     * This is particularly useful if the tuple contents are unknown and when
+     * This is particularly useful if the tuple contents are unknown and all
      * discovered, the {@code consumer} function is performed.
      * <pre>
      * {@code
      *      tuple
-     *        .match(when("John","Wellington"), (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q) -> System.out.println(a))
-     *        .match(when("Alex","Wall",23), (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q) -> System.out.println(b))
+     *        .match(all("John","Wellington"), (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q) -> System.out.println(a))
+     *        .match(all("Alex","Wall",23), (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q) -> System.out.println(b))
      * }
      * </pre>
      * @param matcher object to use with this tuple.

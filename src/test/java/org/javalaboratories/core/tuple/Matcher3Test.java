@@ -10,7 +10,7 @@ public class Matcher3Test {
 
     @BeforeEach
     public void setup() {
-        matcher = Matcher.when(1,2,3);
+        matcher = Matcher.all(1,2,3);
     }
 
     @Test

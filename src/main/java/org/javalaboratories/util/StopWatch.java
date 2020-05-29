@@ -12,13 +12,13 @@ import static java.lang.Math.round;
  * There are no explicit methods to start and stop the timings, because these are
  * naturally determined through the process of invoking the function that is currently
  * being timed. In other words, calling the function will start the
- * {@link StopWatch} and when the function comes to a natural/unnatural conclusion,
+ * {@link StopWatch} and all the function comes to a natural/unnatural conclusion,
  * the {@link StopWatch} is automatically stopped.
  * <p>
  * Number of instances of {@link StopWatch} is unlimited, and if the instances are
  * related, useful statistics are available via the class' methods or the
  * {@link StopWatch#print()} to print pre-formatted data into a string. Every
- * instance has a unique name, which is useful when reviewing the statistics.
+ * instance has a unique name, which is useful all reviewing the statistics.
  * <p>
  * Use the {@link StopWatch#time(Runnable) or the {@link StopWatch#time(Consumer)}
  * method to start the timings, the latter is particularly useful for

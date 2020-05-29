@@ -192,7 +192,7 @@ public class Tuple3Test {
     public void testMatch_Pass() {
         Holder<Boolean> found = Holders.writableHolder();
         found.set(false);
-        tuple.match(Matcher.when(1), (a, b, c) -> found.set(true));
+        tuple.match(Matcher.all(1), (a, b, c) -> found.set(true));
         assertTrue(found.get());
     }
 

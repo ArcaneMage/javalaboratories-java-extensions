@@ -1,5 +1,11 @@
 package org.javalaboratories.core.tuple;
 
+import java.util.EnumSet;
+import java.util.Set;
+
+import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherProperties.MATCH_ALL;
+import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherProperties.MATCH_ANY;
+
 public final class Matcher10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> extends AbstractMatcher {
     private final T1 t1;
     private final T2 t2;
@@ -12,8 +18,15 @@ public final class Matcher10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> extends AbstractMat
     private final T9 t9;
     private final T10 t10;
 
-    Matcher10(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10) {
-        super(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10);
+    public static <T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> Matcher10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> all(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10) { return new Matcher10<>(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10); }
+    public static <T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> Matcher10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10> any(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10) { return new Matcher10<>(EnumSet.of(MATCH_ANY),t1,t2,t3,t4,t5,t6,t7,t8,t9,t10); }
+
+    private Matcher10(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10) {
+        this(EnumSet.of(MATCH_ALL),t1,t2,t3,t4,t5,t6,t7,t8,t9,t10);
+    }
+
+    private Matcher10(Set<MatcherProperties> properties, T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10) {
+        super(properties,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10);
         this.t1 = t1;
         this.t2 = t2;
         this.t3 = t3;
