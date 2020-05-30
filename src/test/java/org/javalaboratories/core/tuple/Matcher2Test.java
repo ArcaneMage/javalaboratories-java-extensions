@@ -3,6 +3,7 @@ package org.javalaboratories.core.tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_ALL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Matcher2Test {
@@ -17,5 +18,10 @@ public class Matcher2Test {
     public void testValue_Pass() {
         assertEquals(1, matcher.value1());
         assertEquals(2, matcher.value2());
+    }
+
+    @Test
+    public void testStrategy_Pass() {
+        assertEquals(MATCH_ALL,matcher.getStrategy());
     }
 }

@@ -21,12 +21,10 @@ import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
 
-import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherStrategies.MATCH_ALL;
-import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherStrategies.MATCH_ANY;
+import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_ALL;
+import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_ANY;
 
 public abstract class AbstractMatcher extends AbstractTupleContainer implements Matcher {
-
-    public enum MatcherStrategies {MATCH_ALL, MATCH_ANY}
 
     private final Pattern[] matchPatterns;
     private final MatcherStrategies strategy;

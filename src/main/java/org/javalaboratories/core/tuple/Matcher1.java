@@ -1,6 +1,6 @@
 package org.javalaboratories.core.tuple;
 
-import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherStrategies.MATCH_ALL;
+import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_ALL;
 
 public final class Matcher1<T1> extends AbstractMatcher {
     private final T1 t1;

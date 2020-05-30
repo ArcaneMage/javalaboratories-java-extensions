@@ -44,6 +44,8 @@ import java.util.regex.Pattern;
  */
 public interface Matcher extends TupleBase {
 
+    enum MatcherStrategies {MATCH_ALL, MATCH_ANY}
+
     /**
      * Pattern matcher for depth of 1
      * @return (All) Matcher object encapsulating pattern element
