@@ -18,7 +18,6 @@ package org.javalaboratories.core.tuple;
 import org.javalaboratories.core.Nullable;
 
 import java.util.*;
-import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
 
 import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_ALL;
@@ -47,10 +46,13 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
         for ( Object o : this )
             matchPatterns[i++] = o instanceof String ? Pattern.compile(o.toString()) : null;
         this.strategy = strategy;
-        strategies.put(MATCH_ALL,MatcherStrategy.all(getObjectMatch(),getPatternMatch()));
-        strategies.put(MATCH_ANY,MatcherStrategy.any(getObjectMatch(),getPatternMatch()));
+        strategies.put(MATCH_ALL,MatcherStrategy.all());
+        strategies.put(MATCH_ANY,MatcherStrategy.any());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T extends Tuple> boolean match(T tuple) {
         Objects.requireNonNull(tuple);
@@ -59,30 +61,20 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
         return strategy.match(this,tuple);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Nullable<Pattern> getPattern(int position) {
         verify(position);
         return Nullable.ofNullable(matchPatterns[position -1]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public MatcherStrategies getStrategy() {
         return strategy;
-    }
-
-    private BiPredicate<Object,Object> getObjectMatch() {
-        return (matcherElement,element) -> {
-            boolean result;
-            if ( matcherElement == null && element == null ) {
-                result = true;
-            } else {
-                result = matcherElement != null && matcherElement.equals(element);
-            }
-            return result;
-        };
-    }
-
-    private BiPredicate<Pattern,String> getPatternMatch() {
-        return (pattern,element) -> pattern != null && pattern.matcher(element).matches();
     }
 
 }

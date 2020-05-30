@@ -251,6 +251,11 @@ public interface Matcher extends TupleBase {
     Nullable<Pattern> getPattern(int position);
 
     /**
+     * @return Current strategy employed this {@link Matcher} object.
+     */
+    MatcherStrategies getStrategy();
+
+    /**
      * Matches this {@link Matcher} with {@code tuple} object.
      *
      * @param tuple object match pattern against.
