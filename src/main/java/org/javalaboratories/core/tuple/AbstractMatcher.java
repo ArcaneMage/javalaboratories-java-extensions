@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherProperties.MATCH_ALL;
 import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherProperties.MATCH_ANY;
 
-@SuppressWarnings("WeakerAccess")
 public abstract class AbstractMatcher extends AbstractTupleContainer implements Matcher {
 
     public enum MatcherProperties {MATCH_ALL, MATCH_ANY}
