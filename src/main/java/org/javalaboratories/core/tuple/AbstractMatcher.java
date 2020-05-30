@@ -15,23 +15,28 @@ package org.javalaboratories.core.tuple;
  *    limitations under the License.
  */
 
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
+import org.javalaboratories.core.Nullable;
+
+import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
 
+import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherProperties.MATCH_ALL;
+import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherProperties.MATCH_ANY;
+
+@SuppressWarnings("WeakerAccess")
 public abstract class AbstractMatcher extends AbstractTupleContainer implements Matcher {
 
     public enum MatcherProperties {MATCH_ALL, MATCH_ANY}
 
     private final Pattern[] matchPatterns;
     private final Set<MatcherProperties> properties;
+    private final Map<MatcherProperties,MatcherStrategy<Matcher,Tuple>> strategies = new HashMap<>();
 
     /**
      * Constructs this implementation of {@link Matcher} object.
      *
-     * @param elements
+     * @param elements matcher elements
      */
     AbstractMatcher(Object... elements) {
         this(EnumSet.of(MatcherProperties.MATCH_ALL),elements);
@@ -54,40 +59,42 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
         for ( Object o : this )
             matchPatterns[i++] = o instanceof String ? Pattern.compile(o.toString()) : null;
         this.properties = properties;
+        strategies.put(MATCH_ALL,MatcherStrategy.all(getObjectMatch(),getPatternMatch()));
+        strategies.put(MATCH_ANY,MatcherStrategy.any(getObjectMatch(),getPatternMatch()));
     }
 
     @Override
     public <T extends Tuple> boolean match(T tuple) {
         Objects.requireNonNull(tuple);
-        boolean result = this.depth() <= tuple.depth(); // Pattern tuple scope adequate? If not, return false.
-        if ( result ) {
-            int i = 0;
-            Iterator<Object> it = tuple.iterator();
-            while ( result && it.hasNext() && i < this.depth() ) {
-                Object o = it.next();
-                if ( !(o instanceof String) ) {
-                    // Comparison of elements in matcher pattern and tuple should be of the same type,
-                    // if not false is returned
-                    Object matcherElement = this.get(i);
-                    if ( matcherElement == null && o == null ) {
-                        result = true;
-                    } else {
-                        result = matcherElement != null && matcherElement.equals(o);
-                    }
-                } else {
-                    String element = (String) o;
-                    Pattern matcherPattern = matchPatterns[i];
-                    result = matcherPattern != null && matcherPattern.matcher(element).matches();
-                }
-                if ( result && properties.contains(MatcherProperties.MATCH_ANY) )
-                    break;
-                i++;
-            }
-        }
-        return result;
+        MatcherStrategy<Matcher,Tuple> strategy = strategies.get(this.properties.contains(MATCH_ALL) ? MATCH_ALL : MATCH_ANY);
+
+        return strategy.match(this,tuple);
+    }
+
+    @Override
+    public Nullable<Pattern> getPattern(int position) {
+        verify(position);
+        return Nullable.ofNullable(matchPatterns[position]);
     }
 
     public Set<MatcherProperties> getProperties() {
         return properties;
     }
+
+    private BiPredicate<Object,Object> getObjectMatch() {
+        return (matcherElement,element) -> {
+            boolean result;
+            if ( matcherElement == null && element == null ) {
+                result = true;
+            } else {
+                result = matcherElement != null && matcherElement.equals(element);
+            }
+            return result;
+        };
+    }
+
+    private BiPredicate<Pattern,String> getPatternMatch() {
+        return (pattern,element) -> pattern != null && pattern.matcher(element).matches();
+    }
+
 }
