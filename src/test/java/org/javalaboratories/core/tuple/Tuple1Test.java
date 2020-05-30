@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.javalaboratories.core.tuple.Matcher.all;
+import static org.javalaboratories.core.tuple.Matcher.any;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class Tuple1Test {
@@ -141,10 +142,12 @@ public class Tuple1Test {
 
     @Test
     public void testMatch_Pass() {
-        Holder<Boolean> found = Holders.writableHolder();
-        found.set(false);
-        tuple.match(all(1), a -> found.set(true));
-        assertTrue(found.get());
+        Holder<Integer> found = Holders.writableHolder();
+        found.set(0);
+        tuple.match(all(1), a -> found.set(1));
+        tuple.match(any(1), a -> found.set(found.get()+1));
+
+        assertEquals(2,found.get());
     }
 
     @Test

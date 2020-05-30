@@ -21,25 +21,16 @@ import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
 
-import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherProperties.MATCH_ALL;
-import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherProperties.MATCH_ANY;
+import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherStrategies.MATCH_ALL;
+import static org.javalaboratories.core.tuple.AbstractMatcher.MatcherStrategies.MATCH_ANY;
 
 public abstract class AbstractMatcher extends AbstractTupleContainer implements Matcher {
 
-    public enum MatcherProperties {MATCH_ALL, MATCH_ANY}
+    public enum MatcherStrategies {MATCH_ALL, MATCH_ANY}
 
     private final Pattern[] matchPatterns;
-    private final Set<MatcherProperties> properties;
-    private final Map<MatcherProperties,MatcherStrategy<Matcher,Tuple>> strategies = new HashMap<>();
-
-    /**
-     * Constructs this implementation of {@link Matcher} object.
-     *
-     * @param elements matcher elements
-     */
-    AbstractMatcher(Object... elements) {
-        this(EnumSet.of(MatcherProperties.MATCH_ALL),elements);
-    }
+    private final MatcherStrategies strategy;
+    private final Map<MatcherStrategies,MatcherStrategy<Matcher,Tuple>> strategies = new HashMap<>();
 
     /**
      * Constructs this implementation of {@link Matcher} object.
@@ -50,14 +41,14 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
      *
      * @param elements matcher elements
      */
-    AbstractMatcher(Set<MatcherProperties> properties, Object... elements) {
+    AbstractMatcher(MatcherStrategies strategy, Object... elements) {
         super(elements);
-        Objects.requireNonNull(properties);
+        Objects.requireNonNull(strategy);
         matchPatterns = new Pattern[depth()];
         int i = 0;
         for ( Object o : this )
             matchPatterns[i++] = o instanceof String ? Pattern.compile(o.toString()) : null;
-        this.properties = properties;
+        this.strategy = strategy;
         strategies.put(MATCH_ALL,MatcherStrategy.all(getObjectMatch(),getPatternMatch()));
         strategies.put(MATCH_ANY,MatcherStrategy.any(getObjectMatch(),getPatternMatch()));
     }
@@ -65,7 +56,7 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
     @Override
     public <T extends Tuple> boolean match(T tuple) {
         Objects.requireNonNull(tuple);
-        MatcherStrategy<Matcher,Tuple> strategy = strategies.get(this.properties.contains(MATCH_ALL) ? MATCH_ALL : MATCH_ANY);
+        MatcherStrategy<Matcher,Tuple> strategy = strategies.get(this.strategy);
 
         return strategy.match(this,tuple);
     }
@@ -73,11 +64,11 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
     @Override
     public Nullable<Pattern> getPattern(int position) {
         verify(position);
-        return Nullable.ofNullable(matchPatterns[position]);
+        return Nullable.ofNullable(matchPatterns[position -1]);
     }
 
-    public Set<MatcherProperties> getProperties() {
-        return properties;
+    public MatcherStrategies getStrategy() {
+        return strategy;
     }
 
     private BiPredicate<Object,Object> getObjectMatch() {

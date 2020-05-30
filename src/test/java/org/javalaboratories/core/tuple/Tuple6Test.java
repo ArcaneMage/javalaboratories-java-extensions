@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.javalaboratories.core.tuple.Matcher.all;
+import static org.javalaboratories.core.tuple.Matcher.any;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -256,10 +258,12 @@ public class Tuple6Test {
 
     @Test
     public void testMatch_Pass() {
-        Holder<Boolean> found = Holders.writableHolder();
-        found.set(false);
-        tuple.match(Matcher.all(1), (a, b, c, d, e, f) -> found.set(true));
-        assertTrue(found.get());
+        Holder<Integer> found = Holders.writableHolder();
+        found.set(0);
+        tuple.match(all(1,2,3,4,5,6), (a, b, c, d, e, f) -> found.set(1));
+        tuple.match(any(0,0,0,0,0,6), (a, b, c, d, e, f) -> found.set(found.get()+1));
+
+        assertEquals(2,found.get());
     }
 
     @Test

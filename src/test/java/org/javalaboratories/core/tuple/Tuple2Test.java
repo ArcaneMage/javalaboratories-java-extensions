@@ -13,6 +13,8 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.javalaboratories.core.tuple.Matcher.all;
+import static org.javalaboratories.core.tuple.Matcher.any;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -74,42 +76,51 @@ public class Tuple2Test {
         Holder<Integer> found = Holders.writableHolder();
         found.set(0);
         tuple
-            .match(Matcher.all("Adrian","Wall"), (a, b) -> {
+            .match(all("Adrian","Wall"), (a, b) -> {
                 logger.info("Matched on \"Adrian,Wall\" tuple -- should not match");
                 found.set(found.get()+1);
             })
-            .match(Matcher.all(1,2,3), (a, b) -> {
+            .match(all(1,2,3), (a, b) -> {
                 logger.info("Matched on \"1,2,3\" tuple -- should not match");
                 found.set(found.get()+1);
             })
-            .match(Matcher.all("John"), (a, b) -> {
+            .match(all("John"), (a, b) -> {
                 logger.info("Matched \"John\" tuple on: {} {}",a,b);
                 found.set(found.get()+1);
             })
-            .match(Matcher.all("John","Doe"), (a, b) -> {
+            .match(all("John","Doe"), (a, b) -> {
                 logger.info("Matched on \"John,Doe\" tuple: {} {}",a,b);
                 found.set(found.get()+1);
+            })
+            .match(any(null,"^Doe$"),(a, b) -> {
+                logger.info("Matched (any) \"null,^Doe$\" on tuple: {} {}",a,b);
+                found.set(found.get()+1);
             });
+
         tuple_2
-            .match(Matcher.all(1,2), (a, b) -> {
+            .match(all(1,2), (a, b) -> {
                 logger.info("Mathed on \"1,2\" tuple");
                 found.set(found.get()+1);
             })
-            .match(Matcher.all(1), (a, b) -> {
+            .match(all(1), (a, b) -> {
                 logger.info("Matched on \"1\" tuple");
                 found.set(found.get()+1);
             })
-            .match(Matcher.all(3,1),(a, b) -> {
+            .match(all(3,1),(a, b) -> {
                 logger.info("Matched on \"3,1\" tuple -- should not match");
+                found.set(found.get()+1);
+            })
+            .match(any(0,2),(a, b) -> {
+                logger.info("Matched (any) \"0,2\" on tuple: {} {}",a,b);
                 found.set(found.get()+1);
             });
         tuple_3
-           .match(Matcher.all(null,"Wall"), (a, b) -> {
+           .match(all(null,"Wall"), (a, b) -> {
                logger.info("Matched on \"null,Wall\" tuple: {} {}",a,b);
                found.set(found.get()+1);
            });
 
-        assertEquals(5, found.get());
+        assertEquals(7, found.get());
     }
 
     @Test
