@@ -1,7 +1,6 @@
 package org.javalaboratories.core.tuple;
 
-import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_ALL;
-import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_ANY;
+import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.*;
 
 public final class Matcher6<T1,T2,T3,T4,T5,T6> extends AbstractMatcher {
     private final T1 t1;
@@ -13,6 +12,7 @@ public final class Matcher6<T1,T2,T3,T4,T5,T6> extends AbstractMatcher {
 
     public static <T1,T2,T3,T4,T5,T6> Matcher6<T1,T2,T3,T4,T5,T6> all(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) { return new Matcher6<>(t1,t2,t3,t4,t5,t6); }
     public static <T1,T2,T3,T4,T5,T6> Matcher6<T1,T2,T3,T4,T5,T6> any(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) { return new Matcher6<>(MATCH_ANY,t1,t2,t3,t4,t5,t6); }
+    public static <T1,T2,T3,T4,T5,T6> Matcher6<T1,T2,T3,T4,T5,T6> set(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) { return new Matcher6<>(MATCH_SET,t1,t2,t3,t4,t5,t6); }
 
     private Matcher6(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) {
         this(MATCH_ALL,t1,t2,t3,t4,t5,t6);

@@ -20,8 +20,7 @@ import org.javalaboratories.core.Nullable;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_ALL;
-import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_ANY;
+import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.*;
 
 public abstract class AbstractMatcher extends AbstractTupleContainer implements Matcher {
 
@@ -48,6 +47,7 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
         this.strategy = strategy;
         strategies.put(MATCH_ALL,MatcherStrategy.all());
         strategies.put(MATCH_ANY,MatcherStrategy.any());
+        strategies.put(MATCH_SET,MatcherStrategy.set());
     }
 
     /**

@@ -16,29 +16,26 @@ final class MatcherHelper {
     /**
      * The is a helper method of the {@link MatcherStrategy} interface.
      * <p>
-     * Its purpose to determine a match of a specific element in the
-     * {@link Matcher} at logical {@code position} with the {@code element}.
+     * Its purpose to determine a match of a specific element.
      * The match or equality is determined from {@code objectMatching} or
      * {@code patternMatching} predicate functions. In the case of pattern matching,
-     * the pattern is obtained from the {@link Matcher} object for the current
-     * {@code position} and passed to the {@code patternMatching} function. Note that
-     * {@link Pattern} object is already in a compiled state, performed by the
-     * {@link Matcher} object.
+     * the {@link Pattern} object is passed to the {@code patternMatching} function.
+     * Note that {@link Pattern} object is already in a compiled state,
+     * performed by the {@link Matcher} object.
      * <p>
      * For {@link String} elements, the {@code patternMatching} is executed; and for
      * anything else, the {@code objectMatching} function is executed.
-     * @param matcher matcher object
      * @param element current element of {@code position}, from the tuple, to match
-     * @param position current logical position of both {@link Matcher} and
-     * {@link Tuple}
+     * @param matcherElement current matcher element
+     * @param matcherPattern current matcher pattern {@link Tuple}
      * @param objectMatching match function for non-string elements
      * @param patternMatching match function for string elements.
-     * @param <T> type of {@link Matcher}
      * @return {@code True} if element matches current {@link Matcher} element.
      */
-    static <T extends Matcher> boolean match(T matcher, Object element, int position, BiPredicate<Object,Object> objectMatching,
-                                             BiPredicate<Pattern,String> patternMatching) {
-        Objects.requireNonNull(matcher);
+    static boolean matchElement(Object element, Object matcherElement, Pattern matcherPattern,
+                                                    BiPredicate<Object,Object> objectMatching,
+                                                    BiPredicate<Pattern,String> patternMatching) {
+        Objects.requireNonNull(matcherElement);
         Objects.requireNonNull(objectMatching);
         Objects.requireNonNull(patternMatching);
 
@@ -46,12 +43,10 @@ final class MatcherHelper {
         if ( !(element instanceof String) ) {
             // Comparison of elements in matcher pattern and tuple should be of the same type,
             // if not false is returned
-            Object matcherElement = matcher.value(position);
             result = objectMatching.test(matcherElement,element);
         } else {
             String s = (String) element;
-            Pattern matchPattern = matcher.getPattern(position).orElse(null);
-            result = patternMatching.test(matchPattern,s);
+            result = patternMatching.test(matcherPattern,s);
         }
         return result;
     }

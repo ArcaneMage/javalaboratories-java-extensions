@@ -130,7 +130,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Tuple objects = (Tuple) o;
+        TupleContainer objects = (TupleContainer) o;
 
         if ( this.depth() != objects.depth())
             return false;

@@ -19,55 +19,53 @@ import java.util.Iterator;
 import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
 
+import static org.javalaboratories.core.tuple.Matcher.DEFAULT_OBJECT_MATCHING;
+import static org.javalaboratories.core.tuple.Matcher.DEFAULT_PATTERN_MATCHING;
+
 /**
  * {@link AbstractMatcher} uses this interface to execute required matcher
  * strategy.
  *
- * This interface will have several implementations of {@link MatcherStrategy},
+ * This interface has several implementations of {@link MatcherStrategy},
  * which the {@link AbstractMatcher} will invoke, depending on desired behaviour
- * the calling class.
+ * of the calling class.
  * @param <Q> type of {@link Matcher}
- * @param <R> type of {@link TupleContainer}, normally {@link Tuple}
+ * @param <R> type of {@link Tuple}, normally {@link Tuple}
  *
  * @see Matcher
  * @see AbstractMatcher
  */
 @FunctionalInterface
-public interface MatcherStrategy<Q extends Matcher, R extends TupleContainer> {
-
-    BiPredicate<Object,Object> DEFAULT_OBJECT_MATCHING = (matcherElement,element) -> matcherElement == null && element == null ||
-            matcherElement != null && matcherElement.equals(element);
-
-    BiPredicate<Pattern,String> DEFAULT_PATTERN_MATCHING = (pattern,element) -> pattern != null && pattern.matcher(element).matches();
+public interface MatcherStrategy<Q extends Matcher, R extends Tuple> {
 
     boolean match(Q matcher, R tuple);
 
     /**
      * Matcher strategy to match all matcher elements with tuple.
      * <p>
-     * Each {@link Matcher} element is compared in turn with each {@link TupleContainer}
+     * Each {@link Matcher} element is compared in turn with each {@link Tuple}
      * element. A match is considered when all the {@link Matcher} elements match
-     * with the {@link TupleContainer} counterparts. If the {@link TupleContainer}
+     * with the {@link Tuple} counterparts. If the {@link Tuple}
      * element is a string, it is compared with the {@link Matcher} regular expression
      * for that current element position, if a regular expression exists for it.
      * <p>
-     * This method will provide default implementations for both object and pattern
+     * This method provides default implementations for both object and pattern
      * matching.
      * @param <Q> type of {@link Matcher} object
-     * @param <R> type of {@link TupleContainer} object, generally a {@link Tuple}
+     * @param <R> type of {@link Tuple} object.
      * @return {@code True} is return if all {@link Matcher} elements match with
      * the {@link Tuple} counterparts.
      */
-    static <Q extends Matcher,R extends TupleContainer> MatcherStrategy<Q,R> all() {
+    static <Q extends Matcher, R extends Tuple> MatcherStrategy<Q,R> all() {
         return all(DEFAULT_OBJECT_MATCHING,DEFAULT_PATTERN_MATCHING);
     }
 
     /**
      * Matcher strategy to match all matcher elements with a tuple.
      * <p>
-     * Each {@link Matcher} element is compared in turn with each {@link TupleContainer}
+     * Each {@link Matcher} element is compared in turn with each {@link Tuple}
      * element. A match is considered when all the {@link Matcher} elements match
-     * with the {@link TupleContainer} counterparts. If the {@link TupleContainer}
+     * with the {@link Tuple} counterparts. If the {@link Tuple}
      * element is a string, it is compared with the {@link Matcher} regular expression
      * for that current element position, if a regular expression exists for it.
      * <p>
@@ -76,19 +74,21 @@ public interface MatcherStrategy<Q extends Matcher, R extends TupleContainer> {
      * @param objectMatching predicate function for object matching
      * @param patternMatching predicate function for pattern matching.
      * @param <Q> type of {@link Matcher} object
-     * @param <R> type of {@link TupleContainer} object, generally a {@link Tuple}
+     * @param <R> type of {@link Tuple} object.
      * @return {@code True} is return if all {@link Matcher} elements match with
      * the {@link Tuple} counterparts.
      */
-    static <Q extends Matcher,R extends TupleContainer> MatcherStrategy<Q,R> all(BiPredicate<Object,Object> objectMatching,
-                                                                                 BiPredicate<Pattern,String> patternMatching) {
+    static <Q extends Matcher, R extends Tuple> MatcherStrategy<Q,R> all(BiPredicate<Object,Object> objectMatching,
+                                                                         BiPredicate<Pattern,String> patternMatching) {
         return (matcher, tuple) -> {
             boolean result = true;
             int i = 0;
             Iterator<Object> it = tuple.iterator();
             while ( result && it.hasNext() && i < matcher.depth() ) {
                 Object element = it.next();
-                result = MatcherHelper.match(matcher,element,i+1,objectMatching,patternMatching);
+                Object matcherElement = matcher.value(i+1);
+                Pattern matcherPattern = matcher.getPattern(i+1).orElse(null);
+                result = MatcherHelper.matchElement(element,matcherElement,matcherPattern,objectMatching,patternMatching);
                 i++;
             }
             return result;
@@ -98,29 +98,29 @@ public interface MatcherStrategy<Q extends Matcher, R extends TupleContainer> {
     /**
      * Matcher strategy to match any of the matcher elements with a tuple.
      * <p>
-     * Each {@link Matcher} element is compared in turn with each {@link TupleContainer}
+     * Each {@link Matcher} element is compared in turn with each {@link Tuple}
      * element. A match is considered when any of the {@link Matcher} elements match
-     * with the {@link TupleContainer} counterparts. If the {@link TupleContainer}
+     * with the {@link Tuple} counterparts. If the {@link Tuple}
      * element is a string, it is compared with the {@link Matcher} regular expression
      * for that current element position, if a regular expression exists for it.
      * <p>
-     * This method will provide default implementations for both object and pattern
+     * This method provides default implementations for both object and pattern
      * matching.
      * @param <Q> type of {@link Matcher} object
-     * @param <R> type of {@link TupleContainer} object, generally a {@link Tuple}
+     * @param <R> type of {@link Tuple} object.
      * @return {@code True} is return if all {@link Matcher} elements match with
      * the {@link Tuple} counterparts.
      */
-    static <Q extends Matcher,R extends TupleContainer> MatcherStrategy<Q,R> any() {
+    static <Q extends Matcher, R extends Tuple> MatcherStrategy<Q,R> any() {
         return any(DEFAULT_OBJECT_MATCHING,DEFAULT_PATTERN_MATCHING);
     }
 
     /**
      * Matcher strategy to match any of the matcher elements with a tuple.
      * <p>
-     * Each {@link Matcher} element is compared in turn with each {@link TupleContainer}
+     * Each {@link Matcher} element is compared in turn with each {@link Tuple}
      * element. A match is considered when any of the {@link Matcher} elements match
-     * with the {@link TupleContainer} counterparts. If the {@link TupleContainer}
+     * with the {@link Tuple} counterparts. If the {@link Tuple}
      * element is a string, it is compared with the {@link Matcher} regular expression
      * for that current element position, if a regular expression exists for it.
      * <p>
@@ -129,20 +129,78 @@ public interface MatcherStrategy<Q extends Matcher, R extends TupleContainer> {
      * @param objectMatching predicate function for object matching
      * @param patternMatching predicate function for pattern matching.
      * @param <Q> type of {@link Matcher} object
-     * @param <R> type of {@link TupleContainer} object, generally a {@link Tuple}
+     * @param <R> type of {@link Tuple} object.
      * @return {@code True} is return if all {@link Matcher} elements match with
      * the {@link Tuple} counterparts.
      */
-    static <Q extends Matcher,R extends TupleContainer> MatcherStrategy<Q,R> any(BiPredicate<Object,Object> objectMatching,
-                                                                                 BiPredicate<Pattern,String> patternMatching) {
+    static <Q extends Matcher, R extends Tuple> MatcherStrategy<Q,R> any(BiPredicate<Object,Object> objectMatching,
+                                                                         BiPredicate<Pattern,String> patternMatching) {
         return (matcher, tuple) -> {
             boolean result = false;
             int i = 0;
             Iterator<Object> it = tuple.iterator();
             while ( !result && it.hasNext() && i < matcher.depth() ) {
                 Object element = it.next();
-                result = MatcherHelper.match(matcher,element,i+1,objectMatching,patternMatching);
+                Object matcherElement = matcher.value(i+1);
+                Pattern matcherPattern = matcher.getPattern(i+1).orElse(null);
+                result = MatcherHelper.matchElement(element,matcherElement,matcherPattern,objectMatching,patternMatching);
                 i++;
+            }
+            return result;
+        };
+    }
+
+    /**
+     * Matcher strategy to match the matcher elements with a tuple, ignoring the
+     * ordered nature of the tuple elements.
+     * <p>
+     * This strategy is not concerned with the ordered nature of the
+     * {@link Tuple} elements. Therefore, matching {@code [1,2,3]} with
+     * {@code [3,2,1]} will result in {@code True}. The comparison is more akin
+     * to mathematical sets.
+     * <p>
+     * This method provides default implementations for both object and pattern
+     * matching.
+     * @param <Q> type of {@link Matcher} object
+     * @param <R> type of {@link Tuple} object.
+     * @return {@code True} is return if all {@link Matcher} elements match with
+     * the {@link Tuple} counterparts.
+     */
+    static <Q extends Matcher, R extends Tuple> MatcherStrategy<Q,R> set() {
+        return set(DEFAULT_OBJECT_MATCHING,DEFAULT_PATTERN_MATCHING);
+    }
+
+    /**
+     * Matcher strategy to match the matcher elements with a tuple, ignoring the
+     * ordered nature of the tuple elements.
+     * <p>
+     * This strategy is not concerned with the ordered nature of the
+     * {@link Tuple} elements, but whether the {@link Tuple} contains the
+     * {@link Matcher} elements. Therefore, matching {@code [1,2,3]} with tuple
+     * {@code [3,2,1]} will result in {@code True}. The comparison is more akin
+     * to mathematical sets.
+     * <p>
+     * Two matching predicates are required, one for object matching and one for
+     * pattern matching.
+     * @param objectMatching predicate function for object matching
+     * @param patternMatching predicate function for pattern matching
+     * @param <Q> type of {@link Matcher} object
+     * @param <R> type of {@link Tuple} object.
+     * @return {@code True} is return if all {@link Matcher} elements match with
+     * the {@link Tuple} counterparts.
+     */
+    static <Q extends Matcher, R extends Tuple> MatcherStrategy<Q,R> set(BiPredicate<Object,Object> objectMatching,
+                                                                         BiPredicate<Pattern,String> patternMatching) {
+        return (matcher, tuple) -> {
+            boolean result = true;
+            for ( int j = 0; j < matcher.depth() && result; j++ ) {
+                Object matcherElement = matcher.value(j+1);
+                Pattern matcherPattern = matcher.getPattern(j+1).orElse(null);
+                Iterator<Object> it = tuple.iterator();
+                while ( result && it.hasNext() ) {
+                    Object element = it.next();
+                    result = MatcherHelper.matchElement(element, matcherElement, matcherPattern, objectMatching, patternMatching);
+                }
             }
             return result;
         };
