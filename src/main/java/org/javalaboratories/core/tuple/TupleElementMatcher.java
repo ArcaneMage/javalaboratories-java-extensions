@@ -27,6 +27,7 @@ package org.javalaboratories.core.tuple;
  * {@link AbstractMatcher} creates a default implementation of this interface.
  * @see AbstractMatcher
  * @see Matchable
+ * @see DefaultTupleElementMatcher
  */
 public interface TupleElementMatcher {
     /**

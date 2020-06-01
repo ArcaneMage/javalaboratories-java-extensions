@@ -44,9 +44,7 @@ public interface MatcherStrategy<T extends Tuple> {
      * with the {@link Tuple} counterparts. If the {@link Tuple}
      * element is a string, it is compared with the {@link Matchable} regular expression
      * for that current element position, if a regular expression exists for it.
-     * <p>
-     * This method provides default implementations for both object and pattern
-     * matching.
+     *
      * @param <T> type of {@link Tuple} object.
      * @return {@code True} is return if all {@link Matchable} elements match with
      * the {@link Tuple} counterparts.
@@ -55,10 +53,11 @@ public interface MatcherStrategy<T extends Tuple> {
         return (matcherSupplier, tuple) -> {
             Objects.requireNonNull(matcherSupplier);
             Objects.requireNonNull(tuple);
-            boolean result = true;
+            boolean result;
             int i = 0;
             Iterator<Object> it = tuple.iterator();
             TupleElementMatcher matcher = matcherSupplier.get();
+            result = matcher.getMatchable().depth() <= tuple.depth();
             while ( result && it.hasNext() && i < matcher.getMatchable().depth() ) {
                 Object element = it.next();
                 result = matcher.match(element,i+1);
@@ -77,8 +76,9 @@ public interface MatcherStrategy<T extends Tuple> {
      * element is a string, it is compared with the {@link Matchable} regular expression
      * for that current element position, if a regular expression exists for it.
      * <p>
-     * This method provides default implementations for both object and pattern
-     * matching.
+     * Excess {@link Matchable} elements, elements that exceed {@link Tuple} elements,
+     * are ignored.
+     *
      * @param <T> type of {@link Tuple} object.
      * @return {@code True} is return if all {@link Matchable} elements match with
      * the {@link Tuple} counterparts.
@@ -108,9 +108,7 @@ public interface MatcherStrategy<T extends Tuple> {
      * {@link Tuple} elements. Therefore, matching {@code [1,2,3]} with
      * {@code [3,2,1]} will result in {@code True}. The comparison is more akin
      * to mathematical sets.
-     * <p>
-     * This method provides default implementations for both object and pattern
-     * matching.
+     *
      * @param <T> type of {@link Tuple} object.
      * @return {@code True} is return if all {@link Matchable} elements match with
      * the {@link Tuple} counterparts.

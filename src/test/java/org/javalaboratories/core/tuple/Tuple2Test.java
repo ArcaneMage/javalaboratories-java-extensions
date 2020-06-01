@@ -105,7 +105,7 @@ public class Tuple2Test {
                 found.set(found.get()+1);
             })
             .match(Matcher.allOf(1), (a, b) -> {
-                logger.info("Matched on \"1\" tuple");
+                logger.info("Matched on \"1\" tuple: {} {}",a,b);
                 found.set(found.get()+1);
             })
             .match(Matcher.allOf(3,1),(a, b) -> {
