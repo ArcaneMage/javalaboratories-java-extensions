@@ -1,17 +1,15 @@
 package org.javalaboratories.core.tuple;
 
 import org.javalaboratories.core.Nullable;
-import org.javalaboratories.util.Holder;
-import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.javalaboratories.core.tuple.Matcher.all;
-import static org.javalaboratories.core.tuple.Matcher.any;
+import static org.javalaboratories.core.tuple.Matcher.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -392,12 +390,13 @@ public class Tuple12Test {
 
     @Test
     public void testMatch_Pass() {
-        Holder<Integer> found = Holders.writableHolder();
-        found.set(0);
-        tuple.match(all(1,2,3,4,5,6,7,8,9,10,11,12), (a, b, c, d, e, f, g, h, i, j, k, l) -> found.set(1));
-        tuple.match(any(0,0,0,0,0,0,0,0,0,0,0,12), (a, b, c, d, e, f, g, h, i, j, k, l) -> found.set(found.get()+1));
+        AtomicInteger index = new AtomicInteger();
+        index.set(0);
+        tuple.match(allOf(1,2,3,4,5,6,7,8,9,10,11,12), (a, b, c, d, e, f, g, h, i, j, k, l) -> index.incrementAndGet());
+        tuple.match(anyOf(0,0,0,0,0,0,0,0,0,0,0,12), (a, b, c, d, e, f, g, h, i, j, k, l) -> index.incrementAndGet());
+        tuple.match(setOf(12,11,10,9,8,7,6,5,4,3,2,1), (a, b, c, d, e, f, g, h, i, j, k, l) -> index.incrementAndGet());
 
-        assertEquals(2,found.get());
+        assertEquals(3,index.get());
     }
 
     @Test

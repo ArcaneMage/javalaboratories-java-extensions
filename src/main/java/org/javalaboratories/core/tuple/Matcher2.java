@@ -6,9 +6,9 @@ public final class Matcher2<T1,T2> extends AbstractMatcher {
     private final T1 t1;
     private final T2 t2;
 
-    public static <T1,T2> Matcher2<T1,T2> all(T1 t1, T2 t2) { return new Matcher2<>(t1,t2); }
-    public static <T1,T2> Matcher2<T1,T2> any(T1 t1, T2 t2) { return new Matcher2<>(MATCH_ANY,t1,t2); }
-    public static <T1,T2> Matcher2<T1,T2> set(T1 t1, T2 t2) { return new Matcher2<>(MATCH_SET,t1,t2); }
+    public static <T1,T2> Matcher2<T1,T2> allOf(T1 t1, T2 t2) { return new Matcher2<>(t1,t2); }
+    public static <T1,T2> Matcher2<T1,T2> anyOf(T1 t1, T2 t2) { return new Matcher2<>(MATCH_ANY,t1,t2); }
+    public static <T1,T2> Matcher2<T1,T2> setOf(T1 t1, T2 t2) { return new Matcher2<>(MATCH_SET,t1,t2); }
 
     private Matcher2(T1 t1, T2 t2) {
         this(MATCH_ALL,t1,t2);

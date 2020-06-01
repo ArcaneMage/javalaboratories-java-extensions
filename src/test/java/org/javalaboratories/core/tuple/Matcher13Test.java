@@ -11,7 +11,7 @@ public class Matcher13Test {
 
     @BeforeEach
     public void setup() {
-        matcher = Matcher.all(1,2,3,4,5,6,7,8,9,10,11,12,13);
+        matcher = Matcher.allOf(1,2,3,4,5,6,7,8,9,10,11,12,13);
     }
 
     @Test

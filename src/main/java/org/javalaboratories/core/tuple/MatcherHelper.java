@@ -35,8 +35,6 @@ final class MatcherHelper {
     static boolean matchElement(Object element, Object matcherElement, Pattern matcherPattern,
                                                     BiPredicate<Object,Object> objectMatching,
                                                     BiPredicate<Pattern,String> patternMatching) {
-        Objects.requireNonNull(matcherElement);
-        Objects.requireNonNull(objectMatching);
         Objects.requireNonNull(patternMatching);
 
         boolean result;

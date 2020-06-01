@@ -6,8 +6,8 @@ import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.MATCH_SE
 public final class Matcher1<T1> extends AbstractMatcher {
     private final T1 t1;
 
-    public static <T1> Matcher1<T1> all(T1 t1) { return new Matcher1<>(t1); }
-    public static <T1> Matcher1<T1> set(T1 t1) { return new Matcher1<>(MATCH_SET,t1); }
+    public static <T1> Matcher1<T1> allOf(T1 t1) { return new Matcher1<>(t1); }
+    public static <T1> Matcher1<T1> setOf(T1 t1) { return new Matcher1<>(MATCH_SET,t1); }
 
     private Matcher1(T1 t1) {
         this(MATCH_ALL,t1);

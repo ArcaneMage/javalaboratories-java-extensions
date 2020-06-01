@@ -10,7 +10,7 @@ public class Matcher6Test {
 
     @BeforeEach
     public void setup() {
-        matcher = Matcher.all(1,2,3,4,5,6);
+        matcher = Matcher.allOf(1,2,3,4,5,6);
     }
 
     @Test

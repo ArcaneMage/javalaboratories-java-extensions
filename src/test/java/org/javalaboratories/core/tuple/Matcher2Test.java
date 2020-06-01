@@ -11,7 +11,7 @@ public class Matcher2Test {
 
     @BeforeEach
     public void setup() {
-        matcher = Matcher.all(1,2);
+        matcher = Matcher.allOf(1,2);
     }
 
     @Test

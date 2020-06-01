@@ -196,11 +196,13 @@ public interface MatcherStrategy<Q extends Matcher, R extends Tuple> {
             for ( int j = 0; j < matcher.depth() && result; j++ ) {
                 Object matcherElement = matcher.value(j+1);
                 Pattern matcherPattern = matcher.getPattern(j+1).orElse(null);
+                boolean exists = false;
                 Iterator<Object> it = tuple.iterator();
-                while ( result && it.hasNext() ) {
+                while ( it.hasNext() && !exists) {
                     Object element = it.next();
-                    result = MatcherHelper.matchElement(element, matcherElement, matcherPattern, objectMatching, patternMatching);
+                    exists = MatcherHelper.matchElement(element, matcherElement, matcherPattern, objectMatching, patternMatching);
                 }
+                result = exists;
             }
             return result;
         };

@@ -7,9 +7,9 @@ public final class Matcher3<T1,T2,T3> extends AbstractMatcher {
     private final T2 t2;
     private final T3 t3;
 
-    public static <T1,T2,T3> Matcher3<T1,T2,T3> all(T1 t1, T2 t2, T3 t3) { return new Matcher3<>(t1,t2,t3); }
-    public static <T1,T2,T3> Matcher3<T1,T2,T3> any(T1 t1, T2 t2, T3 t3) { return new Matcher3<>(MATCH_ANY,t1,t2,t3); }
-    public static <T1,T2,T3> Matcher3<T1,T2,T3> set(T1 t1, T2 t2, T3 t3) { return new Matcher3<>(MATCH_SET,t1,t2,t3); }
+    public static <T1,T2,T3> Matcher3<T1,T2,T3> allOf(T1 t1, T2 t2, T3 t3) { return new Matcher3<>(t1,t2,t3); }
+    public static <T1,T2,T3> Matcher3<T1,T2,T3> anyOf(T1 t1, T2 t2, T3 t3) { return new Matcher3<>(MATCH_ANY,t1,t2,t3); }
+    public static <T1,T2,T3> Matcher3<T1,T2,T3> setOf(T1 t1, T2 t2, T3 t3) { return new Matcher3<>(MATCH_SET,t1,t2,t3); }
 
     private Matcher3(T1 t1, T2 t2, T3 t3) {
         this(MATCH_ALL,t1,t2,t3);
