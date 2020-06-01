@@ -26,7 +26,7 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
 
     private final Pattern[] matchPatterns;
     private final MatcherStrategies strategy;
-    private final Map<MatcherStrategies,MatcherStrategy<Matcher,Tuple>> strategies = new HashMap<>();
+    private final Map<MatcherStrategies,MatcherStrategy<Tuple>> strategies = new HashMap<>();
 
     /**
      * Constructs this implementation of {@link Matcher} object.
@@ -45,9 +45,9 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
         for ( Object o : this )
             matchPatterns[i++] = o instanceof String ? Pattern.compile(o.toString()) : null;
         this.strategy = strategy;
-        strategies.put(MATCH_ALL,MatcherStrategy.all());
-        strategies.put(MATCH_ANY,MatcherStrategy.any());
-        strategies.put(MATCH_SET,MatcherStrategy.set());
+        strategies.put(MATCH_ALL,MatcherStrategy.allOf());
+        strategies.put(MATCH_ANY,MatcherStrategy.anyOf());
+        strategies.put(MATCH_SET,MatcherStrategy.setOf());
     }
 
     /**
@@ -56,9 +56,9 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
     @Override
     public <T extends Tuple> boolean match(T tuple) {
         Objects.requireNonNull(tuple);
-        MatcherStrategy<Matcher,Tuple> strategy = strategies.get(this.strategy);
+        MatcherStrategy<Tuple> strategy = strategies.get(this.strategy);
 
-        return strategy.match(this,tuple);
+        return strategy.match(() -> new DefaultTupleElementMatcher(this),tuple);
     }
 
     /**
