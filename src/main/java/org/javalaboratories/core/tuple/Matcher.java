@@ -15,9 +15,6 @@ package org.javalaboratories.core.tuple;
  *    limitations under the License.
  */
 
-import java.util.function.BiPredicate;
-import java.util.regex.Pattern;
-
 /**
  * Matcher is a special kind of tuple container that has pattern matching
  * capabilities.
