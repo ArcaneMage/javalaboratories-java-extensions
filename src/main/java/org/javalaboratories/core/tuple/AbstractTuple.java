@@ -117,7 +117,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      */
     final <T extends Tuple> T hop(int position) {
         verify(position);
-        Nullable<T> hopped = Tuples.fromIterable(this, position, depth() - position + 1);
+        Nullable<T> hopped = Tuples.fromIterable(toList(), position, depth() - position + 1);
         return hopped.get();
     }
 
@@ -160,7 +160,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      */
     final <T extends Tuple> T truncate(int position) {
         verify(position);
-        Nullable<T> result = Tuples.fromIterable(this, position - 1);
+        Nullable<T> result = Tuples.fromIterable(toList(), position - 1);
         return result.get();
     }
 
@@ -256,8 +256,8 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
         Object[] result = new Object[depth];
         int i = 0;
         for (Tuple tuple : tuples) {
-            Iterator<?> it = tuple.iterator();
-            while (it.hasNext()) result[i++] = it.next();
+            Iterator<TupleElement> it = tuple.iterator();
+            while (it.hasNext()) result[i++] = it.next().value();
         }
         return result;
     }

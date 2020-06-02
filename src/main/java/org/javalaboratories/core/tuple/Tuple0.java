@@ -23,6 +23,14 @@ public final class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
+    public TupleElement element(int position) {
+        throw new IllegalArgumentException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean contains(Object object) {
         return false;
     }
@@ -49,7 +57,7 @@ public final class Tuple0 implements Tuple {
     @Override
     public <R extends Tuple> R join(final Tuple that) {
         Objects.requireNonNull(that);
-        Nullable<R> result = Tuples.fromIterable(that,that.depth());
+        Nullable<R> result = Tuples.fromIterable(that.toList(),that.depth());
         return result.get();
     }
 
@@ -126,15 +134,15 @@ public final class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public Iterator<Object> iterator() {
-        return new Iterator<Object>() {
+    public Iterator<TupleElement> iterator() {
+        return new Iterator<TupleElement>() {
             @Override
             public boolean hasNext() {
                 return false;
             }
 
             @Override
-            public Object next() {
+            public TupleElement next() {
                 throw new NoSuchElementException();
             }
         };

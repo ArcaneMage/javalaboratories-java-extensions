@@ -95,13 +95,13 @@ public class Tuple0Test {
 
     @Test
     public void testIterator_Pass() {
-        Iterator<Object> it = tuple.iterator();
+        Iterator<TupleElement> it = tuple.iterator();
         assertFalse(it.hasNext());
     }
 
     @Test
     public void testIterator_Fail() {
-        Iterator<Object> it = tuple.iterator();
+        Iterator<TupleElement> it = tuple.iterator();
         assertThrows(NoSuchElementException.class, () -> it.next());
     }
 

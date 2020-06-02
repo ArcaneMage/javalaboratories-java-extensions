@@ -89,11 +89,11 @@ public abstract class AbstractTupleContainer implements TupleContainer {
             return result;
 
         // Then by tuple elements
-        Iterator<Object> iter1 = this.iterator();
-        Iterator<Object> iter2 = o.iterator();
+        Iterator<TupleElement> iter1 = this.iterator();
+        Iterator<TupleElement> iter2 = o.iterator();
         try {
             while (iter1.hasNext() && iter2.hasNext() && result == 0)
-                result = Comparators.compare(iter1.next(), iter2.next());
+                result = Comparators.compare(iter1.next().value(), iter2.next().value());
         } catch (ClassCastException e) {
             throw new TupleComparableException("Element types of tuples, with equal depth, must be in the same order");
         }
@@ -117,20 +117,48 @@ public abstract class AbstractTupleContainer implements TupleContainer {
      * {@inheritDoc}
      */
     @Override
-    public Iterator<Object> iterator() {
-        return new Iterator<Object>() {
+    public Iterator<TupleElement> iterator() {
+        return new Iterator<TupleElement>() {
             Node node = head;
+            int index = 0;
             @Override
             public boolean hasNext() {
                 return !isEmpty() && node != null;
             }
 
             @Override
-            public Object next() {
+            public TupleElement next() {
                 if ( node == null )
                     throw new NoSuchElementException();
-                Object result = node.element;
+                TupleElement result = new TupleElement() {
+                                private Object element = node.element;
+                                private int position = index + 1;
+                                @Override
+                                public <T> T value() {
+                                    @SuppressWarnings("unchecked")
+                                    T result = (T) element;
+                                    return result;
+                                }
+
+                                @Override
+                                public boolean isString() {
+                                    return element instanceof String;
+                                }
+
+                                @Override
+                                public <T extends TupleContainer> T owner() {
+                                    @SuppressWarnings("unchecked")
+                                    T result = (T) AbstractTupleContainer.this;
+                                    return result;
+                                }
+
+                                @Override
+                                public int position() {
+                                    return position;
+                                }
+                            };
                 node = node.next;
+                index++;
                 return result;
             }
         };
@@ -148,13 +176,13 @@ public abstract class AbstractTupleContainer implements TupleContainer {
         if ( this.depth() != objects.depth())
             return false;
 
-        Iterator iter1 = this.iterator();
-        Iterator iter2 = objects.iterator();
+        Iterator<TupleElement> iter1 = this.iterator();
+        Iterator<TupleElement> iter2 = objects.iterator();
 
         while ( iter1.hasNext() && iter2.hasNext() ) {
-            Object e1 = iter1.next();
-            Object e2 = iter2.next();
-            if ( !Objects.equals(e1,e2) )
+            TupleElement e1 = iter1.next();
+            TupleElement e2 = iter2.next();
+            if ( !Objects.equals(e1.value(),e2.value()) )
                 return false;
         }
         return true;
@@ -166,9 +194,41 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     @Override
     public int hashCode() {
         int result = 1;
-        for (Object object : this)
-            result = 31 * result + (object == null ? 0 : object.hashCode());
+        for (TupleElement element : this)
+            result = 31 * result + (element.value() == null ? 0 : element.value().hashCode());
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public TupleElement element(int position) {
+        verify(position);
+        Object value = value(position);
+        return new TupleElement() {
+            @Override
+            public <T> T value() {
+                @SuppressWarnings("unchecked")
+                T result = (T) value;
+                return result;
+            }
+
+            @Override
+            public boolean isString() {
+                return value instanceof String;
+            }
+
+            @Override
+            public <T extends TupleContainer> T owner() {
+                @SuppressWarnings("unchecked")
+                T result = (T) AbstractTupleContainer.this;
+                return result;
+            }
+
+            public int position() {
+                return position;
+            }
+        };
     }
 
     /**
@@ -227,9 +287,9 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(",");
-        for (Object o : this)
-            if (o == null) joiner.add("null");
-            else joiner.add(o.toString());
+        for (TupleElement element : this)
+            if (element.value() == null) joiner.add("null");
+            else joiner.add(element.value().toString());
 
         return String.format("%s=[%s]",this.getClass().getSimpleName(),joiner.toString());
     }

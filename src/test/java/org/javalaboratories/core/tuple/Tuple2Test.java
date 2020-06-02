@@ -148,12 +148,12 @@ public class Tuple2Test {
 
     @Test
     public void testIterator_Pass() {
-        Iterator it = tuple.iterator();
+        Iterator<TupleElement> it = tuple.iterator();
 
         boolean found = false;
         while ( it.hasNext() ) {
-            Object element = it.next();
-            if ( "Doe".equals(element) ) {
+            TupleElement element = it.next();
+            if ( "Doe".equals(element.value()) ) {
                 found = true;
                 break;
             }
@@ -163,7 +163,7 @@ public class Tuple2Test {
 
     @Test
     public void testIterator_Fail() {
-        Iterator it = tuple.iterator();
+        Iterator<TupleElement> it = tuple.iterator();
 
         while ( it.hasNext() )
             it.next();

@@ -30,8 +30,8 @@ public final class DefaultTupleElementMatcher implements TupleElementMatcher {
      * {@inheritDoc}
      */
     @Override
-    public boolean match(Object element, int position) {
-        return matchObjectOrPattern(element,position);
+    public boolean match(TupleElement element) {
+        return matchObjectOrPattern(element);
     }
 
     /**
@@ -42,9 +42,9 @@ public final class DefaultTupleElementMatcher implements TupleElementMatcher {
         boolean result = true;
         for ( int j = 0; j < matchable.depth() && result; j++ ) {
             boolean exists = false;
-            Iterator<Object> it = tuple.iterator();
+            Iterator<TupleElement> it = tuple.iterator();
             while ( it.hasNext() && !exists) {
-                Object element = it.next();
+                TupleElement element = it.next();
                 exists = matchObjectOrPattern(element,j+1);
             }
             result = exists;
@@ -60,18 +60,22 @@ public final class DefaultTupleElementMatcher implements TupleElementMatcher {
         return matchable;
     }
 
-    private boolean matchObjectOrPattern (Object element, int position) {
-        Object matcherElement = matchable.value(position);
-        Pattern matcherPattern = matchable.getPattern(position).orElse(null);
+    private boolean matchObjectOrPattern (TupleElement element) {
+        return matchObjectOrPattern(element, -1);
+    }
+
+    private boolean matchObjectOrPattern (TupleElement element, int position) {
+        int p = position == -1 ? element.position() : position;
+        Object matcherElement = matchable.value(p);
+        Pattern matcherPattern = matchable.getPattern(p).orElse(null);
 
         boolean result;
-        if ( !(element instanceof String) ) {
+        if ( !(element.isString()) ) {
             // Comparison of elements in matcher pattern and tuple should be of the same type,
             // if not false is returned
-            result = matchObject(matcherElement, element);
+            result = matchObject(matcherElement, element.value());
         } else {
-            String s = (String) element;
-            result = matchPattern(matcherPattern, s);
+            result = matchPattern(matcherPattern, element.value());
         }
 
         return result;

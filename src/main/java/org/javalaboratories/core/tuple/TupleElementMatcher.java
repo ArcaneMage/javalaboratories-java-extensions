@@ -35,11 +35,9 @@ public interface TupleElementMatcher {
      * element.
      * <p><
      * @param element element to match, ultimately came from {@link Tuple}
-     * @param position logical position of element undergoing matching. This is a
-     *                 none-zero, positive value.
      * @return {@code True} for a match; {@code False} for a non-match.
      */
-    boolean match(Object element, int position);
+    boolean match(TupleElement element);
 
     /**
      * Each element in the {@link Matchable} is tested against all the

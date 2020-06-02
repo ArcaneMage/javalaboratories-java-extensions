@@ -55,12 +55,12 @@ public interface MatcherStrategy<T extends Tuple> {
             Objects.requireNonNull(tuple);
             boolean result;
             int i = 0;
-            Iterator<Object> it = tuple.iterator();
+            Iterator<TupleElement> it = tuple.iterator();
             TupleElementMatcher matcher = matcherSupplier.get();
             result = matcher.getMatchable().depth() <= tuple.depth();
             while ( result && it.hasNext() && i < matcher.getMatchable().depth() ) {
-                Object element = it.next();
-                result = matcher.match(element,i+1);
+                TupleElement element = it.next();
+                result = matcher.match(element);
                 i++;
             }
             return result;
@@ -89,11 +89,11 @@ public interface MatcherStrategy<T extends Tuple> {
             Objects.requireNonNull(tuple);
             boolean result = false;
             int i = 0;
-            Iterator<Object> it = tuple.iterator();
+            Iterator<TupleElement> it = tuple.iterator();
             TupleElementMatcher matcher = matcherSupplier.get();
             while ( !result && it.hasNext() && i < matcher.getMatchable().depth() ) {
-                Object element = it.next();
-                result = matcher.match(element,i+1);
+                TupleElement element = it.next();
+                result = matcher.match(element);
                 i++;
             }
             return result;
