@@ -23,14 +23,6 @@ public final class Tuple0 implements Tuple {
      * {@inheritDoc}
      */
     @Override
-    public TupleElement element(int position) {
-        throw new IllegalArgumentException();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean contains(Object object) {
         return false;
     }

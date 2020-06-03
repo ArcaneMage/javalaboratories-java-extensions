@@ -43,13 +43,6 @@ public interface TupleContainer extends TupleBase, Comparable<TupleContainer>, I
     boolean contains(Object element);
 
     /**
-     * Returns an element of this {@link TupleContainer} at logical {@code position}
-     * @param position logical {@code position} of element.
-     * @return an implementation of {@link TupleElement} interface.
-     */
-    TupleElement element(int position);
-
-    /**
      * Returns an {@link Map<K,?>} of elements within this tuple.
      * <p>
      * Implement the function that returns a key value for a given index of the

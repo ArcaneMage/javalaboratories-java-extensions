@@ -31,6 +31,14 @@ import java.util.function.Function;
  * concrete classes. This class implements {@link Comparable},
  * {@link java.io.Serializable} and {@link Iterable} interfaces.
  * <p>
+ * Although the internal data structure of the container is a linked list, it is
+ * a linked list of {@link Object} element types, however, when the iterator
+ * traverses the {@code Node} objects, it returns {@link TupleElement}
+ * implementation with information pertaining to current the element. This is
+ * useful for some client classes that require additional information such as the
+ * {@link DefaultTupleElementMatcher} class. This approach is also conservative
+ * of memory.
+ * <p>
  * This class and derived classes are immutable.
  *
  * @author Kevin Henry
@@ -131,32 +139,32 @@ public abstract class AbstractTupleContainer implements TupleContainer {
                 if ( node == null )
                     throw new NoSuchElementException();
                 TupleElement result = new TupleElement() {
-                                private Object element = node.element;
-                                private int position = index + 1;
-                                @Override
-                                public <T> T value() {
-                                    @SuppressWarnings("unchecked")
-                                    T result = (T) element;
-                                    return result;
-                                }
+                    private Object element = node.element;
+                    private int position = index + 1;
+                    @Override
+                    public <T> T value() {
+                        @SuppressWarnings("unchecked")
+                        T result = (T) element;
+                        return result;
+                    }
 
-                                @Override
-                                public boolean isString() {
-                                    return element instanceof String;
-                                }
+                    @Override
+                    public boolean isString() {
+                        return element instanceof String;
+                    }
 
-                                @Override
-                                public <T extends TupleContainer> T owner() {
-                                    @SuppressWarnings("unchecked")
-                                    T result = (T) AbstractTupleContainer.this;
-                                    return result;
-                                }
+                    @Override
+                    public <T extends TupleContainer> T owner() {
+                        @SuppressWarnings("unchecked")
+                        T result = (T) AbstractTupleContainer.this;
+                        return result;
+                    }
 
-                                @Override
-                                public int position() {
-                                    return position;
-                                }
-                            };
+                    @Override
+                    public int position() {
+                        return position;
+                    }
+                };
                 node = node.next;
                 index++;
                 return result;
@@ -197,38 +205,6 @@ public abstract class AbstractTupleContainer implements TupleContainer {
         for (TupleElement element : this)
             result = 31 * result + (element.value() == null ? 0 : element.value().hashCode());
         return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public TupleElement element(int position) {
-        verify(position);
-        Object value = value(position);
-        return new TupleElement() {
-            @Override
-            public <T> T value() {
-                @SuppressWarnings("unchecked")
-                T result = (T) value;
-                return result;
-            }
-
-            @Override
-            public boolean isString() {
-                return value instanceof String;
-            }
-
-            @Override
-            public <T extends TupleContainer> T owner() {
-                @SuppressWarnings("unchecked")
-                T result = (T) AbstractTupleContainer.this;
-                return result;
-            }
-
-            public int position() {
-                return position;
-            }
-        };
     }
 
     /**
