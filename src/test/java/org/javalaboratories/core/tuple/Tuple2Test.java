@@ -153,6 +153,7 @@ public class Tuple2Test {
         boolean found = false;
         while ( it.hasNext() ) {
             TupleElement element = it.next();
+            assertSame(tuple,element.owner());
             if ( "Doe".equals(element.value()) ) {
                 found = true;
                 break;

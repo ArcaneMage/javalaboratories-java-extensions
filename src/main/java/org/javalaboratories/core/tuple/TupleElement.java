@@ -46,7 +46,7 @@ public interface TupleElement {
      * Returns the {@link Tuple} object that this {@link TupleElement} object
      * belongs to.
      * @param <T> type of {@link TupleContainer} object.
-     * @return
+     * @return instance of tuple the element pertains to.
      */
     <T extends TupleContainer> T owner();
 
