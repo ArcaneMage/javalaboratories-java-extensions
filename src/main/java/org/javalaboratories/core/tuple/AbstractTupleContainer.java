@@ -150,7 +150,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
 
                     @Override
                     public boolean isString() {
-                        return element instanceof String;
+                        return element != null && element instanceof String;
                     }
 
                     @Override

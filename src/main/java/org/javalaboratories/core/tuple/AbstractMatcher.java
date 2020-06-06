@@ -43,7 +43,7 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
         matchPatterns = new Pattern[depth()];
         int i = 0;
         for ( TupleElement element : this )
-            matchPatterns[i++] = element.value() instanceof String ? Pattern.compile(element.value().toString()) : null;
+            matchPatterns[i++] = element.isString() ? Pattern.compile(element.value().toString()) : null;
         this.strategy = strategy;
         strategies.put(MATCH_ALL,MatcherStrategy.allOf());
         strategies.put(MATCH_ANY,MatcherStrategy.anyOf());
