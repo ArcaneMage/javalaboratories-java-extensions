@@ -36,11 +36,15 @@ package org.javalaboratories.core.tuple;
  * Consumer)} method.
  *
  * @see Tuple
+ * @see TupleElementMatcher
+ * @see MatchableTuple
+ * @see AbstractMatcher
+ *
  * @author Kevin Henry
  */
-public interface Matcher extends Matchable {
+public interface Matcher extends MatchableTuple, MatchablePatternAware {
 
-    enum MatcherStrategies {MATCH_ALL, MATCH_ANY, MATCH_SET}
+    enum Strategy {MATCH_ALL, MATCH_ANY, MATCH_SET}
 
     /**
      * Pattern matcher for depth of 1
@@ -333,7 +337,7 @@ public interface Matcher extends Matchable {
     /**
      * @return Current strategy employed this {@link Matcher} object.
      */
-    MatcherStrategies getStrategy();
+    Strategy getStrategy();
 
     /**
      * Matches this {@link Matcher} with {@code tuple} object.

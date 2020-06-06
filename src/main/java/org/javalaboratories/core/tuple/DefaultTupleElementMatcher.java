@@ -18,11 +18,14 @@ package org.javalaboratories.core.tuple;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("WeakerAccess")
 public final class DefaultTupleElementMatcher implements TupleElementMatcher {
 
-    private final Matchable matchable;
+    private static final int DERIVE_POSITION = -1;
 
-    public DefaultTupleElementMatcher(final Matchable matchable) {
+    private final MatchableTuple matchable;
+
+    public DefaultTupleElementMatcher(final MatchableTuple matchable) {
         this.matchable = matchable;
     }
 
@@ -56,24 +59,28 @@ public final class DefaultTupleElementMatcher implements TupleElementMatcher {
      * {@inheritDoc}
      */
     @Override
-    public Matchable getMatchable() {
+    public MatchableTuple getMatchable() {
         return matchable;
     }
 
     private boolean matchObjectOrPattern (TupleElement element) {
-        return matchObjectOrPattern(element, -1);
+        return matchObjectOrPattern(element, DERIVE_POSITION);
     }
 
     private boolean matchObjectOrPattern (TupleElement element, int position) {
-        int p = position == -1 ? element.position() : position;
-        Object matcherElement = matchable.value(p);
-        Pattern matcherPattern = matchable.getPattern(p).orElse(null);
+        int p = position == DERIVE_POSITION ? element.position() : position;
+        Object matcherValue = matchable.value(p);
+        Pattern matcherPattern;
+        if (matchable instanceof MatchablePatternAware)
+            matcherPattern = ((MatchablePatternAware) matchable).getPattern(p).orElse(null);
+        else
+            throw new IllegalArgumentException("Expected MatchablePatternAware object");
 
         boolean result;
         if ( !(element.isString()) ) {
             // Comparison of elements in matcher pattern and tuple should be of the same type,
             // if not false is returned
-            result = matchObject(matcherElement, element.value());
+            result = matchObject(matcherValue, element.value());
         } else {
             result = matchPattern(matcherPattern, element.value());
         }
@@ -81,12 +88,12 @@ public final class DefaultTupleElementMatcher implements TupleElementMatcher {
         return result;
     }
 
-    private boolean matchObject(Object matcherElement, Object element) {
-        return matcherElement == null && element == null ||
-                matcherElement != null && matcherElement.equals(element);
+    private boolean matchObject(Object matcherValue, Object elementValue) {
+        return matcherValue == null && elementValue == null ||
+                matcherValue != null && matcherValue.equals(elementValue);
     }
 
-    private boolean matchPattern(Pattern pattern, String element) {
-        return pattern != null && pattern.matcher(element).matches();
+    private boolean matchPattern(Pattern pattern, String elementValue) {
+        return pattern != null && pattern.matcher(elementValue).matches();
     }
 }

@@ -21,7 +21,7 @@ package org.javalaboratories.core.tuple;
  * Contains information pertaining to an element of a tuple.
  * <p>
  * Not all tuples have the ability to return {@link TupleElement} objects, for
- * example {@link Matchable} objects. Some classes will find this information
+ * example {@link MatchableTuple} objects. Some classes will find this information
  * useful to perform their operations.
  */
 public interface TupleElement {

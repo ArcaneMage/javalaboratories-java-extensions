@@ -17,21 +17,21 @@ package org.javalaboratories.core.tuple;
 
 /**
  * Matches an element of a tuple or elements within a tuple against a
- * {@link Matchable} object.
+ * {@link MatchableTuple} object.
  * <p>
- * This object will attempt to match each element in the {@link Matchable},
+ * This object will attempt to match each element in the {@link MatchableTuple},
  * applying {@link java.util.regex.Pattern}, if applicable -- only {@link String}
  * object types invoke pattern matching, and only if a pattern is available.
  * All other types invoke the equal method.
  * <p>
  * {@link AbstractMatcher} creates a default implementation of this interface.
  * @see AbstractMatcher
- * @see Matchable
+ * @see MatchableTuple
  * @see DefaultTupleElementMatcher
  */
 public interface TupleElementMatcher {
     /**
-     * Match {@code element} at logical {@code position} with {@link Matchable}
+     * Match {@code element} at logical {@code position} with {@link MatchableTuple}
      * element.
      * <p><
      * @param element element to match, ultimately came from {@link Tuple}
@@ -40,7 +40,7 @@ public interface TupleElementMatcher {
     boolean match(TupleElement element);
 
     /**
-     * Each element in the {@link Matchable} is tested against all the
+     * Each element in the {@link MatchableTuple} is tested against all the
      * {@link Tuple} elements.
      * <p>
      * @param tuple the {@link Tuple} to match.
@@ -50,9 +50,9 @@ public interface TupleElementMatcher {
     <T extends Tuple> boolean match(T tuple);
 
     /**
-     * Returns underlying {@link Matchable} object whose elements and patterns
+     * Returns underlying {@link MatchableTuple} object whose elements and patterns
      * are used in the matching process.
-     * @return an implementation of {@link Matchable}
+     * @return an implementation of {@link MatchableTuple}
      */
-    Matchable getMatchable();
+    MatchableTuple getMatchable();
 }

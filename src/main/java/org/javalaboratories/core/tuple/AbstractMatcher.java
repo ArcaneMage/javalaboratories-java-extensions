@@ -20,13 +20,13 @@ import org.javalaboratories.core.Nullable;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.*;
+import static org.javalaboratories.core.tuple.Matcher.Strategy.*;
 
 public abstract class AbstractMatcher extends AbstractTupleContainer implements Matcher {
 
     private final Pattern[] matchPatterns;
-    private final MatcherStrategies strategy;
-    private final Map<MatcherStrategies,MatcherStrategy<Tuple>> strategies = new HashMap<>();
+    private final Strategy strategy;
+    private final Map<Strategy,MatcherStrategy<Tuple>> strategies = new HashMap<>();
 
     /**
      * Constructs this implementation of {@link Matcher} object.
@@ -37,7 +37,7 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
      *
      * @param elements matcher elements
      */
-    AbstractMatcher(MatcherStrategies strategy, Object... elements) {
+    AbstractMatcher(Strategy strategy, Object... elements) {
         super(elements);
         Objects.requireNonNull(strategy);
         matchPatterns = new Pattern[depth()];
@@ -73,7 +73,7 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
     /**
      * {@inheritDoc}
      */
-    public MatcherStrategies getStrategy() {
+    public Strategy getStrategy() {
         return strategy;
     }
 

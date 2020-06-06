@@ -20,22 +20,22 @@ import org.javalaboratories.core.Nullable;
 import java.util.regex.Pattern;
 
 /**
- * Tuples that implement this interface are considered as matchable with
- * other tuples.
+ * Tuples that implements this interface is said to be pattern aware.
  * <p>
  * They have patterns which are associated with each element of the tuple,
  * and are referenced at a logical position. The patterns, if applicable,
  * are applied to determine an element match. However, depending on
  * {@link MatcherStrategy} implementation, this alone will not necessarily
- * mean that the {@link Matchable} tuple matches.
- *
+ * mean that the {@link MatchableTuple} tuple matches.
+ * <p>
  * For more information,
- * @see MatcherStrategy interface.
- */
-public interface Matchable extends TupleBase {
-
+ * @see TupleElementMatcher
+ * @see MatcherStrategy
+ * @see Matcher
+*/
+public interface MatchablePatternAware {
     /**
-     * Returns {@link Pattern} object associated with this {@link Matchable}
+     * Returns {@link Pattern} object associated with this {@link MatchableTuple}
      * elements.
      * <p>
      * Not all elements have an associated pattern and for these {@code null}

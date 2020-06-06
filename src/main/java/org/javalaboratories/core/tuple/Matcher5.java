@@ -1,6 +1,6 @@
 package org.javalaboratories.core.tuple;
 
-import static org.javalaboratories.core.tuple.Matcher.MatcherStrategies.*;
+import static org.javalaboratories.core.tuple.Matcher.Strategy.*;
 
 public final class Matcher5<T1,T2,T3,T4,T5> extends AbstractMatcher {
     private final T1 t1;
@@ -17,7 +17,7 @@ public final class Matcher5<T1,T2,T3,T4,T5> extends AbstractMatcher {
         this(MATCH_ALL,t1,t2,t3,t4,t5);
     }
 
-    private Matcher5(MatcherStrategies strategy, T1 t1, T2 t2, T3 t3, T4 t4, T5 t5) {
+    private Matcher5(Strategy strategy, T1 t1, T2 t2, T3 t3, T4 t4, T5 t5) {
         super(strategy,t1,t2,t3,t4,t5);
         this.t1 = t1;
         this.t2 = t2;

@@ -28,35 +28,35 @@ import java.util.function.Supplier;
  * of the calling class.
  * @param <T> type of {@link Tuple}, normally {@link Tuple}
  *
- * @see Matchable
+ * @see MatchableTuple
  * @see AbstractMatcher
  */
 @FunctionalInterface
 public interface MatcherStrategy<T extends Tuple> {
 
-    boolean match(Supplier<TupleElementMatcher> matcherSupplier, T tuple);
+    boolean match(Supplier<TupleElementMatcher> supplier, T tuple);
 
     /**
      * Matcher strategy to match all matcher elements with tuple.
      * <p>
-     * Each {@link Matchable} element is compared in turn with each {@link Tuple}
-     * element. A match is considered when all the {@link Matchable} elements match
+     * Each {@link MatchableTuple} element is compared in turn with each {@link Tuple}
+     * element. A match is considered when all the {@link MatchableTuple} elements match
      * with the {@link Tuple} counterparts. If the {@link Tuple}
-     * element is a string, it is compared with the {@link Matchable} regular expression
+     * element is a string, it is compared with the {@link MatchableTuple} regular expression
      * for that current element position, if a regular expression exists for it.
      *
      * @param <T> type of {@link Tuple} object.
-     * @return {@code True} is return if all {@link Matchable} elements match with
+     * @return {@code True} is return if all {@link MatchableTuple} elements match with
      * the {@link Tuple} counterparts.
      */
     static <T extends Tuple> MatcherStrategy<T> allOf() {
-        return (matcherSupplier, tuple) -> {
-            Objects.requireNonNull(matcherSupplier);
+        return (supplier, tuple) -> {
+            Objects.requireNonNull(supplier);
             Objects.requireNonNull(tuple);
             boolean result;
             int i = 0;
             Iterator<TupleElement> it = tuple.iterator();
-            TupleElementMatcher matcher = matcherSupplier.get();
+            TupleElementMatcher matcher = supplier.get();
             result = matcher.getMatchable().depth() <= tuple.depth();
             while ( result && it.hasNext() && i < matcher.getMatchable().depth() ) {
                 TupleElement element = it.next();
@@ -70,27 +70,27 @@ public interface MatcherStrategy<T extends Tuple> {
     /**
      * Matchable strategy to match any of the matcher elements with a tuple.
      * <p>
-     * Each {@link Matchable} element is compared in turn with each {@link Tuple}
-     * element. A match is considered when any of the {@link Matchable} elements match
+     * Each {@link MatchableTuple} element is compared in turn with each {@link Tuple}
+     * element. A match is considered when any of the {@link MatchableTuple} elements match
      * with the {@link Tuple} counterparts. If the {@link Tuple}
-     * element is a string, it is compared with the {@link Matchable} regular expression
+     * element is a string, it is compared with the {@link MatchableTuple} regular expression
      * for that current element position, if a regular expression exists for it.
      * <p>
-     * Excess {@link Matchable} elements, elements that exceed {@link Tuple} elements,
+     * Excess {@link MatchableTuple} elements, elements that exceed {@link Tuple} elements,
      * are ignored.
      *
      * @param <T> type of {@link Tuple} object.
-     * @return {@code True} is return if all {@link Matchable} elements match with
+     * @return {@code True} is return if all {@link MatchableTuple} elements match with
      * the {@link Tuple} counterparts.
      */
     static <T extends Tuple> MatcherStrategy<T> anyOf() {
-        return (matcherSupplier, tuple) -> {
-            Objects.requireNonNull(matcherSupplier);
+        return (supplier, tuple) -> {
+            Objects.requireNonNull(supplier);
             Objects.requireNonNull(tuple);
             boolean result = false;
             int i = 0;
             Iterator<TupleElement> it = tuple.iterator();
-            TupleElementMatcher matcher = matcherSupplier.get();
+            TupleElementMatcher matcher = supplier.get();
             while ( !result && it.hasNext() && i < matcher.getMatchable().depth() ) {
                 TupleElement element = it.next();
                 result = matcher.match(element);
@@ -110,14 +110,14 @@ public interface MatcherStrategy<T extends Tuple> {
      * to mathematical sets.
      *
      * @param <T> type of {@link Tuple} object.
-     * @return {@code True} is return if all {@link Matchable} elements match with
+     * @return {@code True} is return if all {@link MatchableTuple} elements match with
      * the {@link Tuple} counterparts.
      */
     static <T extends Tuple> MatcherStrategy<T> setOf() {
-        return (matcherSupplier, tuple) -> {
-            Objects.requireNonNull(matcherSupplier);
+        return (supplier, tuple) -> {
+            Objects.requireNonNull(supplier);
             Objects.requireNonNull(tuple);
-            TupleElementMatcher matcher = matcherSupplier.get();
+            TupleElementMatcher matcher = supplier.get();
             return matcher.match(tuple);
         };
     }
