@@ -43,14 +43,14 @@ public interface TupleContainer extends TupleBase, Comparable<TupleContainer>, I
     boolean contains(Object element);
 
     /**
-     * Returns an {@link Map<K,?>} of elements within this tuple.
+     * Returns an {@link Map} of elements within this tuple.
      * <p>
      * Implement the function that returns a key value for a given index of the
      * element in the tuple.
      *
      * @param keyMapper Function that returns a key value for a tuple element.
      * @param <K> type of returned value.
-     * @return a {@link Map<K,?>} object.
+     * @return a {@link Map} object.
      */
     <K> Map<K,?> toMap(Function<? super Integer, ? extends K> keyMapper);
 
@@ -63,8 +63,8 @@ public interface TupleContainer extends TupleBase, Comparable<TupleContainer>, I
     Object[] toArray();
 
     /**
-     * Returns a {@link List<?>} object representing the contents of this tuple.
-     * @return a {@link List<?>} object.
+     * Returns a {@link List} object representing the contents of this tuple.
+     * @return a {@link List} object.
      */
     List<?> toList();
 
