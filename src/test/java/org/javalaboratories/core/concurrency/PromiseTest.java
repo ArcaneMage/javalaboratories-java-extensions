@@ -7,16 +7,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
 import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PromiseTest {
+@SuppressWarnings("WeakerAccess")
+public class PromiseTest extends AbstractConcurrencyTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PromiseTest.class);
 
@@ -199,53 +198,5 @@ public class PromiseTest {
         assertTrue(promise.toString().contains("state=FULFILLED,service=[capacity=24,state=ACTIVE,shutdownHook=NEW"));
 
         assertEquals(FULFILLED,promise.getState());
-    }
-
-
-    private int getValue(CountDownLatch latch, AtomicInteger atomicInteger, Supplier<Integer> supplier) {
-        try {
-            int value = supplier.get();
-            atomicInteger.set(value);
-            logger.info("Received and processed value ({}) asynchronously", atomicInteger.get());
-            return value;
-        } finally {
-            if ( latch != null )
-                latch.countDown();
-        }
-    }
-
-    private void wait(String testcase, Object... params) {
-        wait(null,testcase,params);
-    }
-
-    private void wait(CountDownLatch latch, String testcase, Object... params) {
-        String logMessage = testcase+": Waiting for kept promises";
-        logger.info(logMessage,params);
-        if ( latch != null ) {
-            try {
-                latch.await(4,TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                logger.error("Latch interrupted",e);
-            }
-        }
-    }
-
-    private int doLongRunningTaskWithException(String narrative) {
-        logger.error("doLongRunningTaskWithException: {} ",narrative);
-        throw new IllegalStateException("Threw an exception in promise");
-    }
-
-    private int doLongRunningTask(String narrative) {
-        //sleep(1000);
-        logger.info("doLongRunningTask: {} asynchronously",narrative);
-        return 127;
-    }
-
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            // Do nothing
-        }
     }
 }

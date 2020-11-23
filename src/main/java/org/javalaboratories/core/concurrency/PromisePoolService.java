@@ -50,7 +50,7 @@ public class PromisePoolService extends ThreadPoolExecutor {
             shutdown();
             try {
                 while ( !awaitTermination(timeout, TimeUnit.SECONDS) && retry ) {
-                    logger.info("Awaiting termination -- elapsed {} seconds", ++i * SHUTDOWN_WAIT_TIMEOUT);
+                    logger.info("Awaiting termination of some promises  -- elapsed {} seconds", ++i * SHUTDOWN_WAIT_TIMEOUT);
                 }
                 if ( !isTerminated() ) {
                     logger.debug("Not all promises kept following shut down.");

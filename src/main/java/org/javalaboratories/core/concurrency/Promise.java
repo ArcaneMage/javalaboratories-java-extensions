@@ -99,12 +99,6 @@ public class Promise<T> {
         return action;
     }
 
-    protected CompletableFuture<T> doPrimaryActionAsync(final PrimaryAction<T> action) {
-        return CompletableFuture.supplyAsync(action.getTask().orElseThrow(),service)
-                .whenComplete((value,exception) -> action.getResult()
-                        .ifPresent(consumer -> consumer.accept(value, exception)));
-    }
-
     /**
      * Invokes this promise's primary action asynchronously. The method is
      * part of the life-cycle of this object, and therefore must not be called
@@ -114,12 +108,13 @@ public class Promise<T> {
      * @return true is returned if action is executed asynchronously.
      */
     final boolean invokePrimaryActionAsync(PrimaryAction<T> action) {
-        future = doPrimaryActionAsync(action);
+        future = doMakePrimaryActionableAsync(action);
         logger.debug("Promise [{}] invoked action asynchronously successfully",getIdentity());
         return true;
     }
 
     private Consumer<T> doMakeActionable(final Action<T> action) {
+        Objects.requireNonNull(action);
         return (value) -> {
             Consumer<T> result = action.getTask().orElseThrow();
             result.accept(value);
@@ -127,10 +122,17 @@ public class Promise<T> {
     }
 
     private <R> Function<T,R> doMakeTransmutable(final TransmuteAction<T,R> action) {
+        Objects.requireNonNull(action);
         return (value) -> {
             Function<T,R> result = action.getTransmute().orElseThrow();
             return result.apply(value);
         };
+    }
+
+    private CompletableFuture<T> doMakePrimaryActionableAsync(final PrimaryAction<T> action) {
+        return CompletableFuture.supplyAsync(action.getTask().orElseThrow(),service)
+                .whenComplete((value,exception) -> action.getResult()
+                        .ifPresent(consumer -> consumer.accept(value, exception)));
     }
 
     private States getState(final CompletableFuture<?super T> future) {

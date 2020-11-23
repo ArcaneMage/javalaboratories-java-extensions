@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @SuppressWarnings("WeakerAccess")
 public final class Promises {
@@ -22,14 +22,28 @@ public final class Promises {
 
     private Promises() {}
 
-    public static <T> void all(final List<PrimaryAction<T>> actions) {
+    public static <T> List<Promise<T>> all(final List<PrimaryAction<T>> actions) {
+        return all(actions,(action) -> () -> new Promise<>(promisePoolService,action));
+    }
+
+    public static <T,U extends Promise<T>> List<Promise<T>> all(final List<PrimaryAction<T>> actions, final Function<PrimaryAction<T>,Supplier<U>> function ) {
         Objects.requireNonNull(actions);
-        actions.forEach(Promises::newPromise);
+        Objects.requireNonNull(function);
+        List<Promise<T>> results = new ArrayList<>();
+        actions.forEach(a -> {
+            Promise<T> promise = newPromise(a,function.apply(a));
+            results.add(promise);
+        });
+        return Collections.unmodifiableList(results);
     }
 
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
+        return newPromise(action, () -> new Promise<>(promisePoolService,action));
+    }
+
+    public static <T, U extends Promise<T>> Promise<T> newPromise(final PrimaryAction<T> action, final Supplier<U> supplier) {
         Objects.requireNonNull(action,"Cannot keep promise -- no action?");
-        Promise<T> result = new Promise<>(promisePoolService,action);
+        Promise<T> result = supplier.get();
         result.invokePrimaryActionAsync(action);
         return result;
     }
@@ -53,7 +67,7 @@ public final class Promises {
                 factory = (PromisePoolServiceFactory) clazz.newInstance();
             } else {
                 // Resort to default implementation
-                factory = (PromisePoolService::new);
+                factory = PromisePoolService::new;
             }
             result = factory.newPoolService(capacity);
             logger.debug("Promise factory {} created and initialised with capacity {} successfully", clazz, capacity);
