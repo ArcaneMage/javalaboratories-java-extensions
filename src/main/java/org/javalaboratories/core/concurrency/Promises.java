@@ -44,7 +44,7 @@ public final class Promises {
     public static <T, U extends Promise<T>> Promise<T> newPromise(final PrimaryAction<T> action, final Supplier<U> supplier) {
         Objects.requireNonNull(action,"Cannot keep promise -- no action?");
         Promise<T> result = supplier.get();
-        result.invokePrimaryActionAsync(action);
+        result.invokePrimaryAction(action);
         return result;
     }
 

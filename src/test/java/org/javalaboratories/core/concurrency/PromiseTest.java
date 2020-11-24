@@ -77,45 +77,45 @@ public class PromiseTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    public void testThen_Action_Pass() {
+    public void testThen_TaskAction_Pass() {
         // Given
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_Action_Pass")))
-                .then(Action.of(value -> getValue(latch, received, () -> value)));
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskAction_Pass")))
+                .then(TaskAction.of(value -> getValue(latch, received, () -> value)));
 
         // Then
-        wait(latch,"testThen_Action_Pass");
+        wait(latch,"testThen_TaskAction_Pass");
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
 
     }
 
     @Test
-    public void testThen_ActionCompleteHandler_Pass() {
+    public void testThen_TaskActionCompleteHandler_Pass() {
         // Given
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_ActionCompleteHandler_Pass")))
-                .then(Action.of(value -> getValue(latch, received, () -> value),voidResponse));
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandler_Pass")))
+                .then(TaskAction.of(value -> getValue(latch, received, () -> value),voidResponse));
 
         // Then
-        wait(latch,"testThen_ActionCompleteHandler_Pass");
+        wait(latch,"testThen_TaskActionCompleteHandler_Pass");
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
 
     }
 
     @Test
-    public void testThen_ActionCompleteHandlerException_Pass() {
+    public void testThen_TaskActionCompleteHandlerException_Pass() {
         // Given
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_ActionCompleteHandlerException_Pass")))
-                .then(Action.of(value -> getValue(latch, received, () -> value / 0),voidResponse));
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandlerException_Pass")))
+                .then(TaskAction.of(value -> getValue(latch, received, () -> value / 0),voidResponse));
 
         // Then
-        wait(latch,"testThen_ActionCompleteHandlerException_Pass");
+        wait(latch,"testThen_TaskActionCompleteHandlerException_Pass");
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
         // Interestingly enough this works because the reference of the "then" method
         // is assigned to the promise object :)

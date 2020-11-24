@@ -27,6 +27,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.javalaboratories.core.concurrency.Promise.States.*;
 
@@ -65,18 +66,18 @@ import static org.javalaboratories.core.concurrency.Promise.States.*;
  * {@code
  *      Promise<Integer> promise = Promises
  *          .newPromise(PrimaryAction.of(() -> doLongRunningTask("Hello World")))
- *          .then(Action.of(value -> System.out.println("Result: "+value)))
+ *          .then(TaskAction.of(value -> System.out.println("Result: "+value)))
  *
  *      int result = promise.getResult().orElse(-1);
  * }
  * </pre>
  * In the above example, both the {@link Promise#then} method and the
- * {@link Action} object are introduced to illustrate subsequent asynchronous
+ * {@link TaskAction} object are introduced to illustrate subsequent asynchronous
  * processing of action objects. The {@code then} method executes the action
  * in a separate thread as soon as the previous action completes. There is
  * no restriction on the number of subsequent {@code then} methods -- the
  * underlying thread pool {@link PromisePoolService} will manage the processes.
- * The {@link Action} object is useful for scenarios where the value is not
+ * The {@link TaskAction} object is useful for scenarios where the value is not
  * expected from the task, but what about situations where the value has to
  * undergo some kind of transformation? Perhaps from one type to another or
  * the value is required for a calculation resulting in a new value.
@@ -96,7 +97,7 @@ import static org.javalaboratories.core.concurrency.Promise.States.*;
  * a database, then the second action transforms the value into a {@link String},
  * which is then retrieved by {@link Promise#getResult()} method call.
  * <p>
- * <b>Handling Results Asynchronously</b>
+ * <b>Handling Completion Asynchronously</b>
  * <p>
  * <b>All</b> action objects have the ability to handle results and exceptions
  * within their own thread context. When the action task completes, the promise
@@ -140,7 +141,7 @@ import static org.javalaboratories.core.concurrency.Promise.States.*;
  *
  * @see Promises
  * @see PrimaryAction
- * @see Action
+ * @see TaskAction
  * @see TransmuteAction
  * @see Promise#getState()
  */
@@ -163,7 +164,7 @@ public class Promise<T> {
 
     private final Logger logger = LoggerFactory.getLogger(Promise.class);
 
-    private final AbstractAction action;
+    private final Action action;
     private final PromisePoolService service;
     @EqualsAndHashCode.Include
     private final String identity;
@@ -200,7 +201,7 @@ public class Promise<T> {
      *               action asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    private Promise(final PromisePoolService service, final AbstractAction<?> action, final CompletableFuture<T> future) {
+    private Promise(final PromisePoolService service, final Action<?> action, final CompletableFuture<T> future) {
         Objects.requireNonNull(action,"No service object?");
         Objects.requireNonNull(action,"No action object?");
         this.service = service;
@@ -210,18 +211,18 @@ public class Promise<T> {
     }
 
     /**
-     * Having completed the previous action, now execute {@link Action} action
+     * Having completed the previous action, now execute {@link TaskAction} action
      * asynchronously, and return a new {@link Promise} object to manage the
-     * {@link Action} object and the underlying {@link CompletableFuture} future.
+     * {@link TaskAction} object and the underlying {@link CompletableFuture} future.
      *
      * @param action the action being processed asynchronously.
-     * @return a new {@link Promise} object to manage the {@link Action} action
+     * @return a new {@link Promise} object to manage the {@link TaskAction} action
      * object.
      */
-    public final Promise<T> then(final Action<T> action) {
+    public final Promise<T> then(final TaskAction<T> action) {
         Consumer<T> actionable = doMakeActionable(action);
         CompletableFuture<Void> future = this.future.thenAcceptAsync(actionable,service)
-                .whenComplete((value,exception) -> action.getResult()
+                .whenComplete((value,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(value, exception)));
 
         return new Promise<>(service,action,toFuture(future));
@@ -230,7 +231,7 @@ public class Promise<T> {
     /**
      * Having completed the previous action, now execute {@link TransmuteAction}
      * action asynchronously, and return a new {@link Promise} object to manage
-     * the {@link Action} object and the underlying {@link CompletableFuture}
+     * the {@link TaskAction} object and the underlying {@link CompletableFuture}
      * future.
      *
      * @param action the action being processed asynchronously.
@@ -240,7 +241,7 @@ public class Promise<T> {
     public final <R> Promise<R> then(final TransmuteAction<T,R> action) {
         Function<T,R> transmutable = doMakeTransmutable(action);
         CompletableFuture<R> future = this.future.thenApplyAsync(transmutable,service)
-                .whenComplete((newValue,exception) -> action.getResult()
+                .whenComplete((newValue,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(newValue, exception)));
 
         return new Promise<>(service,action,future);
@@ -337,9 +338,9 @@ public class Promise<T> {
      * @return the current {@link AbstractAction} object being managed by this
      * {@link Promise} object.
      */
-    protected AbstractAction<T> getAction() {
+    protected Action<T> getAction() {
         @SuppressWarnings("unchecked")
-        AbstractAction<T> action = this.action;
+        Action<T> action = this.action;
         return action;
     }
 
@@ -351,17 +352,37 @@ public class Promise<T> {
      *
      * @return true is returned if action is executed asynchronously.
      */
-    final boolean invokePrimaryActionAsync(PrimaryAction<T> action) {
-        future = doMakePrimaryActionableAsync(action);
+    final boolean invokePrimaryAction(PrimaryAction<T> action) {
+        future = invokePrimaryActionAsync(action);
         logger.debug("Promise [{}] invoked action asynchronously successfully",getIdentity());
         return true;
     }
 
-    private Consumer<T> doMakeActionable(final Action<T> action) {
+    private Supplier<T> doMakePrimaryActionable(final PrimaryAction<T> action) {
+        Objects.requireNonNull(action);
+        return () -> {
+            Supplier<T> result = action.getTask().orElseThrow();
+            try {
+                return result.get();
+            } finally {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Promise [{}] processed task of PrimaryAction object",getIdentity());
+                }
+            }
+        };
+    }
+
+    private Consumer<T> doMakeActionable(final TaskAction<T> action) {
         Objects.requireNonNull(action);
         return (value) -> {
             Consumer<T> result = action.getTask().orElseThrow();
-            result.accept(value);
+            try {
+                result.accept(value);
+            } finally {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Promise [{}] processed task of TaskAction object",getIdentity());
+                }
+            }
         };
     }
 
@@ -369,18 +390,25 @@ public class Promise<T> {
         Objects.requireNonNull(action);
         return (value) -> {
             Function<T,R> result = action.getTransmute().orElseThrow();
-            return result.apply(value);
+            try {
+                return result.apply(value);
+            } finally {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Promise [{}] processed transmute task of TransmuteAction object",getIdentity());
+                }
+            }
         };
-    }
-
-    private CompletableFuture<T> doMakePrimaryActionableAsync(final PrimaryAction<T> action) {
-        return CompletableFuture.supplyAsync(action.getTask().orElseThrow(),service)
-                .whenComplete((value,exception) -> action.getResult()
-                        .ifPresent(consumer -> consumer.accept(value, exception)));
     }
 
     private States getState(final CompletableFuture<?super T> future) {
         return future == null ? PENDING : future.isCompletedExceptionally() ? REJECTED : FULFILLED;
+    }
+
+    private CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
+        Supplier<T> actionable = doMakePrimaryActionable(action);
+        return CompletableFuture.supplyAsync(actionable,service)
+                .whenComplete((value,exception) -> action.getCompletionHandler()
+                        .ifPresent(consumer -> consumer.accept(value, exception)));
     }
 
     private static <T> CompletableFuture<T> toFuture(CompletableFuture<?> future) {

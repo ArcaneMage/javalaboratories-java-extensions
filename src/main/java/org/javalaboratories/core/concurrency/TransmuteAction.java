@@ -14,17 +14,17 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
         this(transmute, null);
     }
 
-    private TransmuteAction(final Function<T,R> transmute, final BiConsumer<R,Throwable> result) {
-        super(result);
+    private TransmuteAction(final Function<T,R> transmute, final BiConsumer<R,Throwable> completeHandler) {
+        super(completeHandler);
         this.transmute = transmute;
     }
 
-    public static <T,R> TransmuteAction<T,R> of(Function<T,R> transform) {
-        return new TransmuteAction<>(transform);
+    public static <T,R> TransmuteAction<T,R> of(Function<T,R> transmute) {
+        return new TransmuteAction<>(transmute);
     }
 
-    public static <T,R> TransmuteAction<T,R> of(Function<T,R> transform, BiConsumer<R,Throwable> result) {
-        return new TransmuteAction<>(transform,result);
+    public static <T,R> TransmuteAction<T,R> of(Function<T,R> transmute, BiConsumer<R,Throwable> completeHandler) {
+        return new TransmuteAction<>(transmute,completeHandler);
     }
 
     public Nullable<Function<T,R>> getTransmute() {
