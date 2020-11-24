@@ -117,7 +117,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
         // Then
         wait(latch,"testThen_ActionCompleteHandlerException_Pass");
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
-        // Interestingly enough this works because of compiler optimization. The reference of the "then" method
+        // Interestingly enough this works because the reference of the "then" method
         // is assigned to the promise object :)
         assertEquals(REJECTED,promise.getState());
     }

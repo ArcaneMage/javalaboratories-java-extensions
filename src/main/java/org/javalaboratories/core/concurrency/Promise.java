@@ -96,13 +96,13 @@ import static org.javalaboratories.core.concurrency.Promise.States.*;
  * a database, then the second action transforms the value into a {@link String},
  * which is then retrieved by {@link Promise#getResult()} method call.
  * <p>
- * <b>Exception Handling</b>
+ * <b>Handling Results Asynchronously</b>
  * <p>
- * <b>All</b> action objects have the ability to handle exceptions within
- * their own thread context. Consider an exception being thrown in an action.
- * The promise object decides the action to be a rejection and calls
- * the action's result task, passing the exception object for processing.
- * Review the example below to illustrate this kind of exception management.
+ * <b>All</b> action objects have the ability to handle results and exceptions
+ * within their own thread context. When the action task completes, the promise
+ * object then invokes the action's result handler (if it is available), passing
+ * to it the resultant value of the task or the exception object for processing.
+ * Review the example below which illustrates this behaviour.
  * <pre>
  * {@code
  *
@@ -147,7 +147,6 @@ import static org.javalaboratories.core.concurrency.Promise.States.*;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @SuppressWarnings("WeakerAccess")
 public class Promise<T> {
-
     /**
      * Returns the current state of this promise object.
      * <p>
@@ -185,7 +184,6 @@ public class Promise<T> {
     Promise(final PromisePoolService service, final PrimaryAction<T> action) {
         this(service,action,null);
     }
-
 
     /**
      * This copy constructor is only used internally by this promise object.
