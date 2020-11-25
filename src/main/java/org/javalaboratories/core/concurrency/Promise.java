@@ -36,7 +36,7 @@ import static org.javalaboratories.core.concurrency.Promise.States.*;
  * {@link CompletableFuture} object, the inspiration of which came from the
  * JavaScript's Promise object behaviour. This implementation provides an
  * easily understood API for asynchronous submission of tasks encapsulated
- * as {@link AbstractAction} objects with comprehensive exception handling.
+ * as {@link Action} objects with comprehensive exception handling.
  * <p>
  * For example, the following promises to execute the {@code doLongRunningTask()}
  * task asynchronously immediately after the construction of the
@@ -389,7 +389,7 @@ public class Promise<T> {
     private <R> Function<T,R> doMakeTransmutable(final TransmuteAction<T,R> action) {
         Objects.requireNonNull(action);
         return (value) -> {
-            Function<T,R> result = action.getTransmute().orElseThrow();
+            Function<T,R> result = action.getTask().orElseThrow();
             try {
                 return result.apply(value);
             } finally {

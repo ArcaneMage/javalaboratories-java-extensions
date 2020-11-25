@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 /**
  * This is the first or initial action required by the {@link Promise} object.
  * <p>
- * Use the factory methods {@code this#of(...)} to create the instance of the
- * {@link PrimaryAction}.
+ * Use the factory methods {@code PrimaryAction#of(...)} to create the instance
+ * of the {@link PrimaryAction}.
  * <p>
  * It is not compulsory to provide a {@code completionHandler}, hence the
  * multiple factory methods. However, this action does expect the task to
@@ -38,6 +38,7 @@ import java.util.function.Supplier;
  * @see TransmuteAction
  */
 @EqualsAndHashCode(callSuper=false)
+@SuppressWarnings("WeakerAccess")
 public final class PrimaryAction<T> extends AbstractAction<T> {
     private final Supplier<T> task;
 

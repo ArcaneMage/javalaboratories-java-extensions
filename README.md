@@ -74,6 +74,21 @@ available in the `Optional` class in Java-11/13 but it also includes new feature
     List<Person> list = person.toList();
 ```
 Similarly, there are `NullableInt`,`NullableLong` and `NullableDouble` for `int`,`long` and `double` types respectively.
+### Promise
+The `Promise` object is a lightweight abstraction of the `CompletableFuture` object, the inspiration of which came from 
+the JavaScript's Promise object behaviour. This implementation provides an easily understood API for asynchronous 
+submission of task encapsulated as `Action` objects with comprehensive exception handling. The example below demonstrates
+the ability to perform I/O and transformation of data asynchronously, which is then output to the console in the main
+thread:
+```
+    Promise<String> promise = Promises
+       .newPromise(PrimaryAction.of(() -> doLongRunningTask("Reading integer value from database")))
+       .then(TransmuteAction.of(value -> "Value read from the database: "+value));
+ 
+       String result = promise.getResult()
+            .IfPresent(result -> System.out::println(result)); 
+``` 
+There's a lot more to discover about `Promise` objects -- review the source's Javadoc for details. 
 ### Reducers
 `Reducers` are collectors but with a difference. Most of them return `Stream` objects, and so it is possible to continue
 functional programming within a stream context. Many of the `Collectors` methods have been implemented in `Reducers` class, 
