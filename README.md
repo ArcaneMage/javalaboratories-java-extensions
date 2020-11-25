@@ -77,9 +77,9 @@ Similarly, there are `NullableInt`,`NullableLong` and `NullableDouble` for `int`
 ### Promise
 The `Promise` object is a lightweight abstraction of the `CompletableFuture` object, the inspiration of which came from 
 the JavaScript's Promise object behaviour. This implementation provides an easily understood API for asynchronous 
-submission of task encapsulated as `Action` objects with comprehensive exception handling. The example below demonstrates
-the ability to perform I/O and transformation of data asynchronously, which is then output to the console in the main
-thread:
+submission of tasks encapsulated as `Action` objects with comprehensive exception management. The example below 
+demonstrates the ability to perform I/O and transformation of data asynchronously, which is then output to the console 
+in the main thread:
 ```
     Promise<String> promise = Promises
        .newPromise(PrimaryAction.of(() -> doLongRunningTask("Reading integer value from database")))
