@@ -15,6 +15,9 @@
  */
 package org.javalaboratories.core.concurrency;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Factory to create {@code PromisePoolService} thread pool instances.
  * <p>
@@ -24,7 +27,7 @@ package org.javalaboratories.core.concurrency;
  * the thread pool for processing.
  * <p>
  * The {@code promise-configuration.properties} file configures the classname
- * of the factory and workers' capacity. If the file is mis-configured or missing,
+ * of the thread pool and workers' capacity. If the file is mis-configured or missing,
  * system defaults will apply.
  * <p>
  * Ensure the custom factory implements this interface.
@@ -32,15 +35,15 @@ package org.javalaboratories.core.concurrency;
  * @param <T> Type of thread pool the factory creates. This must be inherited
  *           from {@link PromisePoolService}
  */
-@FunctionalInterface
 public interface PromisePoolServiceFactory<T extends PromisePoolService> {
+
+    Logger logger = LoggerFactory.getLogger(PromisePoolServiceFactory.class);
 
     /**
      * Creates a new instance of the {@link PromisePoolService} thread pool
      * to be used by {@link Promise} objects.
      *
-     * @param capacity maximum number of thread workers
      * @return new instance of the {@link PromisePoolService} thread pool.
      */
-    T newPoolService(int capacity);
+    T newPoolService();
 }

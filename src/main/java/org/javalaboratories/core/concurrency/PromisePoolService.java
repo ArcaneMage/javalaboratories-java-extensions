@@ -10,6 +10,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * {@code PromisePoolService} is a custom thread pool executor designed for use
+ * with {@link Promise} objects.
+ * <p>
+ * If required, but rarely necessary, it is possible to provide an alternative
+ * thread pool. Achieving this involves configuring the
+ * {@code promise-configuration.properties} file, but it is required that the
+ * thread pool must inherit from {@link PromisePoolService} class.
+ */
 @SuppressWarnings("WeakerAccess")
 public class PromisePoolService extends ThreadPoolExecutor {
 
