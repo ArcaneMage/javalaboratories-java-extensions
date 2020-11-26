@@ -18,6 +18,7 @@ package org.javalaboratories.core.concurrency;
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Nullable;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -66,7 +67,7 @@ public final class TaskAction<T> extends AbstractAction<Void> {
      */
     private TaskAction(final Consumer<T> task, final BiConsumer<Void,Throwable> completionHandler) {
         super(completionHandler);
-        this.task = task;
+        this.task = Objects.requireNonNull(task,"No task?");
     }
 
     /**

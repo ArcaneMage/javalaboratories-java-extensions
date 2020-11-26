@@ -18,6 +18,7 @@ package org.javalaboratories.core.concurrency;
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Nullable;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -67,7 +68,7 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
      */
     private TransmuteAction(final Function<T,R> task, final BiConsumer<R,Throwable> completionHandler) {
         super(completionHandler);
-        this.task = task;
+        this.task = Objects.requireNonNull(task,"No task?");
     }
 
     /**

@@ -182,7 +182,6 @@ public class PromiseTest extends AbstractConcurrencyTest {
     public void testGetAction_Pass() {
         PrimaryAction<Void> action = PrimaryAction.of(() -> null);
         Promise<Void> promise = Promises.newPromise(action);
-
         assertEquals(action,promise.getAction());
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
 

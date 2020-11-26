@@ -44,10 +44,11 @@ public final class Promises {
     private Promises() {}
 
     public static <T> List<Promise<T>> all(final List<PrimaryAction<T>> actions) {
-        return all(actions,(action) -> () -> new Promise<>(promisePoolService,action));
+        return all(actions,(action) -> () -> new AsyncUndertaking<>(promisePoolService,action));
     }
 
-    public static <T,U extends Promise<T>> List<Promise<T>> all(final List<PrimaryAction<T>> actions, final Function<PrimaryAction<T>,Supplier<U>> function ) {
+    public static <T,U extends Promise<T>> List<Promise<T>> all(final List<PrimaryAction<T>> actions,
+                                                                final Function<PrimaryAction<T>,Supplier<U>> function ) {
         Objects.requireNonNull(actions);
         Objects.requireNonNull(function);
         List<Promise<T>> results = new ArrayList<>();
@@ -59,13 +60,18 @@ public final class Promises {
     }
 
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
-        return newPromise(action, () -> new Promise<>(promisePoolService,action));
+        return newPromise(action, () -> new AsyncUndertaking<>(promisePoolService,action));
     }
 
     public static <T, U extends Promise<T>> Promise<T> newPromise(final PrimaryAction<T> action, final Supplier<U> supplier) {
         Objects.requireNonNull(action,"Cannot keep promise -- no action?");
-        Promise<T> result = supplier.get();
-        result.invokePrimaryAction(action);
+        U result = supplier.get();
+        checked(result).invokePrimaryAction(action);
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T,U extends Promise<T>,V extends AsyncUndertaking<T>> V checked(U promise) {
+        return (V) promise;
     }
 }

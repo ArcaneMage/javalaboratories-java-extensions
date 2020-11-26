@@ -63,8 +63,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
      */
     private PrimaryAction(final Supplier<T> task, final BiConsumer<T,Throwable> completionHandler) {
         super(completionHandler);
-        Objects.requireNonNull(task);
-        this.task = task;
+        this.task = Objects.requireNonNull(task);
     }
 
     /**
