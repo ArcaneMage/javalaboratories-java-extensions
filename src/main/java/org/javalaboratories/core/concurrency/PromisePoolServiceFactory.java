@@ -1,49 +1,63 @@
-/*
- * Copyright 2020 Kevin Henry
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
 package org.javalaboratories.core.concurrency;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Factory to create {@code PromisePoolService} thread pool instances.
- * <p>
- * Only one instance of the thread pool can be created at any one time, they are
- * considered to be singletons. All {@code Promise} objects will submit their
- * {@code PrimaryAction}, {@code Action} and {@code TransmuteAction} objects to
- * the thread pool for processing.
- * <p>
- * The {@code promise-configuration.properties} file configures the classname
- * of the thread pool and workers' capacity. If the file is mis-configured or missing,
- * system defaults will apply.
- * <p>
- * Ensure the custom factory implements this interface.
- *
- * @param <T> Type of thread pool the factory creates. This must be inherited
- *           from {@link PromisePoolService}
- */
-public interface PromisePoolServiceFactory<T extends PromisePoolService> {
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 
-    Logger logger = LoggerFactory.getLogger(PromisePoolServiceFactory.class);
+@SuppressWarnings("WeakerAccess")
+public final class PromisePoolServiceFactory<T extends PromisePoolService> {
 
-    /**
-     * Creates a new instance of the {@link PromisePoolService} thread pool
-     * to be used by {@link Promise} objects.
-     *
-     * @return new instance of the {@link PromisePoolService} thread pool.
-     */
-    T newPoolService();
+    private Logger logger = LoggerFactory.getLogger(PromisePoolServiceFactory.class);
+
+    private static volatile PromisePoolService instance;
+
+    private final PromiseConfiguration configuration;
+
+    public PromisePoolServiceFactory(final PromiseConfiguration configuration) {
+        Objects.requireNonNull(configuration);
+        this.configuration = configuration;
+    }
+
+    public T newPoolService() {
+        if ( instance == null ) {
+            synchronized (PromisePoolServiceFactory.class) {
+                String clazzname = configuration.getPoolServiceClassName();
+                try {
+                    int capacity = configuration.getPoolServiceCapacity();
+                    Class<?> clazz = Class.forName(clazzname);
+                    if (clazz != PromisePoolService.class) {
+                        // Attempt to instantiate custom promise pool service
+                        Constructor<?> constructor = clazz.getConstructor(int.class);
+                        instance = cast(constructor.newInstance(capacity));
+                    } else {
+                        // Resort to default implementation
+                        instance = cast(new PromisePoolService(capacity));
+                    }
+                    logger.debug("Promise pool service {} created and initialised with capacity {} successfully", clazz, capacity);
+                } catch (ClassCastException e) {
+                    logger.error("Promise pool service {} class needs to inherit from {} class", clazzname, PromisePoolService.class);
+                } catch (NoSuchMethodException e) {
+                    logger.error("Promise pool service {} class needs to have a constructor with a single int parameter", clazzname);
+                } catch (InvocationTargetException e) {
+                    logger.error("Promise pool service {} class constructor could not be invoked", clazzname);
+                } catch (ClassNotFoundException e) {
+                    logger.error("Class not found: {}", clazzname);
+                } catch (IllegalAccessException e) {
+                    logger.error("Illegal access to method/constructor, class {}", clazzname, e);
+                } catch (InstantiationException e) {
+                    logger.error("Instantiation exception for {} class", clazzname, e);
+                }
+            }
+        }
+        return cast(instance);
+    }
+
+    private static <T extends PromisePoolService> T cast(Object object) {
+        @SuppressWarnings("unchecked")
+        T result = (T) object;
+        return result;
+    }
 }

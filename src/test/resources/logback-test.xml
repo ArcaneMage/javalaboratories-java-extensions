@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.javalaboratories" level="DEBUG" additivity="false">
+    <logger name="org.javalaboratories" level="TRACE" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 

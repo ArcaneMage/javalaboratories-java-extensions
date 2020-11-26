@@ -1,20 +1,45 @@
 package org.javalaboratories.core.concurrency;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * This is a factory for creating {@link Promise} objects.
+ * <p>
+ * Its role is to ensure {@link PromisePoolServiceFactory},
+ * {@link PromisePoolService} and other objects are properly initialised and
+ * ready for the production of {@link Promise} objects. For flexibility, the
+ * thread pool service can swapped out for an alternative executor -- configure
+ * the concrete implementation in the {@code promise-configuration.properties}
+ * file; factory methods also provide a means to create custom {@link Promise}
+ * objects.
+ * <p>
+ * A typical example for creating promise objects is shown:
+ *
+ * <pre>
+ *     {@code
+ *          Promise<String> promise = Promises
+ *              .newPromise(PrimaryAction.of(() -> doLongRunningTask("Reading integer value from database")))
+ *              .then(TransmuteAction.of(value -> "Value read from the database: "+value));
+ *
+ *          String result = promise.getResult()
+ *             .IfPresent(result -> System.out::println(result));
+ *     }
+ * </pre>
+ */
 @SuppressWarnings("WeakerAccess")
 public final class Promises {
 
-    private static final String PROMISE_CONFIGURATION_FILE="promise-configuration.properties";
+    private static PromisePoolService promisePoolService;
 
-    private static PromisePoolService promisePoolService = createPromisePoolService(DefaultPromisePoolServiceFactory::new);
+    static {
+        PromisePoolServiceFactory factory = new PromisePoolServiceFactory(new PromiseConfiguration());
+        promisePoolService = factory.newPoolService();
+    }
 
     private Promises() {}
 
@@ -42,17 +67,5 @@ public final class Promises {
         Promise<T> result = supplier.get();
         result.invokePrimaryAction(action);
         return result;
-    }
-
-    private static <T extends PromisePoolService> T createPromisePoolService(Function<Properties,PromisePoolServiceFactory<T>> function) {
-        Objects.requireNonNull(function);
-        Properties properties = new Properties();
-        try {
-            properties.load(Promises.class.getClassLoader().getResourceAsStream(PROMISE_CONFIGURATION_FILE));
-        } catch (IOException e) {
-            // Do-nothing, file I/O error will result in system defaults being applied
-        }
-        PromisePoolServiceFactory<T> factory = function.apply(properties);
-        return factory.newPoolService();
     }
 }
