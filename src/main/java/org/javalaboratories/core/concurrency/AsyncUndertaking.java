@@ -48,7 +48,6 @@ import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 class AsyncUndertaking<T> implements Promise<T> {
 
-
     private static final Consumer<Throwable> INERT_HANDLER = e -> {};
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);
 
