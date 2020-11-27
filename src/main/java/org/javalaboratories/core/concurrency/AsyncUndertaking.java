@@ -101,7 +101,7 @@ class AsyncUndertaking<T> implements Promise<T> {
                 .whenComplete((value,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(null, exception)));
 
-        return new AsyncUndertaking<>(service,action,toFuture(future));
+        return new AsyncUndertaking<>(service,action, unchecked(future));
     }
 
     @Override
@@ -170,8 +170,8 @@ class AsyncUndertaking<T> implements Promise<T> {
      *
      * @return true is returned if action is executed asynchronously.
      */
-    final boolean invokePrimaryAction(PrimaryAction<T> action) {
-        future = invokePrimaryActionAsync(action);
+    final boolean invokePrimaryAction(final PrimaryAction<T> action) {
+        future = invokePrimaryActionAsync(Objects.requireNonNull(action,"No action?"));
         logger.debug("Promise [{}] invoked action asynchronously successfully",getIdentity());
         return true;
     }
@@ -238,7 +238,7 @@ class AsyncUndertaking<T> implements Promise<T> {
                         .ifPresent(consumer -> consumer.accept(value, exception)));
     }
 
-    private static <T> CompletableFuture<T> toFuture(CompletableFuture<?> future) {
+    private static <T> CompletableFuture<T> unchecked(CompletableFuture<?> future) {
         @SuppressWarnings("unchecked")
         CompletableFuture<T> result = (CompletableFuture<T>) future;
         return result;

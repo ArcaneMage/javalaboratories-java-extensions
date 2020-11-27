@@ -66,12 +66,13 @@ public final class Promises {
     public static <T, U extends Promise<T>> Promise<T> newPromise(final PrimaryAction<T> action, final Supplier<U> supplier) {
         Objects.requireNonNull(action,"Cannot keep promise -- no action?");
         U result = supplier.get();
-        checked(result).invokePrimaryAction(action);
+        unchecked(result).invokePrimaryAction(action);
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    private static <T,U extends Promise<T>,V extends AsyncUndertaking<T>> V checked(U promise) {
+    private static <T,U extends Promise<T>,V extends AsyncUndertaking<T>> V unchecked(U promise) {
+        // This is okay: AsyncUndertaking is the only implementation for now.
         return (V) promise;
     }
 }

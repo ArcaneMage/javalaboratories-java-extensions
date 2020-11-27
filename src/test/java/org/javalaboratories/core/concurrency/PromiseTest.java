@@ -20,7 +20,6 @@ public class PromiseTest extends AbstractConcurrencyTest {
     private static final Logger logger = LoggerFactory.getLogger(PromiseTest.class);
 
     private BiConsumer<Integer,Throwable> intResponse;
-    private BiConsumer<Void,Throwable> voidResponse;
 
     @BeforeEach
     public void setup() {
@@ -29,14 +28,6 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 logger.error("Exception detected in complete handler:", exception);
             } else {
                 logger.info("Result received in complete handler: {}", result);
-            }
-        };
-
-        voidResponse = (result, exception) -> {
-            if ( exception != null ) {
-                logger.error("Exception detected in complete handler:", exception);
-            } else {
-                logger.info("Result received in complete Void handler: {}", result);
             }
         };
     }
@@ -97,7 +88,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandler_Pass")))
-                .then(TaskAction.of(value -> getValue(latch, received, () -> value),voidResponse));
+                .then(TaskAction.of(value -> getValue(latch, received, () -> value),intResponse));
 
         // Then
         wait(latch,"testThen_TaskActionCompleteHandler_Pass");
@@ -112,7 +103,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandlerException_Pass")))
-                .then(TaskAction.of(value -> getValue(latch, received, () -> value / 0),voidResponse));
+                .then(TaskAction.of(value -> getValue(latch, received, () -> value / 0),intResponse));
 
         // Then
         wait(latch,"testThen_TaskActionCompleteHandlerException_Pass");

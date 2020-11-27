@@ -49,7 +49,7 @@ public abstract class AbstractConcurrencyTest {
     }
 
     int doLongRunningTask(CountDownLatch latch,String narrative) {
-        //sleep(1000);
+        sleep(1000);
         try {
             logger.info("doLongRunningTask: {} asynchronously", narrative);
             return 127;
