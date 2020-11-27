@@ -36,14 +36,14 @@ import java.util.function.Consumer;
  * multiple factory methods. However, this action does expect the task to
  * return a resultant object.
  *
- * @param <T> Type of the returned object of the task.
+ * @param <T> Type of the object to be processed by the task.
  * @see Promise
  * @see PrimaryAction
  * @see TransmuteAction
  */
 @EqualsAndHashCode(callSuper=false)
 @SuppressWarnings("WeakerAccess")
-public final class TaskAction<T> extends AbstractAction<Void> {
+public final class TaskAction<T> extends AbstractAction<T> {
     private final Consumer<T> task;
 
     /**
@@ -60,12 +60,15 @@ public final class TaskAction<T> extends AbstractAction<Void> {
     /**
      * Constructor to setup internal handlers.
      * <p>
+     * Note: There is no return value from the {@code task}, hence the
+     * {@code completionHandler} resultant value will be {@code null}.
+     * <p>
      * Recommended to use factory methods for creation.
      * @param task main task handler that will be executed asynchronously.
      * @param completionHandler to handle task completion -- this is optional.
      * @throws NullPointerException if task parameter is null.
      */
-    private TaskAction(final Consumer<T> task, final BiConsumer<Void,Throwable> completionHandler) {
+    private TaskAction(final Consumer<T> task, final BiConsumer<T,Throwable> completionHandler) {
         super(completionHandler);
         this.task = Objects.requireNonNull(task,"No task?");
     }
@@ -83,11 +86,14 @@ public final class TaskAction<T> extends AbstractAction<Void> {
     /**
      * Factory method to construct this {@link TaskAction} object,
      * <p>
+     * Note: There is no return value from the {@code task}, hence the
+     * {@code completionHandler} resultant value will be {@code null}.
+     * <p>
      * @param task main task handler that will be executed asynchronously.
      * @param completionHandler to handle task completion -- this is optional.
      * @throws NullPointerException if task parameter is null.
      */
-    public static <T> TaskAction<T> of(Consumer<T> task, BiConsumer<Void,Throwable> completionHandler) {
+    public static <T> TaskAction<T> of(Consumer<T> task, BiConsumer<T,Throwable> completionHandler) {
         return new TaskAction<>(task, completionHandler);
     }
 

@@ -149,7 +149,6 @@ public interface Promise<T> {
      */
     enum States { PENDING, FULFILLED, REJECTED }
 
-
     /**
      * Having completed the previous action, now execute {@link TaskAction} action
      * asynchronously, and return a new {@link Promise} object to manage the
@@ -159,7 +158,7 @@ public interface Promise<T> {
      * @return a new {@link Promise} object to manage the {@link TaskAction} action
      * object.
      */
-    Promise<T> then(TaskAction<T> action);
+     Promise<T> then(TaskAction<T> action);
 
     /**
      * Having completed the previous action, now execute {@link TransmuteAction}

@@ -49,7 +49,7 @@ class AsyncUndertaking<T> implements Promise<T> {
 
     private final Logger logger = LoggerFactory.getLogger(Promise.class);
 
-    private final Action action;
+    private final Action<T> action;
     private final PromisePoolService service;
     @EqualsAndHashCode.Include
     private final String identity;
@@ -87,7 +87,7 @@ class AsyncUndertaking<T> implements Promise<T> {
      *               action asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    private AsyncUndertaking(final PromisePoolService service, final Action<?> action, final CompletableFuture<T> future) {
+    private AsyncUndertaking(final PromisePoolService service, final Action<T> action, final CompletableFuture<T> future) {
         this.service = Objects.requireNonNull(service,"No service?");
         this.action = Objects.requireNonNull(action,"No action object?");
         this.future = future;
@@ -99,7 +99,7 @@ class AsyncUndertaking<T> implements Promise<T> {
         Consumer<T> actionable = doMakeActionable(action);
         CompletableFuture<Void> future = this.future.thenAcceptAsync(actionable,service)
                 .whenComplete((value,exception) -> action.getCompletionHandler()
-                        .ifPresent(result -> result.accept(value, exception)));
+                        .ifPresent(result -> result.accept(null, exception)));
 
         return new AsyncUndertaking<>(service,action,toFuture(future));
     }
@@ -116,9 +116,7 @@ class AsyncUndertaking<T> implements Promise<T> {
 
     @Override
     public Action<T> getAction() {
-        @SuppressWarnings("unchecked")
-        Action<T> action = this.action;
-        return action;
+        return this.action;
     }
 
     @Override
@@ -183,10 +181,13 @@ class AsyncUndertaking<T> implements Promise<T> {
         return () -> {
             Supplier<T> result = action.getTask().orElseThrow();
             try {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Promise [{}] starting task of PrimaryAction object",getIdentity());
+                }
                 return result.get();
             } finally {
                 if (logger.isTraceEnabled()) {
-                    logger.trace("Promise [{}] processed task of PrimaryAction object",getIdentity());
+                    logger.trace("Promise [{}] finished task of PrimaryAction object",getIdentity());
                 }
             }
         };
@@ -197,10 +198,13 @@ class AsyncUndertaking<T> implements Promise<T> {
         return (value) -> {
             Consumer<T> result = action.getTask().orElseThrow();
             try {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Promise [{}] starting task of TaskAction object",getIdentity());
+                }
                 result.accept(value);
             } finally {
                 if (logger.isTraceEnabled()) {
-                    logger.trace("Promise [{}] processed task of TaskAction object",getIdentity());
+                    logger.trace("Promise [{}] finished task of TaskAction object",getIdentity());
                 }
             }
         };
@@ -211,10 +215,13 @@ class AsyncUndertaking<T> implements Promise<T> {
         return (value) -> {
             Function<T,R> result = action.getTask().orElseThrow();
             try {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Promise [{}] starting transmutation task of TransmuteAction object",getIdentity());
+                }
                 return result.apply(value);
             } finally {
                 if (logger.isTraceEnabled()) {
-                    logger.trace("Promise [{}] processed transmute task of TransmuteAction object",getIdentity());
+                    logger.trace("Promise [{}] finished transmutation task of TransmuteAction object",getIdentity());
                 }
             }
         };

@@ -36,7 +36,8 @@ import java.util.function.Function;
  * multiple factory methods. However, this action does expect the task to
  * return a resultant object.
  *
- * @param <T> Type of the returned object of the task.
+ * @param <T> Type of the object to be processed by the task.
+ * @param <R> Type of the transmuted object.
  * @see Promise
  * @see PrimaryAction
  * @see TaskAction

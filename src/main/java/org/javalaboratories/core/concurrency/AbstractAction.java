@@ -30,18 +30,18 @@ import java.util.function.BiConsumer;
  * Action objects encapsulate task and completion handlers that are executed
  * within their own thread context.
  *
- * @param <R> Type of resultant value returned from task performed asynchronously
+ * @param <T> Type of the object to be processed by the task.
  * @see AbstractAction
  * @see PrimaryAction
  * @see TaskAction
  * @see TransmuteAction
  */
 @AllArgsConstructor()
-public abstract class AbstractAction<R> implements Action<R>  {
-    private final BiConsumer<R,Throwable> completionHandler;
+public abstract class AbstractAction<T> implements Action<T>  {
+    private final BiConsumer<T,Throwable> completionHandler;
 
     @Override
-    public Nullable<BiConsumer<R,Throwable>> getCompletionHandler() {
+    public Nullable<BiConsumer<T,Throwable>> getCompletionHandler() {
         return Nullable.ofNullable(completionHandler);
     }
 }
