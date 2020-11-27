@@ -79,7 +79,6 @@ public class PromiseTest extends AbstractConcurrencyTest {
         wait(latch,"testThen_TaskAction_Pass");
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
-
     }
 
     @Test
@@ -167,6 +166,21 @@ public class PromiseTest extends AbstractConcurrencyTest {
 
         // Then
         assertEquals(REJECTED,promise.getState());
+    }
+
+    @Test
+    public void testAwait_Promises_Pos() {
+        // Given
+        AtomicInteger received = new AtomicInteger(0);
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testAwait_Promises_Pos")))
+                .then(TaskAction.of(value -> getValue(null, received, () -> value)));
+
+        // Then
+        wait("testAwait_Promises_Pos");
+        promise.await();
+
+        assertEquals(FULFILLED,promise.getState());
+        assertEquals(127,received.get());
     }
 
     @Test

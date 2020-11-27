@@ -150,6 +150,16 @@ public interface Promise<T> {
     enum States { PENDING, FULFILLED, REJECTED }
 
     /**
+     * Awaits for {@link Promise} threads are complete.
+     * <p>
+     * Like {@link Promise#getResult()} and {@link Promise#handle(Consumer)}, this
+     * command will block in the main/current thread.
+     *
+     * @return new instance of this object.
+     */
+    Promise<T> await();
+
+    /**
      * Having completed the previous action, now execute {@link TaskAction} action
      * asynchronously, and return a new {@link Promise} object to manage the
      * {@link TaskAction} object and the underlying {@link CompletableFuture} future.
@@ -232,5 +242,5 @@ public interface Promise<T> {
      * @param handler Function to handle any exception thrown.
      * @return a new {@link Promise} object.
      */
-    Promise<T> handle(Consumer<Throwable> handler);
+    Promise<T> handle(final Consumer<Throwable> handler);
 }

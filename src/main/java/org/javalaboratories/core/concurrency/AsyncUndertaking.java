@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +48,9 @@ import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 class AsyncUndertaking<T> implements Promise<T> {
 
-    private final Logger logger = LoggerFactory.getLogger(Promise.class);
+
+    private static final Consumer<Throwable> INERT_HANDLER = e -> {};
+    private static final Logger logger = LoggerFactory.getLogger(Promise.class);
 
     private final Action<T> action;
     private final PromisePoolService service;
@@ -95,6 +98,11 @@ class AsyncUndertaking<T> implements Promise<T> {
     }
 
     @Override
+    public Promise<T> await() {
+        return handle(INERT_HANDLER);
+    }
+
+    @Override
     public final Promise<T> then(final TaskAction<T> action) {
         Consumer<T> actionable = doMakeActionable(action);
         CompletableFuture<Void> future = this.future.thenAcceptAsync(actionable,service)
@@ -137,18 +145,18 @@ class AsyncUndertaking<T> implements Promise<T> {
         T value = null;
         try {
             value = future.get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (CancellationException | ExecutionException | InterruptedException e) {
             // Ignore, return optional object instead.
         }
         return Nullable.ofNullable(value);
     }
 
     @Override
-    public Promise<T> handle(Consumer<Throwable> handler) {
+    public Promise<T> handle(final Consumer<Throwable> handler) {
         Objects.requireNonNull(handler,"No handle object?");
         try {
             future.join();
-        } catch (CompletionException e) {
+        } catch (CompletionException | CancellationException e) {
             handler.accept(e.getCause());
         }
         return new AsyncUndertaking<>(service,action,future);
