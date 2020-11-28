@@ -5,21 +5,21 @@ import java.util.function.Consumer;
 
 /**
  * Thread pools that implement this interface are considered managed in that
- * they have the ability to shutdown promise threads gracefully in the event
- * of a SIGTERM signal received by the JVM.
+ * they have the ability to shutdown threads gracefully in the event of a
+ * SIGTERM signal received by the JVM.
  * <p>
  * The contract of this interface is that the
- * {@link ManagedPromisePool#signalTerm()} must be invoked having received
+ * {@link ManagedPoolService#signalTerm()} must be invoked having received
  * SIGTERM signal. Following this, the managed pool will wait for outstanding
- * promises for {@link ManagedPromisePool#SHUTDOWN_WAIT_TIMEOUT} time before
+ * promises for {@link ManagedPoolService#SHUTDOWN_WAIT_TIMEOUT} time before
  * re-attempting to terminate them -- this will continue until all promises
- * have concluded. It is for this reason that {@link Promise) objects
+ * have concluded. It is for this reason that {@code thread) objects
  * are carefully written such that they do not block the shutdown sequence
  * indefinitely.
  * <p>
  * Other shutdown strategies are currently being considered.
  */
-public interface ManagedPromisePool extends Executor {
+public interface ManagedPoolService extends Executor {
     enum ServiceStates {ACTIVE, CLOSING, INACTIVE}
 
     long SHUTDOWN_WAIT_TIMEOUT = 5L;
@@ -32,7 +32,7 @@ public interface ManagedPromisePool extends Executor {
      * are accepted for processing. Any other state results in task being
      * rejected and the thread pool actively in the process of shutting down.
      *
-     * @return the current state of the {@link ManagedPromisePool}
+     * @return the current state of the {@link ManagedPoolService}
      */
     ServiceStates getState();
 
@@ -41,7 +41,7 @@ public interface ManagedPromisePool extends Executor {
      * {@link ManagedPromisePoolExecutor} thread pool.
      * <p>
      * It will patiently wait for tasks of {@link Action} objects to conclude
-     * indefinitely, retrying every {@link ManagedPromisePool#SHUTDOWN_WAIT_TIMEOUT}.
+     * indefinitely, retrying every {@link ManagedPoolService#SHUTDOWN_WAIT_TIMEOUT}.
      * Hence, it is important the threads are not made to run infinitely.
      */
     default void free() {
@@ -50,7 +50,7 @@ public interface ManagedPromisePool extends Executor {
 
     /**
      * Calling this method starts the shutting down process of the
-     * {@link ManagedPromisePool} thread pool.
+     * {@link ManagedPoolService} thread pool.
      * <p>
      * Use this method to conclude the thread pool ahead of application shutdown.
      * Specify the timeout period and whether the pool should retry after
@@ -66,13 +66,13 @@ public interface ManagedPromisePool extends Executor {
 
     /**
      * When the JVM receives a SIGTERM signal, this method is called to shutdown
-     * the {@link ManagedPromisePool} gracefully.
+     * the {@link ManagedPoolService} gracefully.
      * <p>
-     * If the {@link ManagedPromisePool} is already in the process of shutting
+     * If the {@link ManagedPoolService} is already in the process of shutting
      * down additional requests are ignored.
      * <p>
      * This method does not require a state transition handler unlike
-     * {@link ManagedPromisePool#signalTerm(Consumer)} overloaded method.
+     * {@link ManagedPoolService#signalTerm(Consumer)} overloaded method.
      * <p>
      * The thread pool patiently waits for outstanding promises to be fulfilled,
      * and it is for this reason, it is important the tasks must not run
@@ -84,9 +84,9 @@ public interface ManagedPromisePool extends Executor {
 
     /**
      * When the JVM receives a SIGTERM signal, this method is called to shutdown
-     * the {@link ManagedPromisePool} gracefully.
+     * the {@link ManagedPoolService} gracefully.
      * <p>
-     * If the {@link ManagedPromisePool} is already in the process of shutting
+     * If the {@link ManagedPoolService} is already in the process of shutting
      * down further requests are ignored, but the {@code stateTransitionHandler}
      * will be invoked, if available.
      * <p>
@@ -99,7 +99,7 @@ public interface ManagedPromisePool extends Executor {
      *
      * @param stateTransitionHandler consumes shutdown states for processing
      */
-    default void signalTerm(Consumer<ServiceStates> stateTransitionHandler) {
+    default void signalTerm(final Consumer<ServiceStates> stateTransitionHandler) {
         if ( stateTransitionHandler != null )
             stateTransitionHandler.accept(getState());
         if (getState() != ServiceStates.ACTIVE) { // Must be already in the process of termination

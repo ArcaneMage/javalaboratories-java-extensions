@@ -11,7 +11,7 @@ import java.util.function.Supplier;
  * This is a factory for creating {@link Promise} objects.
  * <p>
  * Its role is to ensure {@link PromisePoolServiceFactory},
- * {@link ManagedPromisePool} and other objects are properly initialised and
+ * {@link ManagedPoolService} and other objects are properly initialised and
  * ready for the production of {@link Promise} objects. For flexibility, the
  * thread pool service can be swapped out for an alternative executor -- configure
  * the concrete implementation in the {@code promise-configuration.properties}
@@ -34,10 +34,10 @@ import java.util.function.Supplier;
 @SuppressWarnings("WeakerAccess")
 public final class Promises {
 
-    private final static ManagedPromisePool managedPoolService;
+    private final static ManagedPoolService managedPoolService;
 
     /*
-     * Instantiate and configure PromisePoolService object for Promise objects.
+     * Instantiate and configure ManagedPromisePool object for Promise objects.
      */
     static {
         PromisePoolServiceFactory factory = new PromisePoolServiceFactory(new PromiseConfiguration());

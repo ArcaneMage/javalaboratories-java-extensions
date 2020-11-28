@@ -8,11 +8,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
-public final class PromisePoolServiceFactory<T extends ManagedPromisePool> {
+public final class PromisePoolServiceFactory<T extends ManagedPoolService> {
 
     private Logger logger = LoggerFactory.getLogger(PromisePoolServiceFactory.class);
 
-    private static volatile ManagedPromisePool instance;
+    private static volatile ManagedPoolService instance;
 
     private final PromiseConfiguration configuration;
 
@@ -55,7 +55,7 @@ public final class PromisePoolServiceFactory<T extends ManagedPromisePool> {
         return unchecked(instance);
     }
 
-    private static <T extends ManagedPromisePool> T unchecked(Object object) {
+    private static <T extends ManagedPoolService> T unchecked(Object object) {
         @SuppressWarnings("unchecked")
         T result = (T) object;
         return result;

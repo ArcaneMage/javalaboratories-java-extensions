@@ -31,10 +31,9 @@ import java.util.concurrent.atomic.AtomicReference;
  * Currently, various strategies are under consideration to improve shutdown
  * behaviour.
  */
-@SuppressWarnings("WeakerAccess")
-public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements ManagedPromisePool {
+public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements ManagedPoolService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ManagedPromisePool.class);
+    private static final Logger logger = LoggerFactory.getLogger(ManagedPoolService.class);
 
     private static final AtomicInteger workerIndex = new AtomicInteger(0);
     private static final String WORKER_THREAD_NAME="Promise-Worker-%d";
