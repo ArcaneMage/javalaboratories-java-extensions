@@ -42,7 +42,6 @@ import java.util.function.Consumer;
  * @see TransmuteAction
  */
 @EqualsAndHashCode(callSuper=false)
-@SuppressWarnings("WeakerAccess")
 public final class TaskAction<T> extends AbstractAction<T> {
     private final Consumer<T> task;
 

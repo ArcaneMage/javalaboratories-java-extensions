@@ -199,7 +199,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
         Promise<Void> promise = Promises.newPromise(action);
 
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
-        assertTrue(promise.toString().contains("state=FULFILLED,service=[capacity=24,state=ACTIVE,shutdownHook=NEW"));
+        assertTrue(promise.toString().contains("state=ACTIVE,shutdownHook=NEW"));
 
         assertEquals(FULFILLED,promise.getState());
     }

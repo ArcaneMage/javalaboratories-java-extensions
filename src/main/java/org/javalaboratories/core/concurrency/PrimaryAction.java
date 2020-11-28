@@ -38,7 +38,6 @@ import java.util.function.Supplier;
  * @see TransmuteAction
  */
 @EqualsAndHashCode(callSuper=false)
-@SuppressWarnings("WeakerAccess")
 public final class PrimaryAction<T> extends AbstractAction<T> {
     private final Supplier<T> task;
 
