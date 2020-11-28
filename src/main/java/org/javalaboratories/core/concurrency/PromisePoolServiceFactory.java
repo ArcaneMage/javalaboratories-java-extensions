@@ -8,11 +8,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
-public final class PromisePoolServiceFactory<T extends PromisePoolService> {
+public final class PromisePoolServiceFactory<T extends ManagedPromisePool> {
 
     private Logger logger = LoggerFactory.getLogger(PromisePoolServiceFactory.class);
 
-    private static volatile PromisePoolService instance;
+    private static volatile ManagedPromisePool instance;
 
     private final PromiseConfiguration configuration;
 
@@ -28,17 +28,17 @@ public final class PromisePoolServiceFactory<T extends PromisePoolService> {
                 try {
                     int capacity = configuration.getPoolServiceCapacity();
                     Class<?> clazz = Class.forName(clazzname);
-                    if (clazz != PromisePoolService.class) {
+                    if (clazz != ManagedPromisePoolExecutor.class) {
                         // Attempt to instantiate custom promise pool service
                         Constructor<?> constructor = clazz.getConstructor(int.class);
-                        instance = cast(constructor.newInstance(capacity));
+                        instance = unchecked(constructor.newInstance(capacity));
                     } else {
                         // Resort to default implementation
-                        instance = cast(new PromisePoolService(capacity));
+                        instance = unchecked(new ManagedPromisePoolExecutor(capacity));
                     }
                     logger.debug("Promise pool service {} created and initialised with capacity {} successfully", clazz, capacity);
                 } catch (ClassCastException e) {
-                    logger.error("Promise pool service {} class needs to inherit from {} class", clazzname, PromisePoolService.class);
+                    logger.error("Promise pool service {} class needs to inherit from {} class", clazzname, ManagedPromisePoolExecutor.class);
                 } catch (NoSuchMethodException e) {
                     logger.error("Promise pool service {} class needs to have a constructor with a single int parameter", clazzname);
                 } catch (InvocationTargetException e) {
@@ -52,10 +52,10 @@ public final class PromisePoolServiceFactory<T extends PromisePoolService> {
                 }
             }
         }
-        return cast(instance);
+        return unchecked(instance);
     }
 
-    private static <T extends PromisePoolService> T cast(Object object) {
+    private static <T extends ManagedPromisePool> T unchecked(Object object) {
         @SuppressWarnings("unchecked")
         T result = (T) object;
         return result;

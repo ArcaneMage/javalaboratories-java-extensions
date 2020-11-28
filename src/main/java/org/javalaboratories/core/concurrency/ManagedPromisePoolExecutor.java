@@ -11,13 +11,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * {@code PromisePoolService} is a custom thread pool executor designed for use
- * with {@link Promise} objects.
+ * {@code PoolExecutorService} is a custom thread pool executor designed
+ * for use with {@link Promise} objects.
  * <p>
  * If required, but rarely necessary, it is possible to provide an alternative
  * thread pool. Achieving this involves configuring the
  * {@code promise-configuration.properties} file, but it is required that the
- * thread pool must inherit from {@link PromisePoolService} class.
+ * thread pool must inherit from {@link ManagedPromisePoolExecutor} class.
  * <p>
  * When the JVM is signalled to shutdown, whether via SIGTERM or through natural
  * program termination, the thread pool will wait for any outstanding running
@@ -25,20 +25,16 @@ import java.util.concurrent.atomic.AtomicReference;
  * important that {@code Promise} objects reach to a natural conclusion. It is not
  * advisable for threads to run infinitely. If this is a possibility then it
  * would to be prudent to to force shutdown the pool service with the
- * {@link PromisePoolService#free(long, boolean)} specifying a timeout without
+ * {@link ManagedPromisePoolExecutor#free(long, boolean)} specifying a timeout without
  * retries ahead of program termination.
  * <p>
- * Currently, varies strategies are under consideration to improve shutdown
+ * Currently, various strategies are under consideration to improve shutdown
  * behaviour.
  */
 @SuppressWarnings("WeakerAccess")
-public class PromisePoolService extends ThreadPoolExecutor {
+public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements ManagedPromisePool {
 
-    private static final Logger logger = LoggerFactory.getLogger(PromisePoolService.class);
-
-    public enum ServiceStates {ACTIVE, CLOSING, INACTIVE}
-
-    public static final long SHUTDOWN_WAIT_TIMEOUT = 5L;
+    private static final Logger logger = LoggerFactory.getLogger(ManagedPromisePool.class);
 
     private static final AtomicInteger workerIndex = new AtomicInteger(0);
     private static final String WORKER_THREAD_NAME="Promise-Worker-%d";
@@ -54,11 +50,11 @@ public class PromisePoolService extends ThreadPoolExecutor {
      * configured to create an instance of this object.
      * @param capacity Number maximum thread workers to carryout promises.
      */
-    public PromisePoolService(final int capacity) {
-        super(capacity,capacity,0L,TimeUnit.MILLISECONDS,new LinkedBlockingDeque<>(),PromisePoolService::newPromiseWorker);
+    public ManagedPromisePoolExecutor(final int capacity) {
+        super(capacity,capacity,0L,TimeUnit.MILLISECONDS,new LinkedBlockingDeque<>(), ManagedPromisePoolExecutor::newPromiseWorker);
         this.capacity = capacity;
-        this.shutdownHook = new Thread(Handlers.runnable(this::signalTerm));
         this.state = new AtomicReference<>(ServiceStates.ACTIVE);
+        this.shutdownHook = new Thread(Handlers.runnable(() -> signalTerm(this::logShutdownState)));
         Runtime.getRuntime().addShutdownHook(this.shutdownHook);
     }
 
@@ -70,38 +66,14 @@ public class PromisePoolService extends ThreadPoolExecutor {
      * are accepted for processing. Any other state results in task being
      * rejected and the thread pool actively in the processing of shutting down.
      *
-     * @return the current state of the {@link PromisePoolService}
+     * @return the current state of the {@link ManagedPromisePoolExecutor}
      */
-    protected ServiceStates getState() {
+    @Override
+    public ServiceStates getState() {
         return state.get();
     }
 
-    /**
-     * Calling this method starts the shutting down process of the
-     * {@link PromisePoolService} thread pool.
-     * <p>
-     * It will patiently wait for tasks of {@link Action} objects to conclude
-     * indefinitely, retrying every {@link PromisePoolService#SHUTDOWN_WAIT_TIMEOUT}.
-     * Hence, it is important the threads are not made to run infinitely.
-     */
-    public final void free() {
-        free(SHUTDOWN_WAIT_TIMEOUT,true);
-    }
-
-    /**
-     * Calling this method starts the shutting down process of the
-     * {@link PromisePoolService} thread pool.
-     * <p>
-     * Use this method to conclude the thread pool ahead of application shutdown.
-     * Specify the timeout period and whether the pool should retry after
-     * timeouts. If the {@code retry} is {@code false}, then potentially
-     * after timeout some threads may still be live, these will interrupted,
-     * resulting in unkept promises.
-     *
-     * @param timeout value in seconds.
-     * @param retry if {@code true} indefinitely attempts to terminate threads
-     *             after shutdown (use with caution).
-     */
+    @Override
     public final void free(final long timeout, final boolean retry) {
         if ( timeout < 1 )
             throw new IllegalArgumentException("Insufficient timeout");
@@ -126,7 +98,7 @@ public class PromisePoolService extends ThreadPoolExecutor {
     }
 
     /**
-     * @return a {@code String} representation of this {@link PromisePoolService} thread pool.
+     * @return a {@code String} representation of this {@link ManagedPromisePoolExecutor} thread pool.
      */
     @Override
     public String toString() {
@@ -141,23 +113,24 @@ public class PromisePoolService extends ThreadPoolExecutor {
         } while (!state.compareAndSet(from, to));
     }
 
+    private void logShutdownState(ServiceStates state) {
+        switch ( state ) {
+            case ACTIVE:
+                logger.debug("Termination signal received -- shutting down gracefully");
+                break;
+            case CLOSING:
+                logger.debug("Termination signal received, but ignored -- unnecessary");
+                break;
+            case INACTIVE:
+                logger.debug("Termination concluded");
+                break;
+        }
+    }
+
     private static Thread newPromiseWorker(final Runnable runnable) {
         String name = String.format(WORKER_THREAD_NAME,workerIndex.incrementAndGet());
         Thread result = new Thread(runnable);
         result.setName(name);
         return result;
-    }
-
-    private void signalTerm()  {
-        if ( getState() != ServiceStates.ACTIVE ) { // Must be already in the process of termination
-            logger.debug("Termination signal received, but ignored -- unnecessary");
-            return;
-        }
-        logger.debug("Termination signal received -- shutting down gracefully");
-        try {
-            free();
-        } finally {
-            logger.debug("Termination concluded");
-        }
     }
 }

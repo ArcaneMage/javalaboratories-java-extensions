@@ -65,7 +65,7 @@ import java.util.function.Consumer;
  * processing of action objects. The {@code then} method executes the action
  * in a separate thread as soon as the previous action completes. There is
  * no restriction on the number of subsequent {@code then} methods -- the
- * underlying thread pool {@link PromisePoolService} will manage the processes.
+ * underlying thread pool {@link ManagedPromisePoolExecutor} will manage the processes.
  * The {@link TaskAction} object is useful for scenarios where the value is not
  * expected from the task, but what about situations where the value has to
  * undergo some kind of transformation? Perhaps from one type to another or

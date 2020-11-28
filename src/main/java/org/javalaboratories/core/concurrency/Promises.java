@@ -11,9 +11,9 @@ import java.util.function.Supplier;
  * This is a factory for creating {@link Promise} objects.
  * <p>
  * Its role is to ensure {@link PromisePoolServiceFactory},
- * {@link PromisePoolService} and other objects are properly initialised and
+ * {@link ManagedPromisePool} and other objects are properly initialised and
  * ready for the production of {@link Promise} objects. For flexibility, the
- * thread pool service can swapped out for an alternative executor -- configure
+ * thread pool service can be swapped out for an alternative executor -- configure
  * the concrete implementation in the {@code promise-configuration.properties}
  * file; factory methods also provide a means to create custom {@link Promise}
  * objects.
@@ -34,14 +34,14 @@ import java.util.function.Supplier;
 @SuppressWarnings("WeakerAccess")
 public final class Promises {
 
-    private final static PromisePoolService promisePoolService;
+    private final static ManagedPromisePool managedPoolService;
 
     /*
      * Instantiate and configure PromisePoolService object for Promise objects.
      */
     static {
         PromisePoolServiceFactory factory = new PromisePoolServiceFactory(new PromiseConfiguration());
-        promisePoolService = factory.newPoolService();
+        managedPoolService = factory.newPoolService();
     }
 
     /**
@@ -49,7 +49,7 @@ public final class Promises {
      * <p>
      * Internal worker threads process all {@link PrimaryAction} objects, the
      * number of simultaneous tasks could reach total {@code capacity}
-     * of the worker threads in {@link PromisePoolService}. If this is the case,
+     * of the worker threads in {@link ManagedPromisePoolExecutor}. If this is the case,
      * an {@code action} object will remain in the queue until a worker becomes
      * available.
      * <p>
@@ -63,7 +63,7 @@ public final class Promises {
      * @throws NullPointerException if {@code actions} is null
      */
     public static <T> List<Promise<T>> all(final List<PrimaryAction<T>> actions) {
-        return all(actions,(action) -> () -> new AsyncUndertaking<>(promisePoolService,action));
+        return all(actions,(action) -> () -> new AsyncUndertaking<>(managedPoolService,action));
     }
 
     /**
@@ -80,7 +80,7 @@ public final class Promises {
      * @throws NullPointerException if {@code action} is null
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
-        return newPromise(action, () -> new AsyncUndertaking<>(promisePoolService,action));
+        return newPromise(action, () -> new AsyncUndertaking<>(managedPoolService,action));
     }
 
     /**
@@ -89,7 +89,7 @@ public final class Promises {
      * <p>
      * Internal worker threads process all {@link PrimaryAction} objects, the
      * number of simultaneous tasks could reach total {@code capacity}
-     * of the worker threads in {@link PromisePoolService}. If this is the case,
+     * of the worker threads in {@link ManagedPromisePoolExecutor}. If this is the case,
      * an {@code action} object will remain in the queue until a worker becomes
      * available.
      * <p>

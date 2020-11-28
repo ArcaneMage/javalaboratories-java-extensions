@@ -52,7 +52,7 @@ class AsyncUndertaking<T> implements Promise<T> {
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);
 
     private final Action<T> action;
-    private final PromisePoolService service;
+    private final ManagedPromisePool service;
     @EqualsAndHashCode.Include
     private final String identity;
     private CompletableFuture<T> future;
@@ -70,7 +70,7 @@ class AsyncUndertaking<T> implements Promise<T> {
      *              asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    AsyncUndertaking(final PromisePoolService service, final PrimaryAction<T> action) {
+    AsyncUndertaking(final ManagedPromisePool service, final PrimaryAction<T> action) {
         this(service,action,null);
     }
 
@@ -89,7 +89,7 @@ class AsyncUndertaking<T> implements Promise<T> {
      *               action asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    private AsyncUndertaking(final PromisePoolService service, final Action<T> action, final CompletableFuture<T> future) {
+    private AsyncUndertaking(final ManagedPromisePool service, final Action<T> action, final CompletableFuture<T> future) {
         this.service = Objects.requireNonNull(service,"No service?");
         this.action = Objects.requireNonNull(action,"No action object?");
         this.future = future;
