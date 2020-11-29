@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>
  * If required, but rarely necessary, it is possible to provide an alternative
  * thread pool. Achieving this involves configuring the
- * {@code promise-configuration.properties} file, but it is required that the
+ * "{@code promise-configuration.properties}" file, but it is required that the
  * thread pool must inherit from {@link ManagedPromisePoolExecutor} class.
  * <p>
  * When the JVM is signalled to shutdown, whether via SIGTERM or through natural

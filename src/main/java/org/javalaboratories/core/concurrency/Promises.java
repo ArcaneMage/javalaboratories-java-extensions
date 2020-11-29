@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * {@link ManagedPoolService} and other objects are properly initialised and
  * ready for the production of {@link Promise} objects. For flexibility, the
  * thread pool service can be swapped out for an alternative executor -- configure
- * the concrete implementation in the {@code promise-configuration.properties}
+ * the concrete implementation in the "{@code promise-configuration.properties}"
  * file; factory methods also provide a means to create custom {@link Promise}
  * objects.
  * <p>
@@ -40,7 +40,7 @@ public final class Promises {
      * Instantiate and configure ManagedPromisePool object for Promise objects.
      */
     static {
-        PromisePoolServiceFactory factory = new PromisePoolServiceFactory(new PromiseConfiguration());
+        PromisePoolServiceFactory<ManagedPoolService> factory = new PromisePoolServiceFactory<>(new PromiseConfiguration());
         managedPoolService = factory.newPoolService();
     }
 

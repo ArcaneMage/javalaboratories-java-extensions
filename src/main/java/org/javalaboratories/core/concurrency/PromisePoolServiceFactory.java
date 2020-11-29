@@ -7,6 +7,21 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
+/**
+ * Factory to create an instance of a {@link ManagedPoolService} pool service to
+ * process {@link Promise} objects asynchronously.
+ * <p>
+ * {@link PromiseConfiguration} informs the factory the implementation of the
+ * {@link ManagedPoolService} thread pool. Failure to create an instance of the
+ * the {@code pool} will render promise objects inoperable. If there is a need
+ * to provide a custom implementation, it is recommended to inherit from the
+ * {@link ManagedPromisePoolExecutor} class and configure the
+ * "{@code promise-configuration.properties}" file or alternatively provide
+ * configuration with system property values as VM arguments (-D property values).
+ *
+ * @param <T> Type of managed pool to return.
+ * @see PromiseConfiguration
+ */
 @SuppressWarnings("WeakerAccess")
 public final class PromisePoolServiceFactory<T extends ManagedPoolService> {
 
@@ -17,10 +32,21 @@ public final class PromisePoolServiceFactory<T extends ManagedPoolService> {
     private final PromiseConfiguration configuration;
 
     public PromisePoolServiceFactory(final PromiseConfiguration configuration) {
-        Objects.requireNonNull(configuration);
-        this.configuration = configuration;
+        this.configuration = Objects.requireNonNull(configuration,"No configuration?");
     }
 
+    /**
+     * Creates and returns an implementation of {@link ManagedPoolService}
+     * <p>
+     * This is essentially a managed pool of threads, managed in the sense that
+     * the pool will automatically clean up resources including outstanding running
+     * threads at application termination.
+     *
+     * @return an implementation of {@link ManagedPoolService}
+     * @see ManagedPoolService
+     * @see ManagedPromisePoolExecutor
+     * @see PromiseConfiguration
+     */
     public T newPoolService() {
         if ( instance == null ) {
             synchronized (PromisePoolServiceFactory.class) {

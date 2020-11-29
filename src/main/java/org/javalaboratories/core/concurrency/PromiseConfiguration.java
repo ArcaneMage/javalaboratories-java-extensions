@@ -8,11 +8,12 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 /**
  * Class to represent {@link Promise} configuration.
  * <p>
- * Reads configuration from {@code promise-configuration.properties} file. For
+ * Reads configuration from "{@code promise-configuration.properties}" file. For
  * the configuration file to be active, it must be made available on the
  * application classpath. Any of configuration properties are overridable from
  * the system properties. Following properties are supported:
@@ -31,7 +32,7 @@ import java.util.Properties;
  * priority:
  * <pre>
  *     {@code
- *          system property --> file property --> system default
+ *          system property --> file property --> hardcoded default
  *     }
  * </pre>
  * This object is immutable.
@@ -59,7 +60,7 @@ public class PromiseConfiguration {
      * right, leftmost has the highest priority:
      * <pre>
      *     {@code
-     *          system property --> file property --> system default
+     *          system property --> file property --> hardcoded default
      *     }
      * </pre>
      */
@@ -88,21 +89,28 @@ public class PromiseConfiguration {
                             .getResourceAsStream(PROMISE_CONFIGURATION_FILE);
                     if ( stream != null )
                         fileProperties.load(stream);
-                    load(fileProperties,result);
+                    load(fileProperties,result,null);
                 } catch (IOException e) {
                     // Do-nothing, file I/O error will result in system overrides being applied, if any.
                 } finally {
-                    // Load potential overrides from system properties.
+                    // Load potential overrides from system properties
                     Properties sysProperties = System.getProperties();
-                    load(sysProperties,result);
+                    load(sysProperties,result,k -> k.startsWith("promise."));
                 }
             }
         }
         return result;
     }
 
-    private <T> void load(Properties source, Map<String,T> properties) {
-        source.forEach((key, value) -> properties.put((String)key,unchecked(value)));
+    private <T> void load(Properties source, Map<String,T> properties, Predicate<String> filter) {
+        source.forEach((key, value) -> {
+            if ( filter == null ) {
+                properties.put((String) key, unchecked(value));
+            } else {
+                if ( filter.test((String)key) )
+                    properties.put((String) key, unchecked(value));
+            }
+        });
     }
 
     private <T> boolean isInteger(T value) {
