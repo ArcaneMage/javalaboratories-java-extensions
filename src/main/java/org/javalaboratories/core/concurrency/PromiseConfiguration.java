@@ -56,8 +56,8 @@ public class PromiseConfiguration {
      * Constructs an instance of this object.
      * <p>
      * Loads and processes configuration for {@link Promise} objects. The
-     * properties are processed in the following priority, from left to
-     * right, leftmost has the highest priority:
+     * properties are processed in the following priority, from left to right,
+     * leftmost has the highest priority:
      * <pre>
      *     {@code
      *          system property --> file property --> hardcoded default
@@ -65,31 +65,70 @@ public class PromiseConfiguration {
      * </pre>
      */
     public PromiseConfiguration() {
-        properties = load();
+        this(PROMISE_CONFIGURATION_FILE);
+    }
+
+    /**
+     * Constructs an instance of this object.
+     * <p>
+     * Loads and processes configuration for {@link Promise} objects. The
+     * properties are processed in the following priority, from left to
+     * right, leftmost has the highest priority:
+     * <pre>
+     *     {@code
+     *          system property --> file property --> hardcoded default
+     *     }
+     * </pre>
+     * <p>
+     * Set the {@code filename} to process file-based configuration,
+     * which is the value in the default constructor of
+     * {@link PromiseConfiguration}. If the file doesn't exist, system property
+     * values and/or hardcoded values would then apply.
+     * <p>
+     * However, this constructor's access-level has default package access to
+     * enable unit test cases access to validate the object behaviour -- do not
+     * change access level of constructor!
+     *
+     * @param filename to enable file-based configuration to be taken into
+     *                 account.
+     */
+    PromiseConfiguration(final String filename) {
+        properties = load(filename);
         poolServiceClassName = getValue(PROMISE_POOL_SERVICE_CLASS_PROPERTY, DEFAULT_POOL_SERVICE_CLASSNAME);
         int capacity = getValue(PROMISE_POOL_SERVICE_CAPACITY_PROPERTY,-1);
         poolServiceCapacity = capacity < MINIMUM_CAPACITY ? Runtime.getRuntime().availableProcessors() : capacity;
     }
 
     private <T> T getValue(String property, T value) {
-        T result = unchecked(properties.getOrDefault(property, value));
-        if  (result instanceof String && isInteger(result)) {
+        T result = getOrDefault(property, value);
+        if  ( result instanceof String && isInteger(result) ) {
             result = unchecked(Integer.valueOf((String) result));
         }
         return result;
     }
 
-    private <T> Map<String,T> load() {
+    private <T> T getOrDefault(String property, T value) {
+        T result;
+        result =  unchecked(properties.getOrDefault(property, value));
+        if ( result instanceof String && ((String) result).isEmpty() )
+            result = value;
+        return result;
+    }
+
+    private <T> Map<String,T> load(final String filename) {
         Map<String,T> result = new HashMap<>();
         if ( properties == null ) {
             synchronized (this) {
                 try {
-                    Properties fileProperties = new Properties();
-                    InputStream stream = PromiseConfiguration.class.getClassLoader()
-                            .getResourceAsStream(PROMISE_CONFIGURATION_FILE);
-                    if ( stream != null )
-                        fileProperties.load(stream);
-                    load(fileProperties,result,null);
+                    if ( filename != null ) {
+                        Properties fileProperties = new Properties();
+                        InputStream stream = PromiseConfiguration.class.getClassLoader()
+                                .getResourceAsStream(filename);
+                        // Load file if it exists
+                        if (stream != null)
+                            fileProperties.load(stream);
+                        load(fileProperties, result, null);
+                    }
                 } catch (IOException e) {
                     // Do-nothing, file I/O error will result in system overrides being applied, if any.
                 } finally {

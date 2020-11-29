@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings("WeakerAccess")
 public class PromiseConfigurationTest {
 
+    private static final String MALFORMED_PROMISE_CONFIGURATION_FILE="malformed-promise-configuration-test.properties";
+
     @AfterEach
     public void tearDown() {
         System.clearProperty(PROMISE_POOL_SERVICE_CLASS_PROPERTY);
@@ -33,8 +35,21 @@ public class PromiseConfigurationTest {
 
     @Test
     public void testNew_FilePropertyDefaults_Pass() {
+        // Given
         PromiseConfiguration configuration = new PromiseConfiguration();
 
+        // Then
+        assertEquals("org.javalaboratories.core.concurrency.ManagedPromisePoolExecutor",configuration.getPoolServiceClassName());
+        assertTrue(configuration.getPoolServiceCapacity() > 0);
+    }
+
+    @Test
+    public void testNew_InternalDefaults_Pass() {
+        // Given
+        //      No system properties, malformed file configuration
+        PromiseConfiguration configuration = new PromiseConfiguration(MALFORMED_PROMISE_CONFIGURATION_FILE);
+
+        // Then
         assertEquals("org.javalaboratories.core.concurrency.ManagedPromisePoolExecutor",configuration.getPoolServiceClassName());
         assertTrue(configuration.getPoolServiceCapacity() > 0);
     }
