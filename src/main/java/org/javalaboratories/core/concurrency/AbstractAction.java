@@ -22,7 +22,7 @@ import java.util.function.BiConsumer;
 
 /**
  * All action objects inherit from this abstract class and therefore the
- * {@link Action} interface.
+ * implement the {@link Action} interface.
  * <p>
  * For more information on the role of this abstract class, refer to the {@link Action}
  * interface.
