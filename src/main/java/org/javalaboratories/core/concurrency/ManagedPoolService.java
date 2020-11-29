@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * SIGTERM signal. Following this, the managed pool will wait for outstanding
  * promises for {@link ManagedPoolService#SHUTDOWN_WAIT_TIMEOUT} time before
  * re-attempting to terminate them -- this will continue until all promises
- * have concluded. It is for this reason that {@code thread) objects
+ * have concluded. It is for this reason that {@code thread} objects
  * are carefully written such that they do not block the shutdown sequence
  * indefinitely.
  * <p>
