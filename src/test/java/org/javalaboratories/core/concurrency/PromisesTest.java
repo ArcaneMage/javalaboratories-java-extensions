@@ -2,16 +2,19 @@ package org.javalaboratories.core.concurrency;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
 public class PromisesTest extends AbstractConcurrencyTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(PromisesTest.class);
 
     @Test
     public void testNewPromise_Promise_Pass() {
@@ -27,7 +30,6 @@ public class PromisesTest extends AbstractConcurrencyTest {
 
     @Test
     public void testAll_Promises_Pass() {
-        CountDownLatch latch = new CountDownLatch(4);
         // Given
         List<PrimaryAction<Integer>> actions = Arrays.asList(
                 PrimaryAction.of(() -> doLongRunningTask("testAll_Promises_Pass[0]")),
@@ -37,12 +39,14 @@ public class PromisesTest extends AbstractConcurrencyTest {
         );
 
         // When
-        List<Promise<Integer>> promises = Promises.all(actions);
+        Promise<List<Promise<Integer>>> promise = Promises
+                .all(actions)
+                .then(TaskAction.of(results -> results.forEach(result -> logger.info("Promise states of tasks: {}",result.getState()))));
 
         // Then
         wait("testAll_Promises_Pass");
-        assertEquals(4,promises.size());
-        //promises.forEach(p -> assertEquals(FULFILLED,p.getState()));
+        promise.await();
+        assertEquals(FULFILLED,promise.getState());
     }
 
     // Only enable for manual observation of behaviour

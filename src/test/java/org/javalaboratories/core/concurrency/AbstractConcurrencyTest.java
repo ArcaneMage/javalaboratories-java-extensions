@@ -27,7 +27,7 @@ public abstract class AbstractConcurrencyTest {
     }
 
     int doLongRunningTask(String narrative) {
-        sleep(1000);
+        //sleep(1000);
         logger.info("doLongRunningTask: {} asynchronously", narrative);
         return 127;
     }

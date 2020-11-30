@@ -45,24 +45,27 @@ public final class Promises {
     }
 
     /**
-     * Queues all {@link PrimaryAction} objects for processing.
+     * Queues all {@link PrimaryAction} objects for processing with a specified
+     * implementation of {@link Promise}.
      * <p>
      * Internal worker threads process all {@link PrimaryAction} objects, the
      * number of simultaneous tasks could reach total {@code capacity}
-     * of the worker threads in {@link ManagedPromisePoolExecutor}. If this is the case,
-     * an {@code action} object will remain in the queue until a worker becomes
-     * available.
+     * of the worker threads in {@link ManagedPromisePoolExecutor}. If this is the
+     * case, an {@code action} object will remain in the queue until a worker
+     * becomes available.
      * <p>
-     * A {@link List} of {@link Promise} objects is immediately returned,
-     * providing access to processing states of each process.
+     * A {@link Promise} object is immediately returned, providing a reference
+     * to an asynchronous process that is currently waiting completion of the all
+     * the {@code actions} objects.
      * <p>
+     *
      * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
      * @param <T> Type of value returned from asynchronous task.
-     * @return a {@link List} of {@link Promise} objects for tracking tasks and/or
-     * further asynchronous tasks.
-     * @throws NullPointerException if {@code actions} is null
+     * @return a {@link Promise} object that promises to wait for the conclusion of
+     * all aforementioned {@code actions} objects.
+     * @throws NullPointerException if {@code action} is null
      */
-    public static <T> List<Promise<T>> all(final List<PrimaryAction<T>> actions) {
+    public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions) {
         return all(actions,(action) -> () -> new AsyncUndertaking<>(managedPoolService,action));
     }
 
@@ -89,12 +92,13 @@ public final class Promises {
      * <p>
      * Internal worker threads process all {@link PrimaryAction} objects, the
      * number of simultaneous tasks could reach total {@code capacity}
-     * of the worker threads in {@link ManagedPromisePoolExecutor}. If this is the case,
-     * an {@code action} object will remain in the queue until a worker becomes
-     * available.
+     * of the worker threads in {@link ManagedPromisePoolExecutor}. If this is the
+     * case, an {@code action} object will remain in the queue until a worker
+     * becomes available.
      * <p>
-     * A {@link List} of {@link Promise} objects is immediately returned,
-     * providing access to processing states of each process.
+     * A {@link Promise} object is immediately returned, providing a reference
+     * to an asynchronous process that is currently waiting completion of the all
+     * the {@code actions} objects.
      * <p>
      * This factory method is really provided for further development purposes,
      * a mechanism to create alternative implementations of {@link Promise}
@@ -105,21 +109,26 @@ public final class Promises {
      * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
      * @param function to present an implementation of the {@link Promise} object.
      * @param <T> Type of value returned from asynchronous task.
-     * @return a {@link List} of {@link Promise} objects for tracking tasks and/or
-     * further asynchronous tasks.
+     * @return a {@link Promise} object that promises to wait for the conclusion of
+     * all aforementioned {@code actions} objects.
      * @throws NullPointerException if {@code action} is null
      * @throws NullPointerException if {@code function} is null
      */
-    private static <T,U extends Promise<T>> List<Promise<T>> all(final List<PrimaryAction<T>> actions,
+    private static <T,U extends Promise<T>> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions,
                                                                 final Function<PrimaryAction<T>,Supplier<U>> function) {
         List<PrimaryAction<T>> list = Objects.requireNonNull(actions);
         Function<PrimaryAction<T>,Supplier<U>> factory = Objects.requireNonNull(function);
         List<Promise<T>> results = new ArrayList<>();
+        // Start asynchronous processes with custom promise implementation
         list.forEach(action -> {
             Promise<T> promise = newPromise(action,factory.apply(action));
             results.add(promise);
         });
-        return Collections.unmodifiableList(results);
+        // Start new thread process that will wait on aforementioned asynchronous processes
+        PrimaryAction<List<Promise<T>>> action = PrimaryAction.of(() -> {
+                    results.forEach(Promise::await);
+                    return Collections.unmodifiableList(results);});
+        return newPromise(action);
     }
 
     /**
