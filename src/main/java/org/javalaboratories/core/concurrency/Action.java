@@ -24,7 +24,7 @@ import java.util.function.BiConsumer;
  * All action objects managed by {@link Promise} objects implement this
  * interface.
  * <p>
- * They are considered to be mutable and understand how to perform tasks in
+ * They are considered to be immutable and understand how to perform tasks in
  * their own thread context. When the action <b>task</b> is completed
  * successfully or exceptionally, the {@link Action#getCompletionHandler()} method
  * is invoked, if the action implementation requires it. Whereupon the resultant

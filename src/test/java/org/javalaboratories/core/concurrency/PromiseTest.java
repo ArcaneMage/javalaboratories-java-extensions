@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.NoSuchElementException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
@@ -70,13 +69,13 @@ public class PromiseTest extends AbstractConcurrencyTest {
     @Test
     public void testThen_TaskAction_Pass() {
         // Given
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskAction_Pass")))
-                .then(TaskAction.of(value -> getValue(latch, received, () -> value)));
+                .then(TaskAction.of(value -> getValue(received, () -> value)));
 
         // Then
-        wait(latch,"testThen_TaskAction_Pass");
+        wait("testThen_TaskAction_Pass");
+        promise.await();
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
     }
@@ -84,13 +83,13 @@ public class PromiseTest extends AbstractConcurrencyTest {
     @Test
     public void testThen_TaskActionCompleteHandler_Pass() {
         // Given
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandler_Pass")))
-                .then(TaskAction.of(value -> getValue(latch, received, () -> value),intResponse));
+                .then(TaskAction.of(value -> getValue(received, () -> value),intResponse));
 
         // Then
-        wait(latch,"testThen_TaskActionCompleteHandler_Pass");
+        wait("testThen_TaskActionCompleteHandler_Pass");
+        promise.await();
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
 
@@ -99,13 +98,12 @@ public class PromiseTest extends AbstractConcurrencyTest {
     @Test
     public void testThen_TaskActionCompleteHandlerException_Pass() {
         // Given
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandlerException_Pass")))
-                .then(TaskAction.of(value -> getValue(latch, received, () -> value / 0),intResponse));
+                .then(TaskAction.of(value -> getValue(received, () -> value / 0),intResponse));
 
         // Then
-        wait(latch,"testThen_TaskActionCompleteHandlerException_Pass");
+        wait("testThen_TaskActionCompleteHandlerException_Pass");
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
         // Interestingly enough this works because the reference of the "then" method
         // is assigned to the promise object :)
@@ -115,13 +113,13 @@ public class PromiseTest extends AbstractConcurrencyTest {
     @Test
     public void testThen_TransmuteAction_Pass() {
         // Given
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteAction_Pass")))
-                .then(TransmuteAction.of(value -> getValue(latch, received, () -> value + 1)));
+                .then(TransmuteAction.of(value -> getValue(received, () -> value + 1)));
 
         // Then
-        wait(latch,"testThen_TransmuteAction_Pass");
+        wait("testThen_TransmuteAction_Pass");
+        promise.await();
         assertEquals(FULFILLED,promise.getState());
         int value = received.get();
         assertEquals(128,value);
@@ -130,13 +128,13 @@ public class PromiseTest extends AbstractConcurrencyTest {
     @Test
     public void testThen_TransmuteActionCompleteHandlerException_Pass() {
         // Given
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteActionCompleteHandlerException_Pass")))
-                .then(TransmuteAction.of(value -> getValue(latch, received, () -> (value + 1) / 0),intResponse));
+                .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1) / 0),intResponse));
 
         // Then
-        wait(latch,"testThen_TransmuteActionCompleteHandlerException_Pass");
+        wait("testThen_TransmuteActionCompleteHandlerException_Pass");
+        promise.await();
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
         assertEquals(REJECTED,promise.getState());
     }
@@ -144,13 +142,13 @@ public class PromiseTest extends AbstractConcurrencyTest {
     @Test
     public void testThen_TransmuteActionCompleteHandler_Pass() {
         // Given
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteActionCompleteHandler")))
-                .then(TransmuteAction.of(value -> getValue(latch, received, () -> value + 1),intResponse));
+                .then(TransmuteAction.of(value -> getValue(received, () -> value + 1),intResponse));
 
         // Then
-        wait(latch,"testThen_TransmuteActionCompleteHandler_Pass");
+        wait("testThen_TransmuteActionCompleteHandler_Pass");
+        promise.await();
         assertEquals(FULFILLED,promise.getState());
         int value = received.get();
         assertEquals(128,value);
@@ -161,7 +159,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
         // Given
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testHandle_TransmuteActionException_Pass")))
-                .then(TransmuteAction.of(value -> getValue(null, received, () -> (value + 1) / 0)))
+                .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1) / 0)))
                 .handle((e) -> logger.error("testHandle_TransmuteActionException_Pass <-- Houston we have a problem in the main thread!! :)",e));
 
         // Then
@@ -173,7 +171,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
         // Given
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testAwait_Promises_Pos")))
-                .then(TaskAction.of(value -> getValue(null, received, () -> value)));
+                .then(TaskAction.of(value -> getValue(received, () -> value)));
 
         // Then
         wait("testAwait_Promises_Pos");

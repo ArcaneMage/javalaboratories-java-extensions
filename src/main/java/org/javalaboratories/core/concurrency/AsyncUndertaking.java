@@ -138,8 +138,8 @@ class AsyncUndertaking<T> implements Promise<T> {
 
     @Override
     public final Nullable<T> getResult()  {
-        if ( getState() == Promise.States.PENDING )
-            throw new IllegalStateException();
+        //if ( getState() == Promise.States.PENDING )
+         //   throw new IllegalStateException();
 
         T value = null;
         try {
@@ -235,7 +235,8 @@ class AsyncUndertaking<T> implements Promise<T> {
     }
 
     private States getState(final CompletableFuture<?super T> future) {
-        return future == null ? PENDING : future.isCompletedExceptionally() ? REJECTED : FULFILLED;
+        return future == null ? PENDING : !future.isDone() ? PENDING :
+                future.isCompletedExceptionally() ? REJECTED : FULFILLED;
     }
 
     private CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
