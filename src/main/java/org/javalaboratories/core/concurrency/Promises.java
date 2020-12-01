@@ -66,7 +66,15 @@ public final class Promises {
      * @throws NullPointerException if {@code action} is null
      */
     public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions) {
-        return all(actions,(action) -> () -> new AsyncUndertaking<>(managedPoolService,action));
+        List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncUndertaking<>(managedPoolService,action));
+        // Start new thread process that will wait on aforementioned asynchronous
+        // processes
+        PrimaryAction<List<Promise<T>>> action = PrimaryAction.of(() -> {
+            promises.forEach(Promise::await);
+            return Collections.unmodifiableList(promises);
+        });
+
+        return newPromise(action,() -> new AsyncUndertaking<>(managedPoolService,action));
     }
 
     /**
@@ -96,9 +104,9 @@ public final class Promises {
      * case, an {@code action} object will remain in the queue until a worker
      * becomes available.
      * <p>
-     * A {@link Promise} object is immediately returned, providing a reference
-     * to an asynchronous process that is currently waiting completion of the all
-     * the {@code actions} objects.
+     * A {@link List} collection of {@link Promise} objects is immediately returned,
+     * providing a reference to an asynchronous process that is currently waiting
+     * completion of the all the {@code actions} objects.
      * <p>
      * This factory method is really provided for further development purposes,
      * a mechanism to create alternative implementations of {@link Promise}
@@ -109,16 +117,16 @@ public final class Promises {
      * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
      * @param function to present an implementation of the {@link Promise} object.
      * @param <T> Type of value returned from asynchronous task.
-     * @return a {@link Promise} object that promises to wait for the conclusion of
-     * all aforementioned {@code actions} objects.
+     * @param <U> Type promise implementation returned.
+     * @return a {@link List} collection of {@link Promise} objects.
+     *
      * @throws NullPointerException if {@code action} is null
      * @throws NullPointerException if {@code function} is null
      */
-    private static <T,U extends Promise<T>> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions,
+    private static <T,U extends Promise<T>> List<Promise<T>> all(final List<PrimaryAction<T>> actions,
                                                                 final Function<PrimaryAction<T>,Supplier<U>> function) {
         List<PrimaryAction<T>> list = Objects.requireNonNull(actions);
         Function<PrimaryAction<T>,Supplier<U>> factory = Objects.requireNonNull(function);
-
 
         // Start asynchronous processes with custom promise implementation
         List<Promise<T>> promises = new ArrayList<>();
@@ -126,22 +134,7 @@ public final class Promises {
             Promise<T> promise = newPromise(action,factory.apply(action));
             promises.add(promise);
         });
-
-        // Start new thread process that will wait on aforementioned asynchronous
-        // processes
-        PrimaryAction<List<Promise<T>>> action = PrimaryAction.of(() -> {
-                    promises.forEach(Promise::await);
-                    return Collections.unmodifiableList(promises);
-        });
-
-        // Unchecked casts: these are okay, alternatively I could introduce
-        // another "newPromise" generic method with correct types -- jury is
-        // out on this.
-        @SuppressWarnings("unchecked")
-        Supplier<U> supplier = factory.apply((PrimaryAction<T>) action);
-        @SuppressWarnings("unchecked")
-        Promise<List<Promise<T>>> result = (Promise<List<Promise<T>>>) newPromise((PrimaryAction<T>) action,supplier);
-        return result;
+        return promises;
     }
 
     /**
