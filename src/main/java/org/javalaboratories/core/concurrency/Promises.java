@@ -118,17 +118,30 @@ public final class Promises {
                                                                 final Function<PrimaryAction<T>,Supplier<U>> function) {
         List<PrimaryAction<T>> list = Objects.requireNonNull(actions);
         Function<PrimaryAction<T>,Supplier<U>> factory = Objects.requireNonNull(function);
-        List<Promise<T>> results = new ArrayList<>();
+
+
         // Start asynchronous processes with custom promise implementation
+        List<Promise<T>> promises = new ArrayList<>();
         list.forEach(action -> {
             Promise<T> promise = newPromise(action,factory.apply(action));
-            results.add(promise);
+            promises.add(promise);
         });
-        // Start new thread process that will wait on aforementioned asynchronous processes
+
+        // Start new thread process that will wait on aforementioned asynchronous
+        // processes
         PrimaryAction<List<Promise<T>>> action = PrimaryAction.of(() -> {
-                    results.forEach(Promise::await);
-                    return Collections.unmodifiableList(results);});
-        return newPromise(action);
+                    promises.forEach(Promise::await);
+                    return Collections.unmodifiableList(promises);
+        });
+
+        // Unchecked casts: these are okay, alternatively I could introduce
+        // another "newPromise" generic method with correct types -- jury is
+        // out on this.
+        @SuppressWarnings("unchecked")
+        Supplier<U> supplier = factory.apply((PrimaryAction<T>) action);
+        @SuppressWarnings("unchecked")
+        Promise<List<Promise<T>>> result = (Promise<List<Promise<T>>>) newPromise((PrimaryAction<T>) action,supplier);
+        return result;
     }
 
     /**
@@ -152,7 +165,8 @@ public final class Promises {
      * @return a new {@link Promise} object.
      * @throws NullPointerException if {@code action} is null
      */
-    private static <T, U extends Promise<T>> Promise<T> newPromise(final PrimaryAction<T> action, final Supplier<U> supplier) {
+    private static <T, U extends Promise<T>> Promise<T> newPromise(final PrimaryAction<T> action,
+                                                                   final Supplier<U> supplier) {
         PrimaryAction<T> a = Objects.requireNonNull(action,"Cannot keep promise -- no action?");
         U result = Objects.requireNonNull(supplier).get();
         unchecked(result).invokePrimaryAction(a);
