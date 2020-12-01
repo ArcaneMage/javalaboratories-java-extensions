@@ -67,11 +67,12 @@ public final class Promises {
      */
     public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions) {
         List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncUndertaking<>(managedPoolService,action));
+
         // Start new thread process that will wait on aforementioned asynchronous
         // processes
         PrimaryAction<List<Promise<T>>> action = PrimaryAction.of(() -> {
             promises.forEach(Promise::await);
-            return Collections.unmodifiableList(promises);
+            return promises;
         });
 
         return newPromise(action,() -> new AsyncUndertaking<>(managedPoolService,action));
@@ -134,7 +135,7 @@ public final class Promises {
             Promise<T> promise = newPromise(action,factory.apply(action));
             promises.add(promise);
         });
-        return promises;
+        return Collections.unmodifiableList(promises);
     }
 
     /**
