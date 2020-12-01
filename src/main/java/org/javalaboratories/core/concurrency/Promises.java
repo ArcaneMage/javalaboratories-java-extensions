@@ -1,5 +1,9 @@
 package org.javalaboratories.core.concurrency;
 
+import org.javalaboratories.core.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -163,14 +167,30 @@ public final class Promises {
                                                                    final Supplier<U> supplier) {
         PrimaryAction<T> a = Objects.requireNonNull(action,"Cannot keep promise -- no action?");
         U result = Objects.requireNonNull(supplier).get();
-        unchecked(result).invokePrimaryAction(a);
+
+        Invocable<T> invocable = asInvocable(result)
+                .orElseThrow(() -> new IllegalArgumentException("Promise object is not invocable -- promise unkept"));
+        invocable.invokeAction(a);
         return result;
     }
 
+    /**
+     * Returns the {@link Promise} object as an {@link Invocable}, if possible.
+     * <p>
+     * @param promise the {@link Promise} object that implements {@link Invocable}
+     * @param <T> The type of the resultant value returned from the asynchronous
+     *           task.
+     * @return {@link Nullable} encapsulates {@link Invocable} implementation.
+     */
     @SuppressWarnings("unchecked")
-    private static <T,U extends Promise<T>,V extends AsyncUndertaking<T>> V unchecked(U promise) {
-        // This is okay: AsyncUndertaking is the only implementation for now.
-        return (V) promise;
+    private static <T> Nullable<Invocable<T>> asInvocable(final Promise<T> promise) {
+        Nullable<Invocable<T>> result;
+        try {
+            result = Nullable.of(Objects.requireNonNull((Invocable<T>) promise));
+        } catch (ClassCastException e) {
+            result = Nullable.empty();
+        }
+        return result;
     }
 
     private Promises() {}

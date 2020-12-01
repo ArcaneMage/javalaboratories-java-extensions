@@ -46,7 +46,7 @@ import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
  * @see Promise for full contract details and usage.
  */
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-class AsyncUndertaking<T> implements Promise<T> {
+class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
 
     private static final Consumer<Throwable> INERT_HANDLER = e -> {};
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);
@@ -161,26 +161,19 @@ class AsyncUndertaking<T> implements Promise<T> {
         return new AsyncUndertaking<>(service,action,future);
     }
 
+    @Override
+    public final boolean invokeAction(final PrimaryAction<T> action) {
+        future = invokePrimaryActionAsync(Objects.requireNonNull(action,"No action?"));
+        logger.debug("Promise [{}] invoked action asynchronously successfully",getIdentity());
+        return true;
+    }
+
     /**
      * @return a {@link String} object describing this {@link AsyncUndertaking} object.
      */
     @Override
     public String toString() {
         return String.format("[identity=%s,state=%s,service=%s]",identity,getState(),service);
-    }
-
-    /**
-     * Invokes this promise's primary action asynchronously. The method is
-     * part of the life-cycle of this object, and therefore must not be called
-     * in any other context. This is why the access level is set to package
-     * default, and must remain so.
-     *
-     * @return true is returned if action is executed asynchronously.
-     */
-    final boolean invokePrimaryAction(final PrimaryAction<T> action) {
-        future = invokePrimaryActionAsync(Objects.requireNonNull(action,"No action?"));
-        logger.debug("Promise [{}] invoked action asynchronously successfully",getIdentity());
-        return true;
     }
 
     private Supplier<T> doMakePrimaryActionable(final PrimaryAction<T> action) {
