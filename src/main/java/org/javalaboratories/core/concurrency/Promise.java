@@ -135,6 +135,9 @@ import java.util.function.Consumer;
  * @see Promise#getState()
  */
 public interface Promise<T> {
+
+    Consumer<Throwable> DEFAULT_EXCEPTION_HANDLER = e -> {throw new RuntimeException(e);};
+
     /**
      * Returns the current state of this promise object.
      * <p>
@@ -150,7 +153,7 @@ public interface Promise<T> {
     enum States { PENDING, FULFILLED, REJECTED }
 
     /**
-     * Awaits for {@link Promise} threads are complete.
+     * Awaits for {@link Promise} thread to complete.
      * <p>
      * Like {@link Promise#getResult()} and {@link Promise#handle(Consumer)}, this
      * command will block in the main/current thread.

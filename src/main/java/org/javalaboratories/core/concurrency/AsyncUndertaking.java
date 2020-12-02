@@ -93,7 +93,7 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
         this.service = Objects.requireNonNull(service,"No service?");
         this.action = Objects.requireNonNull(action,"No action object?");
         this.future = future;
-        this.identity = String.format("promise-{%s}", UUID.randomUUID());
+        this.identity = String.format("{%s}", UUID.randomUUID());
     }
 
     @Override
@@ -138,9 +138,6 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
 
     @Override
     public final Nullable<T> getResult()  {
-        //if ( getState() == Promise.States.PENDING )
-         //   throw new IllegalStateException();
-
         T value = null;
         try {
             value = future.get();

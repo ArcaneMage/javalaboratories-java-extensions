@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -67,13 +68,16 @@ public final class Promises {
      * <p>
      * Internal worker threads process all {@link PrimaryAction} objects, the
      * number of simultaneous tasks could reach total {@code capacity}
-     * of the worker threads in {@link ManagedPromisePoolExecutor}. If this is the
-     * case, an {@code action} object will remain in the queue until a worker
+     * of the worker threads in {@link ManagedPoolService}. If this is the
+     * case, an {@code action} task object will remain in the queue until a worker
      * becomes available.
      * <p>
      * A {@link Promise} object is immediately returned, providing a reference
      * to an asynchronous process that is currently waiting completion of the all
-     * the {@code actions} objects.
+     * the {@code actions} objects. However, if any of the {@code Promise} objects
+     * fail, the first rejection encountered will be returned encapsulated as a
+     * {@link Promise} object. Use the {@link Promise#handle(Consumer)} to catch
+     * or handle the exception thrown asynchronously.
      * <p>
      *
      * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
@@ -83,12 +87,45 @@ public final class Promises {
      * @throws NullPointerException if {@code action} is null
      */
     public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions) {
+        return all(actions,false);
+    }
+
+    /**
+     * Queues all {@link PrimaryAction} objects for processing with a specified
+     * implementation of {@link Promise}.
+     * <p>
+     * Internal worker threads process all {@link PrimaryAction} objects, the
+     * number of simultaneous tasks could reach total {@code capacity}
+     * of the worker threads in {@link ManagedPoolService}. If this is the
+     * case, an {@code action} task object will remain in the queue until a worker
+     * becomes available.
+     * <p>
+     * A {@link Promise} object is immediately returned, providing a reference
+     * to an asynchronous process that is currently waiting completion of the all
+     * the {@code actions} objects.
+     * <p>
+     *
+     * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
+     * @param settleAll {@code true} all promises will either resolve or reject, but
+     *                              exception is not handled; {@code false} means to
+     *                              return the first {@link Promise} object that
+     *                              encountered an error asynchronously.
+     * @param <T> Type of value returned from asynchronous task.
+     * @return a {@link Promise} object that promises to wait for the conclusion of
+     * all aforementioned {@code actions} objects.
+     * @throws NullPointerException if {@code action} is null
+     */
+    public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions, boolean settleAll ) {
+
         List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncUndertaking<>(managedPoolService,action));
 
         // Start new thread process that will wait on aforementioned asynchronous
         // processes
         PrimaryAction<List<Promise<T>>> action = PrimaryAction.of(() -> {
-            promises.forEach(Promise::await);
+            promises.forEach(p -> {
+                if ( settleAll ) p.await();
+                else p.handle(Promise.DEFAULT_EXCEPTION_HANDLER);
+            });
             return promises;
         });
 
@@ -170,7 +207,7 @@ public final class Promises {
      * provides the default implementation.
      *
      * @param action a {@link PrimaryAction} encapsulating the task to be
-     *               executed asynchronously.
+     *        executed asynchronously.
      * @param supplier supplies an implementation of {@link Promise}
      * @param <T> Type of value returned from asynchronous task.
      * @return a new {@link Promise} object.
