@@ -106,7 +106,7 @@ public final class Promises {
      * <p>
      *
      * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
-     * @param settleAll {@code true} all promises will either resolve or reject, but
+     * @param settle {@code true} all promises will either resolve or reject, but
      *                              exception is not handled; {@code false} means to
      *                              return the first {@link Promise} object that
      *                              encountered an error asynchronously.
@@ -115,7 +115,7 @@ public final class Promises {
      * all aforementioned {@code actions} objects.
      * @throws NullPointerException if {@code action} is null
      */
-    public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions, boolean settleAll ) {
+    public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions, boolean settle) {
 
         List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncUndertaking<>(managedPoolService,action));
 
@@ -123,7 +123,7 @@ public final class Promises {
         // processes
         PrimaryAction<List<Promise<T>>> action = PrimaryAction.of(() -> {
             promises.forEach(p -> {
-                if ( settleAll ) p.await();
+                if (settle) p.await();
                 else p.handle(Promise.DEFAULT_EXCEPTION_HANDLER);
             });
             return promises;
