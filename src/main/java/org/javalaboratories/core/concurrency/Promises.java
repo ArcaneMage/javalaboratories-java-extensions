@@ -179,7 +179,7 @@ public final class Promises {
      * @throws NullPointerException if {@code function} is null
      */
     private static <T,U extends Promise<T>> List<Promise<T>> all(final List<PrimaryAction<T>> actions,
-                                                                final Function<PrimaryAction<T>,Supplier<U>> function) {
+                                                                 final Function<PrimaryAction<T>,Supplier<U>> function) {
         List<PrimaryAction<T>> list = Objects.requireNonNull(actions);
         Function<PrimaryAction<T>,Supplier<U>> factory = Objects.requireNonNull(function);
 
