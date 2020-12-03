@@ -85,15 +85,15 @@ public abstract class AbstractTupleContainer implements TupleContainer {
      */
     @Override
     public int compareTo(TupleContainer o) {
-        if ( o == null )
+        if (o == null)
             throw new NullPointerException();
 
-        if ( this.equals(o) )
+        if (this.equals(o))
             return 0;
 
         // Compare depth (sort by depth first)
         int result = this.depth() - o.depth();
-        if ( result != 0 )
+        if (result != 0)
             return result;
 
         // Then by tuple elements
@@ -136,7 +136,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
 
             @Override
             public TupleElement next() {
-                if ( node == null )
+                if (node == null)
                     throw new NoSuchElementException();
                 TupleElement result = new TupleElement() {
                     private Object element = node.element;
@@ -181,16 +181,16 @@ public abstract class AbstractTupleContainer implements TupleContainer {
         if (o == null || getClass() != o.getClass()) return false;
         TupleContainer objects = (TupleContainer) o;
 
-        if ( this.depth() != objects.depth())
+        if (this.depth() != objects.depth())
             return false;
 
         Iterator<TupleElement> iter1 = this.iterator();
         Iterator<TupleElement> iter2 = objects.iterator();
 
-        while ( iter1.hasNext() && iter2.hasNext() ) {
+        while (iter1.hasNext() && iter2.hasNext()) {
             TupleElement e1 = iter1.next();
             TupleElement e2 = iter2.next();
-            if ( !Objects.equals(e1.value(),e2.value()) )
+            if (!Objects.equals(e1.value(),e2.value()))
                 return false;
         }
         return true;
@@ -228,7 +228,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     public <K> Map<K,?> toMap(Function<? super Integer, ? extends K> keyMapper) {
         Map<K,Object> result = new LinkedHashMap<>();
         int i = 0;
-        for (Node node = head; node != null; node = node.next )
+        for (Node node = head; node != null; node = node.next)
             result.put(keyMapper.apply(i++),node.element);
 
         return result;
@@ -241,7 +241,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     public Object[] toArray() {
         Object[] result = new Object[depth];
         int i = 0;
-        for (Node node = head; node != null; node = node.next )
+        for (Node node = head; node != null; node = node.next)
             result[i++] = node.element;
         return result;
     }
@@ -252,7 +252,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     @Override
     public List<?> toList() {
         List<Object> result = new ArrayList<>();
-        for (Node node = head; node != null; node = node.next )
+        for (Node node = head; node != null; node = node.next)
             result.add(node.element);
         return result;
     }
@@ -282,7 +282,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     }
 
     protected final void verify(int position) {
-        if ( position < 1 || position > (depth()) )
+        if (position < 1 || position > (depth()))
             throw new IllegalArgumentException("Position must be non-zero and less than or equal depth");
     }
 
@@ -299,8 +299,8 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     final int indexOf(Object element) {
         int result = 0;
         for (Node node = head; node != null; node = node.next) {
-            if ( (element == null && node.element == null) ||
-                    (element != null && element.equals(node.element)) )
+            if ((element == null && node.element == null) ||
+                    (element != null && element.equals(node.element)))
                 return result;
             result++;
         }
@@ -311,8 +311,8 @@ public abstract class AbstractTupleContainer implements TupleContainer {
         validateNodeIndex(index);
         Object result = null;
         int i = 0;
-        for (Node node = head; node != null; node = node.next ) {
-            if ( index == i ) {
+        for (Node node = head; node != null; node = node.next) {
+            if (index == i) {
                 result = node.element;
                 break;
             }
@@ -323,7 +323,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
 
     private Node linkToFirstNode(Object element) {
         Node link;
-        if ( isEmpty() ) {
+        if (isEmpty()) {
             link = new Node(element);
             tail = link;
         } else {
@@ -337,7 +337,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
 
     private Node linkToLastNode(Object element) {
         Node link;
-        if ( isEmpty() ) {
+        if (isEmpty()) {
             link = new Node(element);
             head = link;
         } else {
@@ -352,14 +352,14 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         int size = in.readInt();
-        for ( int i = 0; i < size; i++ ) {
+        for (int i = 0; i < size; i++) {
             Object element = in.readObject();
             linkToLastNode(element);
         }
     }
 
     private void validateNodeIndex(int index) {
-        if ( index < 0 || index > depth -1)
+        if (index < 0 || index > depth -1)
             throw new IndexOutOfBoundsException();
     }
 

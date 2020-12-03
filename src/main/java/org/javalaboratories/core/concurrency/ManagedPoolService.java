@@ -115,7 +115,7 @@ public interface ManagedPoolService extends Executor {
      * @param stateTransitionHandler consumes shutdown states for processing
      */
     default void signalTerm(final Consumer<ServiceStates> stateTransitionHandler) {
-        if ( stateTransitionHandler != null )
+        if (stateTransitionHandler != null)
             stateTransitionHandler.accept(getState());
         if (getState() != ServiceStates.ACTIVE) { // Must be already in the process of termination
             return;
@@ -123,7 +123,7 @@ public interface ManagedPoolService extends Executor {
         try {
             free();
         } finally {
-            if (stateTransitionHandler != null )
+            if (stateTransitionHandler != null)
                 stateTransitionHandler.accept(getState());
         }
     }

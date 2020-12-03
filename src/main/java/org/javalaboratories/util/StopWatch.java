@@ -143,7 +143,7 @@ public final class StopWatch {
     }
 
     public void reset() {
-        if ( state == State.STAND_BY )
+        if (state == State.STAND_BY)
             return;
         verify(State.STOPPED);
         sumTotal -= cycles.getTime();
@@ -153,7 +153,7 @@ public final class StopWatch {
 
     @Override
     public String toString() {
-        if ( getState() == State.RUNNING ) {
+        if (getState() == State.RUNNING) {
             return String.format("StopWatch[name='%s',state='%s',cycles=%s]",name,state,cycles);
         } else {
             return String.format("StopWatch[name='%s',time=%d,millis=%d,seconds=%d,total-percentile=%d,state='%s',cycles=%s]",
@@ -181,9 +181,9 @@ public final class StopWatch {
     private String printStats() {
         String result;
         String name = getName();
-        if ( name.length() > 24 )
+        if (name.length() > 24)
             name = name.substring(0,21)+"...";
-        if ( getState() == State.RUNNING )
+        if (getState() == State.RUNNING)
             result = String.format("%-24s %14s", name, ">> "+getState())+" <<";
         else {
             result = String.format("%-24s %12s %3d%% %12d %12s", name, getTimeAsString(), getTotalPercentile(),

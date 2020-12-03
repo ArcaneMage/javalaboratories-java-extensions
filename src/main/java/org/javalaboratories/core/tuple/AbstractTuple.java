@@ -212,7 +212,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      */
     final <T extends Tuple> T rotateRight(int times) {
         Object[] elements = getObjects(this);
-        for ( int i = 0; i < times; i++ )
+        for ( int i = 0; i < times; i++)
             rotate(elements,true);
         Nullable<T> result = Tuples.fromIterable(Arrays.asList(elements),elements.length);
         return result.get();
@@ -229,14 +229,14 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      */
     final <T extends Tuple> T rotateLeft(int times) {
         Object[] elements = getObjects(this);
-        for ( int i = 0; i < times; i++ )
+        for ( int i = 0; i < times; i++)
             rotate(elements,false);
         Nullable<T> result = Tuples.fromIterable(Arrays.asList(elements),elements.length);
         return result.get();
     }
 
     private void rotate(Object[] objects, boolean right) {
-        if ( right ) { // rotate right
+        if ( right) { // rotate right
             Object overflow = objects[this.depth() -1];
             System.arraycopy(objects, 0, objects, 1, objects.length - 1);
             objects[0] = overflow;

@@ -13,14 +13,14 @@ public class MedianCalculator<T extends Number> implements StatisticalCalculator
     }
 
     public Double getResult() {
-        if ( terms.size() == 0 )
+        if (terms.size() == 0)
             throw new InsufficientPopulationException("Could not calculate median");
         List<T> sorted = terms.stream()
                 .sorted()
                 .collect(Collectors.toList());
         int index;
         index = (sorted.size() + 1) / 2;
-        if ( sorted.size() % 2 != 0 ) {
+        if (sorted.size() % 2 != 0) {
             return sorted.get(index -1).doubleValue();
         } else {
             T lterm = sorted.get(index - 1);

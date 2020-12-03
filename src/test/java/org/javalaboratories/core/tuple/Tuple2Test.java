@@ -151,10 +151,10 @@ public class Tuple2Test {
         Iterator<TupleElement> it = tuple.iterator();
 
         boolean found = false;
-        while ( it.hasNext() ) {
+        while (it.hasNext()) {
             TupleElement element = it.next();
             assertSame(tuple,element.owner());
-            if ( "Doe".equals(element.value()) ) {
+            if ("Doe".equals(element.value())) {
                 found = true;
                 break;
             }
@@ -166,7 +166,7 @@ public class Tuple2Test {
     public void testIterator_Fail() {
         Iterator<TupleElement> it = tuple.iterator();
 
-        while ( it.hasNext() )
+        while (it.hasNext())
             it.next();
 
         assertThrows(NoSuchElementException.class, it::next);

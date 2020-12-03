@@ -23,7 +23,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
     @BeforeEach
     public void setup() {
         intResponse = (result, exception) -> {
-            if ( exception != null ) {
+            if (exception != null) {
                 logger.error("Exception detected in complete handler:", exception);
             } else {
                 logger.info("Result received in complete handler: {}", result);

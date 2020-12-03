@@ -26,7 +26,7 @@ public abstract class AbstractStatisticalCalculators<T extends Number> implement
 
     public void combine(AbstractStatisticalCalculators<T> other) {
         // Source data from the first calculator for now
-        if ( other.calculators.size() > 0 )
+        if (other.calculators.size() > 0)
             other.calculators.get(0).getData()
                     .forEach(v -> calculators
                             .forEach (c -> c.accept(v)));

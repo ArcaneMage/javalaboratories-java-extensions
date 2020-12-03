@@ -144,7 +144,7 @@ public final class Reducers {
                 () -> new long[2],
                 (a,l) -> {a[0]  = a[0] + mapper.applyAsLong(l); a[1] += 1;},
                 (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
-                result -> Stream.of ( (double) result[0] / result[1]),
+                result -> Stream.of ((double) result[0] / result[1]),
                 NO_CHARACTERISTICS
         );
     }
@@ -154,7 +154,7 @@ public final class Reducers {
                 () -> new int[2],
                 (a,l) -> {a[0]  = a[0] + mapper.applyAsInt(l); a[1] += 1;},
                 (l,r) -> {l[0] += r[0]; l[1] += r[1]; return l;},
-                result -> Stream.of ( (double) result[0] / result[1]),
+                result -> Stream.of ((double) result[0] / result[1]),
                 NO_CHARACTERISTICS
         );
     }

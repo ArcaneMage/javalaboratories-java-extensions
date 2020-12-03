@@ -400,16 +400,16 @@ public class ReducersTest {
 
         numbers.stream()
                 .collect(Reducers.maxBy(Integer::compareTo))
-                .ifPresent( n -> assertEquals((Integer) 101,n));
+                .ifPresent(n -> assertEquals((Integer) 101,n));
 
         numbers.parallelStream()
                 .collect(Reducers.maxBy(Integer::compareTo))
-                .ifPresent( n -> assertEquals((Integer) 101,n));
+                .ifPresent(n -> assertEquals((Integer) 101,n));
 
         numbers = Collections.singletonList(0);
         numbers.stream()
                 .collect(Reducers.maxBy(Integer::compareTo))
-                .ifPresent( n -> assertEquals((Integer) 0,n));
+                .ifPresent(n -> assertEquals((Integer) 0,n));
 
         numbers = Collections.emptyList();
         assertFalse(numbers.stream()
@@ -425,16 +425,16 @@ public class ReducersTest {
 
         numbers.stream()
                 .collect(Reducers.minBy(Integer::compareTo))
-                .ifPresent( n -> assertEquals((Integer) 2,n));
+                .ifPresent(n -> assertEquals((Integer) 2,n));
 
         numbers.parallelStream()
                 .collect(Reducers.minBy(Integer::compareTo))
-                .ifPresent( n -> assertEquals((Integer) 2,n));
+                .ifPresent(n -> assertEquals((Integer) 2,n));
 
         numbers = Collections.singletonList(0);
         numbers.stream()
                 .collect(Reducers.minBy(Integer::compareTo))
-                .ifPresent( n -> assertEquals((Integer) 0,n));
+                .ifPresent(n -> assertEquals((Integer) 0,n));
 
         numbers = Collections.emptyList();
         assertFalse(numbers.stream()

@@ -13,13 +13,13 @@ public class ModeCalculator<T extends Number> implements StatisticalCalculator<T
 
     public void accept(T value) {
         Long count = modeMap.get(value);
-        if ( count == null )
+        if (count == null)
             count = 0L;
         modeMap.put(value,++count);
     }
 
     public Nullable<Double> getResult() {
-        if ( modeMap.size() == 0 )
+        if ( modeMap.size() == 0)
             throw new InsufficientPopulationException("Could not calculate mode");
         List<T> result = modeMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
@@ -41,7 +41,7 @@ public class ModeCalculator<T extends Number> implements StatisticalCalculator<T
     }
 
     private boolean isModeCalculable(List<T> sortedKeys) {
-        if ( modeMap.size() > 1 )
+        if ( modeMap.size() > 1)
             return !modeMap.get(sortedKeys.get(0)).equals(modeMap.get(sortedKeys.get(sortedKeys.size() - 1)));
         else
             return modeMap.size() == 1;

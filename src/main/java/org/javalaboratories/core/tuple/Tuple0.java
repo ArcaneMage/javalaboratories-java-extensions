@@ -90,12 +90,12 @@ public final class Tuple0 implements Tuple {
      */
     @Override
     public int compareTo(TupleContainer o) {
-        if ( o == null )
+        if ( o == null)
             throw new NullPointerException();
 
         // Compare depth (sort by depth first)
         int result = this.depth() - o.depth();
-        if ( result != 0 )
+        if ( result != 0)
             return result;
 
         // Comparing with another Tuple0?

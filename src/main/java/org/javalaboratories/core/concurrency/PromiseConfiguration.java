@@ -116,7 +116,7 @@ public class PromiseConfiguration {
 
     private <T> T getValue(String property, T value) {
         T result = getOrDefault(property, value);
-        if  ( result instanceof String && isInteger(result) ) {
+        if  (result instanceof String && isInteger(result)) {
             result = unchecked(Integer.valueOf((String) result));
         }
         return result;
@@ -125,17 +125,17 @@ public class PromiseConfiguration {
     private <T> T getOrDefault(String property, T value) {
         T result;
         result =  unchecked(properties.getOrDefault(property, value));
-        if ( result instanceof String && ((String) result).isEmpty() )
+        if (result instanceof String && ((String) result).isEmpty())
             result = value;
         return result;
     }
 
     private <T> Map<String,T> load(final String filename) {
         Map<String,T> result = new HashMap<>();
-        if ( properties == null ) {
+        if (properties == null) {
             synchronized (this) {
                 try {
-                    if ( filename != null ) {
+                    if (filename != null) {
                         Properties fileProperties = new Properties();
                         InputStream stream = PromiseConfiguration.class.getClassLoader()
                                 .getResourceAsStream(filename);
@@ -158,10 +158,10 @@ public class PromiseConfiguration {
 
     private <T> void load(Properties source, Map<String,T> properties, Predicate<String> filter) {
         source.forEach((key, value) -> {
-            if ( filter == null ) {
+            if (filter == null) {
                 properties.put((String) key, unchecked(value));
             } else {
-                if ( filter.test((String)key) )
+                if (filter.test((String)key))
                     properties.put((String) key, unchecked(value));
             }
         });

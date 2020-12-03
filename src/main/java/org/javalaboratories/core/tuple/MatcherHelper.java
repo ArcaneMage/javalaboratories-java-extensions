@@ -38,7 +38,7 @@ final class MatcherHelper {
         Objects.requireNonNull(patternMatching);
 
         boolean result;
-        if ( !(element instanceof String) ) {
+        if (!(element instanceof String)) {
             // Comparison of elements in matcher pattern and tuple should be of the same type,
             // if not false is returned
             result = objectMatching.test(matcherElement,element);

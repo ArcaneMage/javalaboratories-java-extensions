@@ -99,31 +99,31 @@ public final class Nullable<T> implements Iterable<T> {
 
     public Nullable<T> filter(Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate);
-        if ( this.value == null ) return this;
+        if (this.value == null) return this;
         else return predicate.test(value) ? this : empty();
     }
 
     @SuppressWarnings("unchecked")
     public <U> Nullable<U> flatMap(Function<? super T,? extends Nullable<? extends U>> mapper) {
         Objects.requireNonNull(mapper);
-        if ( this.value == null ) return empty();
+        if (this.value == null) return empty();
         else return Objects.requireNonNull((Nullable<U>) mapper.apply(value));
     }
 
     public T get() {
-        if ( this.value == null ) throw new NoSuchElementException();
+        if (this.value == null) throw new NoSuchElementException();
         else return value;
     }
 
     public void ifPresent(Consumer<? super T> action) {
         Objects.requireNonNull(action);
-        if ( this.value != null )
+        if (this.value != null)
             action.accept(value);
     }
 
-    public void ifPresentOrElse(Consumer<? super T> action, Runnable elseAction ) {
+    public void ifPresentOrElse(Consumer<? super T> action, Runnable elseAction) {
         Objects.requireNonNull(action);
-        if ( this.value == null ) elseAction.run();
+        if (this.value == null) elseAction.run();
         else action.accept(value);
     }
 
@@ -131,7 +131,7 @@ public final class Nullable<T> implements Iterable<T> {
 
     public <U> Nullable<U> map(Function<? super T, ? extends U> mapper) {
         Objects.requireNonNull(mapper);
-        if ( this.value == null )
+        if (this.value == null)
             return empty();
         else
             return Nullable.ofNullable(mapper.apply(value));
@@ -159,12 +159,12 @@ public final class Nullable<T> implements Iterable<T> {
     }
 
     public <E extends Throwable> T orElseThrow(Supplier<? extends E> exSupplier) throws E {
-        if ( this.value != null ) return value;
+        if (this.value != null) return value;
         else throw exSupplier.get();
     }
 
     public Stream<T> stream() {
-        if ( value == null ) return Stream.of();
+        if (value == null) return Stream.of();
         else return Stream.of(value);
     }
 
@@ -177,15 +177,15 @@ public final class Nullable<T> implements Iterable<T> {
         else return Collections.emptyList();
     }
 
-    public <K,V> Map<K,V> toMap(Function<? super T, ? extends K> keyMapper,Function<? super T,? extends V> valueMapper ) {
+    public <K,V> Map<K,V> toMap(Function<? super T, ? extends K> keyMapper,Function<? super T,? extends V> valueMapper) {
         Objects.requireNonNull(keyMapper);
         Objects.requireNonNull(valueMapper);
-        if ( this.value != null ) return Collections.singletonMap(keyMapper.apply(value), valueMapper.apply(this.value));
+        if (this.value != null) return Collections.singletonMap(keyMapper.apply(value), valueMapper.apply(this.value));
         else return Collections.emptyMap();
     }
 
     public String toString() {
-        if ( this.value == null ) return "Nullable[isEmpty]";
+        if (this.value == null) return "Nullable[isEmpty]";
         else return String.format("Nullable[%s]", value);
     }
 

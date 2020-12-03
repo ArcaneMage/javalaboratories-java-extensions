@@ -63,7 +63,7 @@ public final class PromisePoolServiceFactory<T extends ManagedPoolService> {
      * @see PromiseConfiguration
      */
     public T newPoolService() {
-        if ( instance == null ) {
+        if (instance == null) {
             synchronized (PromisePoolServiceFactory.class) {
                 String clazzname = configuration.getPoolServiceClassName();
                 try {

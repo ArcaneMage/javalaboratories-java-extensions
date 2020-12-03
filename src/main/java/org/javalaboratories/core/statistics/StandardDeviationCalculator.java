@@ -22,7 +22,7 @@ public class StandardDeviationCalculator<T extends Number> implements Statistica
 
     @Override
     public Double getResult() {
-        if ( variance.getData().size() == 0 )
+        if (variance.getData().size() == 0)
             throw new InsufficientPopulationException("Could not calculate standard deviation");
         return Math.sqrt(variance.getResult());
     }

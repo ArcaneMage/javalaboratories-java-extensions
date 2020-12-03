@@ -97,7 +97,7 @@ import java.util.function.Consumer;
  * {@code
  *
  *      public void handleResult(int value, Throwable e) {
- *          if ( e != null )
+ *          if (e != null)
  *              logger.error("Exception thrown: ",e);
  *          else
  *              logger.info("Completed successfully with result: "+value);
@@ -213,7 +213,7 @@ public interface Promise<T> {
      * <p>
      * This is particularly useful for {@code HashMap} or other collection
      * objects that require a mechanism to uniquely identify {@link Promise}
-     * objects. The {@link Promise#toString()} method also reports {@code identity}
+     * objects. The {@code Promise.toString()} method also reports {@code identity}
      * making it useful for debugging purposes.
      *
      * @return the unique {@code identity} of the {@link Promise} object.

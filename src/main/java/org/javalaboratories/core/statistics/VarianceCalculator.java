@@ -29,7 +29,7 @@ public class VarianceCalculator<T extends Number> implements StatisticalCalculat
 
     @Override
     public Double getResult() {
-        if ( terms.size() == 0 )
+        if (terms.size() == 0)
             throw new InsufficientPopulationException("Could not calculate variance");
         double n = (double) terms.size();
         double mean = sum / n;

@@ -249,7 +249,7 @@ public final class Handlers {
     }
 
     private static void handle (Throwable t) {
-        if ( t instanceof RuntimeException)
+        if (t instanceof RuntimeException)
             throw (RuntimeException) t;
 
         if (t instanceof IOException)

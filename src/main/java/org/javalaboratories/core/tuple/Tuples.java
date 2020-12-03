@@ -20,7 +20,7 @@ public final class Tuples {
         T result = null;
         try {
             int i = 1;
-            while ( it.hasNext() && i++ < start )
+            while (it.hasNext() && i++ < start)
                 it.next();
 
             switch (depth) {

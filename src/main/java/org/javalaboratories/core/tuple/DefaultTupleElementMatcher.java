@@ -43,10 +43,10 @@ public final class DefaultTupleElementMatcher implements TupleElementMatcher {
     @Override
     public <T extends Tuple> boolean match(T tuple) {
         boolean result = true;
-        for ( int j = 0; j < matchable.depth() && result; j++ ) {
+        for (int j = 0; j < matchable.depth() && result; j++) {
             boolean exists = false;
             Iterator<TupleElement> it = tuple.iterator();
-            while ( it.hasNext() && !exists) {
+            while (it.hasNext() && !exists) {
                 TupleElement element = it.next();
                 exists = matchObjectOrPattern(element,j+1);
             }
@@ -77,7 +77,7 @@ public final class DefaultTupleElementMatcher implements TupleElementMatcher {
             throw new IllegalArgumentException("Expected MatchablePatternAware object");
 
         boolean result;
-        if ( !(element.isString()) ) {
+        if (!(element.isString())) {
             // Comparison of elements in matcher pattern and tuple should be of the same type,
             // if not false is returned
             result = matchObject(matcherValue, element.value());

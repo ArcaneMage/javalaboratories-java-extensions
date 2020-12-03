@@ -58,7 +58,7 @@ public interface MatcherStrategy<T extends Tuple> {
             Iterator<TupleElement> it = tuple.iterator();
             TupleElementMatcher matcher = supplier.get();
             result = matcher.getMatchable().depth() <= tuple.depth();
-            while ( result && it.hasNext() && i < matcher.getMatchable().depth() ) {
+            while (result && it.hasNext() && i < matcher.getMatchable().depth()) {
                 TupleElement element = it.next();
                 result = matcher.match(element);
                 i++;
@@ -91,7 +91,7 @@ public interface MatcherStrategy<T extends Tuple> {
             int i = 0;
             Iterator<TupleElement> it = tuple.iterator();
             TupleElementMatcher matcher = supplier.get();
-            while ( !result && it.hasNext() && i < matcher.getMatchable().depth() ) {
+            while (!result && it.hasNext() && i < matcher.getMatchable().depth()) {
                 TupleElement element = it.next();
                 result = matcher.match(element);
                 i++;

@@ -75,7 +75,7 @@ public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements Ma
     /**
      * Returns the current state of this pool service.
      * <p>
-     * Indicates whether the thread pool is in an {@link ServiceStates#ACTIVE}
+     * Indicates whether the thread pool is in an {@code ServiceStates.ACTIVE}
      * state, the normal mode of operation where tasks of {@link Action} objects
      * are accepted for processing. Any other state results in task being
      * rejected and the thread pool actively in the processing of shutting down.
@@ -89,17 +89,17 @@ public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements Ma
 
     @Override
     public final void free(final long timeout, final boolean retry) {
-        if ( timeout < 1 )
+        if (timeout < 1)
             throw new IllegalArgumentException("Insufficient timeout");
-        if ( getState() == ServiceStates.ACTIVE) {
+        if (getState() == ServiceStates.ACTIVE) {
             changeState(ServiceStates.ACTIVE, ServiceStates.CLOSING);
             int i = 0;
             shutdown();
             try {
-                while ( !awaitTermination(timeout, TimeUnit.SECONDS) && retry ) {
+                while (!awaitTermination(timeout, TimeUnit.SECONDS) && retry) {
                     logger.info("Awaiting termination of some promises  -- elapsed {} seconds", ++i * SHUTDOWN_WAIT_TIMEOUT);
                 }
-                if ( !isTerminated() ) {
+                if (!isTerminated()) {
                     shutdownNow();
                     logger.debug("Not all promises kept following shutdown -- forced shutdown.");
                 }
@@ -128,7 +128,7 @@ public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements Ma
     }
 
     private void logShutdownState(ServiceStates state) {
-        switch ( state ) {
+        switch (state) {
             case ACTIVE:
                 logger.debug("Termination signal received -- shutting down gracefully");
                 break;
