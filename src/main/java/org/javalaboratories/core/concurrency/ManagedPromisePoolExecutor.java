@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * important that {@code Promise} objects reach to a natural conclusion. It is not
  * advisable for threads to run infinitely. If this is a possibility then it
  * would to be prudent to to force shutdown the pool service with the
- * {@link ManagedPromisePoolExecutor#free(long, boolean)} specifying a timeout without
+ * {@link ManagedPromisePoolExecutor#stop(long, boolean)} specifying a timeout without
  * retries ahead of program termination.
  * <p>
  * Currently, various strategies are under consideration to improve shutdown
@@ -48,60 +48,82 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements ManagedPoolService {
 
+    protected static final String PROMISES_THREAD_GROUP = "Promises-Group";
+
     private static final Logger logger = LoggerFactory.getLogger(ManagedPoolService.class);
 
     private static final AtomicInteger workerIndex = new AtomicInteger(0);
     private static final String WORKER_THREAD_NAME="Promise-Worker-%d";
+    private static final ThreadGroup THREAD_GROUP = new ThreadGroup(PROMISES_THREAD_GROUP);
 
     private final int capacity;
     private final AtomicReference<ServiceStates> state;
     private final Thread shutdownHook;
 
+
     /**
      * Constructs an instance of this thread pool.
      * <p>
      * Constructor called from the {@link PromisePoolServiceFactory}, if
-     * configured to create an instance of this object.
+     * configured to create an instance of this object. Automatic shutdown
+     * management is enabled by default.
+     *
      * @param capacity Number maximum thread workers to carryout promises.
      */
     public ManagedPromisePoolExecutor(final int capacity) {
-        super(capacity,capacity,0L,TimeUnit.MILLISECONDS,new LinkedBlockingDeque<>(), ManagedPromisePoolExecutor::newPromiseWorker);
-        this.capacity = capacity;
-        this.state = new AtomicReference<>(ServiceStates.ACTIVE);
-        this.shutdownHook = new Thread(Handlers.runnable(() -> signalTerm(this::logShutdownState)));
-        Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+        this(capacity,true);
     }
 
     /**
-     * Returns the current state of this pool service.
+     * Constructs an instance of this thread pool with optional automatic
+     * shutdown management.
      * <p>
-     * Indicates whether the thread pool is in an {@code ServiceStates.ACTIVE}
-     * state, the normal mode of operation where tasks of {@link Action} objects
-     * are accepted for processing. Any other state results in task being
-     * rejected and the thread pool actively in the processing of shutting down.
+     * Constructor is package level access only for unit testing purposes. It
+     * is recommended to use {@link ManagedPromisePoolExecutor#ManagedPromisePoolExecutor(int)}
+     * or the {@link PromisePoolServiceFactory} to create an instance of this
+     * thread pool.
      *
-     * @return the current state of the {@link ManagedPromisePoolExecutor}
+     * @param capacity Number maximum thread workers to carryout promises.
+     * @param autoShutdown {@code true} manage automatic shutdown when VM
+     *                                 receives SIGTERM.
      */
+    ManagedPromisePoolExecutor(final int capacity, final boolean autoShutdown) {
+        super(capacity,capacity,0L,TimeUnit.MILLISECONDS,new LinkedBlockingDeque<>(), ManagedPromisePoolExecutor::newPromiseWorker);
+        this.capacity = capacity;
+        this.state = new AtomicReference<>(ServiceStates.ACTIVE);
+        if ( autoShutdown ) {
+            this.shutdownHook = new Thread(Handlers.runnable(() -> signalTerm(this::logShutdownState)));
+            Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+        } else {
+            this.shutdownHook = null;
+        }
+    }
+
+    @Override
+    public boolean isShutdownEnabled() {
+        return shutdownHook != null;
+    }
+
     @Override
     public ServiceStates getState() {
         return state.get();
     }
 
     @Override
-    public final void free(final long timeout, final boolean retry) {
-        if (timeout < 1)
+    public final void stop(final long timeout, final boolean retry) {
+        if (timeout < MIN_WAIT_TIMEOUT)
             throw new IllegalArgumentException("Insufficient timeout");
         if (getState() == ServiceStates.ACTIVE) {
             changeState(ServiceStates.ACTIVE, ServiceStates.CLOSING);
             int i = 0;
             shutdown();
             try {
-                while (!awaitTermination(timeout, TimeUnit.SECONDS) && retry) {
-                    logger.info("Awaiting termination of some promises  -- elapsed {} seconds", ++i * SHUTDOWN_WAIT_TIMEOUT);
+                while (!awaitTermination(timeout, TimeUnit.MILLISECONDS) && retry) {
+                    logger.info("Awaiting termination of some promises  -- elapsed {} seconds", (++i * timeout) / 1000.0);
                 }
                 if (!isTerminated()) {
                     shutdownNow();
-                    logger.debug("Not all promises kept following shutdown -- forced shutdown.");
+                    logger.info("Not all promises kept following shutdown -- forced shutdown");
                 }
             } catch (InterruptedException e) {
                 logger.error("Termination of capacity (promises) interrupted -- promises not kept");
@@ -112,11 +134,13 @@ public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements Ma
     }
 
     /**
-     * @return a {@code String} representation of this {@link ManagedPromisePoolExecutor} thread pool.
+     * @return a {@code String} representation of this
+     * {@link ManagedPromisePoolExecutor} thread pool.
      */
     @Override
     public String toString() {
-        return String.format("[capacity=%d,state=%s,shutdownHook=%s]",capacity,state,shutdownHook.getState());
+        return String.format("[capacity=%d,state=%s,shutdownHook=%s]", capacity, state,
+                isShutdownEnabled() ? shutdownHook.getState() : "disabled");
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -143,7 +167,7 @@ public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements Ma
 
     private static Thread newPromiseWorker(final Runnable runnable) {
         String name = String.format(WORKER_THREAD_NAME,workerIndex.incrementAndGet());
-        Thread result = new Thread(runnable);
+        Thread result = new Thread(THREAD_GROUP,runnable);
         result.setName(name);
         return result;
     }

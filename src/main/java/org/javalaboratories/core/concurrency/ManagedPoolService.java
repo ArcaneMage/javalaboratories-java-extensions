@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * The contract of this interface is that the
  * {@link ManagedPoolService#signalTerm()} must be invoked having received
  * SIGTERM signal. Following this, the managed pool will wait for outstanding
- * promises for {@link ManagedPoolService#SHUTDOWN_WAIT_TIMEOUT} time before
+ * promises for {@link ManagedPoolService#WAIT_TIMEOUT} time before
  * re-attempting to terminate them -- this will continue until all promises
  * have concluded. It is for this reason that {@code thread} objects
  * are carefully written such that they do not block the shutdown sequence
@@ -37,7 +37,8 @@ import java.util.function.Consumer;
 public interface ManagedPoolService extends Executor {
     enum ServiceStates {ACTIVE, CLOSING, INACTIVE}
 
-    long SHUTDOWN_WAIT_TIMEOUT = 5L;
+    long MIN_WAIT_TIMEOUT = 250L;
+    long WAIT_TIMEOUT = 5000L;
 
     /**
      * Returns the current state of this pool service.
@@ -52,15 +53,21 @@ public interface ManagedPoolService extends Executor {
     ServiceStates getState();
 
     /**
+     * @return {@code true} to indicate the auto-shutdown of the thread pool is
+     * enabled.
+     */
+    boolean isShutdownEnabled();
+
+    /**
      * Calling this method starts the shutting down process of the
      * {@link ManagedPromisePoolExecutor} thread pool.
      * <p>
      * It will patiently wait for tasks of {@link Action} objects to conclude
-     * indefinitely, retrying every {@link ManagedPoolService#SHUTDOWN_WAIT_TIMEOUT}.
+     * indefinitely, retrying every {@link ManagedPoolService#WAIT_TIMEOUT}.
      * Hence, it is important the threads are not made to run infinitely.
      */
-    default void free() {
-        free(SHUTDOWN_WAIT_TIMEOUT,true);
+    default void stop() {
+        stop(WAIT_TIMEOUT,true);
     }
 
     /**
@@ -73,18 +80,20 @@ public interface ManagedPoolService extends Executor {
      * after timeout some threads may still be live, these will be interrupted,
      * resulting in unkept promises.
      *
-     * @param timeout value in seconds.
+     * @param timeout value in milliseconds.
      * @param retry if {@code true} indefinitely attempts to terminate threads
      *             after shutdown (use with caution).
+     * @throws IllegalArgumentException if timeout value <
+     *                  {@link ManagedPoolService#MIN_WAIT_TIMEOUT}
      */
-    void free(final long timeout, final boolean retry);
+    void stop(final long timeout, final boolean retry);
 
     /**
      * When the JVM receives a SIGTERM signal, this method is called to shutdown
      * the {@link ManagedPoolService} gracefully.
      * <p>
-     * If the {@link ManagedPoolService} is already in the process of shutting
-     * down additional requests are ignored.
+     * This method is considered idempotent. So if the {@link ManagedPoolService}
+     * is already in the process of shutting down additional requests are ignored.
      * <p>
      * This method does not require a state transition handler unlike
      * {@link ManagedPoolService#signalTerm(Consumer)} overloaded method.
@@ -101,9 +110,9 @@ public interface ManagedPoolService extends Executor {
      * When the JVM receives a SIGTERM signal, this method is called to shutdown
      * the {@link ManagedPoolService} gracefully.
      * <p>
-     * If the {@link ManagedPoolService} is already in the process of shutting
-     * down further requests are ignored, but the {@code stateTransitionHandler}
-     * will be invoked, if available.
+     * This method is considered idempotent. So if the {@link ManagedPoolService}
+     * is already in the process of shutting down further requests are ignored,
+     * but the {@code stateTransitionHandler} will be invoked, if available.
      * <p>
      * The thread pool patiently waits for outstanding promises to be fulfilled,
      * and it is for this reason, it is important the tasks must not run
@@ -121,7 +130,7 @@ public interface ManagedPoolService extends Executor {
             return;
         }
         try {
-            free();
+            stop();
         } finally {
             if (stateTransitionHandler != null)
                 stateTransitionHandler.accept(getState());
