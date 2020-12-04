@@ -167,6 +167,31 @@ public class PromiseTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    public void testHandle_TransmuteActionCompleteHandlerException_Pass() {
+        // Given
+        AtomicInteger received = new AtomicInteger(0);
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testHandle_TransmuteActionException_Pass")))
+                .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1) / 0),intResponse))
+                .handle((e) -> logger.error("testHandle_TransmuteActionCompleteHandlerException_Pass <-- Houston we have a problem in the main thread!! :)",e));
+
+        // Then
+        assertEquals(REJECTED,promise.getState());
+    }
+
+    @Test
+    @SuppressWarnings("NumericOverflow")
+    public void testHandle_HandleFailFastException_Pass() {
+        // Given
+        AtomicInteger received = new AtomicInteger(0);
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(()-> getValue(received, () ->  128 / 0)))
+                .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1))))
+                .handle((e) -> logger.error("testHandle_HandleFailFastException_Pass <-- Houston we have a problem in the main thread!! :)",e));
+
+        // Then
+        assertEquals(REJECTED,promise.getState());
+    }
+
+    @Test
     public void testAwait_Promises_Pos() {
         // Given
         AtomicInteger received = new AtomicInteger(0);

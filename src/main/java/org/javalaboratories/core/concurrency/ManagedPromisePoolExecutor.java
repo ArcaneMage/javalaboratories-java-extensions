@@ -40,8 +40,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * important that {@code Promise} objects reach to a natural conclusion. It is not
  * advisable for threads to run infinitely. If this is a possibility then it
  * would to be prudent to to force shutdown the pool service with the
- * {@link ManagedPromisePoolExecutor#stop(long, boolean)} specifying a timeout without
- * retries ahead of program termination.
+ * {@link ManagedPromisePoolExecutor#stop(long, boolean)} specifying a timeout
+ * without retries ahead of program termination.
  * <p>
  * Currently, various strategies are under consideration to improve shutdown
  * behaviour.
