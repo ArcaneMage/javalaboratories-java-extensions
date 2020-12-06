@@ -48,10 +48,25 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
         Set<Event<? extends T>> captureEvents;
     }
 
+    /**
+     * Default constructor
+     * <p>
+     * Create an instance of this object with {@link EventSource} set to this.
+     */
     public EventBroadcaster() {
         this(null);
     }
 
+    /**
+     * Constructs an instance of this object with an alternative {@link
+     * EventSource}.
+     * <p>
+     * An alternative {@link EventSource} is useful when this object is a
+     * composite of a "parent" object that requires an {@link EventPublisher}
+     * object.
+     * <p>
+     * Create an instance of this object with {@link EventSource} set to this.
+     */
     public EventBroadcaster(final T source) {
         this.subscriptionsMap = new LinkedHashMap<>();
         this.source = source == null ? Generics.unchecked(this) : source;
@@ -66,7 +81,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
                 try {
                     subscriber.notify(anEvent, value);
                 } catch (Throwable e) {
-
+                    // TODO: Handle this important situation
                 }
             }
         });
