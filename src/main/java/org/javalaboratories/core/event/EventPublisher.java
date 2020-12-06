@@ -4,7 +4,7 @@ package org.javalaboratories.core.event;
  * An object that implements this interface can notify its subscribed
  * dependencies with events.
  * <p>
- * This interface is the {@code Subject} component of the observer design
+ * This interface is the {@code Subject} component of the Observer Design
  * pattern as described in the "Design Patterns, Elements of Reusable Object-
  * Oriented Software (Gang-of-Four)" book. Therefore, it is a container of
  * of {@code Observers}, {@link EventSubscriber} objects. When an {@link Event},
@@ -28,30 +28,34 @@ package org.javalaboratories.core.event;
 public interface EventPublisher<T extends EventSource,V> {
     /**
      * Publish an {@link Event} to interested {@link EventSubscriber} objects
-     * when {@link EventPublisher} or owning application state changes.
+     * when {@link EventPublisher} or the owning component which encapsulates
+     * the {@code EventPublisher} state changes.
      * <p>
      * If the {@code subscriber} has not explicitly stated that it's
-     * interested in that particular {@link Event}, it will not receive a
-     * notification.
+     * interested in a particular {@link Event}, it will not receive a
+     * notification of that {@link Event}.
      * <p>
-     * @param subscriber the {@link EventSubscriber} object to register.
      * @param event the {@link Event} object with which to publish to recipients.
-     * @param value the state value representing the current state of this
-     *             {@code publisher}
+     * @param value the state value when {@link EventPublisher} or the owning
+     *              component which encapsulates the {@code EventPublisher}
+     *              state changes.
+     * @throws NullPointerException if {@code event} is null.
      */
-    void publish(final EventSubscriber<? super T,V> subscriber, final Event<? extends T> event, V value);
+    void publish(final Event<? extends T> event, final V value);
 
     /**
      * Registers the {@link EventSubscriber} with this {@link EventPublisher}.
      * <p>
      * The {@code captureEvents} parameter explicitly state the events the
-     * {@code subscriber} is particularly interested in. Each {@Link Event}
-     * must be uniquely identifiable -- ensure the {@code equals and hashCode} of
-     * the {@code Event} are implemented.
+     * {@link EventSubscriber} object is particularly interested in. Each
+     * {@link Event} must be uniquely identifiable -- ensure the {@code equals
+     * and hashCode} of the {@code Event} are implemented.
      *
      * @param subscriber the {@link EventSubscriber} object to register.
      * @param captureEvents varargs of {@link Event} objects the
      *                      {@link EventSubscriber} is interested in.
+     * @throws NullPointerException if {@code subscriber} is null.
+     * @throws IllegalArgumentException if {@code captureEvents} is null or less than 1.
      */
     void subscribe(final EventSubscriber<? super T,V> subscriber, final Event<? extends T>... captureEvents);
 
@@ -62,6 +66,7 @@ public interface EventPublisher<T extends EventSource,V> {
      * no longer receive notifications from the {@link EventPublisher}.
      *
      * @param subscriber the {@link EventSubscriber} object to unregister.
+     * @throws NullPointerException if {@code subscriber} is null.
      */
     void unsubscribe(final EventSubscriber<? super T,V> subscriber);
 }

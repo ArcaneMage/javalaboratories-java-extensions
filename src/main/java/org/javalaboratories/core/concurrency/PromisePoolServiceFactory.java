@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core.concurrency;
 
+import org.javalaboratories.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,10 +73,10 @@ public final class PromisePoolServiceFactory<T extends ManagedPoolService> {
                     if (clazz != ManagedPromisePoolExecutor.class) {
                         // Attempt to instantiate custom promise pool service
                         Constructor<?> constructor = clazz.getConstructor(int.class);
-                        instance = unchecked(constructor.newInstance(capacity));
+                        instance = Generics.unchecked(constructor.newInstance(capacity));
                     } else {
                         // Resort to default implementation
-                        instance = unchecked(new ManagedPromisePoolExecutor(capacity));
+                        instance = Generics.unchecked(new ManagedPromisePoolExecutor(capacity));
                     }
                     logger.debug("Promise pool service {} created and initialised with capacity {} successfully", clazz, capacity);
                 } catch (ClassCastException e) {
@@ -93,12 +94,6 @@ public final class PromisePoolServiceFactory<T extends ManagedPoolService> {
                 }
             }
         }
-        return unchecked(instance);
-    }
-
-    private static <T extends ManagedPoolService> T unchecked(Object object) {
-        @SuppressWarnings("unchecked")
-        T result = (T) object;
-        return result;
+        return Generics.unchecked(instance);
     }
 }

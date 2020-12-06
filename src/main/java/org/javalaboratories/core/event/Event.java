@@ -5,8 +5,8 @@ import java.io.Serializable;
 /**
  * All events fired from the {@link EventPublisher} implement this interface.
  * <p>
- * This object supplies information to {@link EventSubscriber} objects about the
- * current state change of the {@code publisher} object, upon which the
+ * This object supplies information to the {@link EventSubscriber} objects about
+ * the current state change of the {@code publisher} object, upon which the
  * {@code subscriber} would then perform an action.
  * <p>
  * As a guide to properly implement an {code Event} object, it is recommended to
@@ -17,6 +17,7 @@ import java.io.Serializable;
  * expediency.
  *
  * @param <T> Type of source in which the event originated.
+ *
  * @see AbstractEvent
  * @see EventPublisher
  * @see EventSubscriber

@@ -17,6 +17,7 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Nullable;
+import org.javalaboratories.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +109,7 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
                 .whenComplete((value,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(null, exception)));
 
-        return new AsyncUndertaking<>(service,action, unchecked(future));
+        return new AsyncUndertaking<>(service,action, Generics.unchecked(future));
     }
 
     @Override
@@ -234,11 +235,5 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
         return CompletableFuture.supplyAsync(actionable,service)
                 .whenComplete((value,exception) -> action.getCompletionHandler()
                         .ifPresent(consumer -> consumer.accept(value, exception)));
-    }
-
-    private static <T> CompletableFuture<T> unchecked(CompletableFuture<?> future) {
-        @SuppressWarnings("unchecked")
-        CompletableFuture<T> result = (CompletableFuture<T>) future;
-        return result;
     }
 }

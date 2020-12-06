@@ -16,6 +16,7 @@
 package org.javalaboratories.core.concurrency;
 
 import org.javalaboratories.core.Nullable;
+import org.javalaboratories.util.Generics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -232,11 +233,10 @@ public final class Promises {
      *           task.
      * @return {@link Nullable} encapsulates {@link Invocable} implementation.
      */
-    @SuppressWarnings("unchecked")
     private static <T> Nullable<Invocable<T>> asInvocable(final Promise<T> promise) {
         Nullable<Invocable<T>> result;
         try {
-            result = Nullable.of(Objects.requireNonNull((Invocable<T>) promise));
+            result = Generics.unchecked(Nullable.of(Objects.requireNonNull(promise)));
         } catch (ClassCastException e) {
             result = Nullable.empty();
         }
