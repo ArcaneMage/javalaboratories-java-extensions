@@ -26,5 +26,5 @@ public interface EventSubscriber<T extends EventSource,V> {
      * @param event the object event sent from the {@link EventPublisher}.
      * @param value the state or value received from the {@link EventPublisher}
      */
-    void notify(final Event<? super T> event, V value);
+    void notify(final Event<? extends T> event, V value);
 }

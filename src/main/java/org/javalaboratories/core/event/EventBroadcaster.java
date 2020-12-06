@@ -18,7 +18,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
 
     @Value
     private class Subscription {
-        Set<Event<? super T>> captureEvents;
+        Set<Event<? extends T>> captureEvents;
         String identity;
         EventSubscriber<? super T,V> subscriber;
     }
@@ -28,8 +28,8 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     }
 
     @Override
-    public void publish(final EventSubscriber<? super T,V> subscriber, final Event<? super T> event, V value) {
-        Event<? super T> e = event;
+    public void publish(final EventSubscriber<? super T,V> subscriber, final Event<? extends T> event, V value) {
+        Event<? extends T> e = event;
         subscriptionsMap.forEach((id,subscription) -> {
             if (subscription.getCaptureEvents().contains(event))
                 subscription.getSubscriber().notify(e, value);
@@ -37,7 +37,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     }
 
     @Override
-    public void subscribe(final EventSubscriber<? super T, V> subscriber, final Event<? super T>... captureEvents) {
+    public void subscribe(final EventSubscriber<? super T, V> subscriber, final Event<? extends T>... captureEvents) {
         EventSubscriber<? super T,V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
         if ( captureEvents == null || captureEvents.length > 1 )
             throw new IllegalArgumentException("No events to capture");

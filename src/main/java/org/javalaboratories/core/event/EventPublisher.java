@@ -39,7 +39,7 @@ public interface EventPublisher<T extends EventSource,V> {
      * @param value the state value representing the current state of this
      *             {@code publisher}
      */
-    void publish(final EventSubscriber<? super T,V> subscriber, final Event<? super T> event, V value);
+    void publish(final EventSubscriber<? super T,V> subscriber, final Event<? extends T> event, V value);
 
     /**
      * Registers the {@link EventSubscriber} with this {@link EventPublisher}.
@@ -53,7 +53,7 @@ public interface EventPublisher<T extends EventSource,V> {
      * @param captureEvents varargs of {@link Event} objects the
      *                      {@link EventSubscriber} is interested in.
      */
-    void subscribe(final EventSubscriber<? super T,V> subscriber, final Event<? super T>... captureEvents);
+    void subscribe(final EventSubscriber<? super T,V> subscriber, final Event<? extends T>... captureEvents);
 
     /**
      * Unregisters the {@link EventSubscriber} from this {@link EventPublisher}.
