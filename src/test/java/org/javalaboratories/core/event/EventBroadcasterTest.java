@@ -96,8 +96,8 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         assertEquals(4, logCaptor.getDebugLogs().size());
 
         // Verify event objects
-        assertTrue(((Event) ACTION_EVENT).toString().contains("{ACTION_EVENT}"));
-        assertTrue(((Event) NOTIFY_EVENT).toString().contains("{NOTIFY_EVENT}"));
+        assertTrue(ACTION_EVENT.toString().contains("{ACTION_EVENT}"));
+        assertTrue(NOTIFY_EVENT.toString().contains("{NOTIFY_EVENT}"));
         assertTrue(TEST_EVENT_A.toString().contains("{TEST_EVENT_A}"));
         assertTrue(TEST_EVENT_B.toString().contains("{TEST_EVENT_B}"));
     }
@@ -135,8 +135,8 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         assertEquals("[subscribers=2,source=EventBroadcasterTest]",publisher.toString());
 
         // Verify event objects
-        assertTrue(((Event) ACTION_EVENT).toString().contains("{ACTION_EVENT}"));
-        assertTrue(((Event) NOTIFY_EVENT).toString().contains("{NOTIFY_EVENT}"));
+        assertTrue(ACTION_EVENT.toString().contains("{ACTION_EVENT}"));
+        assertTrue(NOTIFY_EVENT.toString().contains("{NOTIFY_EVENT}"));
         assertTrue(TEST_EVENT_A.toString().contains("{TEST_EVENT_A}"));
         assertTrue(TEST_EVENT_B.toString().contains("{TEST_EVENT_B}"));
     }
@@ -185,8 +185,8 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         assertEquals(2, logCaptor.getDebugLogs().size());
 
         // Verify event objects
-        assertTrue(((Event) ACTION_EVENT).toString().contains("{ACTION_EVENT}"));
-        assertTrue(((Event) NOTIFY_EVENT).toString().contains("{NOTIFY_EVENT}"));
+        assertTrue(ACTION_EVENT.toString().contains("{ACTION_EVENT}"));
+        assertTrue(NOTIFY_EVENT.toString().contains("{NOTIFY_EVENT}"));
         assertTrue(TEST_EVENT_A.toString().contains("{TEST_EVENT_A}"));
         assertTrue(TEST_EVENT_B.toString().contains("{TEST_EVENT_B}"));
     }

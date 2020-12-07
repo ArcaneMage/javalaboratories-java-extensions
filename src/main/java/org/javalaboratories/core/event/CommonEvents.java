@@ -33,21 +33,21 @@ public final class CommonEvents implements EventSource {
      * Useful for scenarios where you expect the {@link EventSubscriber} objects
      * to perform an action based on the current {@link EventPublisher} state.
      */
-    public static final ActionEvent ACTION_EVENT = new ActionEvent(EVENT_SOURCE_UNKNOWN);
+    public static final Event ACTION_EVENT = new ActionEvent(EVENT_SOURCE_UNKNOWN);
 
     /**
      * This is a generic {@link Event} in that it is useful where the {@link Event}
      * can represent any change in state of the {@link EventPublisher}, or perhaps
      * it can be considered a super type of all {@link Event} objects.
      */
-    public static final AnyEvent ANY_EVENT = new AnyEvent(EVENT_SOURCE_UNKNOWN);
+    public static final Event ANY_EVENT = new AnyEvent(EVENT_SOURCE_UNKNOWN);
 
     /**
      * Notifies the {@link EventSubscriber} objects of the state change of the
      * {@link EventPublisher}, but the {@code subscriber} would need to
      * understand the context of the notification.
      */
-    public static final NotifyEvent NOTIFY_EVENT = new NotifyEvent(EVENT_SOURCE_UNKNOWN);
+    public static final Event NOTIFY_EVENT = new NotifyEvent(EVENT_SOURCE_UNKNOWN);
 
     private static class ActionEvent extends AbstractEvent {
         public ActionEvent(EventSource source) {

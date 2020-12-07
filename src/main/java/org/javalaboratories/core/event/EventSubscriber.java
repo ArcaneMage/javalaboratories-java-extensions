@@ -33,6 +33,7 @@ import java.util.EventListener;
  * @see EventBroadcaster
  * @see EventPublisher
  */
+@FunctionalInterface
 public interface EventSubscriber<V> extends EventListener {
 
     /**
