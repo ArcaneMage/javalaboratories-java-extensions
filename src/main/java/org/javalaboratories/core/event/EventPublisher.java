@@ -41,7 +41,7 @@ public interface EventPublisher<T extends EventSource,V> {
      *              state changes.
      * @throws NullPointerException if {@code event} is null.
      */
-    void publish(final Event<? extends T> event, final V value);
+    void publish(final Event event, final V value);
 
     /**
      * Registers the {@link EventSubscriber} with this {@link EventPublisher}.
@@ -50,14 +50,17 @@ public interface EventPublisher<T extends EventSource,V> {
      * {@link EventSubscriber} object is particularly interested in. Each
      * {@link Event} must be uniquely identifiable -- ensure the {@code equals
      * and hashCode} of the {@code Event} are implemented.
+     * <p>
+     * Note: It is not possible to subscribe the same subscriber multiple times.
      *
      * @param subscriber the {@link EventSubscriber} object to register.
      * @param captureEvents varargs of {@link Event} objects the
      *                      {@link EventSubscriber} is interested in.
      * @throws NullPointerException if {@code subscriber} is null.
-     * @throws IllegalArgumentException if {@code captureEvents} is null or less than 1.
+     * @throws IllegalArgumentException if {@code captureEvents} is null or less
+     * than 1. Multiple subscription of the same subscriber is not possible.
      */
-    void subscribe(final EventSubscriber<? super T,V> subscriber, final Event<? extends T>... captureEvents);
+    void subscribe(final EventSubscriber<V> subscriber, final Event... captureEvents);
 
     /**
      * Unregisters the {@link EventSubscriber} from this {@link EventPublisher}.
@@ -68,5 +71,5 @@ public interface EventPublisher<T extends EventSource,V> {
      * @param subscriber the {@link EventSubscriber} object to unregister.
      * @throws NullPointerException if {@code subscriber} is null.
      */
-    void unsubscribe(final EventSubscriber<? super T,V> subscriber);
+    void unsubscribe(final EventSubscriber<V> subscriber);
 }

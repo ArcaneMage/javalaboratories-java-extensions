@@ -56,7 +56,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    public void testNew_PrimaryActionCompleteHandlerException_Pass() {
+    public void testNew_PrimaryActionCompleteHandlerException_Fail() {
         // Given
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTaskWithException("testNew_PrimaryActionCompleteHandlerException_Pass"),intResponse));
 
@@ -96,7 +96,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    public void testThen_TaskActionCompleteHandlerException_Pass() {
+    public void testThen_TaskActionCompleteHandlerException_Fail() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandlerException_Pass")))
@@ -126,7 +126,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    public void testThen_TransmuteActionCompleteHandlerException_Pass() {
+    public void testThen_TransmuteActionCompleteHandlerException_Fail() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteActionCompleteHandlerException_Pass")))
@@ -167,7 +167,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    public void testHandle_TransmuteActionCompleteHandlerException_Pass() {
+    public void testHandle_TransmuteActionCompleteHandlerException_Fail() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testHandle_TransmuteActionException_Pass")))

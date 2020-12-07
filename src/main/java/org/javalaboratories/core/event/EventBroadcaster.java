@@ -12,6 +12,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.javalaboratories.core.event.EventSource.*;
+
 /**
  * This class has the ability to notify {@link EventSubscriber} recipients with
  * {@code events} when this object's state changes.
@@ -44,8 +46,8 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     @Value
     private class Subscription {
         String identity;
-        EventSubscriber<? super T,V> subscriber;
-        Set<Event<? extends T>> captureEvents;
+        EventSubscriber<V> subscriber;
+        Set<Event> captureEvents;
     }
 
     /**
@@ -54,7 +56,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
      * Create an instance of this object with {@link EventSource} set to this.
      */
     public EventBroadcaster() {
-        this(null);
+        this(Generics.unchecked(EVENT_SOURCE_UNKNOWN));
     }
 
     /**
@@ -69,16 +71,17 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
      */
     public EventBroadcaster(final T source) {
         this.subscriptionsMap = new LinkedHashMap<>();
-        this.source = source == null ? Generics.unchecked(this) : source;
+        this.source = source;
     }
 
     @Override
-    public void publish(final Event<? extends T> event, final V value) {
-        Event<? extends T> anEvent = Objects.requireNonNull(event,"No event?");
+    public void publish(final Event event, final V value) {
+        Event anEvent = Objects.requireNonNull(event,"No event?");
         subscriptionsMap.forEach((id,subscription) -> {
             if (subscription.getCaptureEvents().contains(anEvent)) {
-                EventSubscriber<? super T,V> subscriber = subscription.getSubscriber();
+                EventSubscriber<V> subscriber = subscription.getSubscriber();
                 try {
+                    source(anEvent);
                     subscriber.notify(anEvent, value);
                 } catch (Throwable e) {
                     // TODO: Handle this important situation
@@ -88,8 +91,15 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     }
 
     @Override
-    public void subscribe(final EventSubscriber<? super T, V> subscriber, final Event<? extends T>... captureEvents) {
-        EventSubscriber<? super T,V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
+    public void subscribe(final EventSubscriber<V> subscriber, final Event... captureEvents) {
+        EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
+
+        subscriptionsMap.values().stream()
+                .filter(s -> s.getSubscriber().equals(subscriber))
+                .findAny()
+                .ifPresent(s ->  {
+                    throw new IllegalArgumentException("Subscriber exists -- unsubscribe first");
+                });
 
         if ( captureEvents == null || captureEvents.length < 1 )
             throw new IllegalArgumentException("No events to capture");
@@ -101,8 +111,8 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     }
 
     @Override
-    public void unsubscribe(final EventSubscriber<? super T, V> subscriber) {
-        EventSubscriber<? super T,V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
+    public void unsubscribe(final EventSubscriber<V> subscriber) {
+        EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
 
         // Derive subscription identity
         String identity = subscriptionsMap.values().stream()
@@ -112,6 +122,18 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
 
         // Remove subscription
         subscriptionsMap.remove(identity);
+    }
+
+    @Override
+    public String toString() {
+        String source = this.source.getClass().getSimpleName();
+        source = source.isEmpty() ? "UNKNOWN" : source;
+        return String.format("[subscribers=%s,source=%s]",subscriptionsMap.size(),source);
+    }
+
+    private void source(Event event) {
+        if (event instanceof AbstractEvent)
+            ((AbstractEvent) event).source(source);
     }
 
     private String getUniqueIdentity() {

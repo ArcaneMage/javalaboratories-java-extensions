@@ -35,19 +35,19 @@ public final class CommonEvents implements EventSource {
      */
     public static final NotifyEvent NOTIFY_EVENT = new NotifyEvent(EVENT_SOURCE_UNKNOWN);
 
-    private static class ActionEvent extends AbstractEvent<EventSource> {
+    private static class ActionEvent extends AbstractEvent {
         public ActionEvent(EventSource source) {
             super(source);
         }
     }
 
-    private static class AnyEvent extends AbstractEvent<EventSource> {
+    private static class AnyEvent extends AbstractEvent {
         public AnyEvent(EventSource source) {
             super(source);
         }
     }
 
-    private static class NotifyEvent extends AbstractEvent<EventSource> {
+    private static class NotifyEvent extends AbstractEvent {
         public NotifyEvent(EventSource source) {
             super(source);
         }

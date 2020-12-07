@@ -16,13 +16,11 @@ import java.io.Serializable;
  * {@link AbstractEvent}, so would be easier to inherit from the class for
  * expediency.
  *
- * @param <T> Type of source in which the event originated.
- *
  * @see AbstractEvent
  * @see EventPublisher
  * @see EventSubscriber
  */
-public interface Event<T extends EventSource> extends Serializable {
+public interface Event extends Serializable {
 
     /**
      * @return a unique event type identifier.
@@ -32,5 +30,5 @@ public interface Event<T extends EventSource> extends Serializable {
     /**
      * @return the source of the event.
      */
-    T getSource();
+    EventSource getSource();
 }
