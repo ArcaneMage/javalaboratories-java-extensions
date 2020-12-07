@@ -5,8 +5,8 @@ import java.util.Objects;
 /**
  * Utility class for generics.
  * <p>
- * Introduce methods to handle unchecked casting of objects. It is recommended to
- * ensure that all type-checking cases are carefully considered before using
+ * Introduces methods to handle unchecked casting of objects. It is recommended
+ * to ensure that all type-checking cases are carefully considered before using
  * these methods.
  */
 public final class Generics {

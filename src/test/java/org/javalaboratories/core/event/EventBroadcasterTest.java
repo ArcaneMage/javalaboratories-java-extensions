@@ -22,6 +22,7 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
 
     private EventSubscriber<String> subscriberA;
     private EventSubscriber<String> subscriberB;
+    private EventSubscriber<String> subscriberC;
 
     class Publisher extends EventBroadcaster<EventBroadcasterTest,String> {
         public Publisher() {
@@ -51,6 +52,10 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         subscriberA = (event,value) -> logger.debug("(Subscriber - A) received value \"{}\" from event {}",
                 value,event.getEventId());
         subscriberB = this;
+        subscriberC = (event,value) -> {
+            logger.debug("(Subscriber - C) received value \"{}\" from event {}", value,event.getEventId());
+            throw new IllegalStateException("Object state error -- toxic subscriber");
+        };
     }
 
     @Test
@@ -91,6 +96,39 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
 
         assertEquals(4, count);
         assertEquals(4, logCaptor.getDebugLogs().size());
+    }
+
+    @Test
+    public void testPublish_EventsToxicSubscriber_Pass() {
+        LogCaptor logCaptor = LogCaptor.forClass(EventBroadcasterTest.class);
+
+        // Given (3 subscribers)
+        publisher.subscribe(subscriberA,NOTIFY_EVENT,TEST_EVENT_A,TEST_EVENT_B);
+        publisher.subscribe(subscriberC,ACTION_EVENT);
+        publisher.subscribe(subscriberB,ACTION_EVENT,TEST_EVENT_B);
+
+        // When
+        publisher.publish(TEST_EVENT_A,"Hello World, A"); // Subscriber A
+        publisher.publish(ACTION_EVENT,"Hello World, C"); // Subscriber B,C
+        publisher.publish(TEST_EVENT_B,"Hello World, B"); // Subscriber A,B
+
+        // Then
+        String[] log = {
+                "(Subscriber - A) received value \"Hello World, A\" from event {TEST_EVENT_A}",
+                "(Subscriber - C) received value \"Hello World, C\" from event {ACTION_EVENT}",
+                "(Subscriber - B) received value \"Hello World, C\" from event {ACTION_EVENT}",
+                "(Subscriber - A) received value \"Hello World, B\" from event {TEST_EVENT_B}",
+                "(Subscriber - B) received value \"Hello World, B\" from event {TEST_EVENT_B}"
+        };
+
+        long count = logCaptor.getDebugLogs().stream()
+                .filter(l -> l.contains(log[0]) || l.contains(log[1]) || l.contains(log[2]) || l.contains(log[3]) || l.contains(log[4]))
+                .count();
+
+
+        assertEquals(5, count);
+        assertEquals(5, logCaptor.getDebugLogs().size());
+        assertEquals("[subscribers=2,source=EventBroadcasterTest]",publisher.toString());
     }
 
     @Test

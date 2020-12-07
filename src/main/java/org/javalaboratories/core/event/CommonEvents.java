@@ -3,10 +3,9 @@ package org.javalaboratories.core.event;
 /**
  * Utility class of the pre-defined {@link Event} types.
  * <p>
- * These are useful to minimise boiler-plate code, but it must be noted that none
- * of these {@link Event} types are unaware of the {@link EventSource} object. If
- * the {@link EventSource} is required, implement user-defined {@link Event}
- * object by subclassing {@link AbstractEvent} class.
+ * These are useful to minimise boiler-plate code, but if additional or
+ * alternative event types are necessary, implement the user-defined
+ * {@link Event} object(s) by subclassing {@link AbstractEvent} class.
  *
  * @see AbstractEvent
  * @see Event

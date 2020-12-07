@@ -35,6 +35,11 @@ public interface EventPublisher<T extends EventSource,V> {
      * interested in a particular {@link Event}, it will not receive a
      * notification of that {@link Event}.
      * <p>
+     * In situations where {@link EventSubscriber} throws an exception, the
+     * {@link EventPublisher} object will consider the {@code subscriber} as
+     * unstable/toxic and will automatically cancel its subscription, and then
+     * continue notifying outstanding {@code subscribers}.
+     *
      * @param event the {@link Event} object with which to publish to recipients.
      * @param value the state value when {@link EventPublisher} or the owning
      *              component which encapsulates the {@code EventPublisher}

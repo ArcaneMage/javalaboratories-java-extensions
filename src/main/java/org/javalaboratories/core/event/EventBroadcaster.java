@@ -2,17 +2,11 @@ package org.javalaboratories.core.event;
 
 import lombok.Value;
 import org.javalaboratories.util.Generics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.javalaboratories.core.event.EventSource.*;
 
 /**
  * This class has the ability to notify {@link EventSubscriber} recipients with
@@ -38,6 +32,8 @@ import static org.javalaboratories.core.event.EventSource.*;
  * @see EventSubscriber
  */
 public abstract class EventBroadcaster<T extends EventSource,V> implements EventPublisher<T,V>, EventSource {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
     private static int uniqueIdentity = 0;
     private final Map<String,Subscription> subscriptionsMap;
@@ -77,6 +73,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     @Override
     public void publish(final Event event, final V value) {
         Event anEvent = Objects.requireNonNull(event,"No event?");
+        List<EventSubscriber<V>> canceled = new LinkedList<>();
         subscriptionsMap.forEach((id,subscription) -> {
             if (subscription.getCaptureEvents().contains(anEvent)) {
                 EventSubscriber<V> subscriber = subscription.getSubscriber();
@@ -84,10 +81,13 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
                     source(anEvent);
                     subscriber.notify(anEvent, value);
                 } catch (Throwable e) {
-                    // TODO: Handle this important situation
+                    logger.error("Subscriber raised an uncaught exception -- canceled subscription",e);
+                    canceled.add(subscriber);
                 }
             }
         });
+        // Remove/cancel toxic subscriptions
+        canceled.forEach(this::unsubscribe);
     }
 
     @Override
