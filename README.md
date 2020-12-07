@@ -12,7 +12,7 @@ configuration below:
     <dependency>
       <groupId>org.javalaboratories</groupId>
       <artifactId>java-extensions</artifactId>
-      <version>1.0.1-RELEASE</version>
+      <version>1.0.3-RELEASE</version>
     </dependency>
 ```
 
