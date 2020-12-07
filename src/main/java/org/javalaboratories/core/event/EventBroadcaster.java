@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 Kevin Henry
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package org.javalaboratories.core.event;
 
 import lombok.Value;
@@ -20,8 +35,7 @@ import java.util.stream.Collectors;
  * To complete the observer design pattern, implement the {@link EventSubscriber}
  * interface and introduce {@code event} types by subclassing {@link AbstractEvent}
  * class and/or use the out-of-the-box {@link Event} objects defined in the
- * {@link CommonEvents} class. However, it is important to note that these
- * pre-defined events are unaware of the the {@link EventSource}.
+ * {@link CommonEvents} class.
  *
  * @param <T> Type of source in which the event originated.
  * @param <V> Type of value and/or state forwarded to the {@code subscribers}
@@ -36,7 +50,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
     private static int uniqueIdentity = 0;
-    private final Map<String,Subscription> subscriptionsMap;
+    private final Map<String,Subscription> subscriptions;
     private final T source;
 
     @Value
@@ -66,15 +80,15 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
      * Create an instance of this object with {@link EventSource} set to this.
      */
     public EventBroadcaster(final T source) {
-        this.subscriptionsMap = new LinkedHashMap<>();
         this.source = source;
+        this.subscriptions = new LinkedHashMap<>();
     }
 
     @Override
     public void publish(final Event event, final V value) {
         Event anEvent = Objects.requireNonNull(event,"No event?");
         List<EventSubscriber<V>> canceled = new LinkedList<>();
-        subscriptionsMap.forEach((id,subscription) -> {
+        subscriptions.forEach((id, subscription) -> {
             if (subscription.getCaptureEvents().contains(anEvent)) {
                 EventSubscriber<V> subscriber = subscription.getSubscriber();
                 try {
@@ -94,10 +108,10 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     public void subscribe(final EventSubscriber<V> subscriber, final Event... captureEvents) {
         EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
 
-        subscriptionsMap.values().stream()
+        subscriptions.values().stream()
                 .filter(s -> s.getSubscriber().equals(subscriber))
                 .findAny()
-                .ifPresent(s ->  {
+                .ifPresent(s -> {
                     throw new IllegalArgumentException("Subscriber exists -- unsubscribe first");
                 });
 
@@ -107,7 +121,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
         Subscription subscription = new Subscription(getUniqueIdentity(),aSubscriber,
                 Collections.unmodifiableSet(new HashSet<>(Arrays.asList(captureEvents))));
 
-        subscriptionsMap.put(subscription.getIdentity(),subscription);
+        subscriptions.put(subscription.getIdentity(),subscription);
     }
 
     @Override
@@ -115,20 +129,20 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
         EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
 
         // Derive subscription identity
-        String identity = subscriptionsMap.values().stream()
+        String identity = subscriptions.values().stream()
                 .filter(s -> s.getSubscriber().equals(aSubscriber))
                 .map(Subscription::getIdentity)
                 .collect(Collectors.joining());
 
         // Remove subscription
-        subscriptionsMap.remove(identity);
+        subscriptions.remove(identity);
     }
 
     @Override
     public String toString() {
         String source = this.source.getClass().getSimpleName();
         source = source.isEmpty() ? "UNKNOWN" : source;
-        return String.format("[subscribers=%s,source=%s]",subscriptionsMap.size(),source);
+        return String.format("[subscribers=%s,source=%s]", subscriptions.size(),source);
     }
 
     private void source(Event event) {

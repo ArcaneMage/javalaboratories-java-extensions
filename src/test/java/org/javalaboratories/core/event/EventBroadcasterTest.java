@@ -7,8 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.javalaboratories.core.event.CommonEvents.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EventBroadcasterTest implements EventSubscriber<String>, EventSource  {
 
@@ -93,9 +92,14 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
                 .filter(l -> l.contains(log[0]) || l.contains(log[1]) || l.contains(log[2]) || l.contains(log[3]))
                 .count();
 
-
         assertEquals(4, count);
         assertEquals(4, logCaptor.getDebugLogs().size());
+
+        // Verify event objects
+        assertTrue(((Event) ACTION_EVENT).toString().contains("{ACTION_EVENT}"));
+        assertTrue(((Event) NOTIFY_EVENT).toString().contains("{NOTIFY_EVENT}"));
+        assertTrue(TEST_EVENT_A.toString().contains("{TEST_EVENT_A}"));
+        assertTrue(TEST_EVENT_B.toString().contains("{TEST_EVENT_B}"));
     }
 
     @Test
@@ -129,6 +133,12 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         assertEquals(5, count);
         assertEquals(5, logCaptor.getDebugLogs().size());
         assertEquals("[subscribers=2,source=EventBroadcasterTest]",publisher.toString());
+
+        // Verify event objects
+        assertTrue(((Event) ACTION_EVENT).toString().contains("{ACTION_EVENT}"));
+        assertTrue(((Event) NOTIFY_EVENT).toString().contains("{NOTIFY_EVENT}"));
+        assertTrue(TEST_EVENT_A.toString().contains("{TEST_EVENT_A}"));
+        assertTrue(TEST_EVENT_B.toString().contains("{TEST_EVENT_B}"));
     }
 
     @Test
@@ -173,6 +183,12 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
 
         assertEquals(2, count);
         assertEquals(2, logCaptor.getDebugLogs().size());
+
+        // Verify event objects
+        assertTrue(((Event) ACTION_EVENT).toString().contains("{ACTION_EVENT}"));
+        assertTrue(((Event) NOTIFY_EVENT).toString().contains("{NOTIFY_EVENT}"));
+        assertTrue(TEST_EVENT_A.toString().contains("{TEST_EVENT_A}"));
+        assertTrue(TEST_EVENT_B.toString().contains("{TEST_EVENT_B}"));
     }
 
     @Override
