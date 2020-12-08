@@ -24,8 +24,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -117,14 +115,12 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
 
         set.forEach(subscription -> {
             if (subscription.getCaptureEvents().contains(anEvent)) {
-                synchronized(subscription.getIdentity()) {
-                    EventSubscriber<V> subscriber = subscription.getSubscriber();
-                    try {
-                        subscriber.notify(anEvent, value);
-                    } catch (Throwable e) {
-                        logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
-                        unsubscribe(subscriber);
-                    }
+                EventSubscriber<V> subscriber = subscription.getSubscriber();
+                try {
+                    subscriber.notify(anEvent, value);
+                } catch (Throwable e) {
+                    logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
+                    unsubscribe(subscriber);
                 }
             }
         });
