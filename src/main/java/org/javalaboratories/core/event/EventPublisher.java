@@ -89,7 +89,9 @@ public interface EventPublisher<T extends EventSource,V> {
      * no longer receive notifications from the {@link EventPublisher}.
      *
      * @param subscriber the {@link EventSubscriber} object to unregister.
+     * @return {@code true} for successful removal, {@code false} for unrecognised
+     *         or unknown {@code subscriber}
      * @throws NullPointerException if {@code subscriber} is null.
      */
-    void unsubscribe(final EventSubscriber<V> subscriber);
+    boolean unsubscribe(final EventSubscriber<V> subscriber);
 }

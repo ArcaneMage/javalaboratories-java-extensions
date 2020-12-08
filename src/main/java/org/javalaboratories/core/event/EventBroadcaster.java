@@ -15,12 +15,20 @@
  */
 package org.javalaboratories.core.event;
 
-import lombok.Value;
+import lombok.*;
 import org.javalaboratories.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -60,8 +68,11 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     private final T source;
 
     @Value
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     private class Subscription {
+        @EqualsAndHashCode.Include
         String identity;
+
         EventSubscriber<V> subscriber;
         Set<Event> captureEvents;
     }
@@ -96,30 +107,27 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
         Event anEvent = Objects.requireNonNull(event,"No event?")
                 .assign(source);
 
-        List<EventSubscriber<V>> canceled = new LinkedList<>();
-        Map<String,Subscription> subscriptionsCopy = new HashMap<>();
-
+        Set<Subscription> set;
         lock.lock();
         try {
-            subscriptions.forEach((subscriptionsCopy::put));
+            set = new HashSet<>(subscriptions.values());
         } finally {
             lock.unlock();
         }
 
-        subscriptionsCopy.forEach((id, subscription) -> {
+        set.forEach(subscription -> {
             if (subscription.getCaptureEvents().contains(anEvent)) {
-                EventSubscriber<V> subscriber = subscription.getSubscriber();
-                try {
-                    subscriber.notify(anEvent, value);
-                } catch (Throwable e) {
-                    logger.error("Subscriber raised an uncaught exception -- canceled subscription",e);
-                    canceled.add(subscriber);
+                synchronized(subscription.getIdentity()) {
+                    EventSubscriber<V> subscriber = subscription.getSubscriber();
+                    try {
+                        subscriber.notify(anEvent, value);
+                    } catch (Throwable e) {
+                        logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
+                        unsubscribe(subscriber);
+                    }
                 }
             }
         });
-
-        // Remove/cancel toxic subscriptions
-        canceled.forEach(this::unsubscribe);
     }
 
     @Override
@@ -148,7 +156,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     }
 
     @Override
-    public void unsubscribe(final EventSubscriber<V> subscriber) {
+    public boolean unsubscribe(final EventSubscriber<V> subscriber) {
         EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
 
         lock.lock();
@@ -160,7 +168,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
                     .collect(Collectors.joining());
 
             // Remove subscription
-            subscriptions.remove(identity);
+            return subscriptions.remove(identity) != null;
         } finally {
             lock.unlock();
         }

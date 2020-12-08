@@ -142,7 +142,7 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
 
         // Given (3 subscribers)
         publisher.subscribe(subscriberA,NOTIFY_EVENT,TEST_EVENT_A,TEST_EVENT_B);
-        publisher.subscribe(subscriberC,ACTION_EVENT);
+        publisher.subscribe(subscriberC,ACTION_EVENT); // <-- toxic subscriber
         publisher.subscribe(subscriberB,ACTION_EVENT,TEST_EVENT_B);
 
         // When
@@ -198,9 +198,9 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         // Given
         publisher.subscribe(subscriberA,NOTIFY_EVENT,TEST_EVENT_A,TEST_EVENT_B);
         publisher.subscribe(subscriberB,ACTION_EVENT,TEST_EVENT_B);
-        publisher.unsubscribe(subscriberA);
 
         // When
+        boolean removed = publisher.unsubscribe(subscriberA);
         publisher.publish(TEST_EVENT_A,"Hello World, A"); // Subscriber A
         publisher.publish(TEST_EVENT_B,"Hello World, B"); // Subscriber A,B
         publisher.publish(ACTION_EVENT,"Hello World, C"); // Subscriber B
@@ -215,6 +215,7 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
                 .filter(l -> l.contains(log[0]) || l.contains(log[1]))
                 .count();
 
+        assertTrue(removed);
         assertEquals(2, count);
         assertEquals(2, logCaptor.getDebugLogs().size());
 
@@ -223,6 +224,19 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         assertTrue(NOTIFY_EVENT.toString().contains("{NOTIFY_EVENT}"));
         assertTrue(TEST_EVENT_A.toString().contains("{TEST_EVENT_A}"));
         assertTrue(TEST_EVENT_B.toString().contains("{TEST_EVENT_B}"));
+    }
+
+    @Test
+    public void testUnsubscribe_UnregisteredSubscriber_Pass() {
+        // Given (1 subscriber)
+        publisher.subscribe(subscriberA,NOTIFY_EVENT);
+
+        // When
+        boolean removed = publisher.unsubscribe(subscriberB);
+
+        // Then
+        assertFalse(removed);
+        assertEquals("[subscribers=1,source=EventBroadcasterTest]",publisher.toString());
     }
 
     @Override
