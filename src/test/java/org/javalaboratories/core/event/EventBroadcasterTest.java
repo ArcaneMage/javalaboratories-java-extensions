@@ -115,13 +115,16 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
     @Test
     public void testPublish_IncompatibleEvents_Fail() {
         // Given (3 subscribers)
-        publisher.subscribe(subscriberA,NOTIFY_EVENT,TEST_EVENT_A,TEST_EVENT_B);
+        publisher.subscribe(subscriberA,NOTIFY_EVENT,TEST_EVENT_A,TEST_EVENT_B,TEST_EVENT_C);
         publisher.subscribe(subscriberC,ACTION_EVENT);
         publisher.subscribe(subscriberB,ACTION_EVENT,TEST_EVENT_B);
 
         // Then
         publisher.publish(TEST_EVENT_A,"Hello World, A"); // Subscriber A
-        assertThrows(EventException.class, () -> publisher.publish(TEST_EVENT_C,"Hello World, A")); // Subscriber A
+        EventException exception = assertThrows(EventException.class, () -> publisher.publish(TEST_EVENT_C,"Hello World, A"));
+
+        Event incompatibleEvent = exception.getEvent()
+                .orElseThrow();
 
         assertEquals("[subscribers=3,source=EventBroadcasterTest]",publisher.toString());
 
@@ -130,7 +133,7 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         assertTrue(NOTIFY_EVENT.toString().contains("{NOTIFY_EVENT}"));
         assertTrue(TEST_EVENT_A.toString().contains("{TEST_EVENT_A}"));
         assertTrue(TEST_EVENT_B.toString().contains("{TEST_EVENT_B}"));
-        assertTrue(TEST_EVENT_C.toString().contains("{TEST_EVENT_C}"));
+        assertTrue(incompatibleEvent.toString().contains("{TEST_EVENT_C}"));
     }
 
     @Test
