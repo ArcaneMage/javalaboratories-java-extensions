@@ -24,18 +24,33 @@ import java.io.Serializable;
  * the current state change of the {@code publisher} object, upon which the
  * {@code subscriber} would then perform an action.
  * <p>
- * As a guide to properly implement an {code Event} object, it is recommended to
- * ensure that the {@code equals} and {@code hashCode} methods are correctly
- * implemented; preferably, the event object is immutable; each event type has a
- * unique identifier. These considerations are taken into account in the
- * {@link AbstractEvent}, so would be easier to inherit from the class for
+ * As a guide to properly implement an {code Event} object: it is recommended to
+ * ensure that the {@code equals}, {@code hashCode} and {@code clone} methods are
+ * correctly implemented; preferably, the event object is immutable; each event
+ * type has a unique identifier. These considerations are taken into account in the
+ * {@link AbstractEvent}, so would be easier to inherit from that class for
  * expediency.
  *
  * @see AbstractEvent
  * @see EventPublisher
  * @see EventSubscriber
  */
-public interface Event extends Serializable {
+public interface Event extends Serializable, Cloneable {
+
+    /**
+     * Assigns current {@link EventSource} to event object.
+     * <p>
+     * {@link EventSource} is the origin of the {@code event}, in other words
+     * the {@code source} of the behaviour change that triggered the event. To
+     * maintain immutability, a new instance of the {@link Event} object is
+     * returned encapsulating the {@link EventSource}.
+     *
+     * @param source {@link EventSource} of the {@code event}
+     * @return an {@link Event} object with new {@link EventSource}
+     * @throws UnsupportedOperationException problem occurred attempting to
+     * create a new instance of the object.
+     */
+    Event assign(final EventSource source);
 
     /**
      * @return a unique event type identifier.

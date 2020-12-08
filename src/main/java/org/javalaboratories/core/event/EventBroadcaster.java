@@ -86,13 +86,14 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
 
     @Override
     public void publish(final Event event, final V value) {
-        Event anEvent = Objects.requireNonNull(event,"No event?");
+        Event anEvent = Objects.requireNonNull(event,"No event?")
+                .assign(source);
+
         List<EventSubscriber<V>> canceled = new LinkedList<>();
         subscriptions.forEach((id, subscription) -> {
             if (subscription.getCaptureEvents().contains(anEvent)) {
                 EventSubscriber<V> subscriber = subscription.getSubscriber();
                 try {
-                    source(anEvent);
                     subscriber.notify(anEvent, value);
                 } catch (Throwable e) {
                     logger.error("Subscriber raised an uncaught exception -- canceled subscription",e);
@@ -100,6 +101,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
                 }
             }
         });
+
         // Remove/cancel toxic subscriptions
         canceled.forEach(this::unsubscribe);
     }
@@ -108,15 +110,15 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     public void subscribe(final EventSubscriber<V> subscriber, final Event... captureEvents) {
         EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
 
+        if ( captureEvents == null || captureEvents.length < 1 )
+            throw new IllegalArgumentException("No events to capture");
+
         subscriptions.values().stream()
                 .filter(s -> s.getSubscriber().equals(subscriber))
                 .findAny()
                 .ifPresent(s -> {
-                    throw new IllegalArgumentException("Subscriber exists -- unsubscribe first");
+                    throw new EventException("Subscriber exists -- unsubscribe first");
                 });
-
-        if ( captureEvents == null || captureEvents.length < 1 )
-            throw new IllegalArgumentException("No events to capture");
 
         Subscription subscription = new Subscription(getUniqueIdentity(),aSubscriber,
                 Collections.unmodifiableSet(new HashSet<>(Arrays.asList(captureEvents))));
@@ -143,11 +145,6 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
         String source = this.source.getClass().getSimpleName();
         source = source.isEmpty() ? "UNKNOWN" : source;
         return String.format("[subscribers=%s,source=%s]", subscriptions.size(),source);
-    }
-
-    private void source(Event event) {
-        if (event instanceof AbstractEvent)
-            ((AbstractEvent) event).source(source);
     }
 
     private String getUniqueIdentity() {

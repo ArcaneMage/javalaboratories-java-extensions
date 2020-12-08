@@ -68,7 +68,7 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
      *
      * @param service the thread pool service.
      * @param action the primary action of this object to be processed
-     *              asynchronously.
+     *               asynchronously.
      * @throws NullPointerException if service or action is null.
      */
     AsyncUndertaking(final ManagedPoolService service, final PrimaryAction<T> action) {
@@ -84,7 +84,7 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
      *
      * @param service the thread pool service.
      * @param action the primary action of this object to be processed
-     *              asynchronously.
+     *               asynchronously.
      * @param future underlying {@link CompletableFuture} object, initially
      *               set to {@code null} until this object is ready to perform the
      *               action asynchronously.

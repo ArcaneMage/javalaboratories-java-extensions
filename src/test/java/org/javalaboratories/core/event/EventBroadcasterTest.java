@@ -15,6 +15,7 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
 
     private static final Event TEST_EVENT_A = new TestEventA();
     private static final Event TEST_EVENT_B = new TestEventB();
+    private static final Event TEST_EVENT_C = new TestEventC();
 
     private EventPublisher<EventBroadcasterTest,String> publisher;
     private EventPublisher<EventBroadcasterTest,String> publisher2;
@@ -44,6 +45,15 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         }
     }
 
+    static class TestEventC extends AbstractEvent {
+        public TestEventC clone() throws CloneNotSupportedException {
+            throw new CloneNotSupportedException();
+        }
+        public TestEventC() {
+            super();
+        }
+    }
+
     @BeforeEach
     public void setup() {
         publisher = new Publisher(this);
@@ -58,7 +68,7 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
     }
 
     @Test
-    public void testNew_Publisher_Pas() {
+    public void testNew_Publisher_Pass() {
         // Given
         //   - Publisher objects created in setup method, one with a source and one without.
 
@@ -103,7 +113,28 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
     }
 
     @Test
-    public void testPublish_EventsToxicSubscriber_Pass() {
+    public void testPublish_IncompatibleEvents_Fail() {
+        // Given (3 subscribers)
+        publisher.subscribe(subscriberA,NOTIFY_EVENT,TEST_EVENT_A,TEST_EVENT_B);
+        publisher.subscribe(subscriberC,ACTION_EVENT);
+        publisher.subscribe(subscriberB,ACTION_EVENT,TEST_EVENT_B);
+
+        // Then
+        publisher.publish(TEST_EVENT_A,"Hello World, A"); // Subscriber A
+        assertThrows(EventException.class, () -> publisher.publish(TEST_EVENT_C,"Hello World, A")); // Subscriber A
+
+        assertEquals("[subscribers=3,source=EventBroadcasterTest]",publisher.toString());
+
+        // Verify event objects
+        assertTrue(ACTION_EVENT.toString().contains("{ACTION_EVENT}"));
+        assertTrue(NOTIFY_EVENT.toString().contains("{NOTIFY_EVENT}"));
+        assertTrue(TEST_EVENT_A.toString().contains("{TEST_EVENT_A}"));
+        assertTrue(TEST_EVENT_B.toString().contains("{TEST_EVENT_B}"));
+        assertTrue(TEST_EVENT_C.toString().contains("{TEST_EVENT_C}"));
+    }
+
+    @Test
+    public void testPublish_ToxicSubscriber_Pass() {
         LogCaptor logCaptor = LogCaptor.forClass(EventBroadcasterTest.class);
 
         // Given (3 subscribers)
@@ -154,7 +185,7 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         publisher.subscribe(subscriberA,NOTIFY_EVENT,TEST_EVENT_A,TEST_EVENT_B);
 
         // Then
-        assertThrows(IllegalArgumentException.class, () -> publisher.subscribe(subscriberA,ANY_EVENT));
+        assertThrows(EventException.class, () -> publisher.subscribe(subscriberA,ANY_EVENT));
     }
 
     @Test

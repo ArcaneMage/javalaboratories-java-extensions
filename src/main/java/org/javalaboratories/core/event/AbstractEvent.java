@@ -21,6 +21,7 @@ import lombok.ToString;
 
 import java.util.Arrays;
 import java.util.EventObject;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.javalaboratories.core.event.EventSource.EVENT_SOURCE_UNKNOWN;
@@ -47,17 +48,22 @@ public abstract class AbstractEvent extends EventObject implements Event {
         this.eventId = String.format("{%s}",identity);
     }
 
-    /**
-     * Assigns current {@link EventSource} to this event object.
-     * <p>
-     * {@link EventSource} is the origin of the {@code event}, in other words
-     * the {@code source} of the behaviour change that triggered the event. Only
-     * the {@link EventPublisher} will have access to this method.
-     *
-     * @param source {@link EventSource} of the {@code event}.
-     */
-    void source(final EventSource source) {
-        this.source = source;
+    @Override
+    public AbstractEvent clone() throws CloneNotSupportedException {
+        return (AbstractEvent) super.clone();
+    }
+
+    @Override
+    public AbstractEvent assign(final EventSource source) {
+        EventSource s = Objects.requireNonNull(source,"No source?");
+        AbstractEvent result;
+        try {
+            result = clone();
+            result.source = s;
+        } catch (CloneNotSupportedException e) {
+            throw new EventException("Assignment failure of event source",e,this);
+        }
+        return result;
     }
 
     @ToString.Include
