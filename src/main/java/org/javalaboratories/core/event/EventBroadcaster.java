@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -49,7 +51,11 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
 
     private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
+    // uniqueIdentity variable has its own lock (intrinsic). Retrieving identity
+    // should not be obstructed by the main Lock object.
     private static int uniqueIdentity = 0;
+
+    private final Lock lock;
     private final Map<String,Subscription> subscriptions;
     private final T source;
 
@@ -82,6 +88,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     public EventBroadcaster(final T source) {
         this.source = source;
         this.subscriptions = new LinkedHashMap<>();
+        this.lock = new ReentrantLock();
     }
 
     @Override
@@ -90,7 +97,16 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
                 .assign(source);
 
         List<EventSubscriber<V>> canceled = new LinkedList<>();
-        subscriptions.forEach((id, subscription) -> {
+        Map<String,Subscription> subscriptionsCopy = new HashMap<>();
+
+        lock.lock();
+        try {
+            subscriptions.forEach((subscriptionsCopy::put));
+        } finally {
+            lock.unlock();
+        }
+
+        subscriptionsCopy.forEach((id, subscription) -> {
             if (subscription.getCaptureEvents().contains(anEvent)) {
                 EventSubscriber<V> subscriber = subscription.getSubscriber();
                 try {
@@ -113,38 +129,53 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
         if ( captureEvents == null || captureEvents.length < 1 )
             throw new IllegalArgumentException("No events to capture");
 
-        subscriptions.values().stream()
-                .filter(s -> s.getSubscriber().equals(subscriber))
-                .findAny()
-                .ifPresent(s -> {
-                    throw new EventException("Subscriber exists -- unsubscribe first");
-                });
+        lock.lock();
+        try {
+            subscriptions.values().stream()
+                    .filter(s -> s.getSubscriber().equals(subscriber))
+                    .findAny()
+                    .ifPresent(s -> {
+                        throw new EventException("Subscriber exists -- unsubscribe first");
+                    });
 
-        Subscription subscription = new Subscription(getUniqueIdentity(),aSubscriber,
-                Collections.unmodifiableSet(new HashSet<>(Arrays.asList(captureEvents))));
+            Subscription subscription = new Subscription(getUniqueIdentity(), aSubscriber,
+                    Collections.unmodifiableSet(new HashSet<>(Arrays.asList(captureEvents))));
 
-        subscriptions.put(subscription.getIdentity(),subscription);
+            subscriptions.put(subscription.getIdentity(), subscription);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public void unsubscribe(final EventSubscriber<V> subscriber) {
         EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
 
-        // Derive subscription identity
-        String identity = subscriptions.values().stream()
-                .filter(s -> s.getSubscriber().equals(aSubscriber))
-                .map(Subscription::getIdentity)
-                .collect(Collectors.joining());
+        lock.lock();
+        try {
+            // Derive subscription identity
+            String identity = subscriptions.values().stream()
+                    .filter(s -> s.getSubscriber().equals(aSubscriber))
+                    .map(Subscription::getIdentity)
+                    .collect(Collectors.joining());
 
-        // Remove subscription
-        subscriptions.remove(identity);
+            // Remove subscription
+            subscriptions.remove(identity);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public String toString() {
         String source = this.source.getClass().getSimpleName();
         source = source.isEmpty() ? "UNKNOWN" : source;
-        return String.format("[subscribers=%s,source=%s]", subscriptions.size(),source);
+        lock.lock();
+        try {
+            return String.format("[subscribers=%s,source=%s]", subscriptions.size(), source);
+        } finally {
+            lock.unlock();
+        }
     }
 
     private String getUniqueIdentity() {
