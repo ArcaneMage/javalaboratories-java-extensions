@@ -34,5 +34,5 @@ public interface FloodController {
     /**
      * Orders the flood workers to open the gate.
      */
-    void open();
+    void flood();
 }

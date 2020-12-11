@@ -31,7 +31,8 @@ import java.util.function.Supplier;
 
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Floodgate<T> {
+public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
+
     public static final long FLOOD_WAIT_TIMEOUT_MINUTES = 5L;
     public static final int DEFAULT_FLOOD_WORKERS = 2;
     public static final int DEFAULT_FLOOD_ITERATIONS = 5;
@@ -57,14 +58,14 @@ public class Floodgate<T> {
     private final int threads;
     private final int iterations;
 
+    private States state;
+
     @Getter(AccessLevel.NONE)
     private CountDownLatch workLatch;
     @Getter(AccessLevel.NONE)
     private ExecutorService service;
     @Getter(AccessLevel.NONE)
     private List<Future<T>> futures;
-    @Getter(AccessLevel.NONE)
-    private boolean ready;
 
     public <U> Floodgate(final Class<U> clazz, final Runnable target) {
         this(clazz,DEFAULT_FLOOD_WORKERS, DEFAULT_FLOOD_ITERATIONS,target);
@@ -92,27 +93,28 @@ public class Floodgate<T> {
         this.target = target;
         this.floodManagement = controller;
         this.futures = null;
-        this.ready = false;
+        this.state = States.CLOSED;
     }
 
-    public boolean prime() {
-        boolean result = false;
-        if (!ready) {
+    public boolean open() {
+        if (state == States.CLOSED) {
             this.service = createExecutor();
             Supplier<T> target = prepare(this.target);
             futures = prime(target);
-            result = ready = true;
+            state = States.OPENED;
+        } else {
+            throw new IllegalStateException(String.format("Floodgate not closed, state=%s",state));
         }
-        return result;
+        return true;
     }
 
-    public List<T> open() {
-        return open(FLOOD_WAIT_TIMEOUT_MINUTES,TimeUnit.MINUTES);
+    public List<T> flood() {
+        return flood(FLOOD_WAIT_TIMEOUT_MINUTES,TimeUnit.MINUTES);
     }
 
-    public List<T> open(final long timeout, final TimeUnit units) {
-        if (!ready)
-            throw new IllegalStateException("Floodgate not primed");
+    public List<T> flood(final long timeout, final TimeUnit units) {
+        if (state != States.OPENED)
+            throw new IllegalStateException(String.format("Floodgate not open, state=%s",state));
         TimeUnit u = Objects.requireNonNull(units);
 
         List<T> result;
@@ -125,7 +127,7 @@ public class Floodgate<T> {
                 if (getActiveCount() < threads)
                     logger.warn("{} - Active thread count {}. Not all flood workers are ready",name,getActiveCount());
                 if (!(floodManagement instanceof ExternalFloodController)) {
-                    floodManagement.open();
+                    floodManagement.flood();
                 } else {
                     logger.info("{} - Flood controller externally managed -- deferred management",name);
                 }
@@ -136,7 +138,7 @@ public class Floodgate<T> {
         } finally {
             shutdown();
             result = finalise(futures);
-            ready = false;
+            state = States.FLOODED;
         }
         return result;
     }
@@ -183,7 +185,7 @@ public class Floodgate<T> {
                 } catch (InterruptedException ignore) {}
             }
             @Override
-            public void open() {
+            public void flood() {
                 latch.countDown();
             }
         };

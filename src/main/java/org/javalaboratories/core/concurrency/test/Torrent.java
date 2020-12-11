@@ -15,10 +15,7 @@
  */
 package org.javalaboratories.core.concurrency.test;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Value;
+import lombok.*;
 import org.javalaboratories.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,17 +26,22 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
-public final class Torrent {
+@Getter
+public final class Torrent implements MultithreadedFloodTester<Map<String,List<?>>> {
 
     private static final Logger logger = LoggerFactory.getLogger(Torrent.class);
 
+    @Getter(AccessLevel.NONE)
     private final List<Floodgate<?>> floodgates;
+    @Getter(AccessLevel.NONE)
     private final FloodController floodManagement;
+
+    private States state;
 
     private Torrent() {
         floodgates = new ArrayList<>();
         floodManagement = new ExternalFloodController() {
-            CountDownLatch latch = new CountDownLatch(1);
+            final CountDownLatch latch = new CountDownLatch(1);
             @Override
             public void halt() {
                 try {
@@ -47,11 +49,12 @@ public final class Torrent {
                 } catch (InterruptedException ignore) {}
             }
             @Override
-            public void open() {
+            public void flood() {
                 logger.info("Torrent is opening all floodgates simultaneously");
                 latch.countDown();
             }
         };
+        state = States.CLOSED;
     }
 
     @Getter
@@ -142,27 +145,42 @@ public final class Torrent {
         return new TorrentBuilder<>(clazz,threads,iterations);
     }
 
-    public Map<String,List<?>> open() {
-        floodgates.forEach(Floodgate::prime);
-        CompletableFuture<Map<String,List<?>>> cfuture = CompletableFuture
-                .supplyAsync(() -> {
-                    Map<String,List<?>> result = new HashMap<>();
-                    floodgates.forEach(fg -> result.put(fg.getName(),fg.open()));
-                    return result;
-                })
-                .whenComplete((v,e) -> {
-                    if (e != null) {
-                        logger.error("An error was encountered in one of the floodgates {}",e.getMessage());
-                    } else {
-                        logger.info("{} floodgate(s) completed successfully,",v.size());
-                    }
-                });
+    public boolean open() {
+        if (state == States.CLOSED) {
+            floodgates.forEach(Floodgate::open);
+            state = States.OPENED;
+        } else {
+            throw new IllegalStateException(String.format("Torrent not closed, state=%s",state));
+        }
+        return true;
+    }
 
-        floodManagement.open();
-        Map<String,List<?>> result = null;
+    public Map<String,List<?>> flood() {
+        if (state != States.OPENED)
+            throw new IllegalStateException(String.format("Torrent not open, state=%s",state));
+
+        final Map<String, List<?>> result = new HashMap<>();
         try {
-            result = cfuture.get();
-        } catch (InterruptedException | ExecutionException ignored) {}
+            CompletableFuture<Map<String, List<?>>> cfuture = CompletableFuture
+                    .supplyAsync(() -> {
+                        floodgates.forEach(fg -> result.put(fg.getName(), fg.flood()));
+                        return result;
+                    })
+                    .whenComplete((v, e) -> {
+                        if (e != null) {
+                            logger.error("An error was encountered in one of the floodgates {}", e.getMessage());
+                        } else {
+                            logger.info("{} floodgate(s) completed successfully,", v.size());
+                        }
+                    });
+
+            floodManagement.flood();
+            try {
+                cfuture.get();
+            } catch (InterruptedException | ExecutionException ignored) { }
+        } finally {
+            state = States.FLOODED;
+        }
         return result;
     }
 }
