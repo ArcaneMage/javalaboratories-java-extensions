@@ -145,6 +145,17 @@ public final class Torrent implements MultithreadedFloodTester<Map<String,List<?
         return new TorrentBuilder<>(clazz,threads,iterations);
     }
 
+    @Override
+    public void close() {
+        if (state == States.OPENED) {
+            floodgates.forEach(Floodgate::close);
+            state = States.CLOSED;
+        } else {
+            throw new IllegalStateException(String.format("Torrent not opened, state=%s",state));
+        }
+    }
+
+    @Override
     public boolean open() {
         if (state == States.CLOSED) {
             floodgates.forEach(Floodgate::open);
@@ -155,6 +166,7 @@ public final class Torrent implements MultithreadedFloodTester<Map<String,List<?
         return true;
     }
 
+    @Override
     public Map<String,List<?>> flood() {
         if (state != States.OPENED)
             throw new IllegalStateException(String.format("Torrent not open, state=%s",state));

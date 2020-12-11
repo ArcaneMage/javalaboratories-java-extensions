@@ -96,6 +96,27 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
         this.state = States.CLOSED;
     }
 
+    @Override
+    public void close() {
+        if (state == States.OPENED) {
+            service.shutdown();
+            try {
+                service.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                if (!service.isTerminated()) {
+                    service.shutdownNow();
+                    logger.error("{} -Worker threads still active, but SHUTDOWN_TIMEOUT {} exceeded -- forced shutdown",
+                            name, SHUTDOWN_TIMEOUT_SECONDS);
+                }
+            } catch (InterruptedException e) {
+                logger.error("{} Termination of worker threads interrupted", name);
+            } finally {
+                logger.info("{} - Flood pool shutdown successfully", name);
+                state = States.CLOSED;
+            }
+        }
+    }
+
+    @Override
     public boolean open() {
         if (state == States.CLOSED) {
             this.service = createExecutor();
@@ -108,6 +129,7 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
         return true;
     }
 
+    @Override
     public List<T> flood() {
         return flood(FLOOD_WAIT_TIMEOUT_MINUTES,TimeUnit.MINUTES);
     }
@@ -136,11 +158,18 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
             }
         } catch (InterruptedException ignore) {
         } finally {
-            shutdown();
+            close();
             result = finalise(futures);
             state = States.FLOODED;
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        String controller = floodManagement instanceof ExternalFloodController ? "External" : "Internal";
+        return String.format("[name=%s,state=%s,flood-workers=%d,flood-iterations=%d,flood-controller=%s]",name,state,
+                threads,iterations,controller);
     }
 
     protected Supplier<T> prepare(final Supplier<T> target) {
@@ -215,22 +244,6 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
             logger.warn("{} - This implementation of executor service does not support Active Count",name);
         }
         return result;
-    }
-
-    private void shutdown() {
-        service.shutdown();
-        try {
-            service.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            if (!service.isTerminated()) {
-                service.shutdownNow();
-                logger.error("{} -Worker threads still active, but SHUTDOWN_TIMEOUT {} exceeded -- forced shutdown",
-                        name,SHUTDOWN_TIMEOUT_SECONDS);
-            }
-        } catch (InterruptedException e) {
-            logger.error("{} Termination of worker threads interrupted",name);
-        } finally {
-            logger.info("{} - Flood pool shutdown successfully",name);
-        }
     }
 
     private ExecutorService createExecutor() {

@@ -48,6 +48,14 @@ public interface MultithreadedFloodTester<T> {
     enum States {CLOSED,OPENED,FLOODED}
 
     /**
+     * Cleanup allocated resources pertaining to the {@code flood} process.
+     * <p>
+     * @throws IllegalStateException if this object is not in an {@code OPENED}
+     * state.
+     */
+    void close();
+
+    /**
      * Initialises the {@code target} or {@code resource}, preparing it for the
      * {@code flood}.
      * <p>
