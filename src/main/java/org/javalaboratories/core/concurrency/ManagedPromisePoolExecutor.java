@@ -126,7 +126,7 @@ public class ManagedPromisePoolExecutor extends ThreadPoolExecutor implements Ma
                     logger.info("Not all promises kept following shutdown -- forced shutdown");
                 }
             } catch (InterruptedException e) {
-                logger.error("Termination of capacity (promises) interrupted -- promises not kept");
+                logger.error("Termination of threads (promises) interrupted -- promises not kept");
             } finally {
                 changeState(ServiceStates.CLOSING, ServiceStates.INACTIVE);
             }
