@@ -17,14 +17,14 @@ package org.javalaboratories.core.concurrency.test;
 
 import lombok.Getter;
 import lombok.ToString;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.javalaboratories.core.concurrency.test.MultithreadedFloodTester.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.List;
+
+import static org.javalaboratories.core.concurrency.test.ResourceFloodTester.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FloodgateTest {
 
@@ -76,19 +76,20 @@ public class FloodgateTest {
 
     @Test
     public void testNew_Floodgate_Pass() {
+        // Given
         Floodgate<Integer> floodgateAdd = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.add(10));
         Floodgate<Void> floodgatePrint = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.print());
 
         Floodgate<Integer> floodgateAdd2 = new Floodgate<>(UnsafeStatistics.class,10,5,() -> unsafe.add(10));
         Floodgate<Void> floodgatePrint2 = new Floodgate<>(UnsafeStatistics.class,12,6,() -> unsafe.print());
 
-
-        assertTrue(floodgateAdd.getName().contains("UnsafeStatistics"));
+        // Then
+        assertTrue(floodgateAdd.getTarget().getName().contains("UnsafeStatistics"));
         assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS,floodgateAdd.getThreads());
         assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS,floodgateAdd.getIterations());
         assertEquals(States.CLOSED, floodgateAdd.getState());
 
-        assertTrue(floodgatePrint.getName().contains("UnsafeStatistics"));
+        assertTrue(floodgatePrint.getTarget().getName().contains("UnsafeStatistics"));
         assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS,floodgatePrint.getThreads());
         assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS,floodgatePrint.getIterations());
         assertEquals(States.CLOSED, floodgatePrint.getState());
@@ -100,4 +101,50 @@ public class FloodgateTest {
         assertEquals(6,floodgatePrint2.getIterations());
     }
 
+    @Test
+    public void testOpen_State_Pass() {
+        // Given
+        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.add(10));
+
+        // When
+        floodgate.open();
+
+        // Then
+        assertEquals(States.OPENED,floodgate.getState());
+
+        // Clean up
+        floodgate.close(true);
+    }
+
+    @Test
+    public void testOpen_IllegalStateException_Fail() {
+        // Given
+        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.add(10));
+
+        // When
+        floodgate.open();
+
+        // Then
+        assertThrows(IllegalStateException.class,floodgate::open);
+
+        // Clean up resources
+        floodgate.close(true);
+    }
+
+    @Test
+    public void testFlood_TargetObject_Pass() {
+        // Given
+        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.add(10));
+
+        // When
+        floodgate.open();
+        List<Integer> results = floodgate.flood();
+
+        // Then
+        assertEquals(States.FLOODED,floodgate.getState());
+        assertEquals(5,results.size());
+
+        logger.info("{}",unsafe);
+        logger.info("{}",results);
+    }
 }

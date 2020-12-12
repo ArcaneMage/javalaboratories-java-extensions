@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 @Getter
-public final class Torrent implements MultithreadedFloodTester<Map<String,List<?>>> {
+public final class Torrent extends AbstractResourceFloodTester<Map<String,List<?>>> {
 
     private static final Logger logger = LoggerFactory.getLogger(Torrent.class);
 
@@ -38,112 +38,24 @@ public final class Torrent implements MultithreadedFloodTester<Map<String,List<?
 
     private States state;
 
-    private Torrent() {
+    private <T> Torrent(final Class<T> clazz) {
+        super(clazz);
         floodgates = new ArrayList<>();
         floodManagement = new ExternalFloodController() {
             final CountDownLatch latch = new CountDownLatch(1);
             @Override
-            public void halt() {
-                try {
-                    latch.await();
-                } catch (InterruptedException ignore) {}
+            public void halt() throws InterruptedException {
+                latch.await();
             }
             @Override
             public void flood() {
-                logger.info("Torrent is opening all floodgates simultaneously");
+                logger.info("Torrent is flooding all floodgates simultaneously");
                 latch.countDown();
             }
         };
         state = States.CLOSED;
     }
 
-    @Getter
-    @AllArgsConstructor
-    static class FloodgateParameters<T> {
-        private final Class<T> clazz;
-        private final int threads;
-        private final int iterations;
-    }
-
-    @Value
-    @EqualsAndHashCode(callSuper=true)
-    static class RunnableFloodgateParameters<T> extends FloodgateParameters<T> {
-        Runnable target;
-        RunnableFloodgateParameters(Class<T> name, int threads, int iterations, Runnable target) {
-            super(name,threads,iterations);
-            this.target = target;
-        }
-    }
-
-    @Value
-    @EqualsAndHashCode(callSuper=true)
-    static class SupplierFloodgateParameters<U extends Supplier<?>,T> extends FloodgateParameters<T> {
-        U target;
-        SupplierFloodgateParameters(Class<T> name, int threads, int iterations, U target) {
-            super(name,threads,iterations);
-            this.target = target;
-        }
-    }
-
-    private static class TorrentBuilder<T> {
-        private final List<FloodgateParameters<T>> parameters;
-        private final Class<T> clazz;
-        private final int threads;
-        private final int iterations;
-
-        private TorrentBuilder(Class<T> clazz, int threads, int iterations) {
-            this.parameters = new ArrayList<>();
-            this.clazz = clazz;
-            this.threads = threads;
-            this.iterations = iterations;
-        }
-
-        public TorrentBuilder<T> withFloodgates(Runnable target) {
-            parameters.add(new RunnableFloodgateParameters<>(clazz,threads,iterations,target));
-            return this;
-        }
-
-        public <U> TorrentBuilder<T> withFloodgates(Supplier<U> target) {
-            parameters.add(new SupplierFloodgateParameters<>(clazz,threads,iterations,target));
-            return this;
-        }
-
-        public TorrentBuilder<T> withFloodgates(int threads, int iterations, Runnable target) {
-            parameters.add(new RunnableFloodgateParameters<>(clazz,threads,iterations,target));
-            return this;
-        }
-
-        public <U> TorrentBuilder<T> withFloodgates(int threads, int iterations, Supplier<U> target) {
-            parameters.add(new SupplierFloodgateParameters<>(clazz,threads,iterations,target));
-            return this;
-        }
-
-        public Torrent build() {
-            Torrent result = new Torrent();
-
-            parameters.forEach(p -> {
-                Floodgate<?> floodgate;
-                if ( p instanceof RunnableFloodgateParameters) {
-                    floodgate = new Floodgate<>(p.getClazz(), p.getThreads(), p.getIterations(),
-                            Generics.unchecked(((RunnableFloodgateParameters<?>) p).getTarget()), result.floodManagement);
-                } else {
-                    floodgate = new Floodgate<>(p.getClazz(), p.getThreads(), p.getIterations(),
-                            ((SupplierFloodgateParameters<Supplier<?>,T>) p).getTarget(), result.floodManagement);
-                }
-                result.floodgates.add(floodgate);
-            });
-
-            return result;
-        }
-    }
-
-    public static <T> TorrentBuilder<T> builder(Class<T> clazz) {
-        return builder(clazz,Floodgate.DEFAULT_FLOOD_WORKERS,Floodgate.DEFAULT_FLOOD_ITERATIONS);
-    }
-
-    public static <T> TorrentBuilder<T> builder(Class<T> clazz, int threads, int iterations) {
-        return new TorrentBuilder<>(clazz,threads,iterations);
-    }
 
     @Override
     public void close() {
@@ -175,7 +87,7 @@ public final class Torrent implements MultithreadedFloodTester<Map<String,List<?
         try {
             CompletableFuture<Map<String, List<?>>> cfuture = CompletableFuture
                     .supplyAsync(() -> {
-                        floodgates.forEach(fg -> result.put(fg.getName(), fg.flood()));
+                        floodgates.forEach(fg -> result.put(fg.getTarget().getName(), fg.flood()));
                         return result;
                     })
                     .whenComplete((v, e) -> {
@@ -194,5 +106,93 @@ public final class Torrent implements MultithreadedFloodTester<Map<String,List<?
             state = States.FLOODED;
         }
         return result;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    private static class FloodgateParameters<T> {
+        private final Class<T> clazz;
+        private final int threads;
+        private final int iterations;
+    }
+
+    @Value
+    @EqualsAndHashCode(callSuper=true)
+    private static class RunnableFloodgateParameters<T> extends FloodgateParameters<T> {
+        Runnable resource;
+        RunnableFloodgateParameters(Class<T> name, int threads, int iterations, Runnable resource) {
+            super(name,threads,iterations);
+            this.resource = resource;
+        }
+    }
+
+    @Value
+    @EqualsAndHashCode(callSuper=true)
+    private static class SupplierFloodgateParameters<U extends Supplier<?>,T> extends FloodgateParameters<T> {
+        U resource;
+        SupplierFloodgateParameters(Class<T> name, int threads, int iterations, U resource) {
+            super(name,threads,iterations);
+            this.resource = resource;
+        }
+    }
+
+    private static class TorrentBuilder<T> {
+        private final List<FloodgateParameters<T>> parameters;
+        private final Class<T> clazz;
+        private final int threads;
+        private final int iterations;
+
+        private TorrentBuilder(Class<T> clazz, int threads, int iterations) {
+            this.parameters = new ArrayList<>();
+            this.clazz = clazz;
+            this.threads = threads;
+            this.iterations = iterations;
+        }
+
+        public TorrentBuilder<T> withFloodgates(Runnable resource) {
+            parameters.add(new RunnableFloodgateParameters<>(clazz,threads,iterations,resource));
+            return this;
+        }
+
+        public <U> TorrentBuilder<T> withFloodgates(Supplier<U> resource) {
+            parameters.add(new SupplierFloodgateParameters<>(clazz,threads,iterations,resource));
+            return this;
+        }
+
+        public TorrentBuilder<T> withFloodgates(int threads, int iterations, Runnable resource) {
+            parameters.add(new RunnableFloodgateParameters<>(clazz,threads,iterations,resource));
+            return this;
+        }
+
+        public <U> TorrentBuilder<T> withFloodgates(int threads, int iterations, Supplier<U> resource) {
+            parameters.add(new SupplierFloodgateParameters<>(clazz,threads,iterations,resource));
+            return this;
+        }
+
+        public Torrent build() {
+            Torrent result = new Torrent(this.clazz);
+
+            parameters.forEach(p -> {
+                Floodgate<?> floodgate;
+                if ( p instanceof RunnableFloodgateParameters) {
+                    floodgate = new Floodgate<>(p.getClazz(), p.getThreads(), p.getIterations(),
+                            Generics.unchecked(((RunnableFloodgateParameters<?>) p).getResource()), result.floodManagement);
+                } else {
+                    floodgate = new Floodgate<>(p.getClazz(), p.getThreads(), p.getIterations(),
+                            ((SupplierFloodgateParameters<Supplier<?>,T>) p).getResource(), result.floodManagement);
+                }
+                result.floodgates.add(floodgate);
+            });
+
+            return result;
+        }
+    }
+
+    public static <T> TorrentBuilder<T> builder(Class<T> clazz) {
+        return builder(clazz,Floodgate.DEFAULT_FLOOD_WORKERS,Floodgate.DEFAULT_FLOOD_ITERATIONS);
+    }
+
+    public static <T> TorrentBuilder<T> builder(Class<T> clazz, int threads, int iterations) {
+        return new TorrentBuilder<>(clazz,threads,iterations);
     }
 }

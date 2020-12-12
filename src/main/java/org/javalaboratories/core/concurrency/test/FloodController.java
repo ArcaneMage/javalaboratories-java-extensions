@@ -28,8 +28,10 @@ public interface FloodController {
     /**
      * Informs the flood workers to stand-by and wait for orders to open the
      * gate.
+     *
+     * @throws InterruptedException if {@code flood worker} is suddenly interrupted.
      */
-    void halt();
+    void halt() throws InterruptedException;
 
     /**
      * Orders the flood workers to open the gate.

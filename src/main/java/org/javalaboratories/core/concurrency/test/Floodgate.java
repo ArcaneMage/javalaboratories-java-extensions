@@ -16,25 +16,20 @@
 package org.javalaboratories.core.concurrency.test;
 
 import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 @Getter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
+public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
 
     public static final long FLOOD_WAIT_TIMEOUT_MINUTES = 5L;
-    public static final int DEFAULT_FLOOD_WORKERS = 2;
+    public static final int DEFAULT_FLOOD_WORKERS = 5;
     public static final int DEFAULT_FLOOD_ITERATIONS = 5;
 
     private static final Logger logger = LoggerFactory.getLogger(Floodgate.class);
@@ -51,77 +46,60 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
     @Getter(AccessLevel.NONE)
     private final FloodController floodManagement;
 
-    @EqualsAndHashCode.Include
-    private final String name;
+    @Getter(AccessLevel.NONE)
+    private final CountDownLatch workLatch;
 
-    private final Supplier<T> target;
+    private final Supplier<T> resource;
     private final int threads;
     private final int iterations;
 
     private States state;
 
     @Getter(AccessLevel.NONE)
-    private CountDownLatch workLatch;
-    @Getter(AccessLevel.NONE)
-    private ExecutorService service;
+    private FloodExecutorService service;
     @Getter(AccessLevel.NONE)
     private List<Future<T>> futures;
 
-    public <U> Floodgate(final Class<U> clazz, final Runnable target) {
-        this(clazz,DEFAULT_FLOOD_WORKERS, DEFAULT_FLOOD_ITERATIONS,target);
+    public <U> Floodgate(final Class<U> clazz, final Runnable resource) {
+        this(clazz,DEFAULT_FLOOD_WORKERS, DEFAULT_FLOOD_ITERATIONS,resource);
     }
 
-    public <U> Floodgate(final Class<U> clazz, final Supplier<T> target) {
-        this(clazz,DEFAULT_FLOOD_WORKERS, DEFAULT_FLOOD_ITERATIONS,target);
+    public <U> Floodgate(final Class<U> clazz, final Supplier<T> resource) {
+        this(clazz,DEFAULT_FLOOD_WORKERS, DEFAULT_FLOOD_ITERATIONS,resource);
     }
 
-    public <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Runnable target) {
-        this(clazz,threads,iterations,() -> {target.run(); return null;});
+    public <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Runnable resource) {
+        this(clazz,threads,iterations,() -> {resource.run(); return null;});
     }
 
-    public <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Supplier<T> target) {
-        this(clazz,threads,iterations,target,getController());
+    public <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Supplier<T> resource) {
+        this(clazz,threads,iterations,resource,getController());
     }
 
-    <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Supplier<T> target, final FloodController controller) {
-        if (clazz == null || threads < MIN_THREADS || iterations < MIN_ITERATIONS || target == null || controller == null)
+    <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Supplier<T> resource, final FloodController controller) {
+        super(clazz);
+        if (threads < MIN_THREADS || iterations < MIN_ITERATIONS || resource == null || controller == null)
             throw new IllegalArgumentException("Review floodgate constructor arguments");
-
-        this.name = String.format("{%s-%s}",clazz.getSimpleName(), UUID.randomUUID());
+        this.resource = resource;
         this.threads = threads;
         this.iterations = iterations;
-        this.target = target;
         this.floodManagement = controller;
         this.futures = null;
+        this.workLatch = new CountDownLatch(this.threads);
         this.state = States.CLOSED;
     }
 
     @Override
     public void close() {
-        if (state == States.OPENED) {
-            service.shutdown();
-            try {
-                service.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                if (!service.isTerminated()) {
-                    service.shutdownNow();
-                    logger.error("{} -Worker threads still active, but SHUTDOWN_TIMEOUT {} exceeded -- forced shutdown",
-                            name, SHUTDOWN_TIMEOUT_SECONDS);
-                }
-            } catch (InterruptedException e) {
-                logger.error("{} Termination of worker threads interrupted", name);
-            } finally {
-                logger.info("{} - Flood pool shutdown successfully", name);
-                state = States.CLOSED;
-            }
-        }
+        close(false);
     }
 
     @Override
     public boolean open() {
         if (state == States.CLOSED) {
             this.service = createExecutor();
-            Supplier<T> target = prepare(this.target);
-            futures = prime(target);
+            Supplier<T> resource = prepare(this.resource);
+            futures = prime(resource);
             state = States.OPENED;
         } else {
             throw new IllegalStateException(String.format("Floodgate not closed, state=%s",state));
@@ -141,21 +119,20 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
 
         List<T> result;
         try {
-            int i = 0;
-            boolean adequateTime = true;
-            while (i < iterations && adequateTime) {
-                reset();
-                logger.info("{} - Flooding target with {} flood workers, iteration ({})",name,threads,++i);
-                if (getActiveCount() < threads)
-                    logger.warn("{} - Active thread count {}. Not all flood workers are ready",name,getActiveCount());
-                if (!(floodManagement instanceof ExternalFloodController)) {
-                    floodManagement.flood();
-                } else {
-                    logger.info("{} - Flood controller externally managed -- deferred management",name);
-                }
-                if ((adequateTime = workLatch.await(timeout,u)))
-                    logger.error("{} - Insufficient wait timeout specified, not all flood workers have completed their work",name);
+            logger.info("{}: Flooding resource with {} flood workers, each iterating {} times",getTarget().getName(),
+                    threads,iterations);
+            if (service.getActiveCount() < threads)
+                logger.warn("{}: Active thread count {}. Not all flood workers are ready",getTarget().getName(),
+                        service.getActiveCount());
+            if (!(floodManagement instanceof ExternalFloodController)) {
+                floodManagement.flood();
+            } else {
+                logger.info("{}: Flood controller externally managed -- deferred management", getTarget().getName());
             }
+            if (!workLatch.await(timeout, u))
+                logger.error("{}: Insufficient wait timeout specified, not all flood workers have completed their work",
+                        getTarget().getName());
+
         } catch (InterruptedException ignore) {
         } finally {
             close();
@@ -168,19 +145,25 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
     @Override
     public String toString() {
         String controller = floodManagement instanceof ExternalFloodController ? "External" : "Internal";
-        return String.format("[name=%s,state=%s,flood-workers=%d,flood-iterations=%d,flood-controller=%s]",name,state,
+        return String.format("[name=%s,state=%s,flood-workers=%d,flood-iterations=%d,flood-controller=%s]", resource,state,
                 threads,iterations,controller);
     }
 
-    protected Supplier<T> prepare(final Supplier<T> target) {
-        Supplier<T> t = Objects.requireNonNull(target);
+    protected Supplier<T> prepare(final Supplier<T> resource) {
+        Supplier<T> t = Objects.requireNonNull(resource);
         return () -> {
             T result = null;
             try {
                 floodManagement.halt();
-                result = t.get();
+                int i = 0;
+                while (i++ < iterations) {
+                    result = t.get();
+                }
+                logger.info("{}: Finished flooding resource object successfully", this.getTarget().getName());
+            } catch (InterruptedException e) {
+                logger.info("{}: Finished flooding resource object but with interruption", this.getTarget().getName());
             } catch (Throwable throwable) {
-                logger.error("{} - Exception thrown from within target during flood",name,throwable);
+                logger.error("{}: Flood resource raised an exception during flood", this.getTarget().getName(),throwable);
             } finally {
                 workLatch.countDown();
             }
@@ -188,13 +171,52 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
         };
     }
 
-    protected List<Future<T>> prime(final Supplier<T> target) {
+    protected List<Future<T>> prime(final Supplier<T> resource) {
         List<Future<T>> result = new ArrayList<>();
         for (int i = 0; i < threads; i++) {
-            Future<T> f = service.submit(target::get);
+            Future<T> f = service.submit(resource::get);
             result.add(f);
         }
         return result;
+    }
+
+    /**
+     * Closes and releases all allocated resources pertaining to {@code flood
+     * workers}.
+     * <p>
+     * If the {@code force} parameter is {@code true}, an attempt is made to
+     * shutdown the internal pool of {@code flood workers}, and if there any
+     * still processing, rather than waiting they will be shutdown immediately.
+     * <p>
+     * It's advisable to use the {@link Floodgate#close()} and allow this
+     * object to take the correct course of action. This method is provided
+     * for unit tests purposes, hence {@code default} access-level -- do not
+     * alter this.
+     *
+     * @param force {@code true} to force shutdown of {@code flood workers}.
+     */
+    void close(boolean force) {
+        if (state == States.OPENED) {
+            try {
+                if (!force) {
+                    service.shutdown();
+                    service.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    if (!service.isTerminated()) {
+                        service.shutdownNow();
+                        logger.error("{}: Flood workers still active, but SHUTDOWN_TIMEOUT {} seconds exceeded -- forcing shutdown",
+                                getTarget().getName(), SHUTDOWN_TIMEOUT_SECONDS);
+                    }
+                } else {
+                    logger.error("{}: Not waiting for flood workers, forcing immediate shutdown", getTarget().getName());
+                    service.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                logger.error("{} Termination of worker threads interrupted", getTarget().getName());
+            } finally {
+                logger.info("{}: Flood pool service shutdown successfully", getTarget().getName());
+                state = States.CLOSED;
+            }
+        }
     }
 
     private static Thread newFloodWorker(final Runnable runnable) {
@@ -208,10 +230,8 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
         return new FloodController() {
             final CountDownLatch latch = new CountDownLatch(1);
             @Override
-            public void halt() {
-                try {
-                    latch.await();
-                } catch (InterruptedException ignore) {}
+            public void halt() throws InterruptedException {
+                latch.await();
             }
             @Override
             public void flood() {
@@ -227,7 +247,7 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
                 try {
                     result.add(f.get());
                 } catch (InterruptedException | ExecutionException | CancellationException ignored) {
-                    // This okay: no need to report forced shutdown of threads; execution failures
+                    // This is okay: no need to report forced shutdown of threads; execution failures
                     // are already reported by flood workers.
                 }
             });
@@ -235,27 +255,20 @@ public class Floodgate<T> implements MultithreadedFloodTester<List<T>> {
         return result;
     }
 
-    private int getActiveCount() {
-        // TODO: Should introduce custom executor implementation for this -- thinking about it
-        int result = 0;
-        if (service instanceof ThreadPoolExecutor) {
-            result = ((ThreadPoolExecutor) service).getActiveCount();
-        } else {
-            logger.warn("{} - This implementation of executor service does not support Active Count",name);
-        }
+    private FloodExecutorService createExecutor() {
+        FloodExecutorService result = new FloodThreadPoolExecutor(threads,Floodgate::newFloodWorker);
+        logger.info("{}: Flood pool service created successfully, number of flood workers {}",getTarget().getName(),threads);
         return result;
     }
 
-    private ExecutorService createExecutor() {
-        ExecutorService service;
-        service = Executors.unconfigurableExecutorService(
-                Executors.newFixedThreadPool(threads,Floodgate::newFloodWorker)
-        );
-        logger.info("{} - Flood pool created successfully, number of flood workers {}",name,threads);
-        return service;
+    interface FloodExecutorService extends ExecutorService {
+        int getActiveCount();
     }
 
-    private void reset() {
-        workLatch = new CountDownLatch(threads);
+    private static class FloodThreadPoolExecutor extends ThreadPoolExecutor implements FloodExecutorService {
+        public FloodThreadPoolExecutor(int threads,ThreadFactory threadFactory) {
+            super(threads,threads,0L,TimeUnit.MILLISECONDS,new LinkedBlockingDeque<>(),threadFactory);
+        }
     }
+
 }
