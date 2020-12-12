@@ -22,8 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
-import static org.javalaboratories.core.concurrency.test.ResourceFloodTester.*;
+import static org.javalaboratories.core.concurrency.test.ResourceFloodTester.States;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FloodgateTest {
@@ -35,7 +37,7 @@ public class FloodgateTest {
      */
     @Getter
     @ToString
-    private static class UnsafeStatistics {
+    private class UnsafeStatistics {
         int total;
         int requests;
         float average;
@@ -43,24 +45,40 @@ public class FloodgateTest {
         public int add(final int value) {
             total = total + value;
             requests = requests + 1;
-            average = total / (float) requests;
+            average = div(requests);
             return total;
         }
 
+        public float div(final int value) {
+            if (value < 0)
+                throw new IllegalArgumentException(String.format("Positive value only: (%d)",value));
+            return total / (float) value;
+        }
+
+        public void longRunningIO() {
+            sleep(11000);
+        }
+
         public void print() {
-            logger.info("print() - total={}, requests={}, average={}",total,requests,average);
+            logger.info("print() - total={}, requests={}, average={}", total, requests, average);
         }
     }
 
     /**
      * Mutable object -- thread-safe
      */
-    private static class SafeStatistics extends UnsafeStatistics {
+    private class SafeStatistics extends UnsafeStatistics {
         public int add(final int value) {
             if (value < 0)
                 throw new IllegalArgumentException();
             synchronized (this) {
                 return super.add(value);
+            }
+        }
+
+        public float div(final int value) {
+            synchronized (this) {
+                return super.div(value);
             }
         }
     }
@@ -77,40 +95,50 @@ public class FloodgateTest {
     @Test
     public void testNew_Floodgate_Pass() {
         // Given
-        Floodgate<Integer> floodgateAdd = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.add(10));
-        Floodgate<Void> floodgatePrint = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.print());
+        Floodgate<Integer> floodgateAdd = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.add(10));
+        Floodgate<Void> floodgatePrint = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.print());
 
-        Floodgate<Integer> floodgateAdd2 = new Floodgate<>(UnsafeStatistics.class,10,5,() -> unsafe.add(10));
-        Floodgate<Void> floodgatePrint2 = new Floodgate<>(UnsafeStatistics.class,12,6,() -> unsafe.print());
+        Floodgate<Integer> floodgateAdd2 = new Floodgate<>(UnsafeStatistics.class, 10, 5, () -> unsafe.add(10));
+        Floodgate<Void> floodgatePrint2 = new Floodgate<>(UnsafeStatistics.class, 12, 6, () -> unsafe.print());
 
         // Then
         assertTrue(floodgateAdd.getTarget().getName().contains("UnsafeStatistics"));
-        assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS,floodgateAdd.getThreads());
-        assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS,floodgateAdd.getIterations());
+        assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS, floodgateAdd.getThreads());
+        assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS, floodgateAdd.getIterations());
         assertEquals(States.CLOSED, floodgateAdd.getState());
 
         assertTrue(floodgatePrint.getTarget().getName().contains("UnsafeStatistics"));
-        assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS,floodgatePrint.getThreads());
-        assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS,floodgatePrint.getIterations());
+        assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS, floodgatePrint.getThreads());
+        assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS, floodgatePrint.getIterations());
         assertEquals(States.CLOSED, floodgatePrint.getState());
 
-        assertEquals(10,floodgateAdd2.getThreads());
-        assertEquals(5,floodgateAdd2.getIterations());
+        assertTrue(floodgateAdd.toString().contains("state=CLOSED,flood-workers=5,flood-iterations=5,flood-controller=Internal"));
 
-        assertEquals(12,floodgatePrint2.getThreads());
-        assertEquals(6,floodgatePrint2.getIterations());
+        assertEquals(10, floodgateAdd2.getThreads());
+        assertEquals(5, floodgateAdd2.getIterations());
+
+        assertEquals(12, floodgatePrint2.getThreads());
+        assertEquals(6, floodgatePrint2.getIterations());
+    }
+
+    @Test
+    public void testNew_Exception_Fail() {
+        // Then
+        assertThrows(NullPointerException.class, () -> new Floodgate<>(null, () -> unsafe.add(10)));
+        assertThrows(IllegalArgumentException.class, () -> new Floodgate<>(UnsafeStatistics.class, (Supplier<Integer>) null));
+        assertThrows(IllegalArgumentException.class, () -> new Floodgate<>(UnsafeStatistics.class, -1, -1, () -> unsafe.add(10)));
     }
 
     @Test
     public void testOpen_State_Pass() {
         // Given
-        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.add(10));
+        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.add(10));
 
         // When
         floodgate.open();
 
         // Then
-        assertEquals(States.OPENED,floodgate.getState());
+        assertEquals(States.OPENED, floodgate.getState());
 
         // Clean up
         floodgate.close(true);
@@ -119,32 +147,80 @@ public class FloodgateTest {
     @Test
     public void testOpen_IllegalStateException_Fail() {
         // Given
-        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.add(10));
+        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.add(10));
 
         // When
         floodgate.open();
 
         // Then
-        assertThrows(IllegalStateException.class,floodgate::open);
+        assertThrows(IllegalStateException.class, floodgate::open);
 
         // Clean up resources
         floodgate.close(true);
     }
 
     @Test
-    public void testFlood_TargetObject_Pass() {
+    public void testFlood_TargetResource_Pass() {
         // Given
-        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class,() -> unsafe.add(10));
+        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.add(10));
 
         // When
         floodgate.open();
         List<Integer> results = floodgate.flood();
 
         // Then
-        assertEquals(States.FLOODED,floodgate.getState());
-        assertEquals(5,results.size());
+        assertEquals(States.FLOODED, floodgate.getState());
+        assertEquals(5, results.size());
 
-        logger.info("{}",unsafe);
-        logger.info("{}",results);
+        logger.info("UnsafeStatics state={}", unsafe);
+    }
+
+    @Test
+    public void testFlood_RestartingFlood_Fail() {
+        // Given
+        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.add(10));
+
+        // When
+        floodgate.open();
+        List<Integer> results = floodgate.flood();
+
+        // Then
+        assertThrows(IllegalStateException.class, floodgate::flood);
+        assertEquals(5, results.size());
+    }
+
+    @Test
+    public void testFlood_TargetResourceException_Fail() {
+        // Given
+        Floodgate<Float> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.div(-5));
+
+        // When
+        floodgate.open();
+        List<Float> results = floodgate.flood();
+
+        // Then
+        assertThrows(IllegalStateException.class, floodgate::flood);
+        assertEquals(5, results.size());
+
+        logger.info("UnsafeStatics state={}", unsafe);
+    }
+
+    @Test
+    public void testFlood_TargetResourceTimeouts_Fail() {
+        // Given
+        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> {unsafe.longRunningIO(); return 1;});
+
+        // When
+        floodgate.open();
+        List<Integer> results = floodgate.flood(10, TimeUnit.MILLISECONDS);
+
+
+        logger.info("UnsafeStatics state={}", unsafe);
+    }
+
+    void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignore) {}
     }
 }

@@ -145,8 +145,8 @@ public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
     @Override
     public String toString() {
         String controller = floodManagement instanceof ExternalFloodController ? "External" : "Internal";
-        return String.format("[name=%s,state=%s,flood-workers=%d,flood-iterations=%d,flood-controller=%s]", resource,state,
-                threads,iterations,controller);
+        return String.format("[target=%s,state=%s,flood-workers=%d,flood-iterations=%d,flood-controller=%s]", getTarget(),
+                state,threads,iterations,controller);
     }
 
     protected Supplier<T> prepare(final Supplier<T> resource) {
@@ -200,11 +200,13 @@ public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
             try {
                 if (!force) {
                     service.shutdown();
+                    logger.info("{}: Shutting down flood pool service, but first waiting {} seconds for flood workers to " +
+                            "complete their work",getTarget().getName(),SHUTDOWN_TIMEOUT_SECONDS);
                     service.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                     if (!service.isTerminated()) {
                         service.shutdownNow();
-                        logger.error("{}: Flood workers still active, but SHUTDOWN_TIMEOUT {} seconds exceeded -- forcing shutdown",
-                                getTarget().getName(), SHUTDOWN_TIMEOUT_SECONDS);
+                        logger.error("{}: Flood workers still active, but SHUTDOWN_TIMEOUT {} seconds exceeded -- " +
+                                        "forcing shutdown", getTarget().getName(), SHUTDOWN_TIMEOUT_SECONDS);
                     }
                 } else {
                     logger.error("{}: Not waiting for flood workers, forcing immediate shutdown", getTarget().getName());
@@ -245,10 +247,11 @@ public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
         if (futures != null) {
             futures.forEach(f -> {
                 try {
-                    result.add(f.get());
+                    result.add(f.isDone() ? f.get() : null);
                 } catch (InterruptedException | ExecutionException | CancellationException ignored) {
-                    // This is okay: no need to report forced shutdown of threads; execution failures
-                    // are already reported by flood workers.
+                    // This is okay: no need to report forced shutdown of
+                    // threads or execution failures; these are already reported
+                    // by the flood workers.
                 }
             });
         }
