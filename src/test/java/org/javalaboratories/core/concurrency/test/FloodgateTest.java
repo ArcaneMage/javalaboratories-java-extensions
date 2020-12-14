@@ -15,11 +15,7 @@
  */
 package org.javalaboratories.core.concurrency.test;
 
-import lombok.Getter;
-import lombok.ToString;
 import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -28,63 +24,7 @@ import java.util.function.Supplier;
 import static org.javalaboratories.core.concurrency.test.ResourceFloodTester.States;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FloodgateTest {
-
-    private static final Logger logger = LoggerFactory.getLogger(FloodgateTest.class);
-
-    /**
-     * Mutable object -- not thread-safe.
-     */
-    @Getter
-    @ToString
-    private class UnsafeStatistics {
-        int total;
-        int requests;
-        float average;
-
-        public int add(final int value) {
-            total = total + value;
-            requests = requests + 1;
-            average = div(requests);
-            return total;
-        }
-
-        public float div(final int value) {
-            if (value < 0)
-                throw new IllegalArgumentException(String.format("Positive value only: (%d)",value));
-            return total / (float) value;
-        }
-
-        public void longRunningIO() {
-            sleep(11000);
-        }
-
-        public void print() {
-            logger.info("print() - total={}, requests={}, average={}", total, requests, average);
-        }
-    }
-
-    /**
-     * Mutable object -- thread-safe
-     */
-    private class SafeStatistics extends UnsafeStatistics {
-        public int add(final int value) {
-            if (value < 0)
-                throw new IllegalArgumentException();
-            synchronized (this) {
-                return super.add(value);
-            }
-        }
-
-        public float div(final int value) {
-            synchronized (this) {
-                return super.div(value);
-            }
-        }
-    }
-
-    UnsafeStatistics unsafe;
-    SafeStatistics safe;
+public class FloodgateTest extends AbstractResourceFloodTest {
 
     @BeforeEach
     public void setup() {
@@ -122,7 +62,7 @@ public class FloodgateTest {
     }
 
     @Test
-    public void testNew_Exception_Fail() {
+    public void testNew_FloodgateException_Fail() {
         // Then
         assertThrows(NullPointerException.class, () -> new Floodgate<>(null, () -> unsafe.add(10)));
         assertThrows(IllegalArgumentException.class, () -> new Floodgate<>(UnsafeStatistics.class, (Supplier<Integer>) null));
@@ -138,10 +78,12 @@ public class FloodgateTest {
         floodgate.open();
 
         // Then
-        assertEquals(States.OPENED, floodgate.getState());
-
-        // Clean up
-        floodgate.close(true);
+        try {
+            assertEquals(States.OPENED, floodgate.getState());
+        } finally {
+            // Force clean up
+            floodgate.close(true);
+        }
     }
 
     @Test
@@ -153,10 +95,12 @@ public class FloodgateTest {
         floodgate.open();
 
         // Then
-        assertThrows(IllegalStateException.class, floodgate::open);
-
-        // Clean up resources
-        floodgate.close(true);
+        try {
+            assertThrows(IllegalStateException.class, floodgate::open);
+        } finally {
+            // Clean up resources
+            floodgate.close(true);
+        }
     }
 
     @Test
@@ -208,19 +152,12 @@ public class FloodgateTest {
     @Test
     public void testFlood_TargetResourceTimeouts_Fail() {
         // Given
-        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> {unsafe.longRunningIO(); return 1;});
+        Floodgate<Void> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.longRunningIO());
 
         // When
         floodgate.open();
-        List<Integer> results = floodgate.flood(10, TimeUnit.MILLISECONDS);
-
+        List<Void> results = floodgate.flood(10, TimeUnit.MILLISECONDS);
 
         logger.info("UnsafeStatics state={}", unsafe);
-    }
-
-    void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignore) {}
     }
 }

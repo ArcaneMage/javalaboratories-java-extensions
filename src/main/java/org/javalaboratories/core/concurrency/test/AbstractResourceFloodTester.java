@@ -16,6 +16,7 @@
 package org.javalaboratories.core.concurrency.test;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.util.Objects;
 
@@ -25,9 +26,11 @@ import java.util.Objects;
  * <p>
  * It is recommended to extend this class to provide behaviour for flooding
  * targets with requests.
- * <p>
+ *
  * @param <T> Type of return value from targeted {@code resource} under test.
+ * @see Target
  */
+@Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class AbstractResourceFloodTester<T> implements ResourceFloodTester<T> {
 
@@ -35,18 +38,30 @@ public abstract class AbstractResourceFloodTester<T> implements ResourceFloodTes
     private final Target target;
 
     /**
+     * Default constructor of this {@link ResourceFloodTester} object.
+     * <p>
+     * Use this constructor when targeting multiple targets.
+     *
+     * @see Target
+     */
+    public AbstractResourceFloodTester() {
+        target = Target.getIndeterminateTarget();
+    }
+
+    /**
      * Constructs this {@link ResourceFloodTester} object.
+     * <p>
+     * Use this constructor when targeting a specific aspect of the target,
+     * for example web-server API or a particular method of the target
+     * object and it is encouraged to report the {@link Target} to clients
+     * of this object.
      *
      * @param clazz class object type of {@code resource} under test.
      * @param <U> type of resource object.
+     * @see Target
      */
     public <U> AbstractResourceFloodTester(final Class<U> clazz) {
         Class<U> c = Objects.requireNonNull(clazz);
         target = new Target(c);
-    }
-
-    @Override
-    public Target getTarget() {
-        return target;
     }
 }

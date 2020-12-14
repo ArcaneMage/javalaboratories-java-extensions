@@ -15,9 +15,8 @@
  */
 package org.javalaboratories.core.concurrency.test;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Value;
+import lombok.*;
+import org.javalaboratories.core.event.AbstractEvent;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -128,6 +127,10 @@ public interface ResourceFloodTester<T> {
      * Implementors of this interface are encouraged to report {@code target}
      * information to enable easy interpretation of {@code flood} results.
      * <p>
+     * Some {@link ResourceFloodTester} objects may target multiple
+     * targets and it is reasonable to return {@link Target} to represent this.
+     * Refer to {@link Target#getIndeterminateTarget()} method.
+     *
      * @return target object
      */
     Target getTarget();
@@ -139,7 +142,12 @@ public interface ResourceFloodTester<T> {
      * Generally speaking an {@code aspect} can be viewed as a specific method
      * of an object or an API of a web service, and so it is expected that the
      * resource under test could have several targets but all with unique
-     * identifiable names.
+     * identifiable names. It is encouraged to report this information in any logs
+     * generated for tracking and monitoring purposes.
+     * <p>
+     * Additionally, {@link ResourceFloodTester} may mark the target as
+     * {@code UNSTABLE} if it encounters errors whilst flooding the {@code target}
+     * with requests.
      * <p>
      * {@link Target} will uniquely generate a name of the target based on the
      * {@link Class} and unique integer value. The integer value will increment
@@ -149,12 +157,19 @@ public interface ResourceFloodTester<T> {
      * <p>
      * @see AbstractResourceFloodTester
      */
-    @Value
-    class Target {
-        @Getter(AccessLevel.NONE)
-        static Set<String> index = new HashSet<>();
+    @Getter
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    @ToString
+    final class Target {
 
-        String name;
+        public enum Stability {STABLE,UNSTABLE}
+
+        @Getter(AccessLevel.NONE)
+        private static final Set<String> index = new HashSet<>();
+
+        @EqualsAndHashCode.Include
+        private final String name;
+        private volatile Stability stability;
 
         /**
          * Constructs an instance of this {@link Target}.
@@ -180,11 +195,39 @@ public interface ResourceFloodTester<T> {
                 index.add(value);
             }
             name = value;
+            stability = Stability.STABLE;
+        }
+
+        /**
+         * {@link ResourceFloodTester} may mark {@link Target} object as
+         * {@code UNSTABLE} if it encounters errors during the {@code flood}.
+         * <p>
+         * If the {@link Target} is {@code UNSTABLE} prior to the {@code flood},
+         * the target must not be subjected to requests.
+         * <p>
+         * This method is impotent in that once used, reverting the state
+         * is no longer possible.
+         */
+        public void unstable() {
+            if (stability == Stability.STABLE) {
+                stability = Stability.UNSTABLE;
+            }
+        }
+
+        /**
+         * Use to indicate the {@link Target} of the {@link ResourceFloodTester} is
+         * not determinable.
+         */
+        public static Target getIndeterminateTarget() {
+            return new Target(IndeterminateTarget.class);
         }
 
         private String transform(String s) {
             String[] p = s.split("[{\\-}]");
             return(String.format("{%s-%03d}",p[1],Integer.parseInt(p[2])+1));
         }
+
+        @Value
+        private static class IndeterminateTarget { }
     }
 }

@@ -20,20 +20,32 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 @Getter
-public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
+public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> implements ConcurrentResourceFloodTester<List<T>> {
 
     public static final long FLOOD_WAIT_TIMEOUT_MINUTES = 5L;
+
     public static final int DEFAULT_FLOOD_WORKERS = 5;
     public static final int DEFAULT_FLOOD_ITERATIONS = 5;
 
     private static final Logger logger = LoggerFactory.getLogger(Floodgate.class);
 
+    private static final long SHUTDOWN_TIMEOUT_SECONDS = 5L;
     private static final String FLOODGATE_GROUP_NAME = "Floodgate-Group";
     private static final String WORKER_THREAD_NAME="Floodgate-Worker-%d";
     private static final ThreadGroup FLOODGATE_GROUP = new ThreadGroup(FLOODGATE_GROUP_NAME);
@@ -41,15 +53,14 @@ public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
 
     private static final int MIN_THREADS = 1;
     private static final int MIN_ITERATIONS = 1;
-    private static final long SHUTDOWN_TIMEOUT_SECONDS = 10L;
 
     @Getter(AccessLevel.NONE)
-    private final FloodController floodManagement;
-
+    private final FloodController floodController;
     @Getter(AccessLevel.NONE)
     private final CountDownLatch workLatch;
-
+    @Getter(AccessLevel.NONE)
     private final Supplier<T> resource;
+
     private final int threads;
     private final int iterations;
 
@@ -83,7 +94,7 @@ public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
         this.resource = resource;
         this.threads = threads;
         this.iterations = iterations;
-        this.floodManagement = controller;
+        this.floodController = controller;
         this.futures = null;
         this.workLatch = new CountDownLatch(this.threads);
         this.state = States.CLOSED;
@@ -124,10 +135,10 @@ public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
             if (service.getActiveCount() < threads)
                 logger.warn("{}: Active thread count {}. Not all flood workers are ready",getTarget().getName(),
                         service.getActiveCount());
-            if (!(floodManagement instanceof ExternalFloodController)) {
-                floodManagement.flood();
+            if (!(floodController instanceof ExternalFloodController)) {
+                floodController.flood();
             } else {
-                logger.info("{}: Flood controller externally managed -- deferred management", getTarget().getName());
+                logger.info("{}: Flood controller externally managed -- deferred management",getTarget().getName());
             }
             if (!workLatch.await(timeout, u))
                 logger.error("{}: Insufficient wait timeout specified, not all flood workers have completed their work",
@@ -144,7 +155,7 @@ public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
 
     @Override
     public String toString() {
-        String controller = floodManagement instanceof ExternalFloodController ? "External" : "Internal";
+        String controller = floodController instanceof ExternalFloodController ? "External" : "Internal";
         return String.format("[target=%s,state=%s,flood-workers=%d,flood-iterations=%d,flood-controller=%s]", getTarget(),
                 state,threads,iterations,controller);
     }
@@ -154,16 +165,21 @@ public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
         return () -> {
             T result = null;
             try {
-                floodManagement.halt();
-                int i = 0;
-                while (i++ < iterations) {
-                    result = t.get();
+                floodController.halt();
+                if (getTarget().getStability() == Target.Stability.STABLE) {
+                    int i = 0;
+                    while (i++ < iterations) {
+                        result = t.get();
+                    }
+                } else {
+                    logger.warn("{}: Target state is unstable -- cannot flood",getTarget().getName());
                 }
                 logger.info("{}: Finished flooding resource object successfully", this.getTarget().getName());
             } catch (InterruptedException e) {
-                logger.info("{}: Finished flooding resource object but with interruption", this.getTarget().getName());
+                logger.error("{}: Finished flooding resource object but with interruption", this.getTarget().getName());
             } catch (Throwable throwable) {
-                logger.error("{}: Flood resource raised an exception during flood", this.getTarget().getName(),throwable);
+                logger.error("{}: Targeted resource raised an exception during flood", this.getTarget().getName(),throwable);
+                getTarget().unstable();
             } finally {
                 workLatch.countDown();
             }
@@ -273,5 +289,4 @@ public class Floodgate<T> extends AbstractResourceFloodTester<List<T>> {
             super(threads,threads,0L,TimeUnit.MILLISECONDS,new LinkedBlockingDeque<>(),threadFactory);
         }
     }
-
 }
