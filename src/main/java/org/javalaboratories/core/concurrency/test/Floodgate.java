@@ -25,6 +25,39 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+/**
+ * This class has the ability to send multiple requests concurrently to the
+ * {@link Target's} {@code resource(s)}.
+ * <p>
+ * It leverages the concept of {@code flood marshals}, {@link FloodMarshal}.
+ * These marshals have the authority to tell the {@code flood workers} exactly
+ * when to start flooding the {@code target}, consider a track and field
+ * official with a starter pistol and athletes on the starter blocks --
+ * similar concept.
+ * <p>
+ * Furthermore, it will wait until all {@code flood workers} have completed
+ * their work before returning control to the client (as long as the workers)
+ * conclude their task within the allotted time of
+ * {@link AbstractConcurrentResourceFloodTester#DEFAULT_TIMEOUT_MINUTES}.
+ * Alternatively, use the
+ * {@link AbstractConcurrentResourceFloodTester#flood(long, TimeUnit)} method.
+ * Example usage is as follows:
+ * <pre>
+ *     {@code
+ *             Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.add(10));
+ *             ...
+ *             floodgate.open();
+ *             floodgate.flood();
+ *             ...
+ *     }
+ * </pre>
+ * The command automatically creates 5 {@code flood workers} with 5 repetitions
+ * which means, the {@code unsafe.add()} method will be subjected to
+ * 25 {@code requests), 5 repeated requests from 5 {@code flood workers}
+ * working simultaneously.
+ *
+ * @param <T> Type of value returned from {@link Target} {@code resource}
+ */
 @Getter
 public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
 
@@ -60,13 +93,16 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
 
     <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Supplier<T> resource, final FloodMarshal marshal) {
         super(clazz,threads,iterations);
-        if (marshal == null)
+        if (resource == null || marshal == null)
             throw new IllegalArgumentException("Review floodgate constructor arguments");
         this.floodMarshal = marshal;
         this.workLatch = new CountDownLatch(threads);
         this.resource = resource;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         String controller = floodMarshal instanceof ExternalFloodMarshal ? "External" : "Internal";
@@ -74,6 +110,9 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
                 getState(),getThreads(),getIterations(),controller);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected Supplier<T> primeResource() {
         Supplier<T> t = Objects.requireNonNull(resource);
         return () -> {
@@ -101,12 +140,10 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
         };
     }
 
-    protected void floodResource(final long timeout, final TimeUnit units) throws InterruptedException {
-        logger.info("{}: Flooding resource with {} flood workers, each iterating {} times",getTarget().getName(),
-                getThreads(),getIterations());
-        if (getService().getActiveCount() < getThreads() )
-            logger.warn("{}: Active thread count {}. Not all flood workers are ready",getTarget().getName(),
-                    getService().getActiveCount());
+    /**
+     * {@inheritDoc}
+     */
+    protected void await(long timeout, TimeUnit units) throws InterruptedException {
         if (!(floodMarshal instanceof ExternalFloodMarshal)) {
             floodMarshal.flood();
         } else {

@@ -16,7 +16,7 @@
 package org.javalaboratories.core.concurrency.test;
 
 /**
- * Implementation of this interface has the ability to control timing of flood
+ * Implementor of this interface has the ability to control timing of flood
  * thread workers used by {@link Floodgate} and {@link Torrent} objects.
  * <p>
  * Flood thread workers will only commence activity on the authorisation of this
@@ -29,5 +29,8 @@ package org.javalaboratories.core.concurrency.test;
  * notice.
  *
  * @see FloodMarshal
+ * @see ConcurrentResourceFloodTester
+ * @see Floodgate
+ * @see Torrent
  */
 public interface ExternalFloodMarshal extends FloodMarshal { }

@@ -25,10 +25,15 @@ import java.util.Objects;
  * {@link Target} object.
  * <p>
  * It is recommended to extend this class to provide behaviour for flooding
- * targets with requests.
+ * targets with requests. It formally registers the {@code target} that is to
+ * undergo the flood test. All {@link ResourceFloodTester} objects should inherit
+ * from this class, calling its constructor.
  *
  * @param <T> Type of return value from targeted {@code resource} under test.
  * @see Target
+ * @see AbstractConcurrentResourceFloodTester
+ * @see Floodgate
+ * @see Torrent
  */
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -58,6 +63,8 @@ public abstract class AbstractResourceFloodTester<T> implements ResourceFloodTes
      *
      * @param clazz class object type of {@code resource} under test.
      * @param <U> type of resource object.
+     *
+     * @throws NullPointerException if {@code clazz} is null
      * @see Target
      */
     public <U> AbstractResourceFloodTester(final Class<U> clazz) {

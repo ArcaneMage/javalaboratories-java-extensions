@@ -16,7 +16,6 @@
 package org.javalaboratories.core.concurrency.test;
 
 import lombok.*;
-import org.javalaboratories.core.event.AbstractEvent;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -119,10 +118,10 @@ public interface ResourceFloodTester<T> {
      * The {@link ResourceFloodTester} has a {@code target}, which has a specific
      * {@code aspect}.
      * <p>
-     * Generally speaking an {@code aspect} can be viewed as a specific method
-     * of an object or an API of a web service, and so it is expected that the
-     * resource under test could have several targets but all with unique
-     * identifiable names.
+     * Generally speaking an {@code aspect/resource} can be viewed as a specific
+     * method of an object or an API of a web service, and so it is expected that
+     * the {@link Target} under test could have several {@code resources} or
+     * {@code aspect} but all with unique identifiable names.
      * <p>
      * Implementors of this interface are encouraged to report {@code target}
      * information to enable easy interpretation of {@code flood} results.
