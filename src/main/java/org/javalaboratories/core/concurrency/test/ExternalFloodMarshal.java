@@ -23,11 +23,11 @@ package org.javalaboratories.core.concurrency.test;
  * object.
  * <p>
  * To manage multiple instances of the {@link Floodgate} objects, it is advisable
- * to implement this interface as opposed to {@link FloodController}, because
+ * to implement this interface as opposed to {@link FloodMarshal}, because
  * it will inform the {@link Floodgate} object(s) that they are externally
  * controlled and to defer activation of the {@code flood workers} until further
  * notice.
  *
- * @see FloodController
+ * @see FloodMarshal
  */
-public interface ExternalFloodController extends FloodController{ }
+public interface ExternalFloodMarshal extends FloodMarshal { }

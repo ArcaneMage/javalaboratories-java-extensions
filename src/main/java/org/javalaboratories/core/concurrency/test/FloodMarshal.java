@@ -22,9 +22,9 @@ package org.javalaboratories.core.concurrency.test;
  * Flood thread workers will only commence activity on the authorisation of this
  * object.
  *
- * @see ExternalFloodController
+ * @see ExternalFloodMarshal
  */
-public interface FloodController {
+public interface FloodMarshal {
     /**
      * Informs the flood workers to stand-by and wait for orders to open the
      * gate.

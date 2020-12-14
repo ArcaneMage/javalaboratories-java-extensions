@@ -34,14 +34,14 @@ public final class Torrent extends AbstractResourceFloodTester<Map<String,List<?
     @Getter(AccessLevel.NONE)
     private final List<Floodgate<?>> floodgates;
     @Getter(AccessLevel.NONE)
-    private final FloodController floodController;
+    private final FloodMarshal floodMarshal;
 
     private States state;
 
     private Torrent() {
         super();
         floodgates = new ArrayList<>();
-        floodController = new ExternalFloodController() {
+        floodMarshal = new ExternalFloodMarshal() {
             final CountDownLatch latch = new CountDownLatch(1);
             @Override
             public void halt() throws InterruptedException {
@@ -94,7 +94,7 @@ public final class Torrent extends AbstractResourceFloodTester<Map<String,List<?
                                     v.size());
                         }
                     });
-            floodController.flood();
+            floodMarshal.flood();
             try {
                 result = cfuture.get();
                 floodgates.stream()
@@ -128,7 +128,7 @@ public final class Torrent extends AbstractResourceFloodTester<Map<String,List<?
 
     @Override
     public String toString() {
-        String controller = floodController instanceof ExternalFloodController ? "External" : "Internal";
+        String controller = floodMarshal instanceof ExternalFloodMarshal ? "External" : "Internal";
         return String.format("[target=%s,state=%s,floodgates=%d,flood-controller=%s]",getTarget(),state,size(),
                 controller);
     }
@@ -255,11 +255,11 @@ public final class Torrent extends AbstractResourceFloodTester<Map<String,List<?
                 if (p instanceof RunnableFloodgateParameters) {
                     floodgate = new Floodgate<>(p.getClazz(), p.getThreads(), p.getIterations(),
                             () -> {((RunnableFloodgateParameters<Runnable,T>) p).getResource().run(); return null;},
-                            result.floodController);
+                            result.floodMarshal);
                 } else {
                     floodgate = new Floodgate<>(p.getClazz(), p.getThreads(), p.getIterations(),
                             ((SupplierFloodgateParameters<Supplier<?>,T>) p).getResource(),
-                            result.floodController);
+                            result.floodMarshal);
                 }
                 result.floodgates.add(floodgate);
             });
