@@ -54,6 +54,8 @@ import java.util.function.Supplier;
  * the {@link AbstractConcurrentResourceFloodTester#close()} method to clean up.
  *
  * @param <T> Type of value returned from the {@link Target's} {@code resource}
+ * @see Floodgate
+ * @see Torrent
  */
 @Getter
 public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractResourceFloodTester<List<T>> implements ConcurrentResourceFloodTester<List<T>> {
