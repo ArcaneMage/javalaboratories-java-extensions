@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.concurrency.test;
+package org.javalaboratories.core.concurrency.utils;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,9 +38,9 @@ import java.util.function.Supplier;
  * Furthermore, it will wait until all {@code flood workers} have completed
  * their work before returning control to the client (as long as the workers)
  * conclude their task within the allotted time of
- * {@link AbstractConcurrentResourceFloodTester#DEFAULT_TIMEOUT_MINUTES}.
+ * {@link AbstractConcurrentResourceFloodStability#DEFAULT_TIMEOUT_MINUTES}.
  * Alternatively, use the
- * {@link AbstractConcurrentResourceFloodTester#flood(long, TimeUnit)} method.
+ * {@link AbstractConcurrentResourceFloodStability#flood(long, TimeUnit)} method.
  * Example usage is as follows:
  * <pre>
  *     {@code
@@ -61,7 +61,9 @@ import java.util.function.Supplier;
  * @see Floodgate
  */
 @Getter
-public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
+public class Floodgate<T> extends AbstractConcurrentResourceFloodStability<T> {
+
+    private static final Logger logger = LoggerFactory.getLogger(Floodgate.class);
 
     /**
      * Default number of threads
@@ -73,7 +75,10 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
      */
     public static final int DEFAULT_FLOOD_ITERATIONS = 5;
 
-    private static final Logger logger = LoggerFactory.getLogger(Floodgate.class);
+    /**
+     * Indicates tag are not required.
+     */
+    public static final String UNTAGGED = null;
 
     @Getter(AccessLevel.NONE)
     private final FloodMarshal floodMarshal;
@@ -159,7 +164,7 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
      * @param <U> Type of {@code target} under test.
      */
     public <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Supplier<T> resource) {
-        this(clazz,threads,iterations,resource, getMarshal());
+        this(clazz,UNTAGGED,threads,iterations,resource, getMarshal());
     }
 
     /**
@@ -167,13 +172,20 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
      * <p>
      * This constructor offers considerable control over the behaviour of
      * the {@link Floodgate} via the {@link FloodMarshal} and therefore it is
-     * not designed to be called by clients. Preferably use the alternative
-     * constructors with {@code public} access level.
+     * not designed to be generally called by clients. Preferably use the
+     * alternative constructors with {@code public} access level. The constructor
+     * should be used if the concept of {@link FloodMarshal} objects is
+     * understood.
      * <p>
      * The number of {@code threads} and {@code iterations/repetitions} are
      * configurable with {@code threads} and {@code iterations} parameters.
+     * <p>
+     * Optionally a {@code tag} can be supplied to enable easy identification
+     * of {@code resource} under test in reports. This particularly useful with
+     * multiple instances of the {@code floodgates} reporting at the same time.
      *
      * @param clazz {@code class} type of {@code target} subjected to tests.
+     * @param tag a meaningful name to describe the resource under test.
      * @param threads number of threads {@code flood workers} required for the
      *                flood.
      * @param iterations number of request repetitions each thread will perform.
@@ -187,8 +199,9 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
      * @see FloodMarshal
      * @see ExternalFloodMarshal
      */
-    <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Supplier<T> resource, final FloodMarshal marshal) {
-        super(clazz,threads,iterations);
+    <U> Floodgate(final Class<U> clazz, final String tag, final int threads, final int iterations,
+                  final Supplier<T> resource, final FloodMarshal marshal) {
+        super(clazz,tag,threads,iterations);
         if (resource == null || marshal == null)
             throw new IllegalArgumentException("Review floodgate constructor arguments");
         this.workLatch = new CountDownLatch(threads);
@@ -201,9 +214,9 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
      */
     @Override
     public String toString() {
-        String controller = floodMarshal instanceof ExternalFloodMarshal ? "External" : "Internal";
-        return String.format("[target=%s,state=%s,flood-workers=%d,flood-iterations=%d,flood-controller=%s]", getTarget(),
-                getState(),getThreads(),getIterations(),controller);
+        String marshal = floodMarshal instanceof ExternalFloodMarshal ? "External" : "Internal";
+        return String.format("[target=%s,state=%s,flood-workers=%d,flood-iterations=%d,flood-marshal=%s]", getTarget(),
+                getState(),getThreads(),getIterations(),marshal);
     }
 
     /**
@@ -217,7 +230,7 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
      * <p>
      * {@code Floodgate} is notified when the {@code flood workers} complete their
      * task.
-     * @see org.javalaboratories.core.concurrency.test.ResourceFloodTester.Target
+     * @see ResourceFloodStability.Target
      * @see FloodMarshal
      * @see ExternalFloodMarshal
      */
@@ -227,19 +240,21 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
             T result = null;
             try {
                 floodMarshal.halt();
+                logger.info(message("Received authorisation to commence flood"));
                 if (getTarget().getStability() == Target.Stability.STABLE) {
                     int i = 0;
                     while (i++ < getIterations()) {
                         result = resource.get();
+                        Thread.yield();
                     }
                 } else {
-                    logger.warn("{}: Target state is unstable -- cannot flood",getTarget().getName());
+                    logger.warn(message("Target state is unstable -- cannot flood"));
                 }
-                logger.info("{}: Finished flooding resource object successfully", this.getTarget().getName());
+                logger.info(message("Finished flooding resource object successfully"));
             } catch (InterruptedException e) {
-                logger.error("{}: Finished flooding resource object but with interruption", this.getTarget().getName());
+                logger.error(message("Finished flooding resource object but with interruption"));
             } catch (Throwable throwable) {
-                logger.error("{}: Targeted resource raised an exception during flood", this.getTarget().getName(),throwable);
+                logger.error(message("Targeted resource raised an exception during flood"),throwable);
                 getTarget().unstable();
             } finally {
                 workLatch.countDown();
@@ -250,17 +265,7 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
 
     /**
      * {@inheritDoc}
-     * <p>
-     * In this {@link Floodgate} implementation, {@link FloodMarshal} support is
-     * enabled. This method authorises the {@code flood workers} to start via the
-     * {@link FloodMarshal}. For this to work correctly, all workers need to be
-     * already running and waiting for authorisation.
-     * <p>
-     * However, if an {@link ExternalFloodMarshal} is provided, the workers will
-     * NOT be authorised to start their work from this method. An external object
-     * will provide authorization instead. This approach is commonly used with
-     * multiple instances of {@code floodgates}.
-     * <p>
+     *
      * {@code Flood workers} notify this object of task completion, and so
      * {@code await} can wait for all them to complete but within the allotted
      * time.
@@ -271,14 +276,33 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodTester<T> {
      * @see Torrent
      */
     protected void await(long timeout, TimeUnit unit) throws InterruptedException {
+        if (!workLatch.await(timeout, unit))
+            logger.error(message("Insufficient wait timeout specified, not all flood workers have completed their work"));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * In this {@link Floodgate} implementation, {@link FloodMarshal} support is
+     * enabled. This method authorises the {@code flood workers} to start on the
+     * {@link FloodMarshal} orders. For this to work correctly, all workers need
+     * to be already running and waiting for authorisation.
+     * <p>
+     * However, if an {@link ExternalFloodMarshal} is provided, the workers will
+     * NOT be authorised to start their work from this method. An external object
+     * will provide authorization instead, but details of the {@code marshal} are
+     * reported. This approach is commonly used with multiple instances of
+     * {@code floodgates}.
+     */
+    protected void superviseFlood() {
         if (!(floodMarshal instanceof ExternalFloodMarshal)) {
+            super.superviseFlood();
             floodMarshal.flood();
         } else {
-            logger.info("{}: Flood controller externally managed -- deferred management",getTarget().getName());
+            ExternalFloodMarshal<?> marshal = (ExternalFloodMarshal<?>) floodMarshal;
+            String manager = marshal.manager().getSimpleName();
+            logger.info(message("Floodgate supporting \"{}\" via external flood marshal"),manager);
         }
-        if (!workLatch.await(timeout, unit))
-            logger.error("{}: Insufficient wait timeout specified, not all flood workers have completed their work",
-                    getTarget().getName());
     }
 
     private static FloodMarshal getMarshal() {

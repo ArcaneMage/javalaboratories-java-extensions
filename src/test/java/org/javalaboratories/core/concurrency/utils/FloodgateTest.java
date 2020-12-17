@@ -13,18 +13,22 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.concurrency.test;
+package org.javalaboratories.core.concurrency.utils;
 
-import org.junit.jupiter.api.*;
+import nl.altindag.log.LogCaptor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static org.javalaboratories.core.concurrency.test.ResourceFloodTester.States;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.javalaboratories.core.concurrency.utils.ResourceFloodStability.States;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FloodgateTest extends AbstractResourceFloodTest {
+public class FloodgateTest extends AbstractResourceFloodStabilityTest {
 
     @BeforeEach
     public void setup() {
@@ -52,7 +56,7 @@ public class FloodgateTest extends AbstractResourceFloodTest {
         assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS, floodgatePrint.getIterations());
         assertEquals(States.CLOSED, floodgatePrint.getState());
 
-        assertTrue(floodgateAdd.toString().contains("state=CLOSED,flood-workers=5,flood-iterations=5,flood-controller=Internal"));
+        assertTrue(floodgateAdd.toString().contains("state=CLOSED,flood-workers=5,flood-iterations=5,flood-marshal=Internal"));
 
         assertEquals(10, floodgateAdd2.getThreads());
         assertEquals(5, floodgateAdd2.getIterations());
@@ -152,12 +156,23 @@ public class FloodgateTest extends AbstractResourceFloodTest {
     @Test
     public void testFlood_TargetResourceTimeouts_Fail() {
         // Given
+        LogCaptor fgCaptor1 = LogCaptor.forClass(Floodgate.class);
+            // Floodgate inherits from ConcurrentResourceFloodTester, so capture these logs too
+        LogCaptor fgCaptor2 = LogCaptor.forClass(ConcurrentResourceFloodStability.class);
+
         Floodgate<Void> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.longRunningIO());
 
         // When
         floodgate.open();
-        List<Void> results = floodgate.flood(10, TimeUnit.MILLISECONDS);
 
-        logger.info("UnsafeStatics state={}", unsafe);
+        // Then
+        List<Void> results = floodgate.flood(10, TimeUnit.MILLISECONDS);
+        assertEquals(States.FLOODED,floodgate.getState());
+        assertEquals(0,results.size());
+
+        assertTrue(fgCaptor1.getErrorLogs().stream()
+                .anyMatch(l -> l.contains("Insufficient wait timeout specified, not all flood workers have completed their work")));
+        assertTrue(fgCaptor2.getErrorLogs().stream()
+                .anyMatch(l -> l.contains("Flood workers still active, but SHUTDOWN_TIMEOUT 5 seconds exceeded -- forcing shutdown")));
     }
 }

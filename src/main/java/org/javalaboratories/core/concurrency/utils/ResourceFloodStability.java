@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.concurrency.test;
+package org.javalaboratories.core.concurrency.utils;
 
 import lombok.*;
 
@@ -27,7 +27,7 @@ import java.util.Set;
  * <p>
  * The purpose of this is to test the {@code target's} stability under load,
  * revealing performance issues and/or thread-safety concerns. Use these
- * {@link ResourceFloodTester} objects in unit tests, then evaluate the
+ * {@link ResourceFloodStability} objects in unit tests, then evaluate the
  * {@code target's} state. It is not the role of this object to evaluate the
  * state of the {@code target}, but to simply pummel it with requests.
  *
@@ -35,7 +35,7 @@ import java.util.Set;
  * @see Floodgate
  * @see Torrent
  */
-public interface ResourceFloodTester<T> {
+public interface ResourceFloodStability<T> {
 
     /**
      * These are several states that represents the current status of this
@@ -48,13 +48,13 @@ public interface ResourceFloodTester<T> {
      *          CLOSED --> open() --> OPENED --> flood() --> CLOSED --> FLOODED
      *     }
      * </prep>
-     * Initially, {@link ResourceFloodTester} objects starts with the
+     * Initially, {@link ResourceFloodStability} objects starts with the
      * {@code CLOSED} state.
      */
     enum States {CLOSED,OPENED,FLOODED}
 
     /**
-     * Cleanup allocated resources pertaining to this {@link ResourceFloodTester}.
+     * Cleanup allocated resources pertaining to this {@link ResourceFloodStability}.
      * <p>
      * It is likely this object would need to allocate memory and/or I/O
      * components in order to target the resource under test. The purpose of this
@@ -69,13 +69,13 @@ public interface ResourceFloodTester<T> {
     /**
      * Initialises the {@code target} preparing it for the {@code flood}.
      * <p>
-     * This method must be called ahead of the {@link ResourceFloodTester#flood()},
+     * This method must be called ahead of the {@link ResourceFloodStability#flood()},
      * and it can only be used once. It is probable that this object requires
      * access to resources and/or I/O components in order to facilitate testing
      * of the test resource. Successive calls will result in the exception
      * {@link  IllegalStateException} being thrown.
      *
-     * @return {@code true} if opened successfully, and the state of the {@code tester}
+     * @return {@code true} if opened successfully, and the state of this object
      * will transition from {@code CLOSED} to {@code OPENED} state.
      * @throws IllegalStateException if the state is not in {@code CLOSED} state.
      */
@@ -90,7 +90,7 @@ public interface ResourceFloodTester<T> {
      * {@code CLOSED} and finally to {@code FLOODED} but will not be re-runnable.
      * <p>
      * It is important no matter the outcome of the {@code flood}, this method
-     * must release all allocated resources pertaining to this requests.
+     * must release all allocated resources pertaining to the requests.
      *
      * @return results to calling thread.
      * @throws IllegalStateException if state is not in {@code OPENED} state.
@@ -107,7 +107,7 @@ public interface ResourceFloodTester<T> {
      *          CLOSED --> open() --> OPENED --> flood() --> CLOSED --> FLOODED
      *     }
      * </prep>
-     * Initially, {@link ResourceFloodTester} objects starts with the
+     * Initially, {@link ResourceFloodStability} objects starts with the
      * {@code CLOSED} state.
      * <p>
      * @return current state of this object.
@@ -115,7 +115,7 @@ public interface ResourceFloodTester<T> {
     States getState();
 
     /**
-     * The {@link ResourceFloodTester} has a {@code target}, which has a specific
+     * The {@link ResourceFloodStability} has a {@code target}, which has a specific
      * {@code aspect}.
      * <p>
      * Generally speaking an {@code aspect/resource} can be viewed as a specific
@@ -126,7 +126,7 @@ public interface ResourceFloodTester<T> {
      * Implementors of this interface are encouraged to report {@code target}
      * information to enable easy interpretation of {@code flood} results.
      * <p>
-     * Some {@link ResourceFloodTester} objects may target multiple
+     * Some {@link ResourceFloodStability} objects may target multiple
      * targets and it is reasonable to return {@link Target} to represent this.
      * Refer to {@link Target#getIndeterminateTarget()} method.
      *
@@ -135,7 +135,7 @@ public interface ResourceFloodTester<T> {
     Target getTarget();
 
     /**
-     * The {@link ResourceFloodTester} has a {@code target}, which has a specific
+     * The {@link ResourceFloodStability} has a {@code target}, which has a specific
      * {@code aspect}.
      * <p>
      * Generally speaking an {@code aspect} can be viewed as a specific method
@@ -144,7 +144,7 @@ public interface ResourceFloodTester<T> {
      * identifiable names. It is encouraged to report this information in any logs
      * generated for tracking and monitoring purposes.
      * <p>
-     * Additionally, {@link ResourceFloodTester} may mark the target as
+     * Additionally, {@link ResourceFloodStability} may mark the target as
      * {@code UNSTABLE} if it encounters errors whilst flooding the {@code target}
      * with requests.
      * <p>
@@ -154,7 +154,7 @@ public interface ResourceFloodTester<T> {
      * <p>
      * This object is thread-safe.
      * <p>
-     * @see AbstractResourceFloodTester
+     * @see AbstractResourceFloodStability
      */
     @Getter
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -181,6 +181,27 @@ public interface ResourceFloodTester<T> {
          * @param <U> Type of class.
          */
         public <U> Target(final Class<U> clazz) {
+            this(clazz,null);
+        }
+
+        /**
+         * Constructs an instance of this {@link Target}.
+         * <p>
+         * Uniquely creates {@link Target} identifier for tracking and reporting
+         * purposes.
+         * <p>
+         * A {@code tag} provides a meaningful name of the {@code resource}
+         * under test. It will form part of the {@code target} name. This would be
+         * useful for reporting purposes but it is not essential.
+         *
+         * @param clazz class object on which unique {@code target} name or
+         *              identifier is based.
+         * @param tag   a tag is a meaningful name that describes the {@code
+         * resource}
+         *
+         * @param <U> Type of class.
+         */
+        public <U> Target(final Class<U> clazz, final String tag) {
             Class<U> c = Objects.requireNonNull(clazz);
             String cname = c.getSimpleName();
             String value;
@@ -193,12 +214,12 @@ public interface ResourceFloodTester<T> {
                 index.removeIf(s -> s.contains(cname));
                 index.add(value);
             }
-            name = value;
+            name = tag == null ? value : String.format("%s-(%s)",value,tag);
             stability = Stability.STABLE;
         }
 
         /**
-         * {@link ResourceFloodTester} may mark {@link Target} object as
+         * {@link ResourceFloodStability} may mark {@link Target} object as
          * {@code UNSTABLE} if it encounters errors during the {@code flood}.
          * <p>
          * If the {@link Target} is {@code UNSTABLE} prior to the {@code flood},
@@ -214,7 +235,7 @@ public interface ResourceFloodTester<T> {
         }
 
         /**
-         * Use to indicate the {@link Target} of the {@link ResourceFloodTester} is
+         * Use to indicate the {@link Target} of the {@link ResourceFloodStability} is
          * not determinable.
          */
         public static Target getIndeterminateTarget() {

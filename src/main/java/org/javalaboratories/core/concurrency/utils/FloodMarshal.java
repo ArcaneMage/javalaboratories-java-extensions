@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.concurrency.test;
+package org.javalaboratories.core.concurrency.utils;
 
 /**
  * Implementation of this interface has the ability to control timing of flood

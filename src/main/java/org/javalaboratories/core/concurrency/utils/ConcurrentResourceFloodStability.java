@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.concurrency.test;
+package org.javalaboratories.core.concurrency.utils;
 
 /**
  * Implementors of this interface leverage {@code threads} with which to
@@ -25,10 +25,10 @@ package org.javalaboratories.core.concurrency.test;
  * @param <T> Type of object returned from the request sent to the
  * {@code resource}
  */
-public interface ConcurrentResourceFloodTester<T> extends ResourceFloodTester<T> {
+public interface ConcurrentResourceFloodStability<T> extends ResourceFloodStability<T> {
 
     /**
-     * This is the number of repeated requests to the {@code resource}.
+     * This is the number of repeated requests sent to the {@code resource}.
      * <p>
      * The repetition can occur from within the request thread but this is up
      * to the implementer.

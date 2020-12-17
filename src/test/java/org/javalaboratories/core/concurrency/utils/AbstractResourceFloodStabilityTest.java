@@ -13,21 +13,23 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.concurrency.test;
+package org.javalaboratories.core.concurrency.utils;
 
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractResourceFloodTest {
-    static final Logger logger = LoggerFactory.getLogger(AbstractResourceFloodTest.class);
+public abstract class AbstractResourceFloodStabilityTest {
+    static final Logger logger = LoggerFactory.getLogger(AbstractResourceFloodStabilityTest.class);
 
     /**
      * Mutable object -- not thread-safe.
      */
     @Getter
     @ToString
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @NoArgsConstructor
     class UnsafeStatistics {
         int total;
         int requests;
@@ -46,7 +48,7 @@ public abstract class AbstractResourceFloodTest {
             return total / (float) value;
         }
 
-        public void longRunningIO() {
+        public void longRunningIO(){
             sleep(11000);
         }
 
@@ -80,6 +82,8 @@ public abstract class AbstractResourceFloodTest {
     void sleep(long millis) {
         try {
             Thread.sleep(millis);
-        } catch (InterruptedException ignore) {}
+        } catch (InterruptedException e) {
+            logger.error("Input/Output interrupted");
+        }
     }
 }

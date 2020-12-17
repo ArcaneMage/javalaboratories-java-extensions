@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.concurrency.test;
+package org.javalaboratories.core.concurrency.utils;
 
 /**
  * Implementor of this interface has the ability to control timing of flood
@@ -29,8 +29,21 @@ package org.javalaboratories.core.concurrency.test;
  * notice.
  *
  * @see FloodMarshal
- * @see ConcurrentResourceFloodTester
+ * @see ConcurrentResourceFloodStability
  * @see Floodgate
  * @see Torrent
  */
-public interface ExternalFloodMarshal extends FloodMarshal { }
+public interface ExternalFloodMarshal<T> extends FloodMarshal {
+    /**
+     * Identifies the class that currently manages this marshal.
+     * <p>
+     * Note that if the {@link Floodgate} is controlled by this object, it will
+     * not have access to the {@code manager} only its class type -- this is
+     * deliberate to ensure the {@code floodgate} cannot influence the flood
+     * process while under control.
+     *
+     * @return the class type of the owner.
+     */
+    Class<T> manager();
+
+}

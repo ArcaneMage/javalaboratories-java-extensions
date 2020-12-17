@@ -13,9 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.concurrency.test;
+package org.javalaboratories.core.concurrency.utils;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -40,7 +42,7 @@ import java.util.function.Supplier;
  * <p>
  * The results are then returned, ({@link Runnable} types do not have the ability
  * to return values), to the client object. After calling the method
- * {@link AbstractConcurrentResourceFloodTester#flood()}, the default behaviour of
+ * {@link AbstractConcurrentResourceFloodStability#flood()}, the default behaviour of
  * class is to immediately {@code flood} the {@link Target} without any concerns
  * for timing or synchronization the start process -- in other words there is no
  * "starter pistol". This may be sufficient for many tests, but other
@@ -49,20 +51,22 @@ import java.util.function.Supplier;
  * <p>
  * Post-flood, all allocated resources associated with the
  * {@link FloodExecutorService} are destroyed. However, if the
- * {@link AbstractConcurrentResourceFloodTester#open()} method is called but the
+ * {@link AbstractConcurrentResourceFloodStability#open()} method is called but the
  * {@code flood} is unused for whatever reason, it is highly recommend to call
- * the {@link AbstractConcurrentResourceFloodTester#close()} method to clean up.
+ * the {@link AbstractConcurrentResourceFloodStability#close()} method to clean up.
  *
  * @param <T> Type of value returned from the {@link Target's} {@code resource}
  * @see Floodgate
  * @see Torrent
  */
 @Getter
-public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractResourceFloodTester<List<T>> implements ConcurrentResourceFloodTester<List<T>> {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
+public abstract class AbstractConcurrentResourceFloodStability<T> extends AbstractResourceFloodStability<List<T>>
+        implements ConcurrentResourceFloodStability<List<T>> {
 
     public static final long DEFAULT_TIMEOUT_MINUTES = 5L;
 
-    private static final Logger logger = LoggerFactory.getLogger(ConcurrentResourceFloodTester.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConcurrentResourceFloodStability.class);
 
     private static final long SHUTDOWN_TIMEOUT_SECONDS = 5L;
     private static final String FLOODGATE_GROUP_NAME = "Floodgate-Group";
@@ -76,7 +80,9 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
     @Getter(AccessLevel.PROTECTED)
     private FloodExecutorService service;
 
+    @EqualsAndHashCode.Include
     private final int threads;
+    @EqualsAndHashCode.Include
     private final int iterations;
 
     private States state;
@@ -85,8 +91,10 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
     private List<Future<T>> futures;
 
     /**
-     * Constructs an instance of this {@link ConcurrentResourceFloodTester} object.
+     * Constructs an instance of this {@link ConcurrentResourceFloodStability} object.
      * <p>
+     * This constructor assumes the {@code tag} is unnecessary.
+     *
      * @param clazz class of {@link Target} undergoing test.
      * @param threads number of active threads tasked with sending requests
      *               to {@code resource}
@@ -95,8 +103,25 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
      * @throws IllegalArgumentException if {@code threads} or {@code iterations}
      * are negative.
      */
-    public <U> AbstractConcurrentResourceFloodTester(final Class<U> clazz, final int threads, final int iterations) {
-        super(clazz);
+    public <U> AbstractConcurrentResourceFloodStability(final Class<U> clazz, final int threads, final int iterations) {
+        this(clazz,null,threads,iterations);
+    }
+
+    /**
+     * Constructs an instance of this {@link ConcurrentResourceFloodStability} object.
+     * <p>
+     * @param clazz class of {@link Target} undergoing test.
+     * @param tag a meaningful name of the resource under test.
+     * @param threads number of active threads tasked with sending requests
+     *               to {@code resource}
+     * @param iterations number of request repetitions per request thread
+     * @param <U> Type of class currently under test.
+     * @throws IllegalArgumentException if {@code threads} or {@code iterations}
+     * are negative.
+     */
+    public <U> AbstractConcurrentResourceFloodStability(final Class<U> clazz, final String tag, final int threads,
+                                                        final int iterations) {
+        super(clazz, tag);
         if (threads < MIN_THREADS || iterations < MIN_ITERATIONS)
             throw new IllegalArgumentException("Review constructor arguments");
         this.threads = threads;
@@ -112,6 +137,8 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
     public boolean open() {
         if (state == States.CLOSED) {
             this.service = createExecutor();
+            Supplier<T> resource = primeResource();
+            futures = primeThreads(resource);
             state = States.OPENED;
         } else {
             throw new IllegalStateException(String.format("State not closed, state=%s",state));
@@ -131,7 +158,7 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
      * {@inheritDoc}
      *
      * This implementation will wait up to
-     * {@link AbstractConcurrentResourceFloodTester#DEFAULT_TIMEOUT_MINUTES},
+     * {@link AbstractConcurrentResourceFloodStability#DEFAULT_TIMEOUT_MINUTES},
      * currently 5 minutes before closing the {@code resource}.
      */
     @Override
@@ -144,13 +171,13 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
      * waiting for the flood to complete.
      * <p>
      * Specify the {@code timeout} and its {@code unit} to inform
-     * {@link ResourceFloodTester} how long to wait for flood completion. If
+     * {@link ResourceFloodStability} how long to wait for flood completion. If
      * the {@code flood workers} fail to complete their work within the allotted
      * time the threads are signalled to terminate regardless of the outcome
      * of requests.
      * <p>
      * However, this method is dependent on the implementation of the
-     * {@link AbstractConcurrentResourceFloodTester#await(long, TimeUnit)}
+     * {@link AbstractConcurrentResourceFloodStability#await(long, TimeUnit)}
      * method; the default implementation is to {@code join} to the current
      * thread. For a more sophisticated mechanism, it is recommended to override
      * the {@code await} method.
@@ -166,19 +193,14 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
         TimeUnit u = Objects.requireNonNull(unit);
         List<T> result;
         try {
-            Supplier<T> resource = primeResource();
-            futures = primeThreads(resource);
-            logger.info("{}: Flooding resource with {} flood workers, each iterating {} times",getTarget().getName(),
-                    getThreads(),getIterations());
-            if (getService().getActiveCount() < getThreads() )
-                logger.warn("{}: Active thread count {}. Not all flood workers are ready",getTarget().getName(),
-                        getService().getActiveCount());
+            superviseFlood();
             await(timeout,u);
         } catch (InterruptedException ignore) {
         } finally {
             close();
             result = finalise(futures);
             state = States.FLOODED;
+            afterFlood();
         }
         return result;
     }
@@ -193,7 +215,14 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
     }
 
     /**
-     * {@link AbstractConcurrentResourceFloodTester#flood(long, TimeUnit)} calls
+     * Override this method for additional behaviour after the flood.
+     * <p>
+     * Default implementation is to do nothing. This is a life-cycle method.
+     */
+    protected void afterFlood() {}
+
+    /**
+     * {@link AbstractConcurrentResourceFloodStability#flood(long, TimeUnit)} calls
      * this method during the {@code flood} process.
      * <p>
      * It is a blocking method, waiting until the maximum {@code timeout} for
@@ -209,6 +238,20 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
      */
     protected void await(long timeout, TimeUnit units) throws InterruptedException {
         units.timedJoin(Thread.currentThread(),timeout);
+    }
+
+    /**
+     * Performs and manages the flood mechanics required by this object.
+     * <p>
+     * Default implementation is to generate initialisation logging. Override in
+     * derived classes for additional/alternative behaviour.
+     */
+    protected void superviseFlood() {
+        logger.info(message("Flooding resource with {} flood workers, each iterating {} times"),getThreads(),
+                getIterations());
+        if (getService().getActiveCount() < getThreads())
+            logger.warn(message("Active thread count {}. Not all flood workers are ready"),
+                    getService().getActiveCount());
     }
 
     /**
@@ -245,24 +288,29 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
     void close(boolean force) {
         if (state == States.OPENED) {
             try {
+                Consumer<Future<T>> cancel = f -> {if (!f.isDone()) f.cancel(false);};
                 if (!force) {
                     service.shutdown();
-                    logger.info("{}: Shutting down flood pool service, but first waiting {} seconds for flood workers to " +
-                            "complete their work",getTarget().getName(),SHUTDOWN_TIMEOUT_SECONDS);
+                    logger.info(message("Shutting down flood pool service, but first waiting {} seconds for flood workers to " +
+                            "complete their work"),SHUTDOWN_TIMEOUT_SECONDS);
                     service.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                     if (!service.isTerminated()) {
                         service.shutdownNow();
-                        logger.error("{}: Flood workers still active, but SHUTDOWN_TIMEOUT {} seconds exceeded -- " +
-                                "forcing shutdown", getTarget().getName(), SHUTDOWN_TIMEOUT_SECONDS);
+                        logger.error(message("Flood workers still active, but SHUTDOWN_TIMEOUT {} seconds exceeded -- " +
+                                "forcing shutdown"), SHUTDOWN_TIMEOUT_SECONDS);
+                        if (futures != null) // May not have been primed
+                            futures.forEach(cancel);
                     }
                 } else {
-                    logger.error("{}: Not waiting for flood workers, forcing immediate shutdown", getTarget().getName());
+                    logger.error(message("Not waiting for flood workers, forcing immediate shutdown"));
                     service.shutdownNow();
+                    if (futures != null)
+                        futures.forEach(cancel);
                 }
             } catch (InterruptedException e) {
-                logger.error("{} Termination of worker threads interrupted", getTarget().getName());
+                logger.error(message("Termination of worker threads interrupted"));
             } finally {
-                logger.info("{}: Flood pool service shutdown successfully", getTarget().getName());
+                logger.info(message("Flood pool service shutdown successfully"));
                 state = States.CLOSED;
             }
         }
@@ -276,8 +324,8 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
     }
 
     private FloodExecutorService createExecutor() {
-        FloodExecutorService result = new FloodThreadPoolExecutor(threads,AbstractConcurrentResourceFloodTester::newFloodWorker);
-        logger.info("{}: Flood pool service created successfully, number of flood workers {}",getTarget().getName(),threads);
+        FloodExecutorService result = new FloodThreadPoolExecutor(threads, AbstractConcurrentResourceFloodStability::newFloodWorker);
+        logger.info(message("Flood pool service created successfully, number of flood workers {}"),threads);
         return result;
     }
 
@@ -295,7 +343,9 @@ public abstract class AbstractConcurrentResourceFloodTester<T> extends AbstractR
         if (futures != null) {
             futures.forEach(f -> {
                 try {
-                    result.add(f.isDone() ? f.get() : null);
+                    if (f.isDone()) {
+                        result.add(f.get());
+                    }
                 } catch (InterruptedException | ExecutionException | CancellationException ignored) {
                     // This is okay: no need to report forced shutdown of
                     // threads or execution failures; these are already reported

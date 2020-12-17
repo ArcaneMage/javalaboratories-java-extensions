@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.concurrency.test;
+package org.javalaboratories.core.concurrency.utils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,16 +21,19 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.javalaboratories.core.concurrency.test.ResourceFloodTester.States.*;
+import static org.javalaboratories.core.concurrency.utils.ResourceFloodStability.States.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TorrentTest extends AbstractResourceFloodTest {
+public class TorrentTest extends AbstractResourceFloodStabilityTest {
+
+    private UnsafeStatistics expected;
 
     @BeforeEach
     public void setup() {
         unsafe = new UnsafeStatistics();
         safe = new SafeStatistics();
+        expected = new UnsafeStatistics(250,25,10.0f);
     }
 
     @Test
@@ -61,7 +64,7 @@ public class TorrentTest extends AbstractResourceFloodTest {
         assertEquals(6,torrent2.floodgates().get(1).getThreads());
         assertEquals(2,torrent2.floodgates().get(1).getIterations());
 
-        assertTrue(torrent.toString().contains("[target=ResourceFloodTester.Target(name={IndeterminateTarget-001}),state=CLOSED,floodgates=2,flood-controller=External]"));
+        assertTrue(torrent.toString().contains("stability=STABLE),state=CLOSED,floodgates=2,flood-marshal=External"));
     }
 
     @Test
@@ -119,8 +122,8 @@ public class TorrentTest extends AbstractResourceFloodTest {
     public void testFlood_TargetResources_Pass() {
         // Given
         Torrent torrent = Torrent.builder(UnsafeStatistics.class)
-                .withFloodgate(() -> unsafe.print())
-                .withFloodgate(() -> unsafe.add(10))
+                .withFloodgate("print", () -> unsafe.print())
+                .withFloodgate("add", () -> unsafe.add(10))
                 .build();
 
         // When
@@ -128,9 +131,14 @@ public class TorrentTest extends AbstractResourceFloodTest {
         Map<String, List<?>> result = torrent.flood();
 
         // Then
-        assertEquals(FLOODED,torrent.getState());
+        assertEquals(FLOODED, torrent.getState());
         assertEquals(2, result.size());
+        assertEquals(10,torrent.getThreads());
+        assertEquals(50,torrent.getIterations());
+        assertEquals(5.0,torrent.getAverageIterations());
 
-
+        if (!unsafe.equals(expected)) {
+            logger.info("Statistics corrupted this time, expected: {}, but got {}", expected, unsafe);
+        }
     }
 }
