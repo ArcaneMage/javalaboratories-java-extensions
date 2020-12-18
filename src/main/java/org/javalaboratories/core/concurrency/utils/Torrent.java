@@ -17,9 +17,7 @@ package org.javalaboratories.core.concurrency.utils;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +50,7 @@ import static org.javalaboratories.core.concurrency.utils.Floodgate.UNTAGGED;
  * <p>
  * If the client requires access to the {@link Floodgate} objects in this
  * container, the class provides both {@link Torrent#iterator()} and
- * {@link Torrent#floodgates()} methods but the {@code floodgate} objects and the
+ * {@link Torrent#toList()} methods but the {@code floodgate} objects and the
  * {@link List} object returned are immutable to ensure {@link Torrent} cannot
  * be undermined.
  * <p>
@@ -190,17 +188,10 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
             CompletableFuture<Map<String, List<?>>> future = CompletableFuture
                 .supplyAsync(() -> {
                     Map<String,List<?>> response = new HashMap<>();
-                    floodgates.forEach(fg -> response.put(getTarget().getName(),fg.flood()));
+                    floodgates.forEach(fg -> response.put(fg.getTarget().getName(),fg.flood()));
                     return response;
                 })
-                .whenComplete((v, e) -> {
-                    if (e != null) {
-                        logger.error(message("An error was encountered in one of the floodgates {}"),
-                                e.getMessage());
-                    } else {
-                        logger.info(message("Number of floodgates completed: {}"), v.size());
-                    }
-                });
+                .whenComplete((v, e) -> logger.info(message("Number of floodgates completed: {}"), v.size()));
 
             floodMarshal.flood();
             logger.info(message("Torrent authorised flood commencement"));
@@ -231,7 +222,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      * @return a {@link List} of {@code floodgate} objects within this
      * container.
      */
-    public List<ConcurrentResourceFloodStability<?>> floodgates() {
+    public List<ConcurrentResourceFloodStability<?>> toList() {
         return Collections.unmodifiableList(
             floodgates.stream()
                 .map(UnmodifiableFloodgate::new)
@@ -245,7 +236,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      */
     @Override
     public Iterator<ConcurrentResourceFloodStability<?>> iterator() {
-        return floodgates().iterator();
+        return toList().iterator();
     }
 
     /**
@@ -353,7 +344,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      * @param <T> Type of value returned from the {@code target's} {@code
      * resources}.
      * @see Torrent#iterator()
-     * @see Torrent#floodgates()
+     * @see Torrent#toList()
      */
     static class UnmodifiableFloodgate<T> implements ConcurrentResourceFloodStability<List<T>> {
         private final Floodgate<T> delegate;
@@ -418,11 +409,10 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      * @param <U> Type of {@code resource} function with which to {@code target}
      *           the underlying {@code resource}.
      */
-    @Value
-    @EqualsAndHashCode(callSuper=true)
+    @Getter
     private static class RunnableFloodgateParameters<U extends Runnable,T> extends FloodgateParameters<T> {
-        U resource;
-        RunnableFloodgateParameters(Class<T> clazz, String tag, int threads, int iterations, U resource) {
+        private final U resource;
+        private RunnableFloodgateParameters(Class<T> clazz, String tag, int threads, int iterations, U resource) {
             super(clazz,tag,threads,iterations);
             this.resource = resource;
         }
@@ -436,11 +426,10 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      * @param <U> Type of {@code resource} function with which to {@code target}
      *           the underlying {@code resource}.
      */
-    @Value
-    @EqualsAndHashCode(callSuper=true)
+    @Getter
     private static class SupplierFloodgateParameters<U extends Supplier<?>,T> extends FloodgateParameters<T> {
-        U resource;
-        SupplierFloodgateParameters(Class<T> clazz, String tag, int threads, int iterations, U resource) {
+        private final U resource;
+        private SupplierFloodgateParameters(Class<T> clazz, String tag, int threads, int iterations, U resource) {
             super(clazz,tag,threads,iterations);
             this.resource = resource;
         }

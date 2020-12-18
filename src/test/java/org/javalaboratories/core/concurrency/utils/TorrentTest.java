@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core.concurrency.utils;
 
+import org.javalaboratories.core.concurrency.utils.ResourceFloodStability.States;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -54,15 +55,15 @@ public class TorrentTest extends AbstractResourceFloodStabilityTest {
         assertEquals(CLOSED,torrent.getState());
         assertEquals(CLOSED,torrent2.getState());
 
-        assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS,torrent.floodgates().get(0).getThreads());
-        assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS,torrent.floodgates().get(0).getIterations());
-        assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS,torrent.floodgates().get(1).getThreads());
-        assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS,torrent.floodgates().get(1).getIterations());
+        assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS,torrent.toList().get(0).getThreads());
+        assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS,torrent.toList().get(0).getIterations());
+        assertEquals(Floodgate.DEFAULT_FLOOD_WORKERS,torrent.toList().get(1).getThreads());
+        assertEquals(Floodgate.DEFAULT_FLOOD_ITERATIONS,torrent.toList().get(1).getIterations());
 
-        assertEquals(5,torrent2.floodgates().get(0).getThreads());
-        assertEquals(1,torrent2.floodgates().get(0).getIterations());
-        assertEquals(6,torrent2.floodgates().get(1).getThreads());
-        assertEquals(2,torrent2.floodgates().get(1).getIterations());
+        assertEquals(5,torrent2.toList().get(0).getThreads());
+        assertEquals(1,torrent2.toList().get(0).getIterations());
+        assertEquals(6,torrent2.toList().get(1).getThreads());
+        assertEquals(2,torrent2.toList().get(1).getIterations());
 
         assertTrue(torrent.toString().contains("stability=STABLE),state=CLOSED,floodgates=2,flood-marshal=External"));
     }
@@ -119,6 +120,92 @@ public class TorrentTest extends AbstractResourceFloodStabilityTest {
     }
 
     @Test
+    public void testFlood_IllegalStateException_Fail() {
+        // Given
+        Torrent torrent = Torrent.builder(UnsafeStatistics.class)
+                .withFloodgate(() -> unsafe.add(10))
+                .withFloodgate(() -> unsafe.print())
+                .build();
+
+        // Then
+        assertEquals(CLOSED, torrent.getState());
+        assertEquals(2, torrent.size());
+        assertThrows(IllegalStateException.class, torrent::flood);
+    }
+
+
+    @Test
+    public void testClose_State_Pass() {
+        // Given
+        Torrent torrent = Torrent.builder(UnsafeStatistics.class)
+                .withFloodgate(() -> unsafe.add(10))
+                .withFloodgate(() -> unsafe.print())
+                .build();
+
+        // When
+        torrent.open();
+        torrent.close();
+
+        assertEquals(CLOSED,torrent.getState());
+    }
+
+    @Test
+    public void testClose_IllegalStateException_Fail() {
+        // Given
+        Torrent torrent = Torrent.builder(UnsafeStatistics.class)
+                .withFloodgate(() -> unsafe.add(10))
+                .withFloodgate(() -> unsafe.print())
+                .build();
+
+        // When
+        States state = torrent.getState();
+
+        // Then
+        assertEquals(CLOSED,state);
+        assertThrows(IllegalStateException.class, torrent::close);
+    }
+
+
+    @Test
+    public void testIterator_Torrent_Pass() {
+        // Given
+        Torrent torrent = Torrent.builder(UnsafeStatistics.class)
+                .withFloodgate(() -> unsafe.add(10))
+                .withFloodgate(() -> unsafe.print())
+                .build();
+
+        // Then
+        assertEquals(2,torrent.size());
+        torrent.forEach(fg -> {
+            assertEquals(CLOSED,fg.getState());
+            assertEquals(5,fg.getThreads());
+            assertEquals(5,fg.getIterations());
+            assertTrue(fg.toString().contains("state=CLOSED,flood-workers=5,flood-iterations=5,flood-marshal=External"));
+            assertTrue(fg.getTarget().getName().contains("UnsafeStatistics"));
+        });
+    }
+
+    @Test
+    public void testToList_UnsupportedOperationException_Fail() {
+        // Given
+        Torrent torrent = Torrent.builder(UnsafeStatistics.class)
+                .withFloodgate(() -> unsafe.add(10))
+                .withFloodgate(() -> unsafe.print())
+                .build();
+
+        // When
+        List<ConcurrentResourceFloodStability<?>> floodgates = torrent.toList();
+
+        // Then
+        assertEquals(2,floodgates.size());
+        ConcurrentResourceFloodStability<?> floodgate = floodgates.get(0);
+
+        assertThrows(UnsupportedOperationException.class,floodgate::open);
+        assertThrows(UnsupportedOperationException.class,floodgate::flood);
+        assertThrows(UnsupportedOperationException.class,floodgate::close);
+    }
+
+    @Test
     public void testFlood_TargetResources_Pass() {
         // Given
         Torrent torrent = Torrent.builder(UnsafeStatistics.class)
@@ -141,4 +228,25 @@ public class TorrentTest extends AbstractResourceFloodStabilityTest {
             logger.info("Statistics corrupted this time, expected: {}, but got {}", expected, unsafe);
         }
     }
+
+    @Test
+    public void testFlood_TargetUnstableResources_Pass() {
+        // Given
+        Torrent torrent = Torrent.builder(UnsafeStatistics.class)
+                .withFloodgate("print", () -> unsafe.print())
+                .withFloodgate("div", () -> unsafe.div(-1))
+                .build();
+
+        // When
+        torrent.open();
+        Map<String, List<?>> result = torrent.flood();
+
+        // Then
+        assertEquals(FLOODED, torrent.getState());
+
+        if (!unsafe.equals(expected)) {
+            logger.info("Statistics corrupted this time, expected: {}, but got {}", expected, unsafe);
+        }
+    }
+
 }

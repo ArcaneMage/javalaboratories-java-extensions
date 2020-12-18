@@ -60,27 +60,6 @@ public abstract class AbstractResourceFloodStability<T> implements ResourceFlood
      * object and it is encouraged to report the {@link Target} to clients
      * of this object.
      * <p>
-     * The {@code tag} is omitted in this constructor and therefore doesn't
-     * play a role in the {@code target} name.
-     *
-     * @param clazz class object type of {@code resource} under test.
-     * @param <U> type of resource object.
-     *
-     * @throws NullPointerException if {@code clazz} is null
-     * @see Target
-     */
-    public <U> AbstractResourceFloodStability(final Class<U> clazz) {
-        this(clazz,null);
-    }
-
-    /**
-     * Constructs this {@link ResourceFloodStability} object.
-     * <p>
-     * Use this constructor when targeting a specific aspect of the target,
-     * for example web-server API or a particular method of the target
-     * object and it is encouraged to report the {@link Target} to clients
-     * of this object.
-     * <p>
      * A {@code tag} provides a meaningful name of the {@code resource}
      * under test. It will form part of the {@code target} name. This would be
      * useful for reporting purposes but it is not essential.

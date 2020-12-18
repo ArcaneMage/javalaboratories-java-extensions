@@ -224,9 +224,9 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodStability<T> {
      * <p>
      * This {@link Floodgate} implementation decorates the {@code resource}
      * object with additional behaviour to enable {@link FloodMarshal} support,
-     * correct {@code repetition} behaviour as well as useful logging information
-     * for tracking of {@code resource} state. If the {@code resource} causes
-     * raises an exception, the {@code target} would be considered as {@code unstable}.
+     * and useful logging information for tracking of {@code resource} state.
+     * If the {@code resource} causes raises an exception, the {@code target}
+     * would be considered as {@code unstable}.
      * <p>
      * {@code Floodgate} is notified when the {@code flood workers} complete their
      * task.
@@ -234,33 +234,30 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodStability<T> {
      * @see FloodMarshal
      * @see ExternalFloodMarshal
      */
-    protected Supplier<T> primeResource() {
-        Supplier<T> resource = Objects.requireNonNull(this.resource);
+    protected final Supplier<T> primeResource() {
+        Supplier<T> resource = super.primeResource();
         return () -> {
             T result = null;
             try {
                 floodMarshal.halt();
                 logger.info(message("Received authorisation to commence flood"));
-                if (getTarget().getStability() == Target.Stability.STABLE) {
-                    int i = 0;
-                    while (i++ < getIterations()) {
-                        result = resource.get();
-                        Thread.yield();
-                    }
-                } else {
-                    logger.warn(message("Target state is unstable -- cannot flood"));
-                }
+                result = resource.get();
                 logger.info(message("Finished flooding resource object successfully"));
             } catch (InterruptedException e) {
                 logger.error(message("Finished flooding resource object but with interruption"));
-            } catch (Throwable throwable) {
-                logger.error(message("Targeted resource raised an exception during flood"),throwable);
-                getTarget().unstable();
             } finally {
                 workLatch.countDown();
             }
             return result;
         };
+    }
+
+    /**
+     * @return underlying resource subjected to tests.
+     */
+    @Override
+    protected final Supplier<T> getResource() {
+        return resource;
     }
 
     /**

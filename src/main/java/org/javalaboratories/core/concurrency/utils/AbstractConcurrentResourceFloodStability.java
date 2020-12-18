@@ -249,9 +249,6 @@ public abstract class AbstractConcurrentResourceFloodStability<T> extends Abstra
     protected void superviseFlood() {
         logger.info(message("Flooding resource with {} flood workers, each iterating {} times"),getThreads(),
                 getIterations());
-        if (getService().getActiveCount() < getThreads())
-            logger.warn(message("Active thread count {}. Not all flood workers are ready"),
-                    getService().getActiveCount());
     }
 
     /**
@@ -259,16 +256,47 @@ public abstract class AbstractConcurrentResourceFloodStability<T> extends Abstra
      * request.
      * <p>
      * The purpose of this method is to make ready the request to be issued by
-     * the {@code flood workers}. For example, the "original" {@code resource}
-     * may be in fact be a {@link Runnable}, but this class expects a
-     * {@link Supplier} object, and so the role of this method is to transform
-     * the original {@code resource} into an acceptable form, ready for the
-     * {@code flood workers}. In other words, the {@code resource} returned
-     * from this method may be decorated with several layers of encapsulation.
+     * the {@code flood workers}. For example, performing request repetitions
+     * within the worker thread. It is possible to override this method in
+     * derived classes, but ensure a call to this method is made to maintain
+     * the behaviour integrity of this class.
+     * <p>
+     * In other words, the {@code resource} returned from this method is is
+     * decorated with several layers of encapsulation.
      *
      * @return a primed {@code resource} for processing.
      */
-    protected abstract Supplier<T> primeResource();
+    protected Supplier<T> primeResource() {
+        return () -> {
+            T result = null;
+            if (getTarget().getStability() == Target.Stability.STABLE) {
+                int i = 0;
+                try {
+                    while (i++ < getIterations()) {
+                        result = getResource().get();
+                        Thread.yield();
+                    }
+                } catch (Throwable t) {
+                    logger.error(message("Targeted resource raised an exception during flood"),t);
+                    getTarget().unstable();
+                }
+            } else {
+                logger.warn(message("Target state is unstable -- cannot flood"));
+            }
+            return result;
+        };
+    }
+
+    /**
+     * Retrieve underlying {@code resource} to be {@code targeted}.
+     * <p>
+     * {@link AbstractConcurrentResourceFloodStability#primeResource()} depends
+     * on this method in order to {@code prime} the {@code resource} for the
+     * {@code flood workers}.
+     *
+     * @return underlying {@code resource}
+     */
+    protected abstract Supplier<T> getResource();
 
     /**
      * Closes and releases all allocated resources pertaining to {@code flood
