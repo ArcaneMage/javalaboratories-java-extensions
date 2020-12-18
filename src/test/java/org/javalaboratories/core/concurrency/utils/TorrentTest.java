@@ -234,7 +234,7 @@ public class TorrentTest extends AbstractResourceFloodStabilityTest {
         // Given
         Torrent torrent = Torrent.builder(UnsafeStatistics.class)
                 .withFloodgate("print", () -> unsafe.print())
-                .withFloodgate("div", () -> unsafe.div(-5))
+                .withFloodgate("div", () -> unsafe.div(-1))
                 .build();
 
         // When
