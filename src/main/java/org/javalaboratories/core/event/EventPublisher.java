@@ -34,13 +34,12 @@ package org.javalaboratories.core.event;
  * interest. The {@link EventPublisher#unsubscribe(EventSubscriber)} method
  * unregisters the {@link EventSubscriber} object from the {@link EventPublisher}.
  *
- * @param <T> Type of source in which the event originated.
  * @param <V> Type of value and/or state forwarded to the {@code subscribers}
  * @see Event
  * @see EventBroadcaster
  * @see EventSubscriber
  */
-public interface EventPublisher<T extends EventSource,V> {
+public interface EventPublisher<V> {
     /**
      * Publish an {@link Event} to interested {@link EventSubscriber} objects
      * when {@link EventPublisher} or the owning component which encapsulates
@@ -94,4 +93,9 @@ public interface EventPublisher<T extends EventSource,V> {
      * @throws NullPointerException if {@code subscriber} is null.
      */
     boolean unsubscribe(final EventSubscriber<V> subscriber);
+
+    /**
+     * @return number of subscribers registered with this {@code publisher}
+     */
+    int subscribers();
 }

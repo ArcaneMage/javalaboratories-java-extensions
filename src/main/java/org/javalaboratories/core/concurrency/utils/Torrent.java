@@ -441,7 +441,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      * @param <T> Type of {@code target} object currently being subjected to
      *           tests.
      */
-    final static class TorrentBuilder<T> {
+    public final static class TorrentBuilder<T> {
         private final List<FloodgateParameters<T>> parameters;
         private final Class<T> clazz;
         private final int threads;

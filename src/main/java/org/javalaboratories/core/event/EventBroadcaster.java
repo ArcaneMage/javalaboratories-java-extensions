@@ -27,8 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +42,15 @@ import java.util.stream.Collectors;
  * interface and introduce {@code event} types by subclassing {@link AbstractEvent}
  * class and/or use the out-of-the-box {@link Event} objects defined in the
  * {@link CommonEvents} class.
- *
+ * <p>
+ * The implementation is considered thread-safe, and so subscribing and/or
+ * unsubscribing is permitted during {@code subscriber} notification. However
+ * be aware of the following:
+ * <ul>
+ *     <li>When unsubscribing, if this publisher is publishing to the same
+ *     {@code subscriber}, that subscriber will continue to receive events until
+ *     it is safely removed from the publisher.</li>
+ * </ul>
  * @param <T> Type of source in which the event originated.
  * @param <V> Type of value and/or state forwarded to the {@code subscribers}
  *
@@ -53,7 +59,7 @@ import java.util.stream.Collectors;
  * @see CommonEvents
  * @see EventSubscriber
  */
-public abstract class EventBroadcaster<T extends EventSource,V> implements EventPublisher<T,V>, EventSource {
+public abstract class EventBroadcaster<T extends EventSource,V> implements EventPublisher<V>, EventSource {
 
     private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
@@ -61,12 +67,13 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     // should not be obstructed by the main Lock object.
     private static int uniqueIdentity = 0;
 
-    private final Lock lock;
+    private final Object mainLock;
     private final Map<String,Subscription> subscriptions;
     private final T source;
 
     @Value
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    @AllArgsConstructor
     private class Subscription {
         @EqualsAndHashCode.Include
         String identity;
@@ -97,7 +104,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     public EventBroadcaster(final T source) {
         this.source = source;
         this.subscriptions = new LinkedHashMap<>();
-        this.lock = new ReentrantLock();
+        this.mainLock = new Object();
     }
 
     @Override
@@ -106,11 +113,8 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
                 .assign(source);
 
         Set<Subscription> set;
-        lock.lock();
-        try {
+        synchronized(mainLock) {
             set = new HashSet<>(subscriptions.values());
-        } finally {
-            lock.unlock();
         }
 
         set.forEach(subscription -> {
@@ -133,21 +137,18 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
         if ( captureEvents == null || captureEvents.length < 1 )
             throw new IllegalArgumentException("No events to capture");
 
-        lock.lock();
-        try {
+        synchronized(mainLock) {
             subscriptions.values().stream()
-                    .filter(s -> s.getSubscriber().equals(subscriber))
-                    .findAny()
-                    .ifPresent(s -> {
-                        throw new EventException("Subscriber exists -- unsubscribe first");
-                    });
+                .filter(s -> s.getSubscriber().equals(subscriber))
+                .findAny()
+                .ifPresent(s -> {
+                    throw new EventException("Subscriber exists -- unsubscribe first");
+                });
 
             Subscription subscription = new Subscription(getUniqueIdentity(), aSubscriber,
                     Collections.unmodifiableSet(new HashSet<>(Arrays.asList(captureEvents))));
 
             subscriptions.put(subscription.getIdentity(), subscription);
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -155,8 +156,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     public boolean unsubscribe(final EventSubscriber<V> subscriber) {
         EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
 
-        lock.lock();
-        try {
+        synchronized(mainLock) {
             // Derive subscription identity
             String identity = subscriptions.values().stream()
                     .filter(s -> s.getSubscriber().equals(aSubscriber))
@@ -165,8 +165,6 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
 
             // Remove subscription
             return subscriptions.remove(identity) != null;
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -174,11 +172,15 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     public String toString() {
         String source = this.source.getClass().getSimpleName();
         source = source.isEmpty() ? "UNKNOWN" : source;
-        lock.lock();
-        try {
+        synchronized (mainLock) {
             return String.format("[subscribers=%s,source=%s]", subscriptions.size(), source);
-        } finally {
-            lock.unlock();
+        }
+    }
+
+    @Override
+    public int subscribers() {
+        synchronized(mainLock) {
+            return subscriptions.size();
         }
     }
 

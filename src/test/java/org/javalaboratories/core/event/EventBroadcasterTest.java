@@ -1,12 +1,15 @@
 package org.javalaboratories.core.event;
 
 import nl.altindag.log.LogCaptor;
+import org.javalaboratories.core.concurrency.utils.Torrent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.javalaboratories.core.event.CommonEvents.*;
+import static org.javalaboratories.core.event.CommonEvents.ACTION_EVENT;
+import static org.javalaboratories.core.event.CommonEvents.ANY_EVENT;
+import static org.javalaboratories.core.event.CommonEvents.NOTIFY_EVENT;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EventBroadcasterTest implements EventSubscriber<String>, EventSource  {
@@ -17,14 +20,14 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
     private static final Event TEST_EVENT_B = new TestEventB();
     private static final Event TEST_EVENT_C = new TestEventC();
 
-    private EventPublisher<EventBroadcasterTest,String> publisher;
-    private EventPublisher<EventBroadcasterTest,String> publisher2;
+    private EventPublisher<String> publisher;
+    private EventPublisher<String> publisher2;
 
     private EventSubscriber<String> subscriberA;
     private EventSubscriber<String> subscriberB;
     private EventSubscriber<String> subscriberC;
 
-    class Publisher extends EventBroadcaster<EventBroadcasterTest,String> {
+    static class Publisher extends EventBroadcaster<EventBroadcasterTest,String> {
         public Publisher() {
             super();
         }
@@ -237,6 +240,26 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         // Then
         assertFalse(removed);
         assertEquals("[subscribers=1,source=EventBroadcasterTest]",publisher.toString());
+    }
+
+    @Test
+    public void testPublishUnsubscribe_MultiThreaded_Pass() {
+        // Given
+        // (3 subscribers)
+        publisher.subscribe(subscriberA,ACTION_EVENT,NOTIFY_EVENT,TEST_EVENT_A,TEST_EVENT_B);
+        publisher.subscribe(subscriberC,ACTION_EVENT); // <-- toxic subscriber
+        publisher.subscribe(subscriberB,ACTION_EVENT,TEST_EVENT_B);
+
+        Torrent torrent = Torrent.builder(Publisher.class)
+                .withFloodgate("Publisher",16,255,() -> publisher.publish(ACTION_EVENT,"(Action Event): Hello World"))
+                .withFloodgate("Unsubscribe",16,255,() -> publisher.unsubscribe(subscriberB))
+                .build();
+
+        torrent.open();
+        torrent.flood();
+
+        assertEquals(1,publisher.subscribers());
+        logger.info("Publisher state: {}",publisher);
     }
 
     @Override
