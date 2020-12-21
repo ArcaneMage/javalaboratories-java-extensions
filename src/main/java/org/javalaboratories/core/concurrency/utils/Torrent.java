@@ -18,6 +18,7 @@ package org.javalaboratories.core.concurrency.utils;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.javalaboratories.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -109,6 +107,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
     @Getter(AccessLevel.NONE)
     private final ExternalFloodMarshal<Torrent> floodMarshal;
 
+    private final FloodExecutorService service;
     private States state;
 
     /**
@@ -117,11 +116,14 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      * This class implements the {@code builder} pattern to help simplify
      * construction. This is the only means by which to construct this object.
      *
+     * @param service executor service used by {@code floodgates}
+     * @throws NullPointerException if {@code service} parameter is null.
      * @see Torrent#builder(Class)
      * @see Torrent#builder(Class, int, int)
      */
-    private Torrent() {
+    private Torrent(final FloodExecutorService service) {
         super();
+        Objects.requireNonNull(service);
         floodgates = new ArrayList<>();
         floodMarshal = new ExternalFloodMarshal<Torrent>() {
             final CountDownLatch latch = new CountDownLatch(1);
@@ -139,6 +141,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
                 return Torrent.class;
             }
         };
+        this.service = service;
         state = States.CLOSED;
     }
 
@@ -207,6 +210,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
                 logger.error(message("Torrent has encountered an error"),e);
             }
         } finally {
+            close();
             state = States.FLOODED;
         }
         return result;
@@ -330,7 +334,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      */
     void close(final boolean force) {
         if (state == States.OPENED) {
-            floodgates.forEach(fg -> fg.close(force));
+            service.close(force);
             state = States.CLOSED;
         } else {
             throw new IllegalStateException(String.format("Torrent not opened, state=%s",state));
@@ -384,6 +388,24 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
         @Override
         public String toString() {
             return delegate.toString();
+        }
+    }
+
+    private static class TorrentFloodThreadPoolExecutor extends FloodThreadPoolExecutor {
+
+        public TorrentFloodThreadPoolExecutor(int threads) {
+            super(null,threads);
+        }
+
+        @Override
+        public <T> Future<T> submit(final Callable<T> task) {
+            Future<T> ftask = newTaskFor(task);
+            futures.add(ftask);
+            if (futures.size() == getCorePoolSize()) {
+                Collections.sort(Generics.unchecked(futures));
+                futures.forEach(f -> execute((RunnableFuture<?>) f));
+            }
+            return ftask;
         }
     }
 
@@ -636,19 +658,26 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
             if (parameters.size() == 0)
                 throw new IllegalArgumentException("Torrent has nothing to do");
 
-            Torrent result = new Torrent();
+            int threads = parameters.stream()
+                    .mapToInt(FloodgateParameters::getThreads)
+                    .sum();
+            TorrentFloodThreadPoolExecutor service = new TorrentFloodThreadPoolExecutor(threads);
+            Torrent result = new Torrent(service);
+            service.setTarget(result.getTarget());
+
             parameters.forEach(p -> {
                 Floodgate<?> floodgate;
                 if (p instanceof RunnableFloodgateParameters) {
                     floodgate = new Floodgate<>(p.getClazz(), p.getTag(), p.getThreads(), p.getIterations(),
                             () -> {((RunnableFloodgateParameters<Runnable,T>) p).getResource().run(); return null;},
-                            result.floodMarshal);
+                            service,result.floodMarshal);
                 } else {
                     floodgate = new Floodgate<>(p.getClazz(),p.getTag(), p.getThreads(), p.getIterations(),
                             ((SupplierFloodgateParameters<Supplier<?>,T>) p).getResource(),
-                            result.floodMarshal);
+                            service,result.floodMarshal);
                 }
                 result.floodgates.add(floodgate);
+
             });
 
             return result;

@@ -17,10 +17,10 @@ package org.javalaboratories.core.concurrency.utils;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.javalaboratories.util.Arguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -164,7 +164,7 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodStability<T> {
      * @param <U> Type of {@code target} under test.
      */
     public <U> Floodgate(final Class<U> clazz, final int threads, final int iterations, final Supplier<T> resource) {
-        this(clazz,UNTAGGED,threads,iterations,resource, getMarshal());
+        this(clazz,UNTAGGED,threads,iterations,resource,null,getMarshal());
     }
 
     /**
@@ -200,10 +200,10 @@ public class Floodgate<T> extends AbstractConcurrentResourceFloodStability<T> {
      * @see ExternalFloodMarshal
      */
     <U> Floodgate(final Class<U> clazz, final String tag, final int threads, final int iterations,
-                  final Supplier<T> resource, final FloodMarshal marshal) {
-        super(clazz,tag,threads,iterations);
-        if (resource == null || marshal == null)
-            throw new IllegalArgumentException("Review floodgate constructor arguments");
+                  final Supplier<T> resource, final FloodExecutorService service, final FloodMarshal marshal) {
+        super(clazz,tag,threads,iterations,service);
+        Arguments.requireNonNull(() -> new IllegalArgumentException("Review floodgate constructor arguments"),
+                resource,marshal);
         this.workLatch = new CountDownLatch(threads);
         this.resource = resource;
         this.floodMarshal = marshal;

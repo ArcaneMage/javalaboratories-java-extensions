@@ -158,7 +158,7 @@ public class FloodgateTest extends AbstractResourceFloodStabilityTest {
         // Given
         LogCaptor fgCaptor1 = LogCaptor.forClass(Floodgate.class);
             // Floodgate inherits from ConcurrentResourceFloodTester, so capture these logs too
-        LogCaptor fgCaptor2 = LogCaptor.forClass(ConcurrentResourceFloodStability.class);
+        LogCaptor fgCaptor2 = LogCaptor.forClass(FloodExecutorService.class);
 
         Floodgate<Void> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> unsafe.longRunningIO());
 
