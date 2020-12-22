@@ -50,6 +50,9 @@ import java.util.stream.Collectors;
  *     <li>When unsubscribing, if this publisher is publishing to the same
  *     {@code subscriber}, that subscriber will continue to receive events until
  *     it is safely removed from the publisher.</li>
+ *     <li> In the case of "toxic" subscribers, they will be ultimately removed
+ *     from the publisher, but only when it is "safe" to do so.
+ *     </li>
  * </ul>
  * @param <T> Type of source in which the event originated.
  * @param <V> Type of value and/or state forwarded to the {@code subscribers}

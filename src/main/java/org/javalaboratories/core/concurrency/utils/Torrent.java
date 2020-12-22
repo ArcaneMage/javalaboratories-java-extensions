@@ -342,6 +342,70 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
     }
 
     /**
+     * {@link FloodExecutorService} implementation for {@link Torrent} objects
+     * to influence submission order of {@link FloodWorker}.
+     * <p>
+     * Unlike {@link FloodThreadPoolExecutor}, the submission order of the
+     * tasks into the {@code core pool} is by first come, first served. The
+     * problem with this approach is that although the workers commence their
+     * work at the same time, the order in which they are submitted subtly
+     * influences thread scheduler. For example, when {@code Floodgate A} with 5
+     * workers is submitted before {@code Floodgate B} with 5 workers, there
+     * is a likelihood of {@code Floodgate A} workers having a nanosecond or two
+     * chance of starting before {@code Floodgate B} workers, despite all
+     * worker threads commence their work at the "same time".
+     * <p>
+     * To encourage the {@code thread pool} to fairly distribute
+     * {@link FloodWorker} objects in the {@code core pool} and therefore the
+     * scheduler, the priority of the {@link FloodWorker} is used. Subsequently,
+     * when this {@code thread pool} has received all necessary tasks, they are
+     * then sorted into priority order then submitted to he {@code core pool},
+     * thus doing away with the first come, first served algorithm. This
+     * solution is better but not perfect as it is near impossible to have
+     * exclusive control over the tread scheduler.
+     * <p>
+     * @see FloodWorker
+     * @see FloodExecutorService
+     * @see FloodThreadPoolExecutor
+     */
+    static class TorrentFloodThreadPoolExecutor extends FloodThreadPoolExecutor {
+
+        /**
+         * Creates an instance of this thread pool.
+         *
+         * @param threads number threads in {@code core pool}
+         */
+        public TorrentFloodThreadPoolExecutor(int threads) {
+            super(null,threads);
+        }
+
+        /**
+         * {@inheritDoc}
+         * <p>
+         * In this implementation, the tasks are not immediately submitted to the
+         * {@code core pool} until all tasks have been submitted upon which they
+         * are then sorted into {@code priority} order before {@code core pool}
+         * submission. This enables fairer distribution of tasks in the
+         * {@code core pool}.
+         * <p>
+         * @param task to be submitted.
+         * @param <T> type of value returned from task.
+         * @return a Future representing pending completion of the task
+         */
+        @Override
+        public <T> Future<T> submit(final Callable<T> task) {
+            Future<T> ftask = newTaskFor(task);
+            futures.add(ftask);
+            if (futures.size() == getCorePoolSize()) {
+                Collections.sort(Generics.unchecked(futures));
+                futures.forEach(f -> execute((RunnableFuture<?>) f));
+            }
+            return ftask;
+        }
+    }
+
+
+    /**
      * Creates an immutable {@link Floodgate} object to allow clients to review
      * its state, whether pre or post-flood.
      *
@@ -388,24 +452,6 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
         @Override
         public String toString() {
             return delegate.toString();
-        }
-    }
-
-    private static class TorrentFloodThreadPoolExecutor extends FloodThreadPoolExecutor {
-
-        public TorrentFloodThreadPoolExecutor(int threads) {
-            super(null,threads);
-        }
-
-        @Override
-        public <T> Future<T> submit(final Callable<T> task) {
-            Future<T> ftask = newTaskFor(task);
-            futures.add(ftask);
-            if (futures.size() == getCorePoolSize()) {
-                Collections.sort(Generics.unchecked(futures));
-                futures.forEach(f -> execute((RunnableFuture<?>) f));
-            }
-            return ftask;
         }
     }
 

@@ -15,36 +15,37 @@
  */
 package org.javalaboratories.core.concurrency.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 /**
- * {@code FloodWorker} which tasked in performing the {@code resource} test.
+ * {@code FloodWorker} which is tasked in performing the {@code resource} test.
  * <p>
- * All workers have a priority in the queue, but for executor which employs
- * {@code non-priority blocking queues}, this will have no impact on the
- * priority of the {@code flood worker}.
+ * All workers have a priority which is used by the
+ * {@link FloodExecutorService} to determine a fairer distribution of all
+ * {@code submitted} tasks in the {@code core pool}.
  *
  * @param <V> Type of value returned from the asynchronous task.
+ * @see FloodThreadPoolExecutor
+ * @see Floodgate
+ * @see Torrent
  */
 public final class FloodWorker<V> extends FutureTask<V> implements Comparable<FloodWorker<V>> {
-    private final Logger logger = LoggerFactory.getLogger(FloodWorker.class);
 
+    /**
+     * There are five priority levels: HIGHEST, HIGH, MEDIUM, LOW and LOWEST.
+     */
     public enum FloodWorkerPriority {
         HIGHEST(0),HIGH(1),MEDIUM(2),LOW(3),LOWEST(4);
         private final int level;
         FloodWorkerPriority(int value) {this.level = value;}
         public int getLevel() {return level;}
         public static FloodWorkerPriority toPriority(int value) {
-            FloodWorkerPriority result = Arrays.stream(FloodWorkerPriority.values())
+            return Arrays.stream(FloodWorkerPriority.values())
                     .filter(p -> p.getLevel() == value)
                     .findFirst()
                     .orElseThrow(IllegalArgumentException::new);
-            return result;
         }
     }
 
