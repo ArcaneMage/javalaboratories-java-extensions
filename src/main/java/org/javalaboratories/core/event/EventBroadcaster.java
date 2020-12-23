@@ -47,13 +47,23 @@ import java.util.stream.Collectors;
  * unsubscribing is permitted during {@code subscriber} notification. However
  * be aware of the following:
  * <ul>
+ *     <li>Publisher does not lock all {@code subscribers} during notification,
+ *     this is considered too restrictive and impinges concurrency, but instead
+ *     only locks the current {@code subscriber} that is being notified.</li>
  *     <li>When unsubscribing, if this publisher is publishing to the same
  *     {@code subscriber}, that subscriber will continue to receive events until
- *     it is safely removed from the publisher.</li>
- *     <li> In the case of "toxic" subscribers, they will be ultimately removed
- *     from the publisher, but only when it is "safe" to do so.
- *     </li>
+ *     it is conveniently removed from the publisher.</li>
+ *     <li>In the case of "toxic" subscribers, subscribers raised an exception,
+ *     these are automatically "canceled" and eventually removed from the
+ *     publisher when it is convenient to do so. It is not possible to publish
+ *     events to a "canceled" subscriber, and so all threads publishing with this
+ *     publisher are notified to refrain from sending events to "canceled"
+ *     subscribers.</li>
  * </ul>
+ * To conclude,it is possible to {@link EventBroadcaster#publish},
+ * {@link EventBroadcaster#subscribe} and {@link EventBroadcaster#unsubscribe}
+ * and maintain reasonable concurrency in an multi-threaded context.
+ *
  * @param <T> Type of source in which the event originated.
  * @param <V> Type of value and/or state forwarded to the {@code subscribers}
  *
@@ -74,15 +84,17 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     private final Map<String,Subscription> subscriptions;
     private final T source;
 
-    @Value
+    @Getter
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @AllArgsConstructor
     private class Subscription {
+        private final Object lock = new Object();
         @EqualsAndHashCode.Include
-        String identity;
+        private final String identity;
 
-        EventSubscriber<V> subscriber;
-        Set<Event> captureEvents;
+        private final EventSubscriber<V> subscriber;
+        private final Set<Event> captureEvents;
+        private boolean canceled;
     }
 
     /**
@@ -115,19 +127,23 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
         Event anEvent = Objects.requireNonNull(event,"No event?")
                 .assign(source);
 
-        Set<Subscription> set;
+        Set<Subscription> observers;
         synchronized(mainLock) {
-            set = new HashSet<>(subscriptions.values());
+            observers = new HashSet<>(subscriptions.values());
         }
 
-        set.forEach(subscription -> {
+        observers.forEach(subscription -> {
             if (subscription.getCaptureEvents().contains(anEvent)) {
                 EventSubscriber<V> subscriber = subscription.getSubscriber();
-                try {
-                    subscriber.notify(anEvent, value);
-                } catch (Throwable e) {
-                    logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
-                    unsubscribe(subscriber);
+                synchronized (subscription.lock) {
+                    try {
+                        if (!subscription.canceled)
+                            subscriber.notify(anEvent, value);
+                    } catch (Throwable e) {
+                        logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
+                        subscription.canceled = true;
+                        unsubscribe(subscriber);
+                    }
                 }
             }
         });
@@ -149,7 +165,7 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
                 });
 
             Subscription subscription = new Subscription(getUniqueIdentity(), aSubscriber,
-                    Collections.unmodifiableSet(new HashSet<>(Arrays.asList(captureEvents))));
+                    Collections.unmodifiableSet(new HashSet<>(Arrays.asList(captureEvents))),false);
 
             subscriptions.put(subscription.getIdentity(), subscription);
         }

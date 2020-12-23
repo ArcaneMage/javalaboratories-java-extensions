@@ -243,7 +243,7 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
     }
 
     @Test
-    public void testPublishUnsubscribe_MultiThreaded_Pass() {
+    public void testPublish_ThreadSafety_Pass() {
         // Given
         // (3 subscribers)
         publisher.subscribe(subscriberA,ACTION_EVENT,NOTIFY_EVENT,TEST_EVENT_A,TEST_EVENT_B);

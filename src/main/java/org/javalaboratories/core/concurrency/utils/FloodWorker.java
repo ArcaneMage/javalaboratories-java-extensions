@@ -15,6 +15,8 @@
  */
 package org.javalaboratories.core.concurrency.utils;
 
+import lombok.EqualsAndHashCode;
+
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -28,9 +30,11 @@ import java.util.concurrent.FutureTask;
  *
  * @param <V> Type of value returned from the asynchronous task.
  * @see FloodThreadPoolExecutor
+ * @see Torrent.TorrentFloodThreadPoolExecutor
  * @see Floodgate
  * @see Torrent
  */
+@EqualsAndHashCode(callSuper = true)
 public final class FloodWorker<V> extends FutureTask<V> implements Comparable<FloodWorker<V>> {
 
     /**
