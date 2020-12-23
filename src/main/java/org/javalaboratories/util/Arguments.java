@@ -19,11 +19,11 @@ import java.util.function.Supplier;
 
 public final class Arguments {
 
-    public static void requireNonNull(Object... arguments) {
+    public static void requireNonNull(final Object... arguments) {
         requireNonNull(NullPointerException::new,arguments);
     }
 
-    public static void requireNonNull(final String message, Object... arguments) {
+    public static void requireNonNull(final String message, final Object... arguments) {
         requireNonNull(() -> new NullPointerException(message), arguments);
     }
 

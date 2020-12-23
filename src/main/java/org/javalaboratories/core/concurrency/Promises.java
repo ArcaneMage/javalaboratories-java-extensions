@@ -118,7 +118,7 @@ public final class Promises {
      */
     public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions, boolean settle) {
 
-        List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncUndertaking<>(managedPoolService,action));
+        List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncPromiseTask<>(managedPoolService,action));
 
         // Start new thread process that will wait on aforementioned asynchronous
         // processes
@@ -130,7 +130,7 @@ public final class Promises {
             return promises;
         });
 
-        return newPromise(action,() -> new AsyncUndertaking<>(managedPoolService,action));
+        return newPromise(action,() -> new AsyncPromiseTask<>(managedPoolService,action));
     }
 
     /**
@@ -147,7 +147,7 @@ public final class Promises {
      * @throws NullPointerException if {@code action} is null
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
-        return newPromise(action, () -> new AsyncUndertaking<>(managedPoolService,action));
+        return newPromise(action, () -> new AsyncPromiseTask<>(managedPoolService,action));
     }
 
     /**

@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  * multiple factory methods. However, this action does expect the task to
  * return a resultant object.
  *
- * @param <T> Type of the object to be processed by the task.
+ * @param <T> Type of the object to be returned from the task.
  * @see Promise
  * @see TaskAction
  * @see TransmuteAction

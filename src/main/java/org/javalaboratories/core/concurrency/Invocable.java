@@ -27,7 +27,7 @@ package org.javalaboratories.core.concurrency;
  * is implemented.
  *
  * @param <T> Type of value returned from the {@link PrimaryAction}
- * @see AsyncUndertaking
+ * @see AsyncPromiseTask
  * @see Promises
  */
 public interface Invocable<T> {

@@ -30,7 +30,7 @@ import java.util.function.BiConsumer;
  * Action objects encapsulate task and completion handlers that are executed
  * within their own thread context.
  *
- * @param <T> Type of the object to be processed by the task.
+ * @param <T> Type of the object returned from the task.
  * @see AbstractAction
  * @see PrimaryAction
  * @see TaskAction

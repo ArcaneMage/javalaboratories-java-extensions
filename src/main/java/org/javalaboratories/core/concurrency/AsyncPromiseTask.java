@@ -38,7 +38,7 @@ import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
 /**
  * Class implements the {@link Promise} interface.
  * <p>
- * {@code AsyncUndertaking} class only has package visibility, but its API is
+ * {@code AsyncPromiseTask} class only has package visibility, but its API is
  * fully exposed via the (@link Promise} interface for client use. There is
  * consideration of additional implementations of the {@link Promise} interface
  * where composition backed by this class is likely.
@@ -47,7 +47,7 @@ import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
  * @see Promise for full contract details and usage.
  */
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
+class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
 
     private static final Consumer<Throwable> INERT_HANDLER = e -> {};
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);
@@ -59,7 +59,7 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
     private CompletableFuture<T> future;
 
     /**
-     * This {@link AsyncUndertaking} constructor is not designed to be called
+     * This {@link AsyncPromiseTask} constructor is not designed to be called
      * explicitly.
      * <p>
      * Initialises the object with a thread pool and a {@link PrimaryAction}
@@ -71,7 +71,7 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
      *               asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    AsyncUndertaking(final ManagedPoolService service, final PrimaryAction<T> action) {
+    AsyncPromiseTask(final ManagedPoolService service, final PrimaryAction<T> action) {
         this(service,action,null);
     }
 
@@ -90,53 +90,74 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
      *               action asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    private AsyncUndertaking(final ManagedPoolService service, final Action<T> action, final CompletableFuture<T> future) {
+    private AsyncPromiseTask(final ManagedPoolService service, final Action<T> action, final CompletableFuture<T> future) {
         this.service = Objects.requireNonNull(service,"No service?");
         this.action = Objects.requireNonNull(action,"No action object?");
         this.future = future;
         this.identity = String.format("{%s}", UUID.randomUUID());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Promise<T> await() {
         return handle(INERT_HANDLER);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public final Promise<T> then(final TaskAction<T> action) {
+    public Promise<T> then(final TaskAction<T> action) {
         Consumer<T> actionable = doMakeActionable(action);
         CompletableFuture<Void> future = this.future.thenAcceptAsync(actionable,service)
                 .whenComplete((value,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(null, exception)));
 
-        return new AsyncUndertaking<>(service,action, Generics.unchecked(future));
+        return new AsyncPromiseTask<>(service,action,Generics.unchecked(future));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public final <R> Promise<R> then(final TransmuteAction<T, R> action) {
+    public  <R> Promise<R> then(final TransmuteAction<T, R> action) {
         Function<T,R> transmutable = doMakeTransmutable(action);
         CompletableFuture<R> future = this.future.thenApplyAsync(transmutable,service)
                 .whenComplete((newValue,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(newValue, exception)));
 
-        return new AsyncUndertaking<>(service,action,future);
+        return new AsyncPromiseTask<>(service,action,future);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Action<T> getAction() {
         return this.action;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public States getState() {
         return getState(future);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final String getIdentity() {
         return identity;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final Nullable<T> getResult()  {
         T value = null;
@@ -148,6 +169,9 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
         return Nullable.ofNullable(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Promise<T> handle(final Consumer<Throwable> handler) {
         Objects.requireNonNull(handler,"No handle object?");
@@ -156,9 +180,12 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
         } catch (CompletionException | CancellationException e) {
             handler.accept(e.getCause());
         }
-        return new AsyncUndertaking<>(service,action,future);
+        return new AsyncPromiseTask<>(service,action,future);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final boolean invokeAction(final PrimaryAction<T> action) {
         future = invokePrimaryActionAsync(Objects.requireNonNull(action,"No action?"));
@@ -167,11 +194,28 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
     }
 
     /**
-     * @return a {@link String} object describing this {@link AsyncUndertaking} object.
+     * @return a {@link String} object describing this {@link AsyncPromiseTask} object.
      */
     @Override
     public String toString() {
         return String.format("[identity=%s,state=%s,service=%s]",identity,getState(),service);
+    }
+
+    /**
+     * Invokes the {@link PrimaryAction} action asynchronously.
+     * <p>
+     * This is the initial action to be executed asynchronously. It is only
+     * overridable in derived classes for additional behaviour, but it is highly
+     * recommended to call this method first.
+     * <p>
+     * @param action the primary action
+     * @return the underlying future that executes the primary action.
+     */
+    protected CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
+        Supplier<T> actionable = doMakePrimaryActionable(action);
+        return CompletableFuture.supplyAsync(actionable,service)
+                .whenComplete((value,exception) -> action.getCompletionHandler()
+                        .ifPresent(consumer -> consumer.accept(value, exception)));
     }
 
     private Supplier<T> doMakePrimaryActionable(final PrimaryAction<T> action) {
@@ -228,12 +272,5 @@ class AsyncUndertaking<T> implements Promise<T>, Invocable<T> {
     private States getState(final CompletableFuture<?super T> future) {
         return future == null ? PENDING : !future.isDone() ? PENDING :
                 future.isCompletedExceptionally() ? REJECTED : FULFILLED;
-    }
-
-    private CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
-        Supplier<T> actionable = doMakePrimaryActionable(action);
-        return CompletableFuture.supplyAsync(actionable,service)
-                .whenComplete((value,exception) -> action.getCompletionHandler()
-                        .ifPresent(consumer -> consumer.accept(value, exception)));
     }
 }
