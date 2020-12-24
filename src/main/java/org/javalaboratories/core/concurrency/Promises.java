@@ -181,7 +181,7 @@ public final class Promises {
      * @throws NullPointerException if {@code action} is null
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
-                                            final List<PromiseEventSubscriber> subscribers) {
+                                            final List<? extends PromiseEventSubscriber> subscribers) {
         return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedPoolService,action,subscribers));
     }
 

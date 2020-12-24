@@ -82,7 +82,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @throws NullPointerException if service or action is null.
      */
     AsyncPromiseTaskPublisher(final ManagedPoolService service, final PrimaryAction<T> action,
-                              final List<PromiseEventSubscriber> subscribers) {
+                              final List<? extends PromiseEventSubscriber> subscribers) {
         super(service,action);
         Arguments.requireNonNull(() -> new IllegalArgumentException("Arguments null?"),service,action,
                 subscribers);

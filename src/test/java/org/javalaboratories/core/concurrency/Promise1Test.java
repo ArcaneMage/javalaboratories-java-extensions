@@ -14,9 +14,9 @@ import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
-public class PromiseTest extends AbstractConcurrencyTest {
+public class Promise1Test extends AbstractConcurrencyTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(PromiseTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(Promise1Test.class);
 
     private BiConsumer<Integer,Throwable> intResponse;
 

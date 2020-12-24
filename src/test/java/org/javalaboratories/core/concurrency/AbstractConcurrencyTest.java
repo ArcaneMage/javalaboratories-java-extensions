@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 public abstract class AbstractConcurrencyTest {
-    private Logger logger =  LoggerFactory.getLogger(AbstractConcurrencyTest.class);
+    private final Logger logger =  LoggerFactory.getLogger(AbstractConcurrencyTest.class);
 
     int getValue(AtomicInteger atomicInteger, Supplier<Integer> supplier) {
         int value = supplier.get();
