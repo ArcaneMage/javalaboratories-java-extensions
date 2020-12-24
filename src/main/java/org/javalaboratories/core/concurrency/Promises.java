@@ -134,6 +134,23 @@ public final class Promises {
     }
 
     /**
+     * Factory method to create instances of {@link Promise} objects.
+     * <p>
+     * Not only is the {@link Promise} object created, but post creation, the
+     * the {@link PrimaryAction} task is executed asynchronously and the
+     * {@link Promise} returned to the client.
+     *
+     * @param action a {@link PrimaryAction} encapsulating the task to be
+     *               executed asynchronously.
+     * @param <T> Type of value returned from asynchronous task.
+     * @return a new {@link Promise} object.
+     * @throws NullPointerException if {@code action} is null
+     */
+    public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
+        return newPromise(action, () -> new AsyncPromiseTask<>(managedPoolService,action));
+    }
+
+    /**
      * Factory method to create instances of {@link Promise} event driven
      * objects.
      * <p>
@@ -166,23 +183,6 @@ public final class Promises {
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
                                             final List<PromiseEventSubscriber> subscribers) {
         return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedPoolService,action,subscribers));
-    }
-
-    /**
-     * Factory method to create instances of {@link Promise} objects.
-     * <p>
-     * Not only is the {@link Promise} object created, but post creation, the
-     * the {@link PrimaryAction} task is executed asynchronously and the
-     * {@link Promise} returned to the client.
-     *
-     * @param action a {@link PrimaryAction} encapsulating the task to be
-     *               executed asynchronously.
-     * @param <T> Type of value returned from asynchronous task.
-     * @return a new {@link Promise} object.
-     * @throws NullPointerException if {@code action} is null
-     */
-    public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
-        return newPromise(action, () -> new AsyncPromiseTask<>(managedPoolService,action));
     }
 
     /**
