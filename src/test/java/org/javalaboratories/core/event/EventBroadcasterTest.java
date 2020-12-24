@@ -27,15 +27,6 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
     private EventSubscriber<String> subscriberB;
     private EventSubscriber<String> subscriberC;
 
-    static class Publisher extends EventBroadcaster<EventBroadcasterTest,String> {
-        public Publisher() {
-            super();
-        }
-        public Publisher(EventBroadcasterTest source) {
-            super(source);
-        }
-    }
-
     static class TestEventA extends AbstractEvent {
         public TestEventA() {
             super();
@@ -59,8 +50,8 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
 
     @BeforeEach
     public void setup() {
-        publisher = new Publisher(this);
-        publisher2 = new Publisher();
+        publisher = new EventBroadcaster<>(this);
+        publisher2 = new EventBroadcaster<>();
         subscriberA = (event,value) -> logger.debug("(Subscriber - A) received value \"{}\" from event {}",
                 value,event.getEventId());
         subscriberB = this;
@@ -250,7 +241,7 @@ public class EventBroadcasterTest implements EventSubscriber<String>, EventSourc
         publisher.subscribe(subscriberC,ACTION_EVENT); // <-- toxic subscriber
         publisher.subscribe(subscriberB,ACTION_EVENT,TEST_EVENT_B);
 
-        Torrent torrent = Torrent.builder(Publisher.class)
+        Torrent torrent = Torrent.builder(EventPublisher.class)
                 .withFloodgate("Publisher",16,255,() -> publisher.publish(ACTION_EVENT,"(Action Event): Hello World"))
                 .withFloodgate("Unsubscribe",16,255,() -> publisher.unsubscribe(subscriberB))
                 .build();

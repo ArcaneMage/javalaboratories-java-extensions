@@ -15,12 +15,6 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import lombok.Value;
+import org.javalaboratories.core.event.EventSubscriber;
 
-@Value
-public class PromiseEventState<T> {
-    T value;
-    public PromiseEventState(final T value) {
-        this.value = value;
-    }
-}
+public interface PromiseEventSubscriber extends EventSubscriber<EventState<?>> {}

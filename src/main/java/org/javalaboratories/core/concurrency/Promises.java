@@ -134,6 +134,41 @@ public final class Promises {
     }
 
     /**
+     * Factory method to create instances of {@link Promise} event driven
+     * objects.
+     * <p>
+     * Not only is the {@link Promise} object created, but post creation, the
+     * the {@link PrimaryAction} task is executed asynchronously and the
+     * {@link Promise} returned to the client.
+     * <p>
+     * This implementation of a {@link Promise} object has the ability to publish
+     * events to its {@code subscribers}. There are three types of events all
+     * subscribers are notified on:
+     * <ol>
+     *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
+     *     <li>{@link PromiseEvents#TOKEN_ACTION_EVENT}</li>
+     *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
+     * </ol>
+     * There is no limit to the number of {@code subscribers}, but if a
+     * {@code subscriber} is considered "toxic" (unhandled exception raised),
+     * the {@code subscriber} will be banned from event notification.
+     * Notification of events are performed asynchronously to avoid blocking
+     * in the main/current thread.
+     *
+     * @param action a {@link PrimaryAction} encapsulating the task to be
+     *               executed asynchronously.
+     * @param subscribers a collection of {@link PromiseEventSubscriber}
+     *                    objects.
+     * @param <T> Type of value returned from asynchronous task.
+     * @return a new {@link Promise} object.
+     * @throws NullPointerException if {@code action} is null
+     */
+    public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
+                                            final List<PromiseEventSubscriber> subscribers) {
+        return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedPoolService,action,subscribers));
+    }
+
+    /**
      * Factory method to create instances of {@link Promise} objects.
      * <p>
      * Not only is the {@link Promise} object created, but post creation, the

@@ -23,10 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -76,21 +73,21 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
     }
 
     /**
-     * This copy constructor is only used internally by this promise object.
+     * This constructor is only used internally by this object to create a new
+     * {@link Promise} object to represent encapsulated {@code CompletableFuture}.
      * <p>
-     * Initialises the object with a thread pool and a {@link PrimaryAction}
+     * Initialises the object with a thread pool and a {@link Action}
      * action object to be processed asynchronously. Instantiate an instance
      * with the factory methods of the {@link Promises} class.
      *
      * @param service the thread pool service.
-     * @param action the primary action of this object to be processed
-     *               asynchronously.
+     * @param action the action of this object to be processed asynchronously.
      * @param future underlying {@link CompletableFuture} object, initially
      *               set to {@code null} until this object is ready to perform the
      *               action asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    private AsyncPromiseTask(final ManagedPoolService service, final Action<T> action, final CompletableFuture<T> future) {
+    AsyncPromiseTask(final ManagedPoolService service, final Action<T> action, final CompletableFuture<T> future) {
         this.service = Objects.requireNonNull(service,"No service?");
         this.action = Objects.requireNonNull(action,"No action object?");
         this.future = future;
@@ -202,6 +199,20 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
     }
 
     /**
+     * @return current underlying future that is executing current action.
+     */
+    CompletableFuture<T> getFuture() {
+        return future;
+    }
+
+    /**
+     * @return main thread pool service for all promises.
+     */
+    ManagedPoolService getService() {
+        return service;
+    }
+
+    /**
      * Invokes the {@link PrimaryAction} action asynchronously.
      * <p>
      * This is the initial action to be executed asynchronously. It is only
@@ -210,8 +221,9 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      * <p>
      * @param action the primary action
      * @return the underlying future that executes the primary action.
+     * @throws NullPointerException if action is null
      */
-    protected CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
+    CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
         Supplier<T> actionable = doMakePrimaryActionable(action);
         return CompletableFuture.supplyAsync(actionable,service)
                 .whenComplete((value,exception) -> action.getCompletionHandler()

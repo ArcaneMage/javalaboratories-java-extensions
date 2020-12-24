@@ -72,7 +72,7 @@ import java.util.stream.Collectors;
  * @see CommonEvents
  * @see EventSubscriber
  */
-public abstract class EventBroadcaster<T extends EventSource,V> implements EventPublisher<V>, EventSource {
+public class EventBroadcaster<T extends EventSource,V> implements EventPublisher<V>, EventSource {
 
     private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
@@ -85,8 +85,8 @@ public abstract class EventBroadcaster<T extends EventSource,V> implements Event
     private final T source;
 
     @Getter
-    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @AllArgsConstructor
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     private class Subscription {
         private final Object lock = new Object();
         @EqualsAndHashCode.Include
