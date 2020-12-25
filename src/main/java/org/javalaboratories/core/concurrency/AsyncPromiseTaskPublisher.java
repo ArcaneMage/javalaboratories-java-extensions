@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
@@ -194,17 +195,22 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      */
     CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
         CompletableFuture<T> future = super.invokePrimaryActionAsync(action);
-        notify(() -> {
-            try {
-                EventState<T> state = new EventState<>(future.get());
-                publisher.publish(PRIMARY_ACTION_EVENT,state);
-            } catch (CancellationException | ExecutionException | InterruptedException e) {
-                // Ignore, return optional object instead.
-            }});
+        notify(() -> notifyEvent(future,PRIMARY_ACTION_EVENT));
         return future;
     }
 
+    private <U> void notifyEvent(final Future<U> future, final Event event) {
+        Arguments.requireNonNull(future,event);
+        try {
+            EventState<U> state = new EventState<>(future.get());
+            publisher.publish(event, state);
+        } catch (CancellationException | ExecutionException | InterruptedException e) {
+            // Ignore, return optional object instead.
+        }
+    }
+
     private <U> void notifyEvent(final Promise<U> promise, final Event event) {
+        Arguments.requireNonNull(promise,event);
         Nullable<U> value = promise.getResult();
         if (promise.getState() == FULFILLED) {
             if (value.isEmpty()) {
