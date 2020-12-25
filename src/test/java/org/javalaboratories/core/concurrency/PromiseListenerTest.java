@@ -18,9 +18,9 @@ import static org.javalaboratories.core.concurrency.PromiseEvents.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
-public class Promise2Test extends AbstractConcurrencyTest {
+public class PromiseListenerTest extends AbstractConcurrencyTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(Promise2Test.class);
+    private static final Logger logger = LoggerFactory.getLogger(PromiseListenerTest.class);
 
     private BiConsumer<Integer,Throwable> intResponse;
 
@@ -48,6 +48,8 @@ public class Promise2Test extends AbstractConcurrencyTest {
         // Then
         wait("testNew_PrimaryAction_Pass");
         int value  = promise.getResult().orElseThrow();
+        assertEquals(3,listeners.size());
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,value);
     }
@@ -55,11 +57,14 @@ public class Promise2Test extends AbstractConcurrencyTest {
     @Test
     public void testNew_PrimaryActionCompleteHandler_Pass() {
         // Given
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testNew_PrimaryActionCompleteHandler_Pass"), intResponse));
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testNew_PrimaryActionCompleteHandler_Pass"),intResponse),
+                listeners);
 
         // Then
         wait("testNew_PrimaryActionCompleteHandler_Pass");
         int value = promise.getResult().orElseThrow();
+        assertEquals(3,listeners.size());
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,value);
     }
@@ -67,11 +72,14 @@ public class Promise2Test extends AbstractConcurrencyTest {
     @Test
     public void testNew_PrimaryActionCompleteHandlerException_Fail() {
         // Given
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTaskWithException("testNew_PrimaryActionCompleteHandlerException_Pass"),intResponse));
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTaskWithException("testNew_PrimaryActionCompleteHandlerException_Pass"),intResponse),
+                listeners);
 
         // Then
         wait("testNew_PrimaryActionCompleteHandlerException_Pass");
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
+        assertEquals(3,listeners.size());
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 0));
         assertEquals(REJECTED,promise.getState());
     }
 
@@ -79,12 +87,14 @@ public class Promise2Test extends AbstractConcurrencyTest {
     public void testThen_TaskAction_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskAction_Pass")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskAction_Pass")),listeners)
                 .then(TaskAction.of(value -> getValue(received, () -> value)));
 
         // Then
         wait("testThen_TaskAction_Pass");
         promise.await();
+        assertEquals(3,listeners.size());
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 2));
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
     }
@@ -93,22 +103,23 @@ public class Promise2Test extends AbstractConcurrencyTest {
     public void testThen_TaskActionCompleteHandler_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandler_Pass")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandler_Pass")),listeners)
                 .then(TaskAction.of(value -> getValue(received, () -> value),intResponse));
 
         // Then
         wait("testThen_TaskActionCompleteHandler_Pass");
         promise.await();
+        assertEquals(3,listeners.size());
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 2));
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
-
     }
 
     @Test
     public void testThen_TaskActionCompleteHandlerException_Fail() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandlerException_Pass")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandlerException_Pass")),listeners)
                 .then(TaskAction.of(value -> getValue(received, () -> value / 0),intResponse));
 
         // Then
@@ -238,22 +249,20 @@ public class Promise2Test extends AbstractConcurrencyTest {
 
     public static class PromiseEventListener implements PromiseEventSubscriber {
         private final String name;
-
+        private int events;
         public PromiseEventListener(final String name) {
+            events = 0;
             this.name = name;
         }
-
         @Override
         public void notify(Event event, EventState<?> value) {
-            if (event == PRIMARY_ACTION_EVENT) {
-                logger.info("Listener {} received event={}, state={}",name,event,value.getValue());
+            if (event.isAny(PRIMARY_ACTION_EVENT,TOKEN_ACTION_EVENT,TRANSMUTE_ACTION_EVENT)) {
+                logger.info("Listener {} received event={}, state={}",name,event.getEventId(),value.getValue());
+                events++;
             }
-            if (event == TOKEN_ACTION_EVENT) {
-                logger.info("Listener {} received event={}, state={}",name,event,value.getValue());
-            }
-            if (event == TRANSMUTE_ACTION_EVENT) {
-                logger.info("Listener {} received event={}, state={}",name,event,value.getValue());
-            }
+        }
+        public int getEvents() {
+            return events;
         }
     }
 }

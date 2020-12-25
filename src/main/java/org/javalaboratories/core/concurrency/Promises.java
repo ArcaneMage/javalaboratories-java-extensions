@@ -145,6 +145,7 @@ public final class Promises {
      * @param <T> Type of value returned from asynchronous task.
      * @return a new {@link Promise} object.
      * @throws NullPointerException if {@code action} is null
+     * @see AsyncPromiseTask
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
         return newPromise(action, () -> new AsyncPromiseTask<>(managedPoolService,action));
@@ -179,6 +180,7 @@ public final class Promises {
      * @param <T> Type of value returned from asynchronous task.
      * @return a new {@link Promise} object.
      * @throws NullPointerException if {@code action} is null
+     * @see AsyncPromiseTaskPublisher
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
                                             final List<? extends PromiseEventSubscriber> subscribers) {

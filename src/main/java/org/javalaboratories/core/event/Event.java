@@ -16,6 +16,8 @@
 package org.javalaboratories.core.event;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * All events fired from the {@link EventPublisher} implement this interface.
@@ -61,4 +63,16 @@ public interface Event extends Serializable, Cloneable {
      * @return the source of the event.
      */
     EventSource getSource();
+
+    /**
+     * Returns {@code true} if any of the events matches this {@code event}.
+     *
+     * @param events vararg of events to match.
+     * @return {@code true} if any of {@code events} matches this event.
+     */
+    default boolean isAny(Event... events) {
+        Objects.requireNonNull(events);
+        return Arrays.stream(events)
+                .anyMatch(event -> !this.equals(event));
+    }
 }
