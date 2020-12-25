@@ -157,17 +157,17 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
     /**
      * Performs notification of events asynchronously.
      * <p>
-     * @param publisher encapsulates underlying task that actually performs
+     * @param runnable encapsulates underlying task that actually performs
      *                    the notification.
      * @return CompletableFuture object that encapsulates current state of
      * asynchronous process.
      * @throws NullPointerException if broadcaster parameter is null.
      */
     @SuppressWarnings("UnusedReturnValue")
-    final CompletableFuture<Void> notify(final AsyncPublisher publisher) {
+    final CompletableFuture<Void> notify(final Runnable runnable) {
         Objects.requireNonNull(publisher,"Expected publisher?");
         return CompletableFuture
-                .runAsync(publisher::publish,getService())
+                .runAsync(runnable,getService())
                 .whenComplete(this::handleNotifyComplete);
     }
 
@@ -195,15 +195,15 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      */
     CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
         CompletableFuture<T> future = super.invokePrimaryActionAsync(action);
-        notify(() -> notifyEvent(future,PRIMARY_ACTION_EVENT));
+        notify(() -> notifyEvent(future));
         return future;
     }
 
-    private <U> void notifyEvent(final Future<U> future, final Event event) {
-        Arguments.requireNonNull(future,event);
+    private <U> void notifyEvent(final Future<U> future) {
+        Arguments.requireNonNull(future);
         try {
             EventState<U> state = new EventState<>(future.get());
-            publisher.publish(event, state);
+            publisher.publish(PRIMARY_ACTION_EVENT, state);
         } catch (CancellationException | ExecutionException | InterruptedException e) {
             // Ignore, return optional object instead.
         }
@@ -218,14 +218,5 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
             }
             value.ifPresent(v -> publisher.publish(event, new EventState<>(v)));
         }
-    }
-
-    /**
-     * Represents object that has the ability to notify events to subscribers
-     * asynchronously.
-     */
-    @FunctionalInterface
-    interface AsyncPublisher {
-        void publish();
     }
 }
