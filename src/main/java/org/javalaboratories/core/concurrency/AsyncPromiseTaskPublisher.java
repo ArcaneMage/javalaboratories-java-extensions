@@ -16,11 +16,11 @@
 package org.javalaboratories.core.concurrency;
 
 import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.event.Event;
 import org.javalaboratories.core.event.EventBroadcaster;
 import org.javalaboratories.core.event.EventPublisher;
 import org.javalaboratories.core.event.EventSource;
 import org.javalaboratories.util.Arguments;
-import org.javalaboratories.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
-import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
 import static org.javalaboratories.core.concurrency.PromiseEvents.PRIMARY_ACTION_EVENT;
 import static org.javalaboratories.core.concurrency.PromiseEvents.TOKEN_ACTION_EVENT;
 import static org.javalaboratories.core.concurrency.PromiseEvents.TRANSMUTE_ACTION_EVENT;
@@ -135,16 +134,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      */
     public Promise<T> then(final TaskAction<T> action) {
         Promise<T> result = super.then(action);
-        notify(() -> {
-            Nullable<T> value = result.getResult();
-            if (result.getState() == FULFILLED) {
-                EventState<Void> state = new EventState<>(null);
-                if (value.isEmpty()) {
-                    publisher.publish(TOKEN_ACTION_EVENT,state);
-                }
-                value.ifPresent(v -> publisher.publish(TOKEN_ACTION_EVENT,state));
-            }
-        });
+        notify(() -> notifyEvent(result,TOKEN_ACTION_EVENT));
         CompletableFuture<T> future = ((AsyncPromiseTask<T>) result).getFuture();
         return new AsyncPromiseTaskPublisher<>(getService(),action,future,publisher);
     }
@@ -158,15 +148,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      */
     public final <R> Promise<R> then(final TransmuteAction<T,R> action) {
         Promise<R> result = super.then(action);
-        notify(() -> {
-            Nullable<R> value = result.getResult();
-            if (result.getState() == FULFILLED) {
-                if (value.isEmpty()) {
-                    publisher.publish(TRANSMUTE_ACTION_EVENT, new EventState<>(null));
-                }
-                value.ifPresent(v -> publisher.publish(TRANSMUTE_ACTION_EVENT, new EventState<>(v)));
-            }
-        });
+        notify(() -> notifyEvent(result,TRANSMUTE_ACTION_EVENT));
         CompletableFuture<R> future = ((AsyncPromiseTask<R>) result).getFuture();
         return new AsyncPromiseTaskPublisher<>(getService(),action,future,publisher);
     }
@@ -220,6 +202,16 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
                 // Ignore, return optional object instead.
             }});
         return future;
+    }
+
+    private <U> void notifyEvent(final Promise<U> promise, final Event event) {
+        Nullable<U> value = promise.getResult();
+        if (promise.getState() == FULFILLED) {
+            if (value.isEmpty()) {
+                publisher.publish(event, new EventState<>(null));
+            }
+            value.ifPresent(v -> publisher.publish(event, new EventState<>(v)));
+        }
     }
 
     /**
