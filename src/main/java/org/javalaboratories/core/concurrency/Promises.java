@@ -164,7 +164,7 @@ public final class Promises {
      * subscribers are notified on:
      * <ol>
      *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
-     *     <li>{@link PromiseEvents#TOKEN_ACTION_EVENT}</li>
+     *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
      *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
      * </ol>
      * There is no limit to the number of {@code subscribers}, but if a

@@ -67,15 +67,33 @@ public class PromiseTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    public void testEquals_Promise_Pass() {
+        // Given
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTaskWithException("testNew_PrimaryActionCompleteHandlerException_Pass"),intResponse));
+        Promise<Integer> promise2 = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTaskWithException("testNew_PrimaryActionCompleteHandlerException_Pass"),intResponse));
+        Promise<Integer> promise3 = promise;
+
+        boolean equalityTests;
+
+        // When
+        equalityTests = promise.equals(promise2) && promise2.equals(promise3);
+
+        // Then
+        assertFalse(equalityTests);
+    }
+
+    @Test
     public void testThen_TaskAction_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskAction_Pass")))
                 .then(TaskAction.of(value -> getValue(received, () -> value)));
 
-        // Then
+        // When
         wait("testThen_TaskAction_Pass");
         promise.await();
+
+        // Then
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
     }
@@ -87,12 +105,13 @@ public class PromiseTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandler_Pass")))
                 .then(TaskAction.of(value -> getValue(received, () -> value),intResponse));
 
-        // Then
+        // When
         wait("testThen_TaskActionCompleteHandler_Pass");
         promise.await();
+
+        // Then
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
-
     }
 
     @Test
@@ -102,9 +121,11 @@ public class PromiseTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandlerException_Pass")))
                 .then(TaskAction.of(value -> getValue(received, () -> value / 0),intResponse));
 
-        // Then
+        // When
         wait("testThen_TaskActionCompleteHandlerException_Pass");
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
+
+        // Then
         // Interestingly enough this works because the reference of the "then" method
         // is assigned to the promise object :)
         assertEquals(REJECTED,promise.getState());
@@ -117,9 +138,11 @@ public class PromiseTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteAction_Pass")))
                 .then(TransmuteAction.of(value -> getValue(received, () -> value + 1)));
 
-        // Then
+        // When
         wait("testThen_TransmuteAction_Pass");
         promise.await();
+
+        // Then
         assertEquals(FULFILLED,promise.getState());
         int value = received.get();
         assertEquals(128,value);
@@ -132,9 +155,11 @@ public class PromiseTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteActionCompleteHandlerException_Pass")))
                 .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1) / 0),intResponse));
 
-        // Then
+        // When
         wait("testThen_TransmuteActionCompleteHandlerException_Pass");
         promise.await();
+
+        // Then
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
         assertEquals(REJECTED,promise.getState());
     }
@@ -146,9 +171,11 @@ public class PromiseTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteActionCompleteHandler")))
                 .then(TransmuteAction.of(value -> getValue(received, () -> value + 1),intResponse));
 
-        // Then
+        // When
         wait("testThen_TransmuteActionCompleteHandler_Pass");
         promise.await();
+
+        // Then
         assertEquals(FULFILLED,promise.getState());
         int value = received.get();
         assertEquals(128,value);
@@ -192,38 +219,42 @@ public class PromiseTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    public void testAwait_Promises_Pos() {
+    public void testAwait_Promises_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testAwait_Promises_Pos")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testAwait_Promises_Pass")))
                 .then(TaskAction.of(value -> getValue(received, () -> value)));
 
         // Then
-        wait("testAwait_Promises_Pos");
+        wait("testAwait_Promises_Pass");
         promise.await();
 
+        // Given
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
     }
 
     @Test
     public void testGetAction_Pass() {
+        // Given
         PrimaryAction<Void> action = PrimaryAction.of(() -> null);
         Promise<Void> promise = Promises.newPromise(action);
+
+        // Then
         assertEquals(action,promise.getAction());
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
-
         assertEquals(FULFILLED,promise.getState());
     }
 
     @Test
     public void testToString_Pass() {
+        // Given
         PrimaryAction<Void> action = PrimaryAction.of(() -> null);
         Promise<Void> promise = Promises.newPromise(action);
 
+        // Then
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
         assertTrue(promise.toString().contains("state=ACTIVE,shutdownHook=NEW"));
-
         assertEquals(FULFILLED,promise.getState());
     }
 }

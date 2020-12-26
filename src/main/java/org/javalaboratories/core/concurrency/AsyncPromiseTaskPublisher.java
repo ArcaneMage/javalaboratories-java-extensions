@@ -34,7 +34,7 @@ import java.util.function.Consumer;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
 import static org.javalaboratories.core.concurrency.PromiseEvents.PRIMARY_ACTION_EVENT;
-import static org.javalaboratories.core.concurrency.PromiseEvents.TOKEN_ACTION_EVENT;
+import static org.javalaboratories.core.concurrency.PromiseEvents.TASK_ACTION_EVENT;
 import static org.javalaboratories.core.concurrency.PromiseEvents.TRANSMUTE_ACTION_EVENT;
 
 /**
@@ -53,7 +53,7 @@ import static org.javalaboratories.core.concurrency.PromiseEvents.TRANSMUTE_ACTI
  * There are three types of events all subscribers are notified on:
  * <ol>
  *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
- *     <li>{@link PromiseEvents#TOKEN_ACTION_EVENT}</li>
+ *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
  *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
  * </ol>
  * <u>Notification Policy</u>
@@ -68,7 +68,10 @@ import static org.javalaboratories.core.concurrency.PromiseEvents.TRANSMUTE_ACTI
  * method.
  * <p>
  * Notification of {@code subscribers} is performed asynchronously to avoid
- * blocking the main/current thread.
+ * blocking the main/current thread. This is also means it is possible when this
+ * object transitions to the {@link States#FULFILLED} state to retrieve the
+ * result of the asynchronous computation <b>before all</b> the
+ * {@link PromiseEventSubscriber} objects are notified.
  * <p>
  * Constructor in this class is package-access only, use the factory methods
  * provided in the {@link Promises} class.
@@ -99,7 +102,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
         Arguments.requireNonNull(() -> new IllegalArgumentException("Arguments null?"),service,action,
                 subscribers);
         this.publisher = new EventBroadcaster<>(this);
-        subscribers.forEach(s -> publisher.subscribe(s,PRIMARY_ACTION_EVENT,TOKEN_ACTION_EVENT,
+        subscribers.forEach(s -> publisher.subscribe(s,PRIMARY_ACTION_EVENT, TASK_ACTION_EVENT,
                 TRANSMUTE_ACTION_EVENT));
     }
 
@@ -127,15 +130,28 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
     }
 
     /**
+     * Handles the notification completion of subscribers
+     * <p>
+     * Default implementation is to log completion but can be overridden
+     * in derived classes in this package.
+     *
+     * @param value returned value from the asynchronous event notification.
+     * @param throwable an exception thrown during notification.
+     */
+    void handleNotifyComplete(Void value, Throwable throwable) {
+        logger.debug("Promise [{}] notification of subscribers complete",getIdentity());
+    }
+
+    /**
      * {@inheritDoc}
      * <p>
      * Asynchronously notifies {@link PromiseEventSubscriber} subscribers of
-     * the {@link PromiseEvents#TOKEN_ACTION_EVENT} when the promise is
+     * the {@link PromiseEvents#TASK_ACTION_EVENT} when the promise is
      * complete.
      */
     public Promise<T> then(final TaskAction<T> action) {
         Promise<T> result = super.then(action);
-        notify(() -> notifyEvent(result,TOKEN_ACTION_EVENT));
+        notify(() -> notifyEvent(result,TASK_ACTION_EVENT));
         CompletableFuture<T> future = ((AsyncPromiseTask<T>) result).getFuture();
         return new AsyncPromiseTaskPublisher<>(getService(),action,future,publisher);
     }
@@ -155,6 +171,21 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
+     * Asynchronously notifies {@link PromiseEventSubscriber} subscribers of
+     * the {@link PromiseEvents#PRIMARY_ACTION_EVENT} when the promise is
+     * complete.
+     *
+     * @throws NullPointerException if action is null
+     */
+    CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
+        CompletableFuture<T> future = super.invokePrimaryActionAsync(action);
+        notify(() -> notifyEvent(future,PRIMARY_ACTION_EVENT));
+        return future;
+    }
+
+    /**
      * Performs notification of events asynchronously.
      * <p>
      * @param runnable encapsulates underlying task that actually performs
@@ -166,44 +197,19 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
     @SuppressWarnings("UnusedReturnValue")
     final CompletableFuture<Void> notify(final Runnable runnable) {
         Objects.requireNonNull(publisher,"Expected publisher?");
-        return CompletableFuture
+        CompletableFuture<Void> result = CompletableFuture
                 .runAsync(runnable,getService())
                 .whenComplete(this::handleNotifyComplete);
+        logger.debug("Promise [{}] notifying subscribers",getIdentity());
+        return result;
     }
 
-    /**
-     * Handles the notification completion of subscribers
-     * <p>
-     * Default implementation is to log completion but can be overridden
-     * in derived classes in this package.
-     *
-     * @param value returned value from the asynchronous event notification.
-     * @param throwable an exception thrown during notification.
-     */
-    void handleNotifyComplete(Void value, Throwable throwable) {
-        logger.debug("Promise [{}] notification of subscribers complete",getIdentity());
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Asynchronously notifies {@link PromiseEventSubscriber} subscribers of
-     * the {@link PromiseEvents#PRIMARY_ACTION_EVENT} when the promise is
-     * complete.
-     *
-     * @throws NullPointerException if action is null
-     */
-    CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
-        CompletableFuture<T> future = super.invokePrimaryActionAsync(action);
-        notify(() -> notifyEvent(future));
-        return future;
-    }
-
-    private <U> void notifyEvent(final Future<U> future) {
-        Arguments.requireNonNull(future);
+    @SuppressWarnings("SameParameterValue")
+    private <U> void notifyEvent(final Future<U> future, final Event event) {
+        Arguments.requireNonNull(future,event);
         try {
             EventState<U> state = new EventState<>(future.get());
-            publisher.publish(PRIMARY_ACTION_EVENT, state);
+            publisher.publish(event, state);
         } catch (CancellationException | ExecutionException | InterruptedException e) {
             // Ignore, return optional object instead.
         }

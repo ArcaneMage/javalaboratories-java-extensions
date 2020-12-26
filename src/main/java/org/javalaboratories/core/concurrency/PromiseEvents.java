@@ -20,12 +20,12 @@ import org.javalaboratories.core.event.AbstractEvent;
 public final class PromiseEvents {
 
     public static final PrimaryActionEvent PRIMARY_ACTION_EVENT = new PrimaryActionEvent();
-    public static final TokenActionEvent TOKEN_ACTION_EVENT = new TokenActionEvent();
+    public static final TaskActionEvent TASK_ACTION_EVENT = new TaskActionEvent();
     public static final TransmuteActionEvent TRANSMUTE_ACTION_EVENT = new TransmuteActionEvent();
 
 
-    private static class TokenActionEvent extends AbstractEvent {
-        public TokenActionEvent() {
+    private static class TaskActionEvent extends AbstractEvent {
+        public TaskActionEvent() {
             super();
         }
     }

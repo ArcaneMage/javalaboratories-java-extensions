@@ -1,5 +1,6 @@
 package org.javalaboratories.core.concurrency;
 
+import nl.altindag.log.LogCaptor;
 import org.javalaboratories.core.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,12 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PromiseListenerTest.class);
 
+    private static final int DEFAULT_LISTENER_TIMEOUT = 128;
+
     private BiConsumer<Integer,Throwable> intResponse;
 
     private List<PromiseEventListener> listeners;
+    private LogCaptor logCaptor;
 
     @BeforeEach
     public void setup() {
@@ -38,6 +42,8 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
 
         listeners = Arrays.asList(new PromiseEventListener("Listener-A"),new PromiseEventListener("Listener-B"),
                       new PromiseEventListener("Listener-C"));
+        logCaptor = LogCaptor.forClass(PromiseListenerTest.class);
+
     }
 
     @Test
@@ -45,10 +51,13 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         // Given
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testNew_PrimaryAction_Pass")),listeners);
 
-        // Then
+        // When
+        assertEquals(3,listeners.size());
         wait("testNew_PrimaryAction_Pass");
         int value  = promise.getResult().orElseThrow();
-        assertEquals(3,listeners.size());
+        awaitListeners(1, DEFAULT_LISTENER_TIMEOUT);
+
+        // Then
         assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,value);
@@ -60,10 +69,13 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testNew_PrimaryActionCompleteHandler_Pass"),intResponse),
                 listeners);
 
+        // When
+        assertEquals(3,listeners.size());
+        int value = promise.getResult().orElseThrow();
+        awaitListeners(1, DEFAULT_LISTENER_TIMEOUT);
+
         // Then
         wait("testNew_PrimaryActionCompleteHandler_Pass");
-        int value = promise.getResult().orElseThrow();
-        assertEquals(3,listeners.size());
         assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,value);
@@ -75,12 +87,15 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTaskWithException("testNew_PrimaryActionCompleteHandlerException_Pass"),intResponse),
                 listeners);
 
+        // When
+        assertEquals(3,listeners.size());
+
         // Then
         wait("testNew_PrimaryActionCompleteHandlerException_Pass");
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
-        assertEquals(3,listeners.size());
         assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 0));
         assertEquals(REJECTED,promise.getState());
+        assertTrue(logCaptor.getErrorLogs().stream().anyMatch(s -> s.contains("Exception detected in complete handler")));
     }
 
     @Test
@@ -90,10 +105,13 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskAction_Pass")),listeners)
                 .then(TaskAction.of(value -> getValue(received, () -> value)));
 
-        // Then
+        // When
+        assertEquals(3,listeners.size());
         wait("testThen_TaskAction_Pass");
         promise.await();
-        assertEquals(3,listeners.size());
+        awaitListeners(2,DEFAULT_LISTENER_TIMEOUT);
+
+        // Then
         assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 2));
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
@@ -106,10 +124,13 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandler_Pass")),listeners)
                 .then(TaskAction.of(value -> getValue(received, () -> value),intResponse));
 
-        // Then
+        // When
+        assertEquals(3,listeners.size());
         wait("testThen_TaskActionCompleteHandler_Pass");
         promise.await();
-        assertEquals(3,listeners.size());
+        awaitListeners(2,DEFAULT_LISTENER_TIMEOUT);
+
+        // Then
         assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 2));
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,received.get());
@@ -122,24 +143,35 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TaskActionCompleteHandlerException_Pass")),listeners)
                 .then(TaskAction.of(value -> getValue(received, () -> value / 0),intResponse));
 
-        // Then
+        // When
         wait("testThen_TaskActionCompleteHandlerException_Pass");
+        assertEquals(3,listeners.size());
+        awaitListeners(1,DEFAULT_LISTENER_TIMEOUT);
+
+        // Then
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         // Interestingly enough this works because the reference of the "then" method
         // is assigned to the promise object :)
         assertEquals(REJECTED,promise.getState());
+        assertTrue(logCaptor.getErrorLogs().stream().anyMatch(s -> s.contains("Exception detected in complete handler")));
     }
 
     @Test
     public void testThen_TransmuteAction_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteAction_Pass")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteAction_Pass")),listeners)
                 .then(TransmuteAction.of(value -> getValue(received, () -> value + 1)));
 
-        // Then
+        // When
         wait("testThen_TransmuteAction_Pass");
+        assertEquals(3,listeners.size());
         promise.await();
+        awaitListeners(2,DEFAULT_LISTENER_TIMEOUT);
+
+        // Then
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 2));
         assertEquals(FULFILLED,promise.getState());
         int value = received.get();
         assertEquals(128,value);
@@ -149,26 +181,37 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     public void testThen_TransmuteActionCompleteHandlerException_Fail() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteActionCompleteHandlerException_Pass")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteActionCompleteHandlerException_Pass")),listeners)
                 .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1) / 0),intResponse));
 
-        // Then
+        // When
         wait("testThen_TransmuteActionCompleteHandlerException_Pass");
+        assertEquals(3,listeners.size());
         promise.await();
+        awaitListeners(1, DEFAULT_LISTENER_TIMEOUT);
+
+        // Then
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
         assertEquals(REJECTED,promise.getState());
+        assertTrue(logCaptor.getErrorLogs().stream().anyMatch(s -> s.contains("Exception detected in complete handler")));
     }
 
     @Test
     public void testThen_TransmuteActionCompleteHandler_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteActionCompleteHandler")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteActionCompleteHandler")),listeners)
                 .then(TransmuteAction.of(value -> getValue(received, () -> value + 1),intResponse));
 
-        // Then
+        // When
         wait("testThen_TransmuteActionCompleteHandler_Pass");
+        assertEquals(3,listeners.size());
         promise.await();
+        awaitListeners(2,DEFAULT_LISTENER_TIMEOUT);
+
+        // Then
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 2));
         assertEquals(FULFILLED,promise.getState());
         int value = received.get();
         assertEquals(128,value);
@@ -178,24 +221,36 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     public void testHandle_TransmuteActionException_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testHandle_TransmuteActionException_Pass")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testHandle_TransmuteActionException_Pass")),listeners)
                 .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1) / 0)))
                 .handle((e) -> logger.error("testHandle_TransmuteActionException_Pass <-- Houston we have a problem in the main thread!! :)",e));
 
+        // When
+        assertEquals(3,listeners.size());
+        awaitListeners(1,DEFAULT_LISTENER_TIMEOUT);
+
         // Then
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         assertEquals(REJECTED,promise.getState());
+        assertTrue(logCaptor.getErrorLogs().stream().anyMatch(s -> s.contains("Houston we have a problem in the main thread!!")));
     }
 
     @Test
-    public void testHandle_TransmuteActionCompleteHandlerException_Fail() {
+    public void testHandle_TransmuteActionCompleteHandlerException_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testHandle_TransmuteActionException_Pass")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testHandle_TransmuteActionException_Pass")),listeners)
                 .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1) / 0),intResponse))
                 .handle((e) -> logger.error("testHandle_TransmuteActionCompleteHandlerException_Pass <-- Houston we have a problem in the main thread!! :)",e));
 
+        // When
+        assertEquals(3,listeners.size());
+        awaitListeners(1,DEFAULT_LISTENER_TIMEOUT);
+
         // Then
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         assertEquals(REJECTED,promise.getState());
+        assertTrue(logCaptor.getErrorLogs().stream().anyMatch(s -> s.contains("Houston we have a problem in the main thread!!")));
     }
 
     @Test
@@ -203,60 +258,96 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     public void testHandle_HandleFailFastException_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(()-> getValue(received, () ->  128 / 0)))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(()-> getValue(received, () ->  128 / 0)),listeners)
                 .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1))))
                 .handle((e) -> logger.error("testHandle_HandleFailFastException_Pass <-- Houston we have a problem in the main thread!! :)",e));
 
+        // When
+        assertEquals(3,listeners.size());
+
         // Then
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 0));
         assertEquals(REJECTED,promise.getState());
+        assertTrue(logCaptor.getErrorLogs().stream().anyMatch(s -> s.contains("Houston we have a problem in the main thread!!")));
     }
 
     @Test
-    public void testAwait_Promises_Pos() {
+    public void testAwait_Promises_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
-        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testAwait_Promises_Pos")))
+        Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testAwait_Promises_Pass")),listeners)
                 .then(TaskAction.of(value -> getValue(received, () -> value)));
 
-        // Then
-        wait("testAwait_Promises_Pos");
+        // When
+        wait("testAwait_Promises_Pass");
         promise.await();
+        awaitListeners(2,DEFAULT_LISTENER_TIMEOUT);
 
+        // Then
+        assertEquals(3,listeners.size());
+        logger.debug("listeners={}",listeners);
         assertEquals(FULFILLED,promise.getState());
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 2));
         assertEquals(127,received.get());
     }
 
     @Test
     public void testGetAction_Pass() {
+        // Given
         PrimaryAction<Void> action = PrimaryAction.of(() -> null);
-        Promise<Void> promise = Promises.newPromise(action);
+        Promise<Void> promise = Promises.newPromise(action,listeners);
         assertEquals(action,promise.getAction());
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
 
+        // When
+        assertEquals(3,listeners.size());
+        awaitListeners(1,DEFAULT_LISTENER_TIMEOUT);
+
+        // Then
+        logger.debug("listeners={}",listeners);
         assertEquals(FULFILLED,promise.getState());
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
     }
 
     @Test
     public void testToString_Pass() {
+        // Given
         PrimaryAction<Void> action = PrimaryAction.of(() -> null);
-        Promise<Void> promise = Promises.newPromise(action);
+        Promise<Void> promise = Promises.newPromise(action,listeners);
 
+        // When
+        assertEquals(3,listeners.size());
+        awaitListeners(1,DEFAULT_LISTENER_TIMEOUT);
+
+
+        // Then
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
         assertTrue(promise.toString().contains("state=ACTIVE,shutdownHook=NEW"));
-
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         assertEquals(FULFILLED,promise.getState());
+    }
+
+    private void awaitListeners(int expectedEvents, long await) {
+        long start = System.currentTimeMillis();
+        long elapsed = 0;
+        while (!listeners.stream().allMatch(listener -> listener.getEvents() == expectedEvents) && elapsed <= await) {
+            sleep(32);
+            elapsed = System.currentTimeMillis() - start;
+        }
+        logger.debug("awaitListeners elapsed time={}",elapsed);
     }
 
     public static class PromiseEventListener implements PromiseEventSubscriber {
         private final String name;
         private int events;
+
         public PromiseEventListener(final String name) {
             events = 0;
             this.name = name;
         }
         @Override
         public void notify(Event event, EventState<?> value) {
-            if (event.isAny(PRIMARY_ACTION_EVENT,TOKEN_ACTION_EVENT,TRANSMUTE_ACTION_EVENT)) {
+            if (event.isAny(PRIMARY_ACTION_EVENT,TASK_ACTION_EVENT,TRANSMUTE_ACTION_EVENT)) {
                 logger.info("Listener {} received event={}, state={}",name,event.getEventId(),value.getValue());
                 events++;
             }
@@ -264,5 +355,6 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         public int getEvents() {
             return events;
         }
+        public String toString() {return "[name="+name+", events="+events+"]";}
     }
 }
