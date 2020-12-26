@@ -17,9 +17,28 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.Value;
 
+/**
+ * This represents the current state of the {@link Promise} object delivered to
+ * all registered {@link PromiseEventSubscriber} objects.
+ * <p>
+ * For example, the {@code state} could be the resultant value of some asynchronous
+ * {@link Action} to be forwarded to the all registered {@code listeners/subscribers}
+ * after the {@link Promise} transitions to the {@link Promise.States#FULFILLED}
+ * state.
+ *
+ * @param <T> Type of resultant value returned from asynchronous {@link Action}
+ * @see Promises
+ * @see PromiseEventSubscriber
+ */
 @Value
 public class EventState<T> {
     T value;
+
+    /**
+     * Constructs this {@code event} state.
+     * <p>
+     * @param value returned from asynchronous {@link Action}.
+     */
     public EventState(final T value) {
         this.value = value;
     }

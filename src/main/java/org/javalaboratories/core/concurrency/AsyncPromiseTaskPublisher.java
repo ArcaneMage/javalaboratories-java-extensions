@@ -68,10 +68,16 @@ import static org.javalaboratories.core.concurrency.PromiseEvents.TRANSMUTE_ACTI
  * method.
  * <p>
  * Notification of {@code subscribers} is performed asynchronously to avoid
- * blocking the main/current thread. This is also means it is possible when this
- * object transitions to the {@link States#FULFILLED} state to retrieve the
- * result of the asynchronous computation <b>before all</b> the
- * {@link PromiseEventSubscriber} objects are notified.
+ * blocking the main/current thread. This is also means when this object
+ * transitions to the {@link States#FULFILLED} state, it is possible to retrieve
+ * the result of the asynchronous computation <b>before all</b> the
+ * {@link PromiseEventSubscriber} objects are notified of the resultant result
+ * in the {@link Event}. This is a reasonable and deliberate design: it is
+ * unreasonable to block the {@link Promise#await}, {@link Promise#handle} and
+ * {@link Promise#getResult()} methods until all {@link PromiseEventSubscriber}
+ * have been notified. It is not the role of this object to be dependent on
+ * {@code subscribers}, but it does guarantee to eventually inform all the
+ * {@code subscribers} of the current {@link Event}.
  * <p>
  * Constructor in this class is package-access only, use the factory methods
  * provided in the {@link Promises} class.
