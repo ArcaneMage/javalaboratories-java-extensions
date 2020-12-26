@@ -105,8 +105,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
     AsyncPromiseTaskPublisher(final ManagedPoolService service, final PrimaryAction<T> action,
                               final List<? extends PromiseEventSubscriber> subscribers) {
         super(service,action);
-        Arguments.requireNonNull(() -> new IllegalArgumentException("Arguments null?"),service,action,
-                subscribers);
+        Arguments.requireNonNull(() -> new IllegalArgumentException("Arguments null?"),service,action,subscribers);
         this.publisher = new EventBroadcaster<>(this);
         subscribers.forEach(s -> publisher.subscribe(s,PRIMARY_ACTION_EVENT, TASK_ACTION_EVENT,
                 TRANSMUTE_ACTION_EVENT));

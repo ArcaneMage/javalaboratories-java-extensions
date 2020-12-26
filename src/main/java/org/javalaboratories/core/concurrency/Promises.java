@@ -49,6 +49,35 @@ import java.util.function.Supplier;
  *             .IfPresent(result -> System.out::println(result));
  *     }
  * </pre>
+ *
+ * Here is another example using an alternative implementation of {@link Promise}
+ * object which supports event-driven notification in several easy steps:
+ * <pre>
+ *     {@code
+ *          // First, implement listener classes
+ *          public static class PromiseEventListener implements PromiseEventSubscriber {
+ *              ...
+ *              ...
+ *              public void notify (Event event, EventState<?> value {
+ *                   if (event.isAny(PRIMARY_ACTION_EVENT,TASK_ACTION_EVENT,TRANSMUTE_ACTION_EVENT)) {
+ *                      logger.info("Received event {}, state {}",event.getEventId(),value.getValue());
+ *                   }
+ *              }
+ *          }
+ *          ...
+ *          ...
+ *          List<PromiseEventListener> listeners = Arrays.toList(new PromiseEventListener(),...);
+ *
+ *          // Then instantiate Promise object with the factory method
+ *          Promise<String> promise = Promises
+ *              .newPromise(PrimaryAction.of(() -> doLongRunningTask("Reading integer value from database")),listeners)
+ *              .then(TransmuteAction.of(value -> "Value read from the database: "+value));
+ *     }
+ * </pre>
+ * The above example illustrates the ability to not only define your {@link
+ * Action} handlers but also notify {@code listeners/subscribers} of {@link
+ * PromiseEvents} -- there is no limit to the number of listeners, and to avoid
+ * blocking, they are notified asynchronously.
  */
 @SuppressWarnings("WeakerAccess")
 public final class Promises {
