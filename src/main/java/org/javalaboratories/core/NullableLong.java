@@ -1,4 +1,3 @@
-package org.javalaboratories.core;
 /*
  * Copyright 2020 Kevin Henry
  *
@@ -14,6 +13,7 @@ package org.javalaboratories.core;
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package org.javalaboratories.core;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

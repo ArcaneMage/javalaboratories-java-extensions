@@ -1,8 +1,8 @@
 package org.javalaboratories.core.statistics;
 
+import org.javalaboratories.core.Nullable;
 import org.javalaboratories.util.Holder;
 import org.javalaboratories.util.Holders;
-import org.javalaboratories.core.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -15,24 +15,58 @@
  */
 package org.javalaboratories.util;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
+/**
+ * Class of utility methods for validation of method parameters/arguments.
+ * <p>
+ * This is similar to the {@link Objects#requireNonNull(Object)}, but offers
+ * convenient methods to test multiple arguments for validation as varargs.
+ */
 public final class Arguments {
 
+    /**
+     * Validates {@code arguments} for {@code null} values.
+     *
+     * @param arguments varargs of {@code arguments/parameters}.
+     * @throws NullPointerException if any of the {@code arguments} are
+     * {@code null}.
+     */
     public static void requireNonNull(final Object... arguments) {
         requireNonNull(NullPointerException::new,arguments);
     }
 
+    /**
+     * Validates {@code arguments} for {@code null} values.
+     *
+     * @param arguments varargs of {@code arguments/parameters}.
+     * @param message details message to report in {@code exception} object.
+     * @throws NullPointerException if any of the {@code arguments} are
+     * {@code null}.
+     */
     public static void requireNonNull(final String message, final Object... arguments) {
         requireNonNull(() -> new NullPointerException(message), arguments);
     }
 
-    public static void requireNonNull(final Supplier<RuntimeException> supplier, final Object... arguments) {
-        if (arguments != null) {
-            for (Object o : arguments) {
-                if (o == null)
-                    throw supplier.get();
-            }
+    /**
+     * Validates {@code arguments} for {@code null} values then throws requested
+     * exception of type E.
+     *
+     * @param arguments varargs of {@code arguments/parameters}.
+     * @param supplier supplies exception with which to raise.
+     * @param <E> Type of exception to throw.
+     * @throws NullPointerException object type if {@code supplier} or
+     * {@code arguments} is {@code null}
+     * @throws E as requested by {@code supplier} parameter if any of the {@code
+     * arguments} is {@code null}
+     */
+    public static <E extends Exception> void requireNonNull(final Supplier<? extends E> supplier, final Object... arguments) throws E {
+        Objects.requireNonNull(supplier,"Expected supplier?");
+        Objects.requireNonNull(arguments,"Expected arguments?");
+        for (Object o : arguments) {
+            if (o == null)
+                throw supplier.get();
         }
     }
 }

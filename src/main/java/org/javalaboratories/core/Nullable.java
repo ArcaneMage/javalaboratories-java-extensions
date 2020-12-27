@@ -1,4 +1,3 @@
-package org.javalaboratories.core;
 /*
  * Copyright 2020 Kevin Henry
  *
@@ -14,6 +13,10 @@ package org.javalaboratories.core;
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package org.javalaboratories.core;
+
+import lombok.EqualsAndHashCode;
+import org.javalaboratories.util.Generics;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -23,13 +26,15 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * A container object which may or may not contain a non-null value. If the value is present {@code isPresent()}
- * returns {@code true}. If no value is present the object is considered {@code empty()}
+ * A container object which may or may not contain a non-null value. If the
+ * value is present {@code isPresent()} returns {@code true}. If no value is
+ * present the object is considered {@code empty()}
  * <p>
- * This object is a drop-in replacement for {@code Optional}. If you're familiar with the {@code Optional},
- * class, you will be familiar with the API of this object. For Java 8 developers, this object offers a wealth of methods
- * that only users of Java 9 and above enjoy, for example {@code IfPresentOrElse}, {@code stream()} and much
- * more.
+ * This object is a drop-in replacement for {@code Optional}. If you're
+ * familiar with the {@code Optional}, class, you will be familiar with the API
+ * of this class. For Java 8 developers, this object offers a wealth of
+ * methods that only users of Java 9 and above enjoy, for example {@code
+ * IfPresentOrElse}, {@code stream()} and much more.
  * <p>
  * <pre>
  *   {@code
@@ -62,14 +67,17 @@ import java.util.stream.Stream;
  * @see NullableLong
  * @author Kevin H, Java Laboratories
  */
-@SuppressWarnings("WeakerAccess")
+@EqualsAndHashCode
 public final class Nullable<T> implements Iterable<T> {
 
-    private T value;
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private final Optional<T> delegate;
 
     private static final Nullable<?> EMPTY = new Nullable<>();
 
-    public static <T> Nullable<T> of(T value) { return new Nullable<>(value); }
+    public static <T> Nullable<T> of(T value) {
+        return new Nullable<>(value);
+    }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public static <T> Nullable<T> of(Optional<T> optional) {
@@ -77,81 +85,66 @@ public final class Nullable<T> implements Iterable<T> {
         return ofNullable(optional.orElse(null));
     }
 
-    public static <T> Nullable<T> ofNullable(T value) { return value == null ? empty() : of(value); }
+    public static <T> Nullable<T> ofNullable(T value) {
+        return value == null ? empty() : of(value);
+    }
 
-    @SuppressWarnings("unchecked")
     public static <T> Nullable<T> empty() {
-        return (Nullable<T>) EMPTY;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Nullable<?> nullable = (Nullable<?>) o;
-        return Objects.equals(value, nullable.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
+        return Generics.unchecked(EMPTY);
     }
 
     public Nullable<T> filter(Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate);
-        if (this.value == null) return this;
-        else return predicate.test(value) ? this : empty();
+        return delegate == delegate.filter(predicate) ? this : empty();
     }
 
     @SuppressWarnings("unchecked")
     public <U> Nullable<U> flatMap(Function<? super T,? extends Nullable<? extends U>> mapper) {
         Objects.requireNonNull(mapper);
-        if (this.value == null) return empty();
+        T value = value();
+        if (value == null) return empty();
         else return Objects.requireNonNull((Nullable<U>) mapper.apply(value));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public T get() {
-        if (this.value == null) throw new NoSuchElementException();
-        else return value;
+        return delegate.get();
     }
 
     public void ifPresent(Consumer<? super T> action) {
         Objects.requireNonNull(action);
-        if (this.value != null)
-            action.accept(value);
+        delegate.ifPresent(action);
     }
 
     public void ifPresentOrElse(Consumer<? super T> action, Runnable elseAction) {
         Objects.requireNonNull(action);
-        if (this.value == null) elseAction.run();
-        else action.accept(value);
+        if (this.value() == null) elseAction.run();
+        else action.accept(value());
     }
 
-    public boolean isEmpty() { return this.value == null; }
+    public boolean isEmpty() {
+        return !delegate.isPresent();
+    }
 
     public <U> Nullable<U> map(Function<? super T, ? extends U> mapper) {
         Objects.requireNonNull(mapper);
-        if (this.value == null)
-            return empty();
-        else
-            return Nullable.ofNullable(mapper.apply(value));
+        Optional<U> result = delegate.map(mapper);
+        return result.isPresent() ? Nullable.of(result) : empty();
     }
 
-    @SuppressWarnings("unchecked")
     public Nullable<T> or (Supplier<? extends Nullable<? extends T>> supplier) {
         Objects.requireNonNull(supplier);
-        if (this.value != null) return this;
-        else return Objects.requireNonNull((Nullable<T>) supplier.get());
+        if (this.value() != null) return this;
+        else return Objects.requireNonNull(Generics.unchecked(supplier.get()));
     }
 
     public T orElse(T other) {
-       return this.value != null ? value : other;
+       return delegate.orElse(other);
     }
 
     public T orElseGet(Supplier<? extends T> supplier) {
         Objects.requireNonNull(supplier);
-        if (this.value != null) return value;
-        else return Objects.requireNonNull(supplier.get());
+        return delegate.orElseGet(supplier);
     }
 
     public T orElseThrow() {
@@ -159,48 +152,53 @@ public final class Nullable<T> implements Iterable<T> {
     }
 
     public <E extends Throwable> T orElseThrow(Supplier<? extends E> exSupplier) throws E {
-        if (this.value != null) return value;
-        else throw exSupplier.get();
+        return delegate.orElseThrow(exSupplier);
     }
 
     public Stream<T> stream() {
-        if (value == null) return Stream.of();
-        else return Stream.of(value);
+        if (value() == null) return Stream.of();
+        else return Stream.of(value());
     }
 
     public Optional<T> toOptional() {
-        return Optional.ofNullable(value);
+        return delegate;
     }
 
     public List<T> toList() {
-        if (this.value != null) return Collections.singletonList(value);
+        if (this.value() != null) return Collections.singletonList(value());
         else return Collections.emptyList();
     }
 
     public <K,V> Map<K,V> toMap(Function<? super T, ? extends K> keyMapper,Function<? super T,? extends V> valueMapper) {
         Objects.requireNonNull(keyMapper);
         Objects.requireNonNull(valueMapper);
-        if (this.value != null) return Collections.singletonMap(keyMapper.apply(value), valueMapper.apply(this.value));
+        if (this.value() != null) return Collections.singletonMap(keyMapper.apply(value()), valueMapper.apply(this.value()));
         else return Collections.emptyMap();
     }
 
     public String toString() {
-        if (this.value == null) return "Nullable[isEmpty]";
-        else return String.format("Nullable[%s]", value);
+        if (this.value() == null) return "Nullable[isEmpty]";
+        else return String.format("Nullable[%s]", value());
     }
 
-    public boolean isPresent() { return value != null; }
+    public boolean isPresent() {
+        return delegate.isPresent();
+    }
 
     @Override
     public Iterator<T> iterator() {
         return toList().iterator();
     }
 
-    private Nullable() { value = null; }
-
-    private Nullable(T value) {
-        this.value = value;
-        Objects.requireNonNull(value);
+    private Nullable() {
+        delegate = Optional.empty();
     }
 
+    private Nullable(T value) {
+        this.delegate = Optional.of(Objects.requireNonNull(value));
+    }
+
+    private T value() {
+        return delegate.orElse(null);
+    }
 }
