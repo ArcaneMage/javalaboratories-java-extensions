@@ -13,22 +13,22 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableLongTest {
+public class MaybeIntTest {
 
-    private Optional<Long> optional;
-    private NullableLong nullable;
-    private NullableLong nullable2;
-    private NullableLong empty;
+    private Optional<Integer> optional;
+    private MaybeInt nullable;
+    private MaybeInt nullable2;
+    private MaybeInt empty;
 
-    private static final Consumer<Long> DO_NOTHING_CONSUMER = (value) -> {};
+    private static final Consumer<Integer> DO_NOTHING_CONSUMER = (value) -> {};
     private static final Runnable DO_NOTHING_RUNNABLE = () -> {};
 
     @BeforeEach
     public void setup() {
-        optional = Optional.of(99L);
-        nullable = NullableLong.of(99L);
-        nullable2 = NullableLong.of(optional);
-        empty = NullableLong.empty();
+        optional = Optional.of(99);
+        nullable = MaybeInt.of(99);
+        nullable2 = MaybeInt.of(optional);
+        empty = MaybeInt.empty();
     }
 
     @Test
@@ -40,39 +40,39 @@ public class NullableLongTest {
 
     @Test
     public void testEquals_Pass() {
-        NullableLong twin = NullableLong.of(99L);
+        MaybeInt twin = MaybeInt.of(99);
         assertEquals(nullable,twin);
         assertEquals(nullable, nullable);
     }
 
     @Test
     public void testHashCode_Pass() {
-        NullableLong twin = NullableLong.of(99L);
+        MaybeInt twin = MaybeInt.of(99);
         assertEquals(nullable.hashCode(),twin.hashCode());
     }
 
     @Test
-    public void testGetAsLong_Pass() {
-        assertEquals(99L,nullable.getAsLong());
+    public void testGetAsInt_Pass() {
+        assertEquals(99,nullable.getAsInt());
     }
 
     @Test
     public void testIfPresent_Pass() {
-        AtomicReference<Long> reference = new AtomicReference<>();
+        AtomicReference<Integer> reference = new AtomicReference<>();
 
         nullable.ifPresent(v -> reference.set(v));
-        assertEquals((Long) 99L,reference.get());
+        assertEquals((Integer) 99,reference.get());
     }
 
     @Test
     public void testIfPresentOrElse_Pass() {
-        AtomicReference<Long> reference = new AtomicReference<>();
+        AtomicReference<Integer> reference = new AtomicReference<>();
 
         nullable.ifPresentOrElse(v -> reference.set(v),DO_NOTHING_RUNNABLE);
-        assertEquals((Long)99L,reference.get());
+        assertEquals((Integer) 99,reference.get());
 
-        empty.ifPresentOrElse(DO_NOTHING_CONSUMER,() -> reference.set(0L));
-        assertEquals((Long) 0L,reference.get());
+        empty.ifPresentOrElse(DO_NOTHING_CONSUMER,() -> reference.set(0));
+        assertEquals((Integer) 0,reference.get());
     }
 
     @Test
@@ -82,7 +82,7 @@ public class NullableLongTest {
 
     @Test
     public void testOrElseGet_Pass() {
-        assertEquals(99, empty.orElseGet(() -> 99L));
+        assertEquals(99, empty.orElseGet(() -> 99));
     }
 
     @Test
@@ -111,11 +111,11 @@ public class NullableLongTest {
 
     @Test
     public void testStream_Pass() {
-        long value = nullable.stream()
+        int value = nullable.stream()
                 .map(v -> v + 1)
                 .filter(v -> v == 100)
                 .findFirst()
-                .getAsLong();
+                .getAsInt();
         assertEquals(100, value);
 
         value = empty.stream()
@@ -125,14 +125,8 @@ public class NullableLongTest {
 
     @Test
     public void testToNullable_Pass() {
-        Nullable<Long> value = nullable.toNullable();
-        value.ifPresent((v -> assertEquals((Long) 99L,v)));
-    }
-
-    @Test
-    public void testToString_Pass() {
-        assertEquals("NullableLong[99]",nullable.toString());
-        assertEquals("NullableLong[isEmpty]",empty.toString());
+        Maybe<Integer> value = nullable.toNullable();
+        value.ifPresent((v -> assertEquals((Integer) 99,v)));
     }
 
     @Test
@@ -145,5 +139,11 @@ public class NullableLongTest {
         forEachHolder.set(false);
         empty.forEach(v -> forEachHolder.set(true));
         assertFalse(forEachHolder.get());
+    }
+
+    @Test
+    public void testToString_Pass() {
+        assertEquals("NullableInt[99]",nullable.toString());
+        assertEquals("NullableInt[isEmpty]",empty.toString());
     }
 }

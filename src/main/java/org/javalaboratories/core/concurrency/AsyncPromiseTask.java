@@ -16,7 +16,7 @@
 package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 import org.javalaboratories.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,14 +156,14 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      * {@inheritDoc}
      */
     @Override
-    public final Nullable<T> getResult()  {
+    public final Maybe<T> getResult()  {
         T value = null;
         try {
             value = future.get();
         } catch (CancellationException | ExecutionException | InterruptedException e) {
             // Ignore, return optional object instead.
         }
-        return Nullable.ofNullable(value);
+        return Maybe.ofNullable(value);
     }
 
     /**

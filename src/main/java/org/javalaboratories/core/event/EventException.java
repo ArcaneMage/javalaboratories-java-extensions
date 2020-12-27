@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.event;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 /**
  * Exception raised by {@link EventPublisher} and {@link Event} objects.
@@ -61,10 +61,10 @@ public class EventException extends RuntimeException {
     }
 
     /**
-     * @return the current {@code event} as a {@link Nullable} triggered at
+     * @return the current {@code event} as a {@link Maybe} triggered at
      * the time of the exception.
      */
-    public Nullable<Event> getEvent() {
-        return Nullable.ofNullable(event);
+    public Maybe<Event> getEvent() {
+        return Maybe.ofNullable(event);
     }
 }

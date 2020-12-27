@@ -1,6 +1,6 @@
 package org.javalaboratories.core.tuple;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -105,7 +105,7 @@ public class Tuple3Test {
     public void testFromIterable_Pass() {
         List<Integer> list = Arrays.asList(1,2,3);
 
-        Nullable<Tuple3<Integer, Integer, Integer>>
+        Maybe<Tuple3<Integer, Integer, Integer>>
                 maybeTuple = Tuple3.fromIterable(list);
 
         maybeTuple.ifPresentOrElse(tuple -> assertEquals(Tuple.of(1,2,3), tuple),

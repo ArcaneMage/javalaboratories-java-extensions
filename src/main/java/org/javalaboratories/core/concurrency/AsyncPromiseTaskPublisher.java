@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.event.Event;
 import org.javalaboratories.core.event.EventBroadcaster;
 import org.javalaboratories.core.event.EventPublisher;
@@ -222,7 +222,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
 
     private <U> void notifyEvent(final Promise<U> promise, final Event event) {
         Arguments.requireNonNull(promise,event);
-        Nullable<U> value = promise.getResult();
+        Maybe<U> value = promise.getResult();
         if (promise.getState() == FULFILLED) {
             if (value.isEmpty()) {
                 publisher.publish(event, new EventState<>(null));

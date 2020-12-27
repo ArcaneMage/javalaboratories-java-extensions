@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableTest {
+public class MaybeTest {
 
     private Optional<String> optional;
-    private Nullable<String> nullable;
-    private Nullable<String> nullable2;
-    private Nullable<String> empty;
+    private Maybe<String> nullable;
+    private Maybe<String> nullable2;
+    private Maybe<String> empty;
 
     private static final Consumer<String> DO_NOTHING_CONSUMER = (value) -> {};
     private static final Runnable DO_NOTHING_RUNNABLE = () -> {};
@@ -30,9 +30,9 @@ public class NullableTest {
     @BeforeEach
     public void setup() {
         optional = Optional.of("Hello World");
-        nullable = Nullable.of("Hello World");
-        nullable2 = Nullable.of(optional);
-        empty = Nullable.ofNullable(null);
+        nullable = Maybe.of("Hello World");
+        nullable2 = Maybe.of(optional);
+        empty = Maybe.ofNullable(null);
     }
 
     @Test
@@ -75,12 +75,12 @@ public class NullableTest {
     @Test
     public void testFlatMap_Pass() {
 
-        Nullable<Nullable<String>> nested = Nullable.of(Nullable.of("HELLO WORLD"));
+        Maybe<Maybe<String>> nested = Maybe.of(Maybe.of("HELLO WORLD"));
 
         nested.flatMap(value -> value)
                 .ifPresent(value -> assertEquals("HELLO WORLD",value));
 
-        assertFalse(empty.flatMap(value -> Nullable.of("HELLO WORLD"))
+        assertFalse(empty.flatMap(value -> Maybe.of("HELLO WORLD"))
                 .isPresent());
     }
 
@@ -117,12 +117,12 @@ public class NullableTest {
     @Test
     public void testOr_Pass() {
         String value = nullable
-                .or(() -> Nullable.of("Good Morning World"))
+                .or(() -> Maybe.of("Good Morning World"))
                 .get();
         assertEquals("Hello World",value);
 
         value = empty
-                .or(() -> Nullable.of("Good Morning World"))
+                .or(() -> Maybe.of("Good Morning World"))
                 .get();
         assertEquals("Good Morning World",value);
     }
@@ -224,21 +224,21 @@ public class NullableTest {
 
     @Test
     public void testEquals_Pass() {
-        Nullable<String> twin = Nullable.of("Hello World");
+        Maybe<String> twin = Maybe.of("Hello World");
         assertEquals(nullable, nullable);
         assertEquals(nullable,twin);
     }
 
     @Test
     public void testHashCode_Pass() {
-        Nullable<String> twin = Nullable.of("Hello World");
+        Maybe<String> twin = Maybe.of("Hello World");
         assertEquals(nullable.hashCode(),twin.hashCode());
     }
 
     @Test
     public void testToString_Pass() {
-       assertEquals("Nullable[Hello World]",nullable.toString());
-       assertEquals("Nullable[isEmpty]",empty.toString());
+       assertEquals("Maybe[Hello World]",nullable.toString());
+       assertEquals("Maybe[isEmpty]",empty.toString());
     }
 
 }

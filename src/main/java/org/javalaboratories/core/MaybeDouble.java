@@ -21,29 +21,29 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
+import java.util.stream.DoubleStream;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableInt implements Iterable<Integer> {
+public class MaybeDouble implements Iterable<Double> {
 
-    private Nullable<Integer> value;
+    private Maybe<Double> value;
 
-    private static final NullableInt EMPTY = new NullableInt();
+    private static final MaybeDouble EMPTY = new MaybeDouble();
 
-    public static NullableInt empty() { return EMPTY; }
+    public static MaybeDouble empty() { return EMPTY; }
 
-    public static NullableInt of(int value) { return new NullableInt(value); }
+    public static MaybeDouble of(double value) { return new MaybeDouble(value); }
 
-    public static NullableInt of(Optional<Integer> value) {
+    public static MaybeDouble of(Optional<Double> value) {
         Objects.requireNonNull(value);
-        return value.map(NullableInt::of).orElse(EMPTY);
+        return value.map(MaybeDouble::of).orElse(EMPTY);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NullableInt that = (NullableInt) o;
+        MaybeDouble that = (MaybeDouble) o;
         return value.equals(that.value);
     }
 
@@ -52,13 +52,13 @@ public class NullableInt implements Iterable<Integer> {
         return Objects.hash(value);
     }
 
-    public int getAsInt() { return value.get(); }
+    public double getAsDouble() { return value.get(); }
 
-    public void ifPresent(Consumer<? super Integer> action) {
+    public void ifPresent(Consumer<? super Double> action) {
         this.value.ifPresent(action);
     }
 
-    public void ifPresentOrElse(Consumer<? super Integer> action, Runnable emptyAction) {
+    public void ifPresentOrElse(Consumer<? super Double> action, Runnable emptyAction) {
         this.value.ifPresentOrElse(action,emptyAction);
     }
 
@@ -66,41 +66,40 @@ public class NullableInt implements Iterable<Integer> {
 
     public boolean isPresent() { return this.value.isPresent(); }
 
-    public int orElse(int other) {
+    public double orElse(double other) {
         return this.value.orElse(other);
     }
 
-    public int orElseGet(Supplier<? extends Integer> supplier) {
+    public double orElseGet(Supplier<? extends Double> supplier) {
         return this.value.orElseGet(supplier);
     }
 
-    public int orElseThrow() {
+    public double orElseThrow() {
         return orElseThrow(NoSuchElementException::new);
     }
 
-    public <E extends Throwable> int orElseThrow(Supplier<? extends E> exceptionSupplier) throws E {
+    public <E extends Throwable> double orElseThrow(Supplier<? extends E> exceptionSupplier) throws E {
         return this.value.orElseThrow(exceptionSupplier);
     }
 
-    public IntStream stream() {
-        return this.value.isPresent() ? IntStream.of(this.value.get()) : IntStream.of();
+    public DoubleStream stream() {
+        return this.value.isPresent() ? DoubleStream.of(this.value.get()) : DoubleStream.of();
     }
 
-    public Nullable<Integer> toNullable() {
-        return isPresent() ? Nullable.of(this.value.get()) : Nullable.empty();
+    public Maybe<Double> toNullable() {
+        return isPresent() ? Maybe.of(this.value.get()) : Maybe.empty();
     }
 
     public String toString() {
-        return this.isPresent() ? String.format("NullableInt[%d]",this.value.get()) : "NullableInt[isEmpty]";
+        return this.isPresent() ? String.format("NullableDouble[%f]",this.value.get()) : "NullableDouble[isEmpty]";
     }
 
     @Override
-    public Iterator<Integer> iterator() {
+    public Iterator<Double> iterator() {
         return this.value.iterator();
     }
 
-    private NullableInt() { this.value = Nullable.empty(); }
+    private MaybeDouble() { this.value = Maybe.empty(); }
 
-    private NullableInt(int value) { this.value = Nullable.ofNullable(value); }
-
+    private MaybeDouble(double value) { this.value = Maybe.ofNullable(value); }
 }

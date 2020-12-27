@@ -13,22 +13,22 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableIntTest {
+public class MaybeDoubleTest {
 
-    private Optional<Integer> optional;
-    private NullableInt nullable;
-    private NullableInt nullable2;
-    private NullableInt empty;
+    private Optional<Double> optional;
+    private MaybeDouble nullable;
+    private MaybeDouble nullable2;
+    private MaybeDouble empty;
 
-    private static final Consumer<Integer> DO_NOTHING_CONSUMER = (value) -> {};
+    private static final Consumer<Double> DO_NOTHING_CONSUMER = (value) -> {};
     private static final Runnable DO_NOTHING_RUNNABLE = () -> {};
 
     @BeforeEach
     public void setup() {
-        optional = Optional.of(99);
-        nullable = NullableInt.of(99);
-        nullable2 = NullableInt.of(optional);
-        empty = NullableInt.empty();
+        optional = Optional.of(99.9999);
+        nullable = MaybeDouble.of(99.9999);
+        nullable2 = MaybeDouble.of(optional);
+        empty = MaybeDouble.empty();
     }
 
     @Test
@@ -40,39 +40,39 @@ public class NullableIntTest {
 
     @Test
     public void testEquals_Pass() {
-        NullableInt twin = NullableInt.of(99);
+        MaybeDouble twin = MaybeDouble.of(99.9999);
         assertEquals(nullable,twin);
         assertEquals(nullable, nullable);
     }
 
     @Test
     public void testHashCode_Pass() {
-        NullableInt twin = NullableInt.of(99);
+        MaybeDouble twin = MaybeDouble.of(99.9999);
         assertEquals(nullable.hashCode(),twin.hashCode());
     }
 
     @Test
-    public void testGetAsInt_Pass() {
-        assertEquals(99,nullable.getAsInt());
+    public void testGetAsDouble_Pass() {
+        assertEquals(99.9999,nullable.getAsDouble());
     }
 
     @Test
     public void testIfPresent_Pass() {
-        AtomicReference<Integer> reference = new AtomicReference<>();
+        AtomicReference<Double> reference = new AtomicReference<>();
 
         nullable.ifPresent(v -> reference.set(v));
-        assertEquals((Integer) 99,reference.get());
+        assertEquals((Double)99.9999,reference.get());
     }
 
     @Test
     public void testIfPresentOrElse_Pass() {
-        AtomicReference<Integer> reference = new AtomicReference<>();
+        AtomicReference<Double> reference = new AtomicReference<>();
 
         nullable.ifPresentOrElse(v -> reference.set(v),DO_NOTHING_RUNNABLE);
-        assertEquals((Integer) 99,reference.get());
+        assertEquals((Double) 99.9999,reference.get());
 
-        empty.ifPresentOrElse(DO_NOTHING_CONSUMER,() -> reference.set(0));
-        assertEquals((Integer) 0,reference.get());
+        empty.ifPresentOrElse(DO_NOTHING_CONSUMER,() -> reference.set(0.0));
+        assertEquals((Double) 0.0,reference.get());
     }
 
     @Test
@@ -82,26 +82,26 @@ public class NullableIntTest {
 
     @Test
     public void testOrElseGet_Pass() {
-        assertEquals(99, empty.orElseGet(() -> 99));
+        assertEquals(99.9999, empty.orElseGet(() -> 99.9999));
     }
 
     @Test
     public void testOrElse_Pass() {
-        assertEquals(99,empty.orElse(99));
+        assertEquals(99.9999,empty.orElse(99.9999));
     }
 
     @Test
     public void testOrElseThrow_Fail() {
         assertThrows(NoSuchElementException.class, () -> empty.orElseThrow());
 
-        assertEquals(99,nullable.orElseThrow());
+        assertEquals(99.9999,nullable.orElseThrow());
     }
 
     @Test
     public void testOrElseThrowException_Fail() {
         assertThrows(IllegalArgumentException.class, () -> empty.orElseThrow(IllegalArgumentException::new));
 
-        assertEquals(99,nullable.orElseThrow(IllegalArgumentException::new));
+        assertEquals(99.9999,nullable.orElseThrow(IllegalArgumentException::new));
     }
 
     @Test
@@ -111,22 +111,22 @@ public class NullableIntTest {
 
     @Test
     public void testStream_Pass() {
-        int value = nullable.stream()
-                .map(v -> v + 1)
-                .filter(v -> v == 100)
+        double value = nullable.stream()
+                .map(v -> v + 0.0001)
+                .filter(v -> v == 100.0)
                 .findFirst()
-                .getAsInt();
+                .getAsDouble();
         assertEquals(100, value);
 
         value = empty.stream()
                 .sum();
-        assertEquals(0,value);
+        assertEquals(0.0,value);
     }
 
     @Test
     public void testToNullable_Pass() {
-        Nullable<Integer> value = nullable.toNullable();
-        value.ifPresent((v -> assertEquals((Integer) 99,v)));
+        Maybe<Double> value = nullable.toNullable();
+        value.ifPresent((v -> assertEquals((Double) 99.9999,v)));
     }
 
     @Test
@@ -143,7 +143,7 @@ public class NullableIntTest {
 
     @Test
     public void testToString_Pass() {
-        assertEquals("NullableInt[99]",nullable.toString());
-        assertEquals("NullableInt[isEmpty]",empty.toString());
+        assertEquals("NullableDouble[99.999900]",nullable.toString());
+        assertEquals("NullableDouble[isEmpty]",empty.toString());
     }
 }

@@ -1,10 +1,10 @@
 package org.javalaboratories.core.statistics;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 public abstract class ComprehensiveStatisticalCalculators<T extends Number> extends AbstractStatisticalCalculators<T> {
 
-    private StatisticalCalculator<T, Nullable<Double>> mode;
+    private StatisticalCalculator<T, Maybe<Double>> mode;
     private StatisticalCalculator<T,Double> median;
     private StatisticalCalculator<T,Double> variance;
     private StatisticalCalculator<T,Double> standardDeviation;
@@ -18,7 +18,7 @@ public abstract class ComprehensiveStatisticalCalculators<T extends Number> exte
         add(mode,median,variance,standardDeviation);
     }
 
-    public final Nullable<Double> getMode() {
+    public final Maybe<Double> getMode() {
         return mode.getResult();
     }
 

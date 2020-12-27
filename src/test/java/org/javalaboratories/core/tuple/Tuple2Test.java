@@ -1,6 +1,6 @@
 package org.javalaboratories.core.tuple;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 import org.javalaboratories.util.Holder;
 import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.Assertions;
@@ -293,7 +293,7 @@ public class Tuple2Test {
     public void testFromIterable_Pass() {
        List<String> list = Arrays.asList("John","Doe");
 
-       Nullable<Tuple2<String,String>> maybeTuple = Tuple2.fromIterable(list);
+       Maybe<Tuple2<String,String>> maybeTuple = Tuple2.fromIterable(list);
 
        maybeTuple.ifPresentOrElse(tuple -> {
            assertEquals("John",tuple.value1());

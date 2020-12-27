@@ -68,7 +68,7 @@ public class LongStatisticalCalculatorsTest {
 
     @Test
     public void testToString_Pass() {
-        assertEquals("LongStatisticalCalculators{count=10, sum=192, min=13, average=19.2, max=24, mode=Nullable[21.0], " +
+        assertEquals("LongStatisticalCalculators{count=10, sum=192, min=13, average=19.2, max=24, mode=Maybe[21.0], " +
                 "median=20.000000, variance=9.560000, standard-deviation=3.091925}", calculators.toString());
     }
 

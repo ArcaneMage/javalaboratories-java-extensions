@@ -16,7 +16,7 @@
 package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -89,7 +89,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
     /**
      * @return this {@link PrimaryAction} task handler.
      */
-    public Nullable<Supplier<T>> getTask() {
-        return Nullable.ofNullable(task);
+    public Maybe<Supplier<T>> getTask() {
+        return Maybe.ofNullable(task);
     }
 }

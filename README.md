@@ -57,11 +57,11 @@ holder object is an effectively final object allowing its contents to be mutated
 ``` 
 `Holders` utility class can create several implementations of `Holder` objects, including a thread-safe and a read-only
 implementations. 
-### Nullable
-The library introduces `Nullable` class, which is a "drop-in" replacement for `Optional`. It has features that are only 
+### Maybe
+The library introduces `Maybe` class, which is a "drop-in" replacement for `Optional`. It has features that are only 
 available in the `Optional` class in Java-11/13 but it also includes new features. For example, the following is possible:
 ```
-    Nullable<Person> person = people.findById(10983);
+    Maybe<Person> person = people.findById(10983);
     
     person.forEach(System.out::println);    
     

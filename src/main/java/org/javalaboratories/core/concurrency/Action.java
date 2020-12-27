@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -46,7 +46,7 @@ public interface Action<T> extends CompletableFuture.AsynchronousCompletionTask 
      * If the action does not return a completion handler (optional), it will
      * be ignored.
      * <p>
-     * @return a {@link Nullable} object encapsulating the completion handler.
+     * @return a {@link Maybe} object encapsulating the completion handler.
      */
-    Nullable<BiConsumer<T,Throwable>> getCompletionHandler();
+    Maybe<BiConsumer<T,Throwable>> getCompletionHandler();
 }

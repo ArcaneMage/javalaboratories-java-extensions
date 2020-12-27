@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 import org.javalaboratories.util.Generics;
 
 import java.util.ArrayList;
@@ -297,14 +297,14 @@ public final class Promises {
      * @param promise the {@link Promise} object that implements {@link Invocable}
      * @param <T> The type of the resultant value returned from the asynchronous
      *           task.
-     * @return {@link Nullable} encapsulates {@link Invocable} implementation.
+     * @return {@link Maybe} encapsulates {@link Invocable} implementation.
      */
-    private static <T> Nullable<Invocable<T>> asInvocable(final Promise<T> promise) {
-        Nullable<Invocable<T>> result;
+    private static <T> Maybe<Invocable<T>> asInvocable(final Promise<T> promise) {
+        Maybe<Invocable<T>> result;
         try {
-            result = Generics.unchecked(Nullable.of(Objects.requireNonNull(promise)));
+            result = Generics.unchecked(Maybe.of(Objects.requireNonNull(promise)));
         } catch (ClassCastException e) {
-            result = Nullable.empty();
+            result = Maybe.empty();
         }
         return result;
     }

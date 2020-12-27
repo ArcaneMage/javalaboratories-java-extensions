@@ -15,7 +15,7 @@ package org.javalaboratories.core.tuple;
  *    limitations under the License.
  */
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.*;
 
@@ -67,7 +67,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
         if (depth > MAX_DEPTH)
             throw new TupleOverflowException();
         Object[] objects = getObjects(this, that);
-        Nullable<R> result = Tuples.fromIterable(Arrays.asList(objects), objects.length);
+        Maybe<R> result = Tuples.fromIterable(Arrays.asList(objects), objects.length);
         return result.get();
     }
 
@@ -117,7 +117,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      */
     final <T extends Tuple> T hop(int position) {
         verify(position);
-        Nullable<T> hopped = Tuples.fromIterable(toList(), position, depth() - position + 1);
+        Maybe<T> hopped = Tuples.fromIterable(toList(), position, depth() - position + 1);
         return hopped.get();
     }
 
@@ -160,7 +160,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
      */
     final <T extends Tuple> T truncate(int position) {
         verify(position);
-        Nullable<T> result = Tuples.fromIterable(toList(), position - 1);
+        Maybe<T> result = Tuples.fromIterable(toList(), position - 1);
         return result.get();
     }
 
@@ -214,7 +214,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
         Object[] elements = getObjects(this);
         for ( int i = 0; i < times; i++)
             rotate(elements,true);
-        Nullable<T> result = Tuples.fromIterable(Arrays.asList(elements),elements.length);
+        Maybe<T> result = Tuples.fromIterable(Arrays.asList(elements),elements.length);
         return result.get();
     }
 
@@ -231,7 +231,7 @@ public abstract class AbstractTuple extends AbstractTupleContainer implements Tu
         Object[] elements = getObjects(this);
         for ( int i = 0; i < times; i++)
             rotate(elements,false);
-        Nullable<T> result = Tuples.fromIterable(Arrays.asList(elements),elements.length);
+        Maybe<T> result = Tuples.fromIterable(Arrays.asList(elements),elements.length);
         return result.get();
     }
 

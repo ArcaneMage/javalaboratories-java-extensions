@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.tuple;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.regex.Pattern;
 
@@ -44,5 +44,5 @@ public interface MatchablePatternAware {
      * @return pattern associated with element at {@code position}
      * @throws IllegalArgumentException if {@code position} value is invalid.
      */
-    Nullable<Pattern> getPattern(int position);
+    Maybe<Pattern> getPattern(int position);
 }

@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  * <p>
  * <pre>
  *   {@code
- *    Nullable<String> maybeHelloWorld = Nullable.writableHolder("Hello World");
+ *    Maybe<String> maybeHelloWorld = Maybe.of("Hello World");
  *
  *    maybeHelloWorld
  *          .filter("Hello World"::equals)
@@ -62,48 +62,48 @@ import java.util.stream.Stream;
  * </pre>
  *
  * @param <T> the type of value
- * @see NullableDouble
- * @see NullableInt
- * @see NullableLong
+ * @see MaybeDouble
+ * @see MaybeInt
+ * @see MaybeLong
  * @author Kevin H, Java Laboratories
  */
 @EqualsAndHashCode
-public final class Nullable<T> implements Iterable<T> {
+public final class Maybe<T> implements Iterable<T> {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<T> delegate;
 
-    private static final Nullable<?> EMPTY = new Nullable<>();
+    private static final Maybe<?> EMPTY = new Maybe<>();
 
-    public static <T> Nullable<T> of(T value) {
-        return new Nullable<>(value);
+    public static <T> Maybe<T> of(T value) {
+        return new Maybe<>(value);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public static <T> Nullable<T> of(Optional<T> optional) {
+    public static <T> Maybe<T> of(Optional<T> optional) {
         Objects.requireNonNull(optional);
         return ofNullable(optional.orElse(null));
     }
 
-    public static <T> Nullable<T> ofNullable(T value) {
+    public static <T> Maybe<T> ofNullable(T value) {
         return value == null ? empty() : of(value);
     }
 
-    public static <T> Nullable<T> empty() {
+    public static <T> Maybe<T> empty() {
         return Generics.unchecked(EMPTY);
     }
 
-    public Nullable<T> filter(Predicate<? super T> predicate) {
+    public Maybe<T> filter(Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate);
         return delegate == delegate.filter(predicate) ? this : empty();
     }
 
     @SuppressWarnings("unchecked")
-    public <U> Nullable<U> flatMap(Function<? super T,? extends Nullable<? extends U>> mapper) {
+    public <U> Maybe<U> flatMap(Function<? super T,? extends Maybe<? extends U>> mapper) {
         Objects.requireNonNull(mapper);
         T value = value();
         if (value == null) return empty();
-        else return Objects.requireNonNull((Nullable<U>) mapper.apply(value));
+        else return Objects.requireNonNull((Maybe<U>) mapper.apply(value));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -126,13 +126,13 @@ public final class Nullable<T> implements Iterable<T> {
         return !delegate.isPresent();
     }
 
-    public <U> Nullable<U> map(Function<? super T, ? extends U> mapper) {
+    public <U> Maybe<U> map(Function<? super T, ? extends U> mapper) {
         Objects.requireNonNull(mapper);
         Optional<U> result = delegate.map(mapper);
-        return result.isPresent() ? Nullable.of(result) : empty();
+        return result.isPresent() ? Maybe.of(result) : empty();
     }
 
-    public Nullable<T> or (Supplier<? extends Nullable<? extends T>> supplier) {
+    public Maybe<T> or (Supplier<? extends Maybe<? extends T>> supplier) {
         Objects.requireNonNull(supplier);
         if (this.value() != null) return this;
         else return Objects.requireNonNull(Generics.unchecked(supplier.get()));
@@ -177,8 +177,8 @@ public final class Nullable<T> implements Iterable<T> {
     }
 
     public String toString() {
-        if (this.value() == null) return "Nullable[isEmpty]";
-        else return String.format("Nullable[%s]", value());
+        if (this.value() == null) return "Maybe[isEmpty]";
+        else return String.format("Maybe[%s]", value());
     }
 
     public boolean isPresent() {
@@ -190,11 +190,11 @@ public final class Nullable<T> implements Iterable<T> {
         return toList().iterator();
     }
 
-    private Nullable() {
+    private Maybe() {
         delegate = Optional.empty();
     }
 
-    private Nullable(T value) {
+    private Maybe(T value) {
         this.delegate = Optional.of(Objects.requireNonNull(value));
     }
 

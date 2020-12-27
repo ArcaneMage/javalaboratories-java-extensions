@@ -24,26 +24,26 @@ import java.util.function.Supplier;
 import java.util.stream.LongStream;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableLong implements Iterable<Long> {
+public class MaybeLong implements Iterable<Long> {
 
-    private Nullable<Long> value;
+    private Maybe<Long> value;
 
-    private static final NullableLong EMPTY = new NullableLong();
+    private static final MaybeLong EMPTY = new MaybeLong();
 
-    public static NullableLong empty() { return EMPTY; }
+    public static MaybeLong empty() { return EMPTY; }
 
-    public static NullableLong of(long value) { return new NullableLong(value); }
+    public static MaybeLong of(long value) { return new MaybeLong(value); }
 
-    public static NullableLong of(Optional<Long> value) {
+    public static MaybeLong of(Optional<Long> value) {
         Objects.requireNonNull(value);
-        return value.map(NullableLong::of).orElse(EMPTY);
+        return value.map(MaybeLong::of).orElse(EMPTY);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NullableLong that = (NullableLong) o;
+        MaybeLong that = (MaybeLong) o;
         return value.equals(that.value);
     }
 
@@ -86,8 +86,8 @@ public class NullableLong implements Iterable<Long> {
         return this.value.isPresent() ? LongStream.of(this.value.get()) : LongStream.of();
     }
 
-    public Nullable<Long> toNullable() {
-        return isPresent() ? Nullable.of(this.value.get()) : Nullable.empty();
+    public Maybe<Long> toNullable() {
+        return isPresent() ? Maybe.of(this.value.get()) : Maybe.empty();
     }
 
     public String toString() {
@@ -99,7 +99,7 @@ public class NullableLong implements Iterable<Long> {
         return this.value.iterator();
     }
 
-    private NullableLong() { this.value = Nullable.empty(); }
+    private MaybeLong() { this.value = Maybe.empty(); }
 
-    private NullableLong(long value) { this.value = Nullable.ofNullable(value); }
+    private MaybeLong(long value) { this.value = Maybe.ofNullable(value); }
 }
