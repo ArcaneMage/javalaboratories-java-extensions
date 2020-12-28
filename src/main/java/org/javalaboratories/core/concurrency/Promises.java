@@ -242,8 +242,7 @@ public final class Promises {
      * @param <U> Type promise implementation returned.
      * @return a {@link List} collection of {@link Promise} objects.
      *
-     * @throws NullPointerException if {@code action} is null
-     * @throws NullPointerException if {@code function} is null
+     * @throws NullPointerException if {@code action} or {@code function}is null
      */
     private static <T,U extends Promise<T>> List<Promise<T>> all(final List<PrimaryAction<T>> actions,
                                                                  final Function<PrimaryAction<T>,Supplier<U>> function) {
@@ -270,7 +269,7 @@ public final class Promises {
      * This factory method is really provided for further development purposes,
      * a mechanism to create an alternative implementation of {@link Promise}
      * objects. Therefore, it is recommended to use
-     * {@link Promises#newPromise(PrimaryAction) instead, as this method
+     * {@link Promises#newPromise(PrimaryAction)} instead, as this method
      * provides the default implementation.
      *
      * @param action a {@link PrimaryAction} encapsulating the task to be

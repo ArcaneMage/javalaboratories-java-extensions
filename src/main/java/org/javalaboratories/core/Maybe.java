@@ -98,12 +98,11 @@ public final class Maybe<T> implements Iterable<T> {
         return delegate == delegate.filter(predicate) ? this : empty();
     }
 
-    @SuppressWarnings("unchecked")
-    public <U> Maybe<U> flatMap(Function<? super T,? extends Maybe<? extends U>> mapper) {
+    public <U> Maybe<U> flatMap(Function<? super T,? extends Maybe<U>> mapper) {
         Objects.requireNonNull(mapper);
         T value = value();
         if (value == null) return empty();
-        else return Objects.requireNonNull((Maybe<U>) mapper.apply(value));
+        else return Objects.requireNonNull(mapper.apply(value));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
