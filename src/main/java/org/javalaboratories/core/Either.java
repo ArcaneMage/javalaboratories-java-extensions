@@ -496,7 +496,7 @@ public interface Either<A,B> extends Iterable<B> {
         @Override
         public <C> Either<A,C> map(final Function<? super B,? extends C> mapper) {
             super.map(mapper);
-            return new Right<>(Objects.requireNonNull(mapper.apply(getRight())));
+            return Either.right(Objects.requireNonNull(mapper.apply(getRight())));
         }
         /**
          * {@inheritDoc}

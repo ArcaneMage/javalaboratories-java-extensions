@@ -16,6 +16,7 @@
 package org.javalaboratories.core;
 
 import lombok.EqualsAndHashCode;
+import org.javalaboratories.util.Arguments;
 import org.javalaboratories.util.Generics;
 
 import java.util.*;
@@ -169,8 +170,7 @@ public final class Maybe<T> implements Iterable<T> {
     }
 
     public <K,V> Map<K,V> toMap(Function<? super T, ? extends K> keyMapper,Function<? super T,? extends V> valueMapper) {
-        Objects.requireNonNull(keyMapper);
-        Objects.requireNonNull(valueMapper);
+        Arguments.requireNonNull(keyMapper,valueMapper);
         if (this.value() != null) return Collections.singletonMap(keyMapper.apply(value()), valueMapper.apply(this.value()));
         else return Collections.emptyMap();
     }
