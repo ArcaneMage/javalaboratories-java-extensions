@@ -102,8 +102,8 @@ public class EitherTest {
     @Test
     public void testFold_Values_Pass() {
         // Given (setup)
-        Function<Exception,String> functionA = (Exception::getMessage);
-        Function<Integer,String> functionB = (value -> "Right value equals: "+value);
+        Function<Exception,String> functionA = Exception::getMessage;
+        Function<Integer,String> functionB = value -> "Right value equals: "+value;
 
         // When
         String rresult = right
