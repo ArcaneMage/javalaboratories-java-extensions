@@ -74,11 +74,12 @@ public class MaybeTest {
 
     @Test
     public void testFlatMap_Pass() {
+        Parser parser = new Parser();
 
-        Maybe<Maybe<String>> nested = Maybe.of(Maybe.of("HELLO WORLD"));
+        Maybe<String> maybe = Maybe.of("Initial string value");
 
-        nested.flatMap(value -> value)
-                .ifPresent(value -> assertEquals("HELLO WORLD",value));
+        maybe.flatMap(parser::parse)
+                .ifPresent(value -> assertEquals("{Parsed} Initial string value",value));
 
         assertFalse(empty.flatMap(value -> Maybe.of("HELLO WORLD"))
                 .isPresent());
@@ -239,6 +240,13 @@ public class MaybeTest {
     public void testToString_Pass() {
        assertEquals("Maybe[Hello World]",nullable.toString());
        assertEquals("Maybe[isEmpty]",empty.toString());
+    }
+
+    // Some contrived use case for flatMap
+    private static class Parser {
+        public Maybe<String> parse(String value) {
+            return Maybe.of("{Parsed} "+value);
+        }
     }
 
 }
