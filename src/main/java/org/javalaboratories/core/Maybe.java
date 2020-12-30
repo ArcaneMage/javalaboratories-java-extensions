@@ -94,7 +94,7 @@ public final class Maybe<T> implements Iterable<T> {
         return Generics.unchecked(EMPTY);
     }
 
-    public <U> boolean contains(U element) {
+    public boolean contains(T element) {
         Objects.requireNonNull(element);
         return element.equals(value());
     }
@@ -162,7 +162,7 @@ public final class Maybe<T> implements Iterable<T> {
     public <U> Maybe<U> map(Function<? super T, ? extends U> mapper) {
         Objects.requireNonNull(mapper);
         Optional<U> result = delegate.map(mapper);
-        return result.isPresent() ? Maybe.of(result) : empty();
+        return result.isPresent() ? Maybe.of(result) : Maybe.empty();
     }
 
     public Maybe<T> or (Supplier<? extends Maybe<? extends T>> supplier) {
@@ -189,8 +189,8 @@ public final class Maybe<T> implements Iterable<T> {
     }
 
     public Stream<T> stream() {
-        if (value() == null) return Stream.of();
-        else return Stream.of(value());
+        T value = value();
+        return value == null ? Stream.of() : Stream.of(value);
     }
 
     public Optional<T> toOptional() {
@@ -210,8 +210,8 @@ public final class Maybe<T> implements Iterable<T> {
     }
 
     public String toString() {
-        if (this.value() == null) return "Maybe[isEmpty]";
-        else return String.format("Maybe[%s]", value());
+        T value = value();
+        return value == null ? "Maybe[isEmpty]" : String.format("Maybe[%s]", value);
     }
 
     public boolean isPresent() {
