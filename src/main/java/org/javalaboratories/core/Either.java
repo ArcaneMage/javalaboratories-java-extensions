@@ -83,7 +83,7 @@ import java.util.function.Supplier;
  * @see Left
  * @see Right
  */
-@SuppressWarnings({"UnusedReturnValue","BooleanMethodIsAlwaysInverted"})
+@SuppressWarnings("UnusedReturnValue")
 public interface Either<A,B> extends Iterable<B> {
 
     /**
@@ -444,8 +444,9 @@ public interface Either<A,B> extends Iterable<B> {
          */
         @Override
         public <C,D> Either<C,D> flatten() {
-            return this.flatMap(r -> Generics.unchecked(getRight()));
+            return (getRight() instanceof Either) ? Generics.unchecked(getRight()) : Generics.unchecked(this);
         }
+
         /**
          * {@inheritDoc}
          */
@@ -583,6 +584,7 @@ public interface Either<A,B> extends Iterable<B> {
          */
         @Override
         public boolean exists(final Predicate<? super B> predicate) {
+            super.exists(predicate);
             return false;
         }
         /**
@@ -624,7 +626,6 @@ public interface Either<A,B> extends Iterable<B> {
             super.forAll(predicate);
             return true;
         }
-
         @Override
         public B getOrElse(final B other) {
             return other;

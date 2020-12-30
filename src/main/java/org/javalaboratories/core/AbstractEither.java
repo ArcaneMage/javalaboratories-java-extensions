@@ -37,6 +37,6 @@ abstract class AbstractEither<A,B> implements Either<A,B> {
 
     @Override
     public String toString() {
-        return isRight() ? String.format("[Right=%s]",getRight()) : String.format("[Left=%s]",getLeft());
+        return isRight() ? String.format("Right[%s]",getRight()) : String.format("Left[%s]",getLeft());
     }
 }

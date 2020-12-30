@@ -17,22 +17,17 @@ package org.javalaboratories.core;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EitherTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(EitherTest.class);
-
     private Either<Exception,Integer> left;
     private Either<Exception,Integer> right;
-    private static final Consumer<?> DO_NOTHING_CONSUMER = (a) -> {};
-
 
     @BeforeEach
     public void setup() {
@@ -49,6 +44,16 @@ public class EitherTest {
 
         assertTrue(right.contains(100));
         assertFalse(right.contains(10));
+    }
+
+    @Test
+    public void testEquals_Pass() {
+        // Given (setup)
+        Either<Exception,Integer> twin = Either.right(100);
+
+        // Then
+        assertNotEquals(left,right);
+        assertEquals(twin,right);
     }
 
     @Test
@@ -80,6 +85,26 @@ public class EitherTest {
     }
 
     @Test
+    public void testFlatten_Pass() {
+        // Given
+        Either<String,Either<String,Integer>> coffee = Either.left("too-strong-coffee");
+        Either<String,Either<String,Integer>> teacup = Either.right(Either.left("weak-tea"));
+        Either<String,Either<String,Integer>> value127 = Either.right(Either.right(127));
+
+        // When
+        Either<Exception,String> left = coffee
+                .flatten();
+        Either<Exception,String> right = teacup
+                .flatten();
+        Either<Exception,String> right2 = value127
+                .flatten();
+        // Then
+        assertEquals("Left[too-strong-coffee]",left.toString());
+        assertEquals("Left[weak-tea]",right.toString());
+        assertEquals("Right[127]",right2.toString());
+    }
+
+    @Test
     public void testFlatMap_MapperEvaluation_Pass() {
         // Given (setup)
         Parser parser = new Parser();
@@ -87,7 +112,7 @@ public class EitherTest {
         // When
         String rresult = right
                 .flatMap(value -> parser.parse(String.format("[%d] Kevin",value)))
-                .flatMap(value -> Either.right(value + " Henry"))
+                .map(value -> value + " Henry")
                 .getOrElse(null);
 
         String lresult = left
@@ -100,7 +125,7 @@ public class EitherTest {
     }
 
     @Test
-    public void testFold_Values_Pass() {
+    public void testFold_RetrieveValues_Pass() {
         // Given (setup)
         Function<Exception,String> functionA = Exception::getMessage;
         Function<Integer,String> functionB = value -> "Right value equals: "+value;
@@ -116,6 +141,172 @@ public class EitherTest {
         assertEquals(lresult,"Something has gone wrong"); // Left does not transform
     }
 
+    @Test
+    public void testForAll_PredicateEvaluation_Pass() {
+        // Given (setup)
+
+        // When
+        boolean lAll = left.forAll(value -> value > 99);
+        boolean rAll = right.forAll(value -> value > 99);
+        boolean rAll2 = right.forAll(value -> value < 100);
+
+        // Then
+        assertTrue(lAll);
+        assertTrue(rAll);
+        assertFalse(rAll2);
+    }
+
+    @Test
+    public void testForEach_Iterates_Pass() {
+        // Given (setup)
+        AtomicInteger ltracker = new AtomicInteger(0);
+        AtomicInteger rtracker = new AtomicInteger(0);
+
+        // When
+        left.forEach(value -> ltracker.getAndIncrement());
+        right.forEach(value -> rtracker.getAndIncrement());
+
+        // Then
+        assertEquals(0,ltracker.get());
+        assertEquals(1,rtracker.get());
+    }
+
+    @Test
+    public void testGetOrElse_RetrieveValues_Pass() {
+        // Given (setup)
+
+        // When
+        int lvalue = left.getOrElse(17);
+        int rvalue = right.getOrElse(23);
+
+        // Then
+        assertEquals(17, lvalue);
+        assertEquals(100, rvalue);
+    }
+
+    @Test
+    public void testIsLeftRight_Verification_Pass() {
+        // Given (setup)
+
+        // When
+        boolean lIsLeft = left.isLeft();
+        boolean lIsRight = left.isRight();
+        boolean rIsLeft = right.isLeft();
+        boolean rIsRight = right.isRight();
+
+        // Then
+        assertTrue(lIsLeft);
+        assertFalse(lIsRight);
+        assertFalse(rIsLeft);
+        assertTrue(rIsRight);
+    }
+
+    @Test
+    public void testMap_FunctionEvaluation_Pass() {
+        // Given (setup)
+        Function<Exception,String> functionA = Exception::getMessage;
+        Function<Integer,String> functionB = value -> value+"";
+
+        // When
+        Either<Exception,Integer> left = this.left.map(value -> value * 25);
+        Either<Exception,Integer> right = this.right.map(value -> value * 25);
+
+        // Then
+        assertEquals("Something has gone wrong",left.fold(functionA,functionB));
+        assertEquals(2500,right.getOrElse(-1));
+    }
+
+    @Test
+    public void testOf_Instantiation_Pass() {
+        // Given (setup)
+        Either<Exception,Integer> twin = Either.of(100);
+
+        // Then
+        assertEquals(twin,right);
+    }
+
+    @Test
+    public void testOrElse_Pass() {
+        // Given (setup)
+
+        // When
+        Either<Exception,Integer> left = this.left.orElse(Either.right(255));
+        Either<Exception,Integer> right = this.right.orElse(Either.right(255));
+
+        // Then
+        assertEquals(255,left.getOrElse(-1));
+        assertEquals(100,right.getOrElse(-1));
+    }
+
+    @Test
+    public void testOrElseGet_Pass() {
+        // Given (setup)
+
+        // When
+        Either<Exception,Integer> left = this.left.orElseGet(() -> Either.right(255));
+        Either<Exception,Integer> right = this.right.orElseGet(() -> Either.right(255));
+
+        // Then
+        assertEquals(255,left.getOrElse(-1));
+        assertEquals(100,right.getOrElse(-1));
+    }
+
+    @Test
+    public void testOrElseThrow_Fail() {
+        // Given (setup)
+
+        // Then
+        assertThrows(IllegalArgumentException.class,() -> this.left.orElseThrow(IllegalArgumentException::new));
+        assertEquals(100,this.right.orElseThrow(IllegalArgumentException::new).getOrElse(-1));
+    }
+
+    @Test
+    public void testSwap_Pass() {
+        // Given (setup)
+        Function<Exception,String> functionA = Exception::getMessage;
+        Function<Integer,String> functionB = value -> value+"";
+
+        // When
+        Either<Integer,Exception> swappedLeft = left.swap();
+        Either<Integer,Exception> swappedLeftMapped = swappedLeft.map(value -> new Exception("{Transformed} "+value.getMessage()));
+        Either<Integer,Exception> swappedRight = right.swap();
+
+        // Then
+        assertEquals("Something has gone wrong",swappedLeft.fold(functionB,functionA));
+        assertEquals("{Transformed} Something has gone wrong",swappedLeftMapped.fold(functionB,functionA));
+        assertEquals("100",swappedRight.fold(functionB,functionA));
+    }
+
+    @Test
+    public void testToList_Pass() {
+        // Given (setup)
+
+        // When
+        List<Integer> llist = left.toList();
+        List<Integer> rlist = right.toList();
+
+        // Then
+        assertEquals(0,llist.size());
+        assertEquals(1,rlist.size());
+        assertEquals(100,rlist.get(0));
+        // Immutability
+        assertThrows(UnsupportedOperationException.class,() -> llist.add(100));
+        assertThrows(UnsupportedOperationException.class,() -> rlist.add(100));
+    }
+
+    @Test
+    public void testToMaybe_Pass() {
+        // Given (setup)
+
+        // When
+        Maybe<Integer> maybe1 = left.toMaybe();
+        Maybe<Integer> maybe2 = right.toMaybe();
+
+        // Then
+        assertTrue(maybe1.isEmpty());
+        assertFalse(maybe2.isEmpty());
+        assertEquals(100,maybe2.get());
+    }
 
     // Some contrived use case
     private static class Parser {

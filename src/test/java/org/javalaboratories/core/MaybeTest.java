@@ -89,6 +89,7 @@ public class MaybeTest {
     public void testIfPresent_Pass() {
         AtomicBoolean bool = new AtomicBoolean(false);
         nullable.ifPresent(value -> bool.set(true));
+
         assertTrue(bool.get());
     }
 
