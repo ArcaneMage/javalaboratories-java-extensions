@@ -475,7 +475,7 @@ public interface Either<A,B> extends Iterable<B> {
          */
         @Override
         public Iterator<B> iterator() {
-            return Collections.singletonList(getRight()).iterator();
+            return toList().iterator();
         }
         /**
          * {@inheritDoc}
@@ -635,7 +635,7 @@ public interface Either<A,B> extends Iterable<B> {
          */
         @Override
         public Iterator<B> iterator() {
-            return Collections.emptyIterator();
+            return toList().iterator();
         }
         /**
          * {@inheritDoc}

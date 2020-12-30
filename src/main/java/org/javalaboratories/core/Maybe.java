@@ -94,16 +94,49 @@ public final class Maybe<T> implements Iterable<T> {
         return Generics.unchecked(EMPTY);
     }
 
+    public <U> boolean contains(U element) {
+        Objects.requireNonNull(element);
+        return element.equals(value());
+    }
+
+    public boolean exists(final Predicate<? super T> predicate) {
+        Objects.requireNonNull(predicate);
+        T value = value();
+        return value != null && predicate.test(value);
+    }
+
+    public boolean forAll(Predicate<? super T> predicate) {
+        Objects.requireNonNull(predicate);
+        T value = value();
+        return value == null || predicate.test(value);
+    }
+
     public Maybe<T> filter(Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate);
         return delegate == delegate.filter(predicate) ? this : empty();
     }
 
+    public Maybe<T> filterNot(Predicate<? super T> predicate) {
+        Objects.requireNonNull(predicate);
+        T value = value();
+        return value != null && !predicate.test(value) ? this : Maybe.empty();
+    }
+
     public <U> Maybe<U> flatMap(Function<? super T,? extends Maybe<U>> mapper) {
         Objects.requireNonNull(mapper);
         T value = value();
-        if (value == null) return empty();
-        else return Objects.requireNonNull(mapper.apply(value));
+        return value != null ? Objects.requireNonNull(mapper.apply(value)) : Maybe.empty();
+    }
+
+    public <U> Maybe<U> flatten() {
+        T value = value();
+        return value instanceof Maybe ? Generics.unchecked(value) : Generics.unchecked(this);
+    }
+
+    public <U> U fold(final Function<? super T,? extends U> function, U other) {
+        Objects.requireNonNull(function);
+        T value = value();
+        return Objects.requireNonNull(value != null ? function.apply(value) : other);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -165,8 +198,9 @@ public final class Maybe<T> implements Iterable<T> {
     }
 
     public List<T> toList() {
-        if (this.value() != null) return Collections.singletonList(value());
-        else return Collections.emptyList();
+        T value = value();
+        List<T> result = value == null ? Collections.emptyList() : Collections.singletonList(value);
+        return Collections.unmodifiableList(result);
     }
 
     public <K,V> Map<K,V> toMap(Function<? super T, ? extends K> keyMapper,Function<? super T,? extends V> valueMapper) {
