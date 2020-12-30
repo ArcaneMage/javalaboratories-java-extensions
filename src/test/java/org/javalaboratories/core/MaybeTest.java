@@ -21,7 +21,6 @@ public class MaybeTest {
 
     private Optional<String> optional;
     private Maybe<String> nullable;
-    private Maybe<String> nullable2;
     private Maybe<String> empty;
 
     private static final Consumer<String> DO_NOTHING_CONSUMER = (value) -> {};
@@ -31,7 +30,6 @@ public class MaybeTest {
     public void setup() {
         optional = Optional.of("Hello World");
         nullable = Maybe.of("Hello World");
-        nullable2 = Maybe.of(optional);
         empty = Maybe.ofNullable(null);
     }
 
@@ -39,7 +37,6 @@ public class MaybeTest {
     public void testOf_Pass() {
         assertNotNull(nullable);
         assertNotNull(empty);
-        assertNotNull(nullable2);
     }
 
     @Test

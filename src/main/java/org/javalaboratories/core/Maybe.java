@@ -80,12 +80,6 @@ public final class Maybe<T> implements Iterable<T> {
         return new Maybe<>(value);
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public static <T> Maybe<T> of(Optional<T> optional) {
-        Objects.requireNonNull(optional);
-        return ofNullable(optional.orElse(null));
-    }
-
     public static <T> Maybe<T> ofNullable(T value) {
         return value == null ? empty() : of(value);
     }
@@ -95,8 +89,8 @@ public final class Maybe<T> implements Iterable<T> {
     }
 
     public boolean contains(T element) {
-        Objects.requireNonNull(element);
-        return element.equals(value());
+        T value = value();
+        return value != null && value.equals(element);
     }
 
     public boolean exists(final Predicate<? super T> predicate) {
@@ -162,7 +156,7 @@ public final class Maybe<T> implements Iterable<T> {
     public <U> Maybe<U> map(Function<? super T, ? extends U> mapper) {
         Objects.requireNonNull(mapper);
         Optional<U> result = delegate.map(mapper);
-        return result.isPresent() ? Maybe.of(result) : Maybe.empty();
+        return result.map(Maybe::of).orElseGet(Maybe::empty);
     }
 
     public Maybe<T> or (Supplier<? extends Maybe<? extends T>> supplier) {
