@@ -76,151 +76,400 @@ public final class Maybe<T> implements Iterable<T> {
 
     private static final Maybe<?> EMPTY = new Maybe<>();
 
-    public static <T> Maybe<T> of(T value) {
+    /**
+     * Factory method to create an instance of the {@link Maybe} object.
+     *
+     * @param value represented by {@code Maybe} object.
+     * @param <T> Type of value.
+     * @return a {@code Maybe} encapsulating {@code value}
+     */
+    public static <T> Maybe<T> of(final T value) {
         return new Maybe<>(value);
     }
 
-    public static <T> Maybe<T> ofNullable(T value) {
-        return value == null ? empty() : of(value);
+    /**
+     * Factory method to create an instance of the {@link Maybe} object.
+     * <p>
+     * If the use case demands the {@code value} to be {@code null}, this
+     * method will provide a {@code Maybe} instance with an {@code empty}
+     * value, otherwise a {@code Maybe} object is returned with the
+     * encapsulated {@code value}.
+     * <p>
+     * @param value represented by {@code Maybe} object.
+     * @param <T> Type of value.
+     * @return a {@code Maybe} encapsulating {@code value}
+     */
+    public static <T> Maybe<T> ofNullable(final T value) {
+        return value == null ? Maybe.empty() : Maybe.of(value);
     }
 
+    /**
+     * Factory method to return an instance of {@link Maybe} object with an
+     * {@code empty} value.
+     * <p><
+     * @param <T> Type of value.
+     * @return an {@code empty} {@link Maybe} object.
+     */
     public static <T> Maybe<T> empty() {
         return Generics.unchecked(EMPTY);
     }
 
-    public boolean contains(T element) {
+    /**
+     * Determines whether {@code this} contains the {@code element}.
+     * <p>
+     * @param element with which to test equality with this {@link Maybe} {@code
+     * value}
+     * @return true when {@code element} equals the encapsulated {@code value}.
+     */
+    public boolean contains(final T element) {
         T value = value();
         return value != null && value.equals(element);
     }
 
+    /**
+     * Returns {@code true} when {@code this} is nonempty and the {@code
+     * predicate} function applied returns {@code true}.
+     * <p>
+     * If {@code this} is empty, the {@code predicate} function is NOT applied.
+     *
+     * @param predicate function with which to apply to the {@code Maybe}
+     *                  value.
+     * @return true when {@code predicate} test returns {@code true}.
+     * @throws NullPointerException if {@code predicate} function is {@code null}.
+     */
     public boolean exists(final Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate);
         T value = value();
         return value != null && predicate.test(value);
     }
 
-    public boolean forAll(Predicate<? super T> predicate) {
+    /**
+     * Returns {@code true} when {@code this} is {@code empty} or the {@code
+     * predicate} function returns {@code true}.
+     * <p>
+     * The {@code predicate} is not applied if {@code this} is {@code empty}, but
+     * {@code true} is returned. However, if {@code this} is nonempty, then the
+     * {@code predicate} is applied and the resultant boolean {@code result} is
+     * returned.
+     *
+     * @param predicate function to apply when the {@code this} is nonempty.
+     * @return true when {@code this} is empty; or resultant value of the
+     * {@code predicate} function.
+     * @throws NullPointerException if {@code predicate} function is {@code null}.
+     */
+    public boolean forAll(final Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate);
         T value = value();
         return value == null || predicate.test(value);
     }
 
-    public Maybe<T> filter(Predicate<? super T> predicate) {
-        Objects.requireNonNull(predicate);
-        return delegate == delegate.filter(predicate) ? this : empty();
-    }
-
-    public Maybe<T> filterNot(Predicate<? super T> predicate) {
+    /**
+     * Returns {@code this} {@link Maybe} object if the {@code value} is nonempty
+     * and satisfies the {@code predicate} function.
+     * <p>
+     * If {@code this} is {@code empty}, the {@code predicate} function is NOT
+     * applied and the {@link Maybe#empty()} is returned.
+     *
+     * @param predicate function to apply when {@code this} is nonempty.
+     * @return {@code Maybe} object that agrees/or meets the {@code predicate's}
+     * test if {@code this} is nonempty.
+     * @throws NullPointerException if {@code predicate} function is {@code null}.
+     */
+    public Maybe<T> filter(final Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate);
         T value = value();
-        return value != null && !predicate.test(value) ? this : Maybe.empty();
+        return value != null
+                ? delegate.filter(predicate).isPresent()
+                ? this : Maybe.empty()
+                : Maybe.empty();
     }
 
-    public <U> Maybe<U> flatMap(Function<? super T,? extends Maybe<U>> mapper) {
+    /**
+     * Returns {@code this} {@link Maybe} object if the {@code value} is nonempty
+     * and does NOT satisfy the {@code predicate} function.
+     * <p>
+     * If {@code this} is {@code empty}, the {@code predicate} function is NOT
+     * applied and the {@link Maybe#empty()} is returned.
+     *
+     * @param predicate function to apply when {@code this} is nonempty.
+     * @return {@code Maybe} object that agrees/or meets the {@code predicate's}
+     * test if {@code this} is nonempty.
+     * @throws NullPointerException if {@code predicate} function is {@code null}.
+     */
+    public Maybe<T> filterNot(final Predicate<? super T> predicate) {
+        Maybe<T> result = filter(predicate);
+        return result.isPresent() ? Maybe.empty() : result;
+    }
+
+    /**
+     * Transforms the {@link Maybe} value with the {@code function} when {@code
+     * this} is nonempty.
+     *
+     * @param mapper function with which to perform the transformation.
+     * @param <U> Type of transformed value.
+     * @return transformed {@link Maybe} object.
+     */
+    public <U> Maybe<U> flatMap(final Function<? super T,? extends Maybe<U>> mapper) {
         Objects.requireNonNull(mapper);
         T value = value();
         return value != null ? Objects.requireNonNull(mapper.apply(value)) : Maybe.empty();
     }
 
+    /**
+     * Flatten and return internal {@link Maybe} {@code value}, if possible.
+     * <p>
+     * If {@code this} contains a {@link Maybe} value, it is returned, otherwise
+     * {@code this} is returned.
+     * <p>
+     * @param <U> Type of value within {@code nested} {@link Maybe} object.
+     * @return flattened {@link Maybe} object.
+     */
     public <U> Maybe<U> flatten() {
         T value = value();
         return value instanceof Maybe ? Generics.unchecked(value) : Generics.unchecked(this);
     }
 
-    public <U> U fold(final Function<? super T,? extends U> function, U other) {
+    /**
+     * Returns result of {@code function} when {@code this} is nonempty, otherwise
+     * {@code emptyValue} is returned if {@code value} is {@code empty}.
+     *
+     * @param function to perform operation if the {@code value} is {@code empty}.
+     * @param emptyValue to use if {@code this} is {@code empty}
+     * @param <U> Type of returned value from {@code function}.
+     * @return results of {@code function} is {@code this} is nonempty, or
+     * {@code emptyValue}
+     */
+    public <U> U fold(final U emptyValue, final Function<? super T,? extends U> function) {
         Objects.requireNonNull(function);
         T value = value();
-        return Objects.requireNonNull(value != null ? function.apply(value) : other);
+        return Objects.requireNonNull(value != null ? function.apply(value) : emptyValue);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    /**
+     * @return {@code value} if available, otherwise throws {@link
+     * NoSuchMethodException}.
+     *
+     * @throws NoSuchElementException if {@code value} is unavailable.
+     */
     public T get() {
-        return delegate.get();
+        if (delegate.isPresent())
+           return delegate.get();
+        else
+            throw new NoSuchElementException();
     }
 
-    public void ifPresent(Consumer<? super T> action) {
+    /**
+     * Returns {@code value} of {@code this} object if available, otherwise the
+     * {@code other} value is returned.
+     *
+     * @deprecated Consider using the {@link this#orElse(Object)} instead.
+     */
+    @Deprecated
+    public T getOrElse(final T other) {
+        return orElse(other);
+    }
+
+    /**
+     * If {@code this} is nonempty, the {@code action} function is performed.
+     *
+     * @param action function to execute if {@code this} is nonempty.
+     * @throws NullPointerException if {@code action} is null.
+     */
+    public void ifPresent(final Consumer<? super T> action) {
         Objects.requireNonNull(action);
         delegate.ifPresent(action);
     }
 
-    public void ifPresentOrElse(Consumer<? super T> action, Runnable elseAction) {
-        Objects.requireNonNull(action);
-        if (this.value() == null) elseAction.run();
-        else action.accept(value());
+    /**
+     * If {@code this} is nonempty, the {@code action} is performed, otherwise
+     * the {@code elseAction} is executed instead.
+     *
+     * @param action function to perform if {@code this} is nonempty.
+     * @param elseAction to perform if {@code this} is empty.
+     * @throws NullPointerException if either {@code action} or {@code elseAction}
+     * is null.
+     */
+    public void ifPresentOrElse(final Consumer<? super T> action, Runnable elseAction) {
+        Arguments.requireNonNull(action,elseAction);
+        T value = value();
+        if (value == null)
+            elseAction.run();
+        else
+            action.accept(value);
     }
 
+    /**
+     * @return true if {@code this} {@code value} is null.
+     */
     public boolean isEmpty() {
         return !delegate.isPresent();
     }
 
-    public <U> Maybe<U> map(Function<? super T, ? extends U> mapper) {
+    /**
+     * If {@code this} is nonempty, transforms the {@code value} via the {@code
+     * mapper} function.
+     * <p>
+     * If {@code this} is empty, {@link Maybe#empty()} is returned.
+     *
+     * @param mapper function to apply the transformation, if {@code value} is
+     *               nonempty.
+     * @param <U> Type of transformed {@value}
+     * @return Maybe object of transformed {@code value}.
+     * @throws NullPointerException if {@code mapper} is null.
+     */
+    public <U> Maybe<U> map(final Function<? super T, ? extends U> mapper) {
         Objects.requireNonNull(mapper);
+
         Optional<U> result = delegate.map(mapper);
         return result.map(Maybe::of).orElseGet(Maybe::empty);
     }
 
-    public Maybe<T> or (Supplier<? extends Maybe<? extends T>> supplier) {
+    /**
+     * Returns {@code this} if nonempty, or perform {@code supplier} function to
+     * derive {@link Maybe} alternative.
+     *
+     * @param supplier function to provide alternative {@link Maybe} object if
+     *                 {@code this} is empty.
+     * @return this if {@code this} nonempty, or resultant value of {@code supplier}
+     * function.
+     * @throws NullPointerException if {@code supplier} is {@code null} or resultant
+     * {@link Maybe} returned from {@code supplier} function.
+     */
+    public Maybe<T> or (final Supplier<? extends Maybe<? extends T>> supplier) {
         Objects.requireNonNull(supplier);
-        if (this.value() != null) return this;
-        else return Objects.requireNonNull(Generics.unchecked(supplier.get()));
+        T value = value();
+        return value != null ? this : Objects.requireNonNull(Generics.unchecked(supplier.get()));
     }
 
-    public T orElse(T other) {
+    /**
+     * Returns {@code value} of {@code this} object if available, otherwise the
+     * {@code other} value is returned.
+     *
+     * @param other the value is returned when {@code this} is empty.
+     * @return value of {@code this} if nonempty, otherwise {@code other} is
+     * returned.
+     */
+    public T orElse(final T other) {
        return delegate.orElse(other);
     }
 
-    public T orElseGet(Supplier<? extends T> supplier) {
+    /**
+     * Returns {@code value} of {@code this} object if available, otherwise the
+     * {@code supplier} value is returned.
+     *
+     * @param supplier of the value is returned when {@code this} is empty.
+     * @return value of {@code this} if nonempty, otherwise the {@code supplier}
+     * value is returned.
+     */
+    public T orElseGet(final Supplier<? extends T> supplier) {
         Objects.requireNonNull(supplier);
         return delegate.orElseGet(supplier);
     }
 
+    /**
+     * Returns {@code value} of {@code this} object if available, otherwise a
+     * {@link NoSuchElementException} exception is thrown.
+     *
+     * @return value of {@code this} if nonempty, otherwise the {@link
+     * NoSuchElementException} object is thrown.
+     * @throws NoSuchElementException if {@code this} is empty.
+     */
     public T orElseThrow() {
         return orElseThrow(NoSuchElementException::new);
     }
 
-    public <E extends Throwable> T orElseThrow(Supplier<? extends E> exSupplier) throws E {
+    /**
+     * Returns {@code value} of {@code this} object if available, otherwise an
+     * {@code exception} is thrown supplied by the {@code exSupplier}.
+     *
+     * @return value of {@code this} if nonempty, otherwise an {@code exception}
+     * is thrown supplied from the {@code exSupplier} function.
+     * @param <E> Type of exception thrown in the event of {@code this} being
+     *           empty.
+     * @throws E is thrown when {@code this} is empty.
+     */
+    public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exSupplier) throws E {
         return delegate.orElseThrow(exSupplier);
     }
 
+    /**
+     * @return a {@link Stream} object containing the {@code value} if {@code this}
+     * is nonempty, otherwise an empty {@code Stream} is returned.
+     */
     public Stream<T> stream() {
-        T value = value();
-        return value == null ? Stream.of() : Stream.of(value);
+        return fold(Stream.of(),Stream::of);
     }
 
-    public Optional<T> toOptional() {
-        return delegate;
-    }
-
+    /**
+     * Returns an immutable list of containing {@code this} nonempty, {@code
+     * value}.
+     * <p>
+     * If {@code this} is empty, and immutable empty {@link List} object is
+     * returned.
+     *
+     * @return a {@link List} object containing a {@code value} from {@code
+     * this} object, if available. Otherwise, an {@code empty} {@code List} is
+     * returned.
+     */
     public List<T> toList() {
-        T value = value();
-        List<T> result = value == null ? Collections.emptyList() : Collections.singletonList(value);
-        return Collections.unmodifiableList(result);
+        return Collections.unmodifiableList(fold(Collections.emptyList(),Collections::singletonList));
     }
 
-    public <K,V> Map<K,V> toMap(Function<? super T, ? extends K> keyMapper,Function<? super T,? extends V> valueMapper) {
+    /**
+     * Returns {@link Map} containing {@code this} value if nonempty, otherwise
+     * an empty {@code Map} collection.
+     *
+     * @param keyMapper function to derive unique key with which insert the
+     * {@code value}
+     * @param valueMapper function to derive/transform the {@code this} value
+     *                    to be placed into the {@link Map}
+     * @param <K>   Type of {@code map} key
+     * @param <V>   Type of {@code map} value
+     * @return a map containing {@code this} nonempty value, or an {@code empty}
+     * map.
+     */
+    public <K,V> Map<K,V> toMap(final Function<? super T,? extends K> keyMapper,Function<? super T,? extends V> valueMapper) {
         Arguments.requireNonNull(keyMapper,valueMapper);
-        if (this.value() != null) return Collections.singletonMap(keyMapper.apply(value()), valueMapper.apply(this.value()));
-        else return Collections.emptyMap();
+        return fold(Collections.emptyMap(),v -> Collections.singletonMap(keyMapper.apply(v), valueMapper.apply(v)));
     }
 
+    /**
+     * @return a string that represents the current state of {@code this} object.
+     */
     public String toString() {
         T value = value();
         return value == null ? "Maybe[isEmpty]" : String.format("Maybe[%s]", value);
     }
 
+    /**
+     * @return true if {@code this} is nonempty.
+     */
     public boolean isPresent() {
         return delegate.isPresent();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Iterator<T> iterator() {
         return toList().iterator();
     }
 
+    /**
+     * Constructs an instance of this {@link Maybe} object containing an empty
+     * {@code value}.
+     */
     private Maybe() {
         delegate = Optional.empty();
     }
 
+    /**
+     * Constructs an instance of this {@link Maybe} object containing a nonempty
+     * {@code value}.
+     * <p>
+     * @throws NullPointerException if value is {@code null}
+     */
     private Maybe(T value) {
         this.delegate = Optional.of(Objects.requireNonNull(value));
     }

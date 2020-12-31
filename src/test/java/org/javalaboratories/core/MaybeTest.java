@@ -19,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("WeakerAccess")
 public class MaybeTest {
 
-    private Optional<String> optional;
-    private Maybe<String> nullable;
+    private Maybe<String> maybe;
     private Maybe<String> empty;
 
     private static final Consumer<String> DO_NOTHING_CONSUMER = (value) -> {};
@@ -28,30 +27,29 @@ public class MaybeTest {
 
     @BeforeEach
     public void setup() {
-        optional = Optional.of("Hello World");
-        nullable = Maybe.of("Hello World");
+        maybe = Maybe.of("Hello World");
         empty = Maybe.ofNullable(null);
     }
 
     @Test
     public void testOf_Pass() {
-        assertNotNull(nullable);
+        assertNotNull(maybe);
         assertNotNull(empty);
     }
 
     @Test
     public void testIsPresent_Pass() {
-        assertTrue(nullable.isPresent());
+        assertTrue(maybe.isPresent());
         assertFalse(empty.isPresent());
     }
 
     @Test
     public void testFilter_Pass() {
-        nullable
+        maybe
                 .filter(value -> value.equals("Hello World"))
                 .ifPresent(value -> assertEquals("Hello World",value));
 
-        assertFalse(nullable
+        assertFalse(maybe
                         .filter(value -> value.equals("Hello"))
                         .isPresent());
         assertTrue(empty.filter(value -> value.equals("Empty"))
@@ -60,7 +58,7 @@ public class MaybeTest {
 
     @Test
     public void testGet_Pass() {
-        assertEquals("Hello World",nullable.get());
+        assertEquals("Hello World",maybe.get());
     }
 
     @Test
@@ -85,7 +83,7 @@ public class MaybeTest {
     @Test
     public void testIfPresent_Pass() {
         AtomicBoolean bool = new AtomicBoolean(false);
-        nullable.ifPresent(value -> bool.set(true));
+        maybe.ifPresent(value -> bool.set(true));
 
         assertTrue(bool.get());
     }
@@ -94,7 +92,7 @@ public class MaybeTest {
     public void testIfPresentOrElse_Pass() {
         AtomicBoolean bool = new AtomicBoolean(false);
 
-        nullable.ifPresentOrElse(value -> bool.set(true), DO_NOTHING_RUNNABLE);
+        maybe.ifPresentOrElse(value -> bool.set(true), DO_NOTHING_RUNNABLE);
         assertTrue(bool.get());
 
         bool.set(false);
@@ -109,13 +107,13 @@ public class MaybeTest {
 
     @Test
     public void testMap_Pass() {
-        assertEquals(11, (int) nullable.map (String::length).get());
+        assertEquals(11, (int) maybe.map (String::length).get());
     }
 
 
     @Test
     public void testOr_Pass() {
-        String value = nullable
+        String value = maybe
                 .or(() -> Maybe.of("Good Morning World"))
                 .get();
         assertEquals("Hello World",value);
@@ -149,12 +147,12 @@ public class MaybeTest {
 
     @Test
     public void testOrElseThrow_Pass() throws IllegalArgumentException {
-        assertEquals("Hello World",nullable.orElseThrow(IllegalArgumentException::new));
+        assertEquals("Hello World",maybe.orElseThrow(IllegalArgumentException::new));
     }
 
     @Test
     public void testToList_Pass() {
-        List<String> list = nullable.toList();
+        List<String> list = maybe.toList();
         assertEquals("Hello World", list.get(0));
         assertEquals(1, list.size());
 
@@ -166,7 +164,7 @@ public class MaybeTest {
     public void testForEach_Pass() {
         Holder<Boolean> forEachHolder = Holders.writableHolder(false);
 
-        nullable.forEach(v -> forEachHolder.set(true));
+        maybe.forEach(v -> forEachHolder.set(true));
         assertTrue(forEachHolder.get());
 
         forEachHolder.set(false);
@@ -176,23 +174,16 @@ public class MaybeTest {
 
     @Test
     public void testToMap_Pass() {
-        Map<String,String> nullableMap = nullable.toMap(v -> "first", v -> v);
-        assertEquals("Hello World", nullableMap.get("first"));
+        Map<String,String> map = maybe.toMap(v -> "first", v -> v);
+        assertEquals("Hello World", map.get("first"));
 
         Map<String,String> emptyMap = empty.toMap(v -> "first",v -> v);
         assertEquals(0, emptyMap.size());
     }
 
     @Test
-    public void testToOptional_Pass() {
-        Optional<String> optional = nullable.toOptional();
-        assertTrue(optional.isPresent());
-        optional.ifPresent((value) -> assertEquals("Hello World",value));
-    }
-
-    @Test
     public void testToStream_Pass() {
-        List<String> list = nullable.stream()
+        List<String> list = maybe.stream()
                 .filter("Hello World"::equals)
                 .collect(Collectors.toList());
 
@@ -207,7 +198,7 @@ public class MaybeTest {
 
     @Test
     public void testUseCaseFilterMapIfPresent_Pass() {
-        nullable
+        maybe
                 .filter("Hello World"::equals)
                 .map(String::length)
                 .ifPresent(value -> assertEquals(11, (int) value));
@@ -215,7 +206,7 @@ public class MaybeTest {
 
     @Test
     public void testUseCaseFilterMapIsPresent_Pass() {
-        assertFalse(nullable
+        assertFalse(maybe
                 .filter("Not Found"::equals)
                 .map(String::length)
                 .isPresent());
@@ -224,19 +215,19 @@ public class MaybeTest {
     @Test
     public void testEquals_Pass() {
         Maybe<String> twin = Maybe.of("Hello World");
-        assertEquals(nullable, nullable);
-        assertEquals(nullable,twin);
+        assertEquals(maybe, maybe);
+        assertEquals(maybe,twin);
     }
 
     @Test
     public void testHashCode_Pass() {
         Maybe<String> twin = Maybe.of("Hello World");
-        assertEquals(nullable.hashCode(),twin.hashCode());
+        assertEquals(maybe.hashCode(),twin.hashCode());
     }
 
     @Test
     public void testToString_Pass() {
-       assertEquals("Maybe[Hello World]",nullable.toString());
+       assertEquals("Maybe[Hello World]",maybe.toString());
        assertEquals("Maybe[isEmpty]",empty.toString());
     }
 
