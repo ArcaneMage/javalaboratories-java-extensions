@@ -69,7 +69,7 @@ import java.util.stream.Stream;
  *     <li>flatten()</li>
  *     <li>forAll(Predicate)</li>
  *     <li>fold(default,Function)</li>
- *     <li>fold(Iterable,identity,BiFunction</li>
+ *     <li>fold(Iterable,identity,BiFunction<)/li>
  *     <li>forEach(Consumer)</li>
  *     <li>iterator</li>
  *     <li>toList</li>
@@ -238,7 +238,7 @@ public final class Maybe<T> implements Iterable<T> {
      */
     public Maybe<T> filterNot(final Predicate<? super T> predicate) {
         Maybe<T> result = filter(predicate);
-        return result.isPresent() ? Maybe.empty() : result;
+        return result.isPresent() ? Maybe.empty() : this;
     }
 
     /**

@@ -6,10 +6,10 @@ import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -44,16 +44,94 @@ public class MaybeTest {
     }
 
     @Test
-    public void testFilter_Pass() {
-        maybe
-                .filter(value -> value.equals("Hello World"))
-                .ifPresent(value -> assertEquals("Hello World",value));
+    public void testContains_Pass() {
+        assertTrue(maybe.contains("Hello World"));
+        assertFalse(maybe.contains("Does not exist"));
+        assertFalse(empty.contains("Hello World"));
+    }
 
-        assertFalse(maybe
-                        .filter(value -> value.equals("Hello"))
-                        .isPresent());
-        assertTrue(empty.filter(value -> value.equals("Empty"))
-                .isEmpty());
+    @Test
+    public void testExists_Pass() {
+        assertTrue(maybe.exists(v -> v.length() > 0));
+        assertFalse(maybe.exists(v -> v.length() == 0));
+        assertFalse(empty.exists(v -> v.length() == 0));
+    }
+
+    @Test
+    public void testFilter_Pass() {
+        Maybe<String> uncertainty = maybe.filter(value -> value.length() > 0);
+        Maybe<String> uncertainty2 = empty.filter(value -> value.length() > 0);
+
+        assertTrue(uncertainty.isPresent());
+        assertFalse(uncertainty.isEmpty());
+
+        assertFalse(uncertainty2.isPresent());
+        assertTrue(uncertainty2.isEmpty());
+    }
+
+    @Test
+    public void testFilterNot_Pass() {
+        Maybe<String> uncertainty = maybe.filterNot(value -> value.length() > 0);
+        Maybe<String> uncertainty2 = maybe.filterNot(value -> value.length() > 11);
+        Maybe<String> uncertainty3 = empty.filterNot(value -> value.length() > 0);
+
+        assertFalse(uncertainty.isPresent()); //
+        assertTrue(uncertainty.isEmpty());
+
+        assertTrue(uncertainty2.isPresent());
+        assertFalse(uncertainty2.isEmpty());
+
+        assertFalse(uncertainty3.isPresent());
+        assertTrue(uncertainty3.isEmpty());
+    }
+
+    @Test
+    public void testFlatten_Pass() {
+        Maybe<Maybe<String>> nested = Maybe.of(Maybe.of("Flattery will get you nowhere"));
+        Maybe<Maybe<String>> nothingNested = Maybe.of(Maybe.empty());
+
+        String result = nested
+                .<String>flatten() // Type witness needed here :o May consider redesign for this.
+                .map(s -> s +", but chocolates might!")
+                .fold("",s -> s);
+
+        String nothing = nothingNested
+                .<String>flatten()
+                .fold("",s -> s);
+
+        assertEquals("Flattery will get you nowhere, but chocolates might!",result);
+        assertEquals("",nothing);
+    }
+
+    @Test
+    public void testForAll_Pass() {
+        assertTrue(maybe.forAll(value -> value.length() > 0));
+        assertTrue(empty.forAll(value -> value.length() > 0));
+    }
+
+    @Test
+    public void testFold_Accumulator_Pass() {
+        List<Maybe<String>> maybes = Arrays.asList(Maybe.of("This"),Maybe.of("is"),Maybe.empty(),Maybe.of("cool!!!"));
+        List<Maybe<String>> emptyMaybes = Arrays.asList(Maybe.empty(),Maybe.empty());
+
+        String message = Maybe.fold(maybes,"",(a,b) -> a.equals("") ? b : a+" "+b);
+        String nothing = Maybe.fold(emptyMaybes,"Initially there was nothing",(a,b) -> a.equals("") ? b : a+" "+b);
+
+        assertEquals("This is cool!!!", message);
+        assertEquals("Initially there was nothing",nothing);
+    }
+
+    @Test
+    public void testFold_Reducing_Pass() {
+        String value = maybe.fold("Unset",v -> v);
+        String unset = empty.fold("Unset",v -> v);
+        int valueLength = maybe.fold(-1,String::length);
+        int unsetLength = empty.fold(-1,String::length);
+
+        assertEquals("Hello World",value);
+        assertEquals(11,valueLength);
+        assertEquals("Unset",unset);
+        assertEquals(-1,unsetLength);
     }
 
     @Test
@@ -62,10 +140,15 @@ public class MaybeTest {
     }
 
     @Test
+    public void testGetOrElse_Pass() {
+        assertEquals("Hello World", maybe.getOrElse("Hello Mars"));
+        assertEquals("Hello Mars", empty.getOrElse("Hello Mars"));
+    }
+
+    @Test
     public void testGet_Fail() {
         assertThrows(NoSuchElementException.class, () -> empty.get());
     }
-
 
     @Test
     public void testFlatMap_Pass() {
@@ -126,7 +209,9 @@ public class MaybeTest {
 
     @Test
     public void testOrElse_Pass() {
-        assertEquals("Hello World", empty.orElse("Hello World"));
+        assertEquals("Hello World", maybe.orElse("Hello Mars"));
+        assertEquals("Hello Mars", empty.orElse("Hello Mars"));
+
     }
 
     @Test
