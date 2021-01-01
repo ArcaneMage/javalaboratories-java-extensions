@@ -174,10 +174,10 @@ public class MaybeTest {
 
     @Test
     public void testToMap_Pass() {
-        Map<String,String> map = maybe.toMap(v -> "first", v -> v);
+        Map<String,String> map = maybe.toMap(v -> "first");
         assertEquals("Hello World", map.get("first"));
 
-        Map<String,String> emptyMap = empty.toMap(v -> "first",v -> v);
+        Map<String,String> emptyMap = empty.toMap(v -> "first");
         assertEquals(0, emptyMap.size());
     }
 

@@ -20,10 +20,7 @@ import org.javalaboratories.util.Arguments;
 import org.javalaboratories.util.Generics;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 /**
@@ -61,6 +58,23 @@ import java.util.stream.Stream;
  *                          .toList();
  *   }
  * </pre>
+ *
+ * {@link Maybe} class inherits {@link Optional} class behaviour via {@code
+ * composition}, but does provide additional behaviour generally found in other
+ * languages like Scala and Haskell:
+ * <ul>
+ *     <li>contains(element)</li>
+ *     <li>exists(Predicate)</li>
+ *     <li>filterNot(Predicate)</li>
+ *     <li>flatten()</li>
+ *     <li>forAll(Predicate)</li>
+ *     <li>fold(default,Function)</li>
+ *     <li>fold(Iterable,identity,BiFunction</li>
+ *     <li>forEach(Consumer)</li>
+ *     <li>iterator</li>
+ *     <li>toList</li>
+ *     <li>toMap</li>
+ * </ul>
  *
  * @param <T> the type of value
  * @see MaybeDouble
@@ -112,6 +126,32 @@ public final class Maybe<T> implements Iterable<T> {
      */
     public static <T> Maybe<T> empty() {
         return Generics.unchecked(EMPTY);
+    }
+
+    /**
+     * Returns the final result of all the {@code Maybe} nonempty values
+     * returned from each element of the {@link Iterable} object having applied
+     * the {@code accumulator} function on each of them.
+     * <p>
+     * This method is similar to the {@link Stream#reduce} method, except that
+     * it does not support parallelism.
+     *
+     * @param values to perform {@code accumulator} function.
+     * @param identity is the initial value of the fold operation.
+     * @param accumulator a function that takes two parameters: an interim result
+     *                    of the fold operation and the next element.
+     * @param <T> Type of nonempty {@code value} in {@link Maybe} object.
+     * @param <U> Type of returned value from the fold {@code operation}.
+     * @return the final result of of the fold operation.
+     */
+    public static <T,U> U fold(final Iterable<Maybe<T>> values,U identity,final BiFunction<U,? super T,U> accumulator) {
+        Arguments.requireNonNull("Requires values,identity and accumulator",identity,values,accumulator);
+        U result = identity;
+        for (Maybe<T> value : values) {
+            if (value.isPresent())
+                result = accumulator.apply(result,value.get());
+        }
+        return result;
     }
 
     /**
@@ -233,7 +273,7 @@ public final class Maybe<T> implements Iterable<T> {
      * Returns result of {@code function} when {@code this} is nonempty, otherwise
      * {@code emptyValue} is returned if {@code value} is {@code empty}.
      *
-     * @param function to perform operation if the {@code value} is {@code empty}.
+     * @param function to perform operation if the {@code value} is {@code nonempty}.
      * @param emptyValue to use if {@code this} is {@code empty}
      * @param <U> Type of returned value from {@code function}.
      * @return results of {@code function} is {@code this} is nonempty, or
@@ -241,8 +281,7 @@ public final class Maybe<T> implements Iterable<T> {
      */
     public <U> U fold(final U emptyValue, final Function<? super T,? extends U> function) {
         Objects.requireNonNull(function);
-        T value = value();
-        return Objects.requireNonNull(value != null ? function.apply(value) : emptyValue);
+        return fold(Collections.singletonList(this),emptyValue,(a,b) -> function.apply(b));
     }
 
     /**
@@ -412,25 +451,25 @@ public final class Maybe<T> implements Iterable<T> {
      * returned.
      */
     public List<T> toList() {
-        return Collections.unmodifiableList(fold(Collections.emptyList(),Collections::singletonList));
+        return Collections.unmodifiableList(fold(Collections.singletonList(this),Collections.emptyList(),
+                (a,b) -> Collections.singletonList(b)));
     }
 
     /**
      * Returns {@link Map} containing {@code this} value if nonempty, otherwise
-     * an empty {@code Map} collection.
+     * an empty {@code Map} collection is returned.
      *
      * @param keyMapper function to derive unique key with which insert the
      * {@code value}
-     * @param valueMapper function to derive/transform the {@code this} value
-     *                    to be placed into the {@link Map}
      * @param <K>   Type of {@code map} key
-     * @param <V>   Type of {@code map} value
      * @return a map containing {@code this} nonempty value, or an {@code empty}
      * map.
      */
-    public <K,V> Map<K,V> toMap(final Function<? super T,? extends K> keyMapper,Function<? super T,? extends V> valueMapper) {
-        Arguments.requireNonNull(keyMapper,valueMapper);
-        return fold(Collections.emptyMap(),v -> Collections.singletonMap(keyMapper.apply(v), valueMapper.apply(v)));
+    public <K> Map<K,T> toMap(final Function<? super T,? extends K> keyMapper) {
+        Arguments.requireNonNull(keyMapper);
+        T value = value();
+        return Collections.unmodifiableMap(fold(Collections.singletonList(this),Collections.emptyMap(),
+                (a,b) -> Collections.singletonMap(keyMapper.apply(b),value)));
     }
 
     /**
