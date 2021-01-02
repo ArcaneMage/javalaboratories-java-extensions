@@ -66,6 +66,26 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
     }
 
     /**
+     * @return {@link Pair} object representing this {@link Tuple}
+     */
+    public Pair<T1,T2> asPair() {
+        return new Pair<T1,T2>() {
+            @Override
+            public T1 _1() {
+                return t1;
+            }
+            @Override
+            public T2 _2() {
+                return t2;
+            }
+            @Override
+            public String toString() {
+                return String.format("Pair[%s,%s]",_1(),_2());
+            }
+        };
+    }
+
+    /**
      * Hop to position/value 1
      */
     public Tuple2<T1,T2> hopTo1() {

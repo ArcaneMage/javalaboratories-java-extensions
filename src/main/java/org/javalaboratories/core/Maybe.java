@@ -16,6 +16,8 @@
 package org.javalaboratories.core;
 
 import lombok.EqualsAndHashCode;
+import org.javalaboratories.core.tuple.Pair;
+import org.javalaboratories.core.tuple.Tuple;
 import org.javalaboratories.util.Arguments;
 import org.javalaboratories.util.Generics;
 
@@ -63,17 +65,42 @@ import java.util.stream.Stream;
  * composition}, but does provide additional behaviour generally found in other
  * languages like Scala and Haskell:
  * <ul>
- *     <li>contains(element)</li>
- *     <li>exists(Predicate)</li>
- *     <li>filterNot(Predicate)</li>
- *     <li>flatten()</li>
- *     <li>forAll(Predicate)</li>
- *     <li>fold(default,Function)</li>
- *     <li>fold(Iterable,identity,BiFunction<)/li>
- *     <li>forEach(Consumer)</li>
- *     <li>iterator</li>
- *     <li>toList</li>
- *     <li>toMap</li>
+ *     <li>contains(element) -- Determines whether <i>this</i> contains the
+ *     element</li>
+ *     <p>
+ *     <li>exists(Predicate) -- Returns true when <i>this</i> is nonempty and
+ *     the predicate function applied returns true</li>
+ *     <p>
+ *     <li>filterNot(Predicate) -- Returns <i>this</i> Maybe object if the
+ *     value is nonempty and does NOT satisfy the predicate function</li>
+ *     <p>
+ *     <li>flatten() -- Flatten and return internal Maybe value, if possible</li>
+ *     <p>
+ *     <li>forAll(Predicate) -- Returns true when <i>this</i> is empty or the
+ *     {@code predicate} function returns true</li>
+ *     <p>
+ *     <li>fold(default,Function) -- Returns result of {@code function} when
+ *     <i>this</i> is nonempty, otherwise {@code default} is returned if the
+ *     {@code value} is {@code empty}.</li>
+ *     <p>
+ *     <li>fold(Iterable,identity,BiFunction<) -- Returns the {@code accumulated}
+ *     result of all the {@code Maybe} nonempty values</li>
+ *     <p>
+ *     <li>forEach(Consumer) -- For each iteration in <i>this</i> object.</li>
+ *     <p>
+ *     <li>iterator -- Returns an iterator implementation for <i>this</i>.</li>
+ *     <p>
+ *     <li>toList -- Returns an immutable list of containing <i>this</i> nonempty,
+ *     {@code value}.</li>
+ *     <p>
+ *     <li>toMap -- Returns a {@code Map} containing <i>this</i> value if
+ *     nonempty.</li>
+ *     <p>
+ *     <il>unzip -- Converts <i>this</i> Maybe of {@link Pair} to a {@link Pair}
+ *     of Maybe objects, opposite of {@code zip}, if possible</il>
+ *     <p>
+ *     <li>zip -- Returns a {@code Maybe} object of both <i>this</i> and {@code
+ *     that} as a pair, an {@link Pair} object</li>
  * </ul>
  *
  * @param <T> the type of value
@@ -129,14 +156,15 @@ public final class Maybe<T> implements Iterable<T> {
     }
 
     /**
-     * Returns the final result of all the {@code Maybe} nonempty values
-     * returned from each element of the {@link Iterable} object having applied
-     * the {@code accumulator} function on each of them.
+     * Returns the {@code accumulated} result of all the {@code Maybe} nonempty
+     * values returned from the {@link Iterable} object having applied the
+     * {@code accumulator} function on each of them.
      * <p>
      * This method is similar to the {@link Stream#reduce} method, except that
      * it does not support parallelism.
      *
-     * @param values to perform {@code accumulator} function.
+     * @param maybes an {@code iterable} of {@link Maybe} objects with which
+     *               to feed into the {@code accumulator}.
      * @param identity is the initial value of the fold operation.
      * @param accumulator a function that takes two parameters: an interim result
      *                    of the fold operation and the next element.
@@ -144,14 +172,42 @@ public final class Maybe<T> implements Iterable<T> {
      * @param <U> Type of returned value from the fold {@code operation}.
      * @return the final result of of the fold operation.
      */
-    public static <T,U> U fold(final Iterable<Maybe<T>> values,U identity,final BiFunction<U,? super T,U> accumulator) {
-        Arguments.requireNonNull("Requires values,identity and accumulator",identity,values,accumulator);
+    public static <T,U> U fold(final Iterable<Maybe<T>> maybes,U identity,final BiFunction<U,? super T,U> accumulator) {
+        Arguments.requireNonNull("Requires values,identity and accumulator",identity,maybes,accumulator);
         U result = identity;
-        for (Maybe<T> value : values) {
+        for (Maybe<T> value : maybes) {
             if (value.isPresent())
                 result = accumulator.apply(result,value.get());
         }
         return result;
+    }
+
+    /**
+     * Returns a {@link Map} of key to {@link List} collections of partitioned
+     * {@code values} from an {@link Iterable} of {@link Maybe} objects.
+     * <p>
+     * Only nonempty {@link Maybe} objects are processed, partitioned in the
+     * {@link Map} as defined by the {@code partition} function.
+     *
+     * @param maybes an {@code iterable} of {@link Maybe} objects.
+     * @param partition function to orchestrate the partition of nonempty
+     *                  values by {@code key}.
+     * @param <K> Type of key with which to partition the nonempty {@code
+     * values}
+     * @param <V> Type of {@code value} in {@link Maybe} object.
+     * @return a map of partitions.
+     */
+    public static <K,V> Map<K,List<V>> groupBy(final Iterable<Maybe<V>> maybes,final Function<? super V,? extends K> partition) {
+        Arguments.requireNonNull("Requires maybes,partition",maybes,partition);
+
+        HashMap<K,List<V>> result = fold(maybes,new HashMap<>(),(map,value) -> {
+            K key = partition.apply(value);
+            map.computeIfAbsent(key,k -> new ArrayList<>()).add(value);
+            return map;
+        });
+        // Seal all partitions, then return map.
+        result.replaceAll((k,v) -> Collections.unmodifiableList(v));
+        return Collections.unmodifiableMap(result);
     }
 
     /**
@@ -493,6 +549,54 @@ public final class Maybe<T> implements Iterable<T> {
     @Override
     public Iterator<T> iterator() {
         return toList().iterator();
+    }
+
+    /**
+     * If this {@link Maybe} object contains a {@link Pair} of {@code Maybes},
+     * it will be {@code unzipped}, essentially flattened and the {@link Pair}
+     * returned.
+     * <p>
+     * If {@code this} does not contain a {@link Pair} of {@code maybe} objects,
+     * then a {@code pair} of {@code Maybe} objects is returned.
+     *
+     * @param <U> Type of value in first {@code Maybe} object.
+     * @param <V> Type of value in first {@code Maybe} object.
+     * @return a pair of {@code maybe} objects otherwise
+     */
+    public <U,V> Pair<Maybe<U>,Maybe<V>> unzip() {
+        T value = value();
+
+        Pair<Maybe<U>,Maybe<V>> empty = Tuple.<Maybe<U>,Maybe<V>>of(Maybe.empty(),Maybe.empty()).asPair();
+        if (!isEmpty() && value instanceof Pair) {
+            try {
+                @SuppressWarnings("unchecked")
+                Pair<Maybe<U>, Maybe<V>> pair = (Pair<Maybe<U>, Maybe<V>>) value;
+                Maybe<U> umaybe = pair._1();
+                Maybe<V> vmaybe = pair._2();
+                return Tuple.of(umaybe,vmaybe).asPair();
+            } catch (ClassCastException e) {
+                return empty;
+            }
+        } else {
+            return empty;
+        }
+    }
+
+    /**
+     * Returns a {@code Maybe} object of both {@code this} and {@code that} as
+     * a pair, an {@link Pair} object.
+     * <p>
+     * If either {@code this} or {@code that} {@link Maybe} is empty, an empty
+     * {@code Maybe} object is returned.
+     * <p><
+     * @param that the maybe object which is to be {@code zipped} with @code
+     *             this.
+     * @param <U> Type of value contained within {@code that} object.
+     * @return a zipped {@code Maybe} object.
+     */
+    public <U> Maybe<Pair<Maybe<T>,Maybe<U>>> zip(final Maybe<U> that) {
+        Objects.requireNonNull(that);
+        return !isEmpty() && !that.isEmpty() ? Maybe.of(Tuple.of(this,that).asPair()) : Maybe.empty();
     }
 
     /**

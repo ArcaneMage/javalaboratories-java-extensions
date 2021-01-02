@@ -1,6 +1,8 @@
 package org.javalaboratories.core;
 
-
+import org.javalaboratories.core.tuple.Pair;
+import org.javalaboratories.core.tuple.Tuple;
+import org.javalaboratories.core.tuple.Tuple2;
 import org.javalaboratories.util.Holder;
 import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.BeforeEach;
@@ -132,6 +134,28 @@ public class MaybeTest {
         assertEquals(11,valueLength);
         assertEquals("Unset",unset);
         assertEquals(-1,unsetLength);
+    }
+
+    @Test
+    public void testGroupBy_Reducing_Pass() {
+        // Given
+        List<Maybe<Integer>> numbers = Arrays.asList(Maybe.of(10),Maybe.of(15),Maybe.empty(),Maybe.of(20),Maybe.of(25));
+
+        // When
+        Map<String,List<Integer>> partitions = Maybe.groupBy(numbers,v -> v < 20 ? "Group A" : "Group B");
+
+        // Then
+        assertEquals(2,partitions.size());
+        assertEquals(2,partitions.get("Group A").size());
+        assertTrue(partitions.get("Group A").containsAll(Arrays.asList(10,15)));
+        assertEquals(2,partitions.get("Group B").size());
+        assertTrue(partitions.get("Group B").containsAll(Arrays.asList(20,25)));
+
+        // Verify immutability
+        assertThrows(UnsupportedOperationException.class,() -> partitions.put("Group C",Arrays.asList(1,2)));
+
+        assertThrows(UnsupportedOperationException.class,() -> partitions.get("Group A").add(16));
+        assertThrows(UnsupportedOperationException.class,() -> partitions.get("Group B").add(35));
     }
 
     @Test
@@ -314,6 +338,48 @@ public class MaybeTest {
     public void testToString_Pass() {
        assertEquals("Maybe[Hello World]",maybe.toString());
        assertEquals("Maybe[isEmpty]",empty.toString());
+    }
+
+    @Test
+    public void testUnzip_Pass() {
+        // Given (Setup)
+        Maybe<Pair<Maybe<String>,Maybe<Integer>>> zipped = this.maybe.zip(Maybe.of(64));
+        Maybe<Pair<String,Integer>> nonZippedPair = Maybe.of(Tuple.of("Pair",64).asPair());
+
+        // When
+        Pair<Maybe<String>,Maybe<Integer>> pair = this.maybe.unzip(); // (empty,empty)
+        Pair<Maybe<String>,Maybe<Integer>> unzipped = zipped.unzip(); // (String,Integer)
+        Pair<Maybe<String>,Maybe<Integer>> unzipped2 = nonZippedPair.unzip(); // (empty,empty)
+
+        // Then
+        assertTrue(pair._1().isEmpty());
+        assertTrue(pair._2().isEmpty());
+        assertFalse(unzipped._1().isEmpty());
+        assertFalse(unzipped._2().isEmpty());
+        assertTrue(unzipped2._1().isEmpty());
+        assertTrue(unzipped2._2().isEmpty());
+
+        assertEquals("Hello World",unzipped._1().orElseThrow());
+        assertEquals(64,unzipped._2().orElseThrow());
+    }
+
+    @Test
+    public void testZip_Pass() {
+        // Given (Setup)
+
+        // When
+        Maybe<Pair<Maybe<String>,Maybe<Integer>>> maybePair = this.maybe.zip(Maybe.of(64));
+        Maybe<Pair<Maybe<String>,Maybe<Integer>>> maybePair2 = this.maybe.zip(Maybe.empty());
+        Maybe<Pair<Maybe<String>,Maybe<Integer>>> maybePair3 = this.empty.zip(Maybe.of(64));
+
+        Pair<Maybe<String>,Maybe<Integer>> pair = maybePair.orElseThrow();
+
+        // Then
+        assertTrue(maybePair.isPresent());
+        assertTrue(maybePair2.isEmpty());
+        assertTrue(maybePair3.isEmpty());
+        assertEquals("Hello World",pair._1().orElse(null));
+        assertEquals(64,pair._2().orElse(null));
     }
 
     // Some contrived use case for flatMap
