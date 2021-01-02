@@ -91,19 +91,19 @@ import java.util.stream.Stream;
  *     <li>groupBy(Iterable,Function) -- Returns a {@link Map} of key to {@link
  *     List} collections of partitioned {@code values}</li>
  *     <p>
- *     <li>iterator -- Returns an iterator implementation for <i>this</i>.</li>
+ *     <li>iterator() -- Returns an iterator implementation for <i>this</i>.</li>
  *     <p>
- *     <li>toList -- Returns an immutable list of containing <i>this</i> nonempty,
- *     {@code value}.</li>
+ *     <li>toList() -- Returns an immutable list of containing <i>this</i>
+ *     nonempty, {@code value}.</li>
  *     <p>
- *     <li>toMap -- Returns a {@code Map} containing <i>this</i> value if
+ *     <li>toMap() -- Returns a {@code Map} containing <i>this</i> value if
  *     nonempty.</li>
  *     <p>
- *     <il>unzip -- Converts <i>this</i> Maybe of {@link Pair} to a {@link Pair}
- *     of Maybe objects, opposite of {@code zip}, if possible</il>
+ *     <il>unzip() -- Converts <i>this</i> Maybe of {@link Pair} to a {@link
+ *     Pair} of Maybe objects, opposite of {@code zip}, if possible</il>
  *     <p>
- *     <li>zip -- Returns a {@code Maybe} object of both <i>this</i> and {@code
- *     that} as a pair, an {@link Pair} object</li>
+ *     <li>zip() -- Returns a {@code Maybe} object of both <i>this</i> and
+ *     {@code that} as a pair, an {@link Pair} object</li>
  * </ul>
  *
  * @param <T> the type of value
