@@ -88,6 +88,9 @@ import java.util.stream.Stream;
  *     <p>
  *     <li>forEach(Consumer) -- For each iteration in <i>this</i> object.</li>
  *     <p>
+ *     <li>groupBy(Iterable,Function) -- Returns a {@link Map} of key to {@link
+ *     List} collections of partitioned {@code values}</li>
+ *     <p>
  *     <li>iterator -- Returns an iterator implementation for <i>this</i>.</li>
  *     <p>
  *     <li>toList -- Returns an immutable list of containing <i>this</i> nonempty,
