@@ -279,7 +279,7 @@ public final class Maybe<T> implements Iterable<T> {
         T value = value();
         return value != null
                 ? delegate.filter(predicate).isPresent()
-                ? this : Maybe.empty()
+                    ? this : Maybe.empty()
                 : Maybe.empty();
     }
 
@@ -394,13 +394,6 @@ public final class Maybe<T> implements Iterable<T> {
             elseAction.run();
         else
             action.accept(value);
-    }
-
-    /**
-     * @return true if {@code this} {@code value} is null.
-     */
-    public boolean isEmpty() {
-        return !delegate.isPresent();
     }
 
     /**
@@ -540,10 +533,34 @@ public final class Maybe<T> implements Iterable<T> {
     }
 
     /**
+     * @return true if {@code this} {@code value} is null.
+     */
+    public boolean isEmpty() {
+        return !delegate.isPresent();
+    }
+
+    /**
      * @return true if {@code this} is nonempty.
      */
     public boolean isPresent() {
         return delegate.isPresent();
+    }
+
+    /**
+     * @return true if {@code this} contains a {@link Pair} of non-empty {@link
+     * Maybe} objects, otherwise {@code false} is returned.
+     *
+     * @see Maybe#unzip
+     * @see Maybe#zip
+     */
+    public boolean isZipped() {
+        T value = value();
+        return !isEmpty()
+                && value instanceof Pair
+                && ((Pair<?,?>) value)._1() instanceof Maybe
+                && ((Pair<?,?>) value)._2() instanceof Maybe
+                && ((Maybe<?>) ((Pair<?,?>) value)._1()).isPresent()
+                && ((Maybe<?>) ((Pair<?,?>) value)._2()).isPresent();
     }
 
     /**
@@ -568,29 +585,20 @@ public final class Maybe<T> implements Iterable<T> {
      */
     public <U,V> Pair<Maybe<U>,Maybe<V>> unzip() {
         T value = value();
-
-        Pair<Maybe<U>,Maybe<V>> empty = Tuple.<Maybe<U>,Maybe<V>>of(Maybe.empty(),Maybe.empty()).asPair();
-        if (!isEmpty() && value instanceof Pair) {
-            try {
-                @SuppressWarnings("unchecked")
-                Pair<Maybe<U>, Maybe<V>> pair = (Pair<Maybe<U>, Maybe<V>>) value;
-                Maybe<U> umaybe = pair._1();
-                Maybe<V> vmaybe = pair._2();
-                return Tuple.of(umaybe,vmaybe).asPair();
-            } catch (ClassCastException e) {
-                return empty;
-            }
+        if (isZipped()) {
+            Pair<Maybe<U>, Maybe<V>> pair = Generics.unchecked(value);
+            return Tuple.of(pair._1(),pair._2()).asPair();
         } else {
-            return empty;
+            return Tuple.<Maybe<U>,Maybe<V>>of(Maybe.empty(),Maybe.empty()).asPair();
         }
     }
 
     /**
-     * Returns a {@code Maybe} object of both {@code this} and {@code that} as
-     * a pair, an {@link Pair} object.
+     * Returns a {@code Maybe} of both {@code this} and {@code that} as a {@link
+     * Pair} object.
      * <p>
      * If either {@code this} or {@code that} {@link Maybe} is empty, an empty
-     * {@code Maybe} object is returned.
+     * {@code Maybe} is returned.
      * <p><
      * @param that the maybe object which is to be {@code zipped} with @code
      *             this.

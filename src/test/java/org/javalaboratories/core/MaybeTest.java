@@ -2,7 +2,6 @@ package org.javalaboratories.core;
 
 import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple;
-import org.javalaboratories.core.tuple.Tuple2;
 import org.javalaboratories.util.Holder;
 import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +76,7 @@ public class MaybeTest {
         Maybe<String> uncertainty2 = maybe.filterNot(value -> value.length() > 11);
         Maybe<String> uncertainty3 = empty.filterNot(value -> value.length() > 0);
 
-        assertFalse(uncertainty.isPresent()); //
+        assertFalse(uncertainty.isPresent());
         assertTrue(uncertainty.isEmpty());
 
         assertTrue(uncertainty2.isPresent());
@@ -217,7 +216,6 @@ public class MaybeTest {
         assertEquals(11, (int) maybe.map (String::length).get());
     }
 
-
     @Test
     public void testOr_Pass() {
         String value = maybe
@@ -343,24 +341,32 @@ public class MaybeTest {
     @Test
     public void testUnzip_Pass() {
         // Given (Setup)
-        Maybe<Pair<Maybe<String>,Maybe<Integer>>> zipped = this.maybe.zip(Maybe.of(64));
-        Maybe<Pair<String,Integer>> nonZippedPair = Maybe.of(Tuple.of("Pair",64).asPair());
+        Maybe<Pair<Maybe<String>,Maybe<Integer>>> zip1 = this.maybe.zip(Maybe.of(64));
+        Maybe<Pair<String,Integer>> zip2 = Maybe.of(Tuple.of("Pair",64).asPair());
+        Maybe<Pair<Maybe<String>,Maybe<Integer>>> zip3 = Maybe.of(Tuple.of(Maybe.of("Pair"),Maybe.<Integer>empty()).asPair());
 
         // When
-        Pair<Maybe<String>,Maybe<Integer>> pair = this.maybe.unzip(); // (empty,empty)
-        Pair<Maybe<String>,Maybe<Integer>> unzipped = zipped.unzip(); // (String,Integer)
-        Pair<Maybe<String>,Maybe<Integer>> unzipped2 = nonZippedPair.unzip(); // (empty,empty)
+        Pair<Maybe<String>,Maybe<Integer>> maybe = this.maybe.unzip(); // (empty,empty)
+        Pair<Maybe<String>,Maybe<Integer>> unzipped1 = zip1.unzip(); // (String,Integer)
+        Pair<Maybe<String>,Maybe<Integer>> unzipped2 = zip2.unzip(); // (empty,empty)
+        Pair<Maybe<String>,Maybe<Integer>> unzipped3 = zip3.unzip(); // (empty,empty)
 
         // Then
-        assertTrue(pair._1().isEmpty());
-        assertTrue(pair._2().isEmpty());
-        assertFalse(unzipped._1().isEmpty());
-        assertFalse(unzipped._2().isEmpty());
+        assertTrue(zip1.isZipped());
+        assertFalse(zip2.isZipped());
+        assertFalse(zip3.isZipped());
+
+        assertTrue(maybe._1().isEmpty());
+        assertTrue(maybe._2().isEmpty());
+        assertFalse(unzipped1._1().isEmpty());
+        assertFalse(unzipped1._2().isEmpty());
         assertTrue(unzipped2._1().isEmpty());
         assertTrue(unzipped2._2().isEmpty());
+        assertTrue(unzipped3._1().isEmpty());
+        assertTrue(unzipped3._2().isEmpty());
 
-        assertEquals("Hello World",unzipped._1().orElseThrow());
-        assertEquals(64,unzipped._2().orElseThrow());
+        assertEquals("Hello World",unzipped1._1().orElseThrow());
+        assertEquals(64,unzipped1._2().orElseThrow());
     }
 
     @Test
