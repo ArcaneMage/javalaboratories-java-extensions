@@ -99,6 +99,40 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    public void testThenAccept_Consumer_Pass() {
+        // Given
+        AtomicInteger received = new AtomicInteger(0);
+
+        Promise<Integer> promise = Promises.newPromise(() -> doLongRunningTask("testThenAccept_Consumer_Pass"),listeners)
+                .thenAccept(value -> getValue(received, () -> value));
+
+        // When
+        wait("testThenAccept_Consumer_Pass");
+        promise.await();
+
+        // Then
+        assertEquals(FULFILLED,promise.getState());
+        assertEquals(127,received.get());
+    }
+
+    @Test
+    public void testThenApply_Function_Pass() {
+        // Given
+        AtomicInteger received = new AtomicInteger(0);
+        Promise<Integer> promise = Promises.newPromise(() -> doLongRunningTask("testThenApply_Function_Pass"),listeners)
+                .thenApply(value -> getValue(received, () -> value + 1));
+
+        // When
+        wait("testThenApply_Function_Pass");
+        promise.await();
+
+        // Then
+        assertEquals(FULFILLED,promise.getState());
+        int value = received.get();
+        assertEquals(128,value);
+    }
+
+    @Test
     public void testThen_TaskAction_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);

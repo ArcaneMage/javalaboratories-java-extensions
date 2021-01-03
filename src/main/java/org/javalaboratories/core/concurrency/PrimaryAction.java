@@ -17,6 +17,7 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Maybe;
+import org.javalaboratories.util.Generics;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -39,7 +40,7 @@ import java.util.function.Supplier;
  */
 @EqualsAndHashCode(callSuper=false)
 public final class PrimaryAction<T> extends AbstractAction<T> {
-    private final Supplier<T> task;
+    private final Supplier<? extends T> task;
 
     /**
      * Constructor to setup internal handlers.
@@ -48,7 +49,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
      * @param task main task handler that will be executed asynchronously.
      * @throws NullPointerException if task parameter is null.
      */
-    private PrimaryAction(final Supplier<T> task) {
+    private PrimaryAction(final Supplier<? extends T> task) {
         this(task, null);
     }
 
@@ -60,7 +61,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
      * @param completionHandler to handle task completion -- this is optional.
      * @throws NullPointerException if task parameter is null.
      */
-    private PrimaryAction(final Supplier<T> task, final BiConsumer<T,Throwable> completionHandler) {
+    private PrimaryAction(final Supplier<? extends T> task, final BiConsumer<? super T,Throwable> completionHandler) {
         super(completionHandler);
         this.task = Objects.requireNonNull(task);
     }
@@ -71,7 +72,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
      * @param task main task handler that will be executed asynchronously.
      * @throws NullPointerException if task parameter is null.
      */
-    public static <T> PrimaryAction<T> of(Supplier<T> task) {
+    public static <T> PrimaryAction<T> of(Supplier<? extends T> task) {
         return new PrimaryAction<>(task);
     }
 
@@ -82,7 +83,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
      * @param completionHandler to handle task completion -- this is optional.
      * @throws NullPointerException if task parameter is null.
      */
-    public static <T> PrimaryAction<T> of(Supplier<T> task, BiConsumer<T,Throwable> completionHandler) {
+    public static <T> PrimaryAction<T> of(Supplier<? extends T> task, BiConsumer<? super T,Throwable> completionHandler) {
         return new PrimaryAction<>(task, completionHandler);
     }
 
@@ -90,6 +91,6 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
      * @return this {@link PrimaryAction} task handler.
      */
     public Maybe<Supplier<T>> getTask() {
-        return Maybe.ofNullable(task);
+        return Generics.unchecked(Maybe.ofNullable(task));
     }
 }

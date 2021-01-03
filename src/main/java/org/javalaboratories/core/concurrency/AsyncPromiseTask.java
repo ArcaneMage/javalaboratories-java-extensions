@@ -119,7 +119,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      * {@inheritDoc}
      */
     @Override
-    public  <R> Promise<R> then(final TransmuteAction<T, R> action) {
+    public  <R> Promise<R> then(final TransmuteAction<T,R> action) {
         Function<T,R> transmutable = doMakeTransmutable(action);
         CompletableFuture<R> future = this.future.thenApplyAsync(transmutable,service)
                 .whenComplete((newValue,exception) -> action.getCompletionHandler()
@@ -281,7 +281,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
         };
     }
 
-    private States getState(final CompletableFuture<?super T> future) {
+    private States getState(final CompletableFuture<? super T> future) {
         return future == null ? PENDING : !future.isDone() ? PENDING :
                 future.isCompletedExceptionally() ? REJECTED : FULFILLED;
     }

@@ -17,6 +17,7 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.AllArgsConstructor;
 import org.javalaboratories.core.Maybe;
+import org.javalaboratories.util.Generics;
 
 import java.util.function.BiConsumer;
 
@@ -38,10 +39,10 @@ import java.util.function.BiConsumer;
  */
 @AllArgsConstructor()
 public abstract class AbstractAction<T> implements Action<T>  {
-    private final BiConsumer<T,Throwable> completionHandler;
+    private final BiConsumer<? super T,Throwable> completionHandler;
 
     @Override
     public Maybe<BiConsumer<T,Throwable>> getCompletionHandler() {
-        return Maybe.ofNullable(completionHandler);
+        return Generics.unchecked(Maybe.ofNullable(completionHandler));
     }
 }

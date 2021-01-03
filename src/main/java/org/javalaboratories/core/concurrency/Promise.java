@@ -17,8 +17,10 @@ package org.javalaboratories.core.concurrency;
 
 import org.javalaboratories.core.Maybe;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * The {@code Promise} object is a lightweight abstraction of the
@@ -163,6 +165,34 @@ public interface Promise<T> {
     Promise<T> await();
 
     /**
+     * Having completed the previous {@code promise}, now execute {@link Consumer}
+     * action asynchronously, and return a new {@link Promise} object to manage the
+     * asynchronous task and the underlying {@link CompletableFuture} future.
+     *
+     * @param action the action being processed asynchronously.
+     * @return a new {@link Promise} object to manage the {@link TaskAction} action
+     * object.
+     */
+    default Promise<T> thenAccept(final Consumer<? super T> action) {
+        Objects.requireNonNull(action);
+        return then(TaskAction.of(action));
+    }
+
+    /**
+     * Having completed the previous {@code promise}, now execute {@link Function}
+     * action asynchronously, and return a new {@link Promise} object to manage the
+     * asynchronous task and the underlying {@link CompletableFuture} future.
+     *
+     * @param function the action being processed asynchronously.
+     * @return a new {@link Promise} object to manage the {@link TaskAction} action
+     * object.
+     */
+    default <R> Promise<R> thenApply(final Function<? super T, ? extends R> function) {
+        Objects.requireNonNull(function);
+        return then(TransmuteAction.of(function));
+    }
+
+    /**
      * Having completed the previous action, now execute {@link TaskAction} action
      * asynchronously, and return a new {@link Promise} object to manage the
      * {@link TaskAction} object and the underlying {@link CompletableFuture} future.
@@ -171,7 +201,7 @@ public interface Promise<T> {
      * @return a new {@link Promise} object to manage the {@link TaskAction} action
      * object.
      */
-     Promise<T> then(TaskAction<T> action);
+     Promise<T> then(final TaskAction<T> action);
 
     /**
      * Having completed the previous action, now execute {@link TransmuteAction}
@@ -183,7 +213,7 @@ public interface Promise<T> {
      * @return a new {@link Promise} object to manage the {@link TransmuteAction}
      * action object.
      */
-    <R> Promise<R> then(TransmuteAction<T, R> action);
+    <R> Promise<R> then(final TransmuteAction<T,R> action);
 
     /**
      * @return the current {@link AbstractAction} object being managed by this

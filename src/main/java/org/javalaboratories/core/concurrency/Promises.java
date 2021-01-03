@@ -166,6 +166,24 @@ public final class Promises {
      * Factory method to create instances of {@link Promise} objects.
      * <p>
      * Not only is the {@link Promise} object created, but post creation, the
+     * the {@link Supplier} function is executed asynchronously and the
+     * {@link Promise} returned to the client.
+     *
+     * @param supplier a {@link Supplier} the task to be executed
+     *                 asynchronously.
+     * @param <T> Type of value returned from asynchronous task.
+     * @return a new {@link Promise} object.
+     * @throws NullPointerException if {@code action} is null
+     * @see AsyncPromiseTask
+     */
+    public static <T> Promise<T> newPromise(final Supplier<? extends T> supplier) {
+        return newPromise(PrimaryAction.of(Objects.requireNonNull(supplier,"No supplier")));
+    }
+
+    /**
+     * Factory method to create instances of {@link Promise} objects.
+     * <p>
+     * Not only is the {@link Promise} object created, but post creation, the
      * the {@link PrimaryAction} task is executed asynchronously and the
      * {@link Promise} returned to the client.
      *
@@ -179,9 +197,44 @@ public final class Promises {
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
         return newPromise(action, () -> new AsyncPromiseTask<>(managedPoolService,action));
     }
+    /**
+     * Factory method to create instances of event-driven {@link Promise}
+     * objects.
+     * <p>
+     * Not only is the {@link Promise} object created, but post creation, the
+     * the {@link Supplier} task is executed asynchronously and the {@link Promise}
+     * returned to the client.
+     * <p>
+     * This implementation of a {@link Promise} object has the ability to publish
+     * events to its {@code subscribers}. There are three types of events all
+     * subscribers are notified on:
+     * <ol>
+     *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
+     *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
+     *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
+     * </ol>
+     * There is no limit to the number of {@code subscribers}, but if a
+     * {@code subscriber} is considered "toxic" (unhandled exception raised),
+     * the {@code subscriber} will be banned from event notification.
+     * Notification of events are performed asynchronously to avoid blocking
+     * in the main/current thread.
+     *
+     * @param supplier a {@link PrimaryAction} encapsulating the task to be
+     *               executed asynchronously.
+     * @param subscribers a collection of {@link PromiseEventSubscriber}
+     *                    objects.
+     * @param <T> Type of value returned from asynchronous task.
+     * @return a new {@link Promise} object.
+     * @throws NullPointerException if {@code action} is null
+     * @see AsyncPromiseTaskPublisher
+     */
+    public static <T> Promise<T> newPromise(final Supplier<? extends T> supplier,
+                                            final List<? extends PromiseEventSubscriber> subscribers) {
+        return newPromise(PrimaryAction.of(supplier),subscribers);
+    }
 
     /**
-     * Factory method to create instances of {@link Promise} event driven
+     * Factory method to create instances of event-driven {@link Promise}
      * objects.
      * <p>
      * Not only is the {@link Promise} object created, but post creation, the

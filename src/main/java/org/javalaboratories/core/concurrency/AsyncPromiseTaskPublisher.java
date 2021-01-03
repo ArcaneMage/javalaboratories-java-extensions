@@ -127,7 +127,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @param publisher underlying event publisher.
      * @throws NullPointerException if service or action or future or promise is null.
      */
-    AsyncPromiseTaskPublisher(final ManagedPoolService service, final Action<T> action,
+     AsyncPromiseTaskPublisher(final ManagedPoolService service, final Action<T> action,
                               final CompletableFuture<T> future, final EventPublisher<EventState<?>> publisher) {
         super(service,action,future);
         Objects.requireNonNull(publisher);
