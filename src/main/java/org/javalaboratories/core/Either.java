@@ -18,10 +18,7 @@ package org.javalaboratories.core;
 import org.javalaboratories.util.Arguments;
 import org.javalaboratories.util.Generics;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -186,6 +183,27 @@ public interface Either<A,B> extends Iterable<B> {
      */
     default Maybe<Either<A,B>> filter(final Predicate<? super B> predicate) {
         Objects.requireNonNull(predicate,"Expected predicate function");
+        return null;
+    }
+
+    /**
+     * Returns {@code Right} {@link Either} with existing value of {@code Right}
+     * if {@code this} is {@code Right} and satisfies the {@code predicate}.
+     * <p>
+     * {@code Left} {@code other} is returned if {@code Right} but does not
+     * satisfy the {@code predicate}; current value of {@code Left} is returned
+     * if {@code this} is a {@code Left}.
+     * <p>
+     * Default implementation is to validate existence of {@link Predicate}
+     * function and {@code other} parameters. Implementations should call this
+     * method first to enable validation.
+     *
+     * @param predicate criteria to test current value of {@link Right}
+     * @param other to return if {@link Right} does not satisfy {@code predicate}
+     * @return resultant {@link Either}.
+     */
+    default Either<A,B> filterOrElse(final Predicate<? super B> predicate, final A other) {
+        Arguments.requireNonNull(predicate,other,"Expected predicate function and other");
         return null;
     }
 
@@ -376,6 +394,18 @@ public interface Either<A,B> extends Iterable<B> {
     List<B> toList();
 
     /**
+     * For {@link Right} implementation, returns an immutable map of the
+     * {@code right} value, if available; {@link Left} implementations return
+     * an empty map.
+     * <p>
+     * @return a map of a single {@code right} value, if it exists.
+     */
+    default <K> Map<K,B> toMap(final Function<? super B, ? extends K> keyMapper) {
+        Objects.requireNonNull(keyMapper);
+        return null;
+    }
+
+    /**
      * For {@link Right} implementation, returns a {@link Maybe} of the
      * {@code right} value, if available; {@link Left} implementations return an
      * empty {@link Maybe}.
@@ -430,6 +460,14 @@ public interface Either<A,B> extends Iterable<B> {
         public Maybe<Either<A,B>> filter(final Predicate<? super B> predicate)  {
             super.filter(predicate);
             return exists(predicate) ? Maybe.of(this) : Maybe.empty();
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Either<A,B> filterOrElse(final Predicate<? super B> predicate, A other) {
+            super.filterOrElse(predicate,other);
+            return filter(predicate).isPresent() ? this : Either.left(other);
         }
         /**
          * {@inheritDoc}
@@ -535,8 +573,16 @@ public interface Either<A,B> extends Iterable<B> {
         @Override
         public List<B> toList() {
             B element = getRight();
-            List<B> result = element != null ? Collections.singletonList(element) : Collections.emptyList();
-            return Collections.unmodifiableList(result);
+            return element != null ? Collections.singletonList(element) : Collections.emptyList();
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <K> Map<K,B> toMap(final Function<? super B, ? extends K> keyMapper) {
+            super.toMap(keyMapper);
+            B element = getRight();
+            return element != null ? Collections.singletonMap(keyMapper.apply(element),element) : Collections.emptyMap();
         }
         /**
          * {@inheritDoc}
@@ -594,6 +640,14 @@ public interface Either<A,B> extends Iterable<B> {
         public Maybe<Either<A,B>> filter(final Predicate<? super B> predicate) {
             super.filter(predicate);
             return Maybe.of(this);
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Either<A,B> filterOrElse(final Predicate<? super B> predicate, A other) {
+            super.filterOrElse(predicate,other);
+            return this;
         }
         /**
          * {@inheritDoc}
@@ -695,6 +749,13 @@ public interface Either<A,B> extends Iterable<B> {
         @Override
         public List<B> toList() {
             return Collections.unmodifiableList(Collections.emptyList());
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <K> Map<K,B> toMap(final Function<? super B, ? extends K> keyMapper) {
+            return Collections.emptyMap();
         }
         /**
          * {@inheritDoc}

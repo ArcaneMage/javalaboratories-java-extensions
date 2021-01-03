@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -82,6 +83,21 @@ public class EitherTest {
         assertTrue(either3.isEmpty());
 
         either2.ifPresent(value -> assertEquals(100,value.getOrElse(-1)));
+    }
+
+    @Test
+    public void testFilterOrElse_PredicateEvaluation_Pass() {
+        // Given (setup)
+
+        // When
+        Either<Exception,Integer> either1 = left.filterOrElse(value -> value > 99,new Exception("What ?"));
+        Either<Exception,Integer> either2 = right.filterOrElse(value -> value > 99,new Exception("What ?"));
+        Either<Exception,Integer> either3 = right.filterOrElse(value -> value < 100,new Exception("Hey, less than 100?"));
+
+        // Then
+        assertEquals("Something has gone wrong",either1.fold(Exception::getMessage, Object::toString));
+        assertEquals("100",either2.fold(Exception::getMessage, Object::toString));
+        assertEquals("Hey, less than 100?",either3.fold(Exception::getMessage, Object::toString));
     }
 
     @Test
@@ -289,9 +305,27 @@ public class EitherTest {
         assertEquals(0,llist.size());
         assertEquals(1,rlist.size());
         assertEquals(100,rlist.get(0));
+
         // Immutability
         assertThrows(UnsupportedOperationException.class,() -> llist.add(100));
         assertThrows(UnsupportedOperationException.class,() -> rlist.add(100));
+    }
+
+    @Test
+    public void testToMap_Pass() {
+        // Given (setup)
+
+        // When
+        Map<String,Integer> lmap = left.toMap(v -> "LeftKey");
+        Map<String,Integer> rmap = right.toMap(v -> "RightKey");
+
+        // Then
+        assertNull(lmap.get("LeftKey"));
+        assertEquals(100,rmap.get("RightKey"));
+
+        // Immutability
+        assertThrows(UnsupportedOperationException.class,() -> lmap.put("LeftKey",110));
+        assertThrows(UnsupportedOperationException.class,() -> rmap.put("RightKey",120));
     }
 
     @Test
