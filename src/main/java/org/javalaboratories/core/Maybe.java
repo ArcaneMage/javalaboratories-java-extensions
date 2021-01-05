@@ -304,11 +304,11 @@ public final class Maybe<T> implements Iterable<T> {
      * Transforms the {@link Maybe} value with the {@code function} when {@code
      * this} is nonempty.
      *
-     * @param mapper function with which to perform the transformation.
      * @param <U> Type of transformed value.
+     * @param mapper function with which to perform the transformation.
      * @return transformed {@link Maybe} object.
      */
-    public <U> Maybe<U> flatMap(final Function<? super T,? extends Maybe<U>> mapper) {
+    public <U> Maybe<U> flatMap(final Function<? super T, ? extends Maybe<U>> mapper) {
         Objects.requireNonNull(mapper);
         T value = value();
         return value != null ? Objects.requireNonNull(mapper.apply(value)) : Maybe.empty();

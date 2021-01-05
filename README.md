@@ -2,19 +2,108 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions)
 
-This is a library of Java utilities to aid programming with lambda to be just that a little bit more joyful, particularly
-for Java-8 developers but not exclusively. 
+This is a library of utilities to encourage functional programming in Java, particularly for Java-8 developers but not
+ exclusively. With inspiration from functional programming articles and languages like Haskell and Scala, new monads and
+ enhancements to existing ones have been introduced. This page provides a brief description of the objects in the library,
+  but it is encouraged to review the javadoc documentation for additional information and examples. 
 
 ### Maven Central Repository
 The library is now available for download from Maven Central Repository. In the POM file add the maven dependency 
 configuration below:
 ```
-    <dependency>
-      <groupId>org.javalaboratories</groupId>
-      <artifactId>java-extensions</artifactId>
-      <version>1.0.3-RELEASE</version>
-    </dependency>
+        <dependency>
+          <groupId>org.javalaboratories</groupId>
+          <artifactId>java-extensions</artifactId>
+          <version>1.0.3-RELEASE</version>
+        </dependency>
 ```
+### Either
+`Either` class is a container, similar to the `Maybe` and `Optional` classes, that represents one of two possible values
+(a disjoint union). Application and/or sub-routines often have one of two possible outcomes, a successful completion or
+a failure, and so it is common to encapsulate these outcomes within an `Either` class. Convention dictates there is a 
+`Left` and `Right` sides; "left" considered to be the "unhappy" outcome, and the "right" as the "happy" outcome or path.
+So rather than a method throwing an exception, it can return an `Either` implementation that could be either a `Left` 
+or a `Right` object, and thus allowing the client to perform various operations and decide on the best course of action.
+In the example, the `parser.readFromFile` method returns an `Either` object, but notice the concise `client` code and 
+readability and how it neatly manages both "unhappy" and "happy" outcomes.
+```
+        // Client code using parser object.
+        String string = parser.readFromFile(file)
+                .flatMap(parser::parse)
+                .map(jsonObject::marshal)
+                .fold(Exception::getMessage,s -> s);
+        ...
+        ...
+        // Parser class (partial implementation)
+        public class Parser {
+            public Either<Exception,String> readFromFile(File file) {
+            try {
+                ...
+                return Either.right(fileContent)
+            } catch (FileNotFoundException e) {
+                return Either.left(e);
+            }
+        }
+```
+Provided implementations of the `Either` are right-biased, which means operations like `map`,`flatMap` and others have 
+no effect on the `Left` implementation, such operations return the "left" value unchanged.
+
+### EventBroadcaster
+`EventBroadcaster` class has the ability to notify its `subscribera` of events they are interested in. It is a partial
+implementation of the `Observer Design Pattern`. To complete the design pattern, implement the `EventSubscriber` 
+interface and subclass `AbstractEvent` class for defining custom events or use the out-of-the-box `Event` objects in the
+ `CommonEvents` class. It is recommended to encapsulate the `EventBroadcaster` object within a class considered to be 
+ observable. 
+```
+        public class DownloadEvent extends AbstractEvent {
+            public static final DOWNLOAD_EVENT = new DownloadEvent();
+            public DownloadEvent() { super(); }
+        }
+
+        public class News implements EventSource {
+            private EventPublisher<String> publisher;
+            
+            public News() {
+                publisher = new EventBroadcaster<>(this);
+            }
+
+            public void addListener(EventSubscriber subscriber, Event... captureEvents) {
+                publisher.subscribe(subscriber,captureEvents);
+            }
+
+            public void download() {
+                ...
+                ...
+                publisher.publish(DOWNLOAD_EVENT,"Complete");
+                ...             
+            }
+        }
+        ...
+        ...
+        public class NewsListener implements EventSubscriber<String> {
+            public notify(Event event, String value) {
+                logger.info ("Received download event: {}",value);
+            }
+        }
+        ...
+        ...
+        public class NewsPublisherExample {
+            public static void main(String args[]) {
+                News news = new News();
+                NewsListener listener1 = new NewsListener();
+                NewsListener<String> listener2 = (event,state) -> logger.info("Received download event: {}",state);
+
+                news.addListener(listener1,DOWNLOAD_EVENT);
+                news.addListener(listener2,DOWNLOAD_EVENT);
+
+                news.download();
+            }
+        }
+```
+The `EventBroadcaster` class is thread-safe, but for additional information on this and associated classes, please refer
+ to the javadoc details.
+
+### Floadgate, Torrent
 
 ### Handlers
 Handlers class provides a broad set of wrapper methods to handle checked exceptions within lambda expressions. Lambdas 

@@ -20,13 +20,7 @@ import org.javalaboratories.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -204,6 +198,7 @@ public class EventBroadcaster<T extends EventSource,V> implements EventPublisher
     }
 
     private String getUniqueIdentity() {
+         Observable j;
         synchronized (EventBroadcaster.class) {
             return String.format("{subscription-%s}",uniqueIdentity++);
         }

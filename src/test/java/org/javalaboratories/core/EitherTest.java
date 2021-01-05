@@ -18,6 +18,8 @@ package org.javalaboratories.core;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -342,10 +344,36 @@ public class EitherTest {
         assertEquals(100,maybe2.get());
     }
 
-    // Some contrived use case
+    @Test
+    public void testExamples_Pass() {
+        // Given (setup)
+        File file = new File("~/henryk/filesystem");
+        Parser parser = new Parser();
+        JsonObject jsonObject = new JsonObject();
+
+        // When
+        String string = parser.readFromFile(file)
+                .flatMap(parser::parse)
+                .map(jsonObject::marshal)
+                .fold(Exception::getMessage,s -> s);
+
+        assertEquals("Cannot open \"~/henryk/filesystem\"",string);
+    }
+
+    // Some contrived classes for testing
+    //
     private static class Parser {
         public Either<Exception,String> parse(String value) {
             return Either.right("Hello World! "+value);
+        }
+        public Either<Exception,String> readFromFile(File file) {
+            return Either.left(new FileNotFoundException("Cannot open \""+file+"\""));
+        }
+    }
+
+    private static class JsonObject {
+        private String marshal(String string) {
+            return String.format("{\"name:\" \"%s\"}",string);
         }
     }
 }
