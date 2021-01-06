@@ -243,6 +243,7 @@ public class TorrentTest extends AbstractResourceFloodStabilityTest {
 
         // Then
         assertEquals(FLOODED, torrent.getState());
+        assertEquals(2, result.size());
 
         if (!unsafe.equals(expected)) {
             logger.info("Statistics corrupted this time, expected: {}, but got {}", expected, unsafe);

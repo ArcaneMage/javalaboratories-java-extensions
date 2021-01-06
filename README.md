@@ -104,7 +104,37 @@ The `EventBroadcaster` class is thread-safe, but for additional information on t
  to the javadoc details.
 
 ### Floadgate, Torrent
+These classes are used to detect possible thread-safe issues in target objects by subjecting them to method calls 
+from multiple threads. Currently, they do no assert the state of the target object, but generate log information
+for analysis. Each `Floodgate` is configured with a specific number of thread workers with each worker calling the 
+target object's method repeatedly for a configured number of times. For example the `Floodgate` in the example code below
+configures 5 (default) thread workers to repeatedly call the `add(10)` method 5 (default) times, and so the expected 
+total of the additions is 250, as opposed to 240, clearly indicating lost updates. 
+```
+        Floodgate<Integer> floodgate = new Floodgate<>(UnsafeStatistics.class, () -> statistics.add(10));
 
+        floodgate.open();
+        List<Integer> results = floodgate.flood();
+
+        logger.info("UnsafeStatics statistics={}", unsafe);
+
+        >> output:  statistics=UnsafeStatistics(total=240, requests=24, average=10.0 
+```
+`Floodgate` is really designed to flood one method/resource, but it is possible to target multiple methods of an object 
+under test with this class, but consider the use of `Torrent` instead for this purpose. `Torrent` manages and controls 
+multiple `Floodgates`, ensuring a fairer distribution of thread workers in the core thread pool as well as triggering the 
+flood of all floodgates simultaneously. These features increase the likelihood of detecting thread-safe issues in the 
+target object. Review the javadoc for more information.
+```
+        Torrent torrent = Torrent.builder(UnsafeStatistics.class)
+                .withFloodgate("print", () -> unsafe.print()) 
+                .withFloodgate("add", () -> unsafe.add(10))
+                .build();
+
+        torrent.open();
+        torrent.flood();
+```
+ 
 ### Handlers
 Handlers class provides a broad set of wrapper methods to handle checked exceptions within lambda expressions. Lambdas 
 are generally short and concise, but checked exceptions can sometimes cause the lambda expression to look unwieldy. 
@@ -131,24 +161,10 @@ For example, here is an example of a method performing file input/output:
  
         Consumer<String> consumer = Handlers.consumer(s -> writeFile(s));
 ```
-### Holder
-`Holder` class is a simple container, which is generally useful for mutating values within a lambda expression -- the
-holder object is an effectively final object allowing its contents to be mutated.
-```
-        Holder<Integer> base = Holders.writableHolder(220);
-        
-        List<Long> values = Arrays.asList(10,20,30)       
-        
-        values.stream()
-            .forEach(n -> base.set(base.get() + n));
-        
-        System.out.println(base.get());
-``` 
-`Holders` utility class can create several implementations of `Holder` objects, including a thread-safe and a read-only
-implementations. 
 ### Maybe
 The library introduces `Maybe` class, which is a "drop-in" replacement for `Optional`. It has features that are only 
-available in the `Optional` class in Java-11/13 but it also includes new features. For example, the following is possible:
+available in the `Optional` class in Java-9/11/13 but it also includes new features. For example, the following is
+ possible:
 ```
     Maybe<Person> person = people.findById(10983);
     
@@ -162,7 +178,9 @@ available in the `Optional` class in Java-11/13 but it also includes new feature
     
     List<Person> list = person.toList();
 ```
-Similarly, there are `NullableInt`,`NullableLong` and `NullableDouble` for `int`,`long` and `double` types respectively.
+Similarly, there are `NullableInt`,`NullableLong` and `NullableDouble` for `int`,`long` and `double` types respectively. 
+Release v1.0.5 includes many new features found in Scala and Haskell such as `filterNot`, `flatten` and `fold`-- 
+review javadoc for further details.
 ### Promise
 The `Promise` object is a lightweight abstraction of the `CompletableFuture` object, the inspiration of which came from 
 the JavaScript's Promise object behaviour. This implementation provides an easily understood API for asynchronous 

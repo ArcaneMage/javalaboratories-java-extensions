@@ -14,6 +14,7 @@ import java.util.function.Supplier;
  * the type writableHolder implementation it creates.
  */
 @SuppressWarnings("WeakerAccess")
+@Deprecated
 public final class Holders {
 
     /**
