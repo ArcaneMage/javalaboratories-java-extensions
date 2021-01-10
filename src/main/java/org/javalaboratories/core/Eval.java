@@ -123,7 +123,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
      *
      * @see Recursion
      */
-    <U> Eval<U> mapFn(final Function<? super T,? extends Recursion<? extends U>> mapper);
+    <U> Eval<U> mapFn(final Function<? super T,? extends Recursion<U>> mapper);
 
     /**
      * @return encapsulated {@code value} from {@link Eval}. Some implementations
@@ -181,7 +181,8 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
          */
         @Override
         protected T value() {
-            return source.get();
+            value = source.get();
+            return value;
         }
         Supplier<T> source() {
             return source;
@@ -197,6 +198,12 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
      *           implementation.
      */
     class Eager<T> extends AbstractEval<T>  {
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Eager}
+         * strategy.
+         *
+         * @param value the {@code value} of this {@link Eval}
+         */
         private Eager(T value) {
             super(value);
         }
@@ -218,10 +225,15 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
      * @param <T> Type of lazily computed {@code value}.
      */
     class Later<T> extends Always<T> {
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Later}
+         * strategy.
+         *
+         * @param source function that computes the {@code value}.
+         */
         private Later(final Supplier<T> source) {
             super(source);
         }
-
         /**
          * {@inheritDoc}
          */
@@ -237,6 +249,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
          * This implementation evaluates the {@code value} lazily and once only
          * and caches the resultant {@code value}.
          */
+        @Override
         protected T value() {
             if (value == null)
                 value = super.value();

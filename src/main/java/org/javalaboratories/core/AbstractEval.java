@@ -42,7 +42,7 @@ import java.util.function.Predicate;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public abstract class AbstractEval<T> implements Eval<T> {
+abstract class AbstractEval<T> implements Eval<T> {
     T value;
 
     /**
@@ -123,7 +123,7 @@ public abstract class AbstractEval<T> implements Eval<T> {
      * {@inheritDoc}
      */
     @Override
-    public final <U> AbstractEval<U> mapFn(final Function<? super T,? extends Recursion<? extends U>> mapper) {
+    public final <U> AbstractEval<U> mapFn(final Function<? super T,? extends Recursion<U>> mapper) {
         Objects.requireNonNull(mapper,"Expected map function");
         return boxEval(mapper.apply(value()).result());
     }
