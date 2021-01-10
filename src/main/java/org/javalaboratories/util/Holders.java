@@ -12,6 +12,9 @@ import java.util.function.Supplier;
  * Use this class to create a variety of {@code Holder} objects, which can be
  * thread-safe, immutable as well as mutable. Each factory method describes
  * the type writableHolder implementation it creates.
+ *
+ * @deprecated class will be replaced with a purer alternative: does not rely on side
+ * effects.
  */
 @SuppressWarnings("WeakerAccess")
 @Deprecated

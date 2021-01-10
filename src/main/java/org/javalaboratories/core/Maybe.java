@@ -113,7 +113,7 @@ import java.util.stream.Stream;
  * @author Kevin H, Java Laboratories
  */
 @EqualsAndHashCode
-public final class Maybe<T> implements Iterable<T> {
+public final class Maybe<T> implements Functor<T>, Iterable<T> {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<T> delegate;
@@ -426,7 +426,7 @@ public final class Maybe<T> implements Iterable<T> {
      * @throws NullPointerException if {@code supplier} is {@code null} or resultant
      * {@link Maybe} returned from {@code supplier} function.
      */
-    public Maybe<T> or (final Supplier<? extends Maybe<? extends T>> supplier) {
+    public Maybe<T> or (final Supplier<? extends Maybe<? super T>> supplier) {
         Objects.requireNonNull(supplier);
         T value = value();
         return value != null ? this : Objects.requireNonNull(Generics.unchecked(supplier.get()));
@@ -481,6 +481,16 @@ public final class Maybe<T> implements Iterable<T> {
      */
     public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exSupplier) throws E {
         return delegate.orElseThrow(exSupplier);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Maybe<T> peek(final Consumer<? super T> consumer) {
+        Maybe<T> result = (Maybe<T>) Functor.super.peek(consumer);
+        T value = isEmpty() ? null : value();
+        consumer.accept(value);
+        return result;
     }
 
     /**

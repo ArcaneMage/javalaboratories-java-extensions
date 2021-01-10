@@ -19,6 +19,7 @@ import org.javalaboratories.util.Arguments;
 import org.javalaboratories.util.Generics;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -81,7 +82,7 @@ import java.util.function.Supplier;
  * @see Right
  */
 @SuppressWarnings("UnusedReturnValue")
-public interface Either<A,B> extends Iterable<B> {
+public interface Either<A,B> extends Functor<B>, Iterable<B> {
 
     /**
      * Factory method to create an instance of {@link Right} implementation
@@ -337,7 +338,7 @@ public interface Either<A,B> extends Iterable<B> {
      *              implementation.
      * @return current value of right-biased implementations.
      */
-    Either<A,B> orElse(final Either<? extends A,? extends B> other);
+    Either<A,B> orElse(final Either<? super A,? super B> other);
 
     /**
      * For {@link Right} implementation, returns this object or derives it from
@@ -350,7 +351,7 @@ public interface Either<A,B> extends Iterable<B> {
      * @param supplier function executed by {@link Left} implementation.
      * @return this {@code Right} or derives it from the {@code supplier}
      */
-    default Either<A,B> orElseGet(Supplier<? extends Either<? extends A,? extends B>> supplier) {
+    default Either<A,B> orElseGet(Supplier<? extends Either<? super A,? super B>> supplier) {
         Objects.requireNonNull(supplier);
         return null;
     }
@@ -372,6 +373,16 @@ public interface Either<A,B> extends Iterable<B> {
     default <E extends Throwable> Either<A,B> orElseThrow(Supplier<? extends E> supplier) throws E {
         Objects.requireNonNull(supplier);
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default Either<A,B> peek(final Consumer<? super B> consumer) {
+        Either<A,B> result = (Either<A,B>) Functor.super.peek(consumer);
+        consumer.accept(null);
+        return result;
     }
 
     /**
@@ -541,14 +552,14 @@ public interface Either<A,B> extends Iterable<B> {
          * {@inheritDoc}
          */
         @Override
-        public Either<A,B> orElse(final Either<? extends A,? extends B> other) {
+        public Either<A,B> orElse(final Either<? super A,? super B> other) {
             return this;
         }
         /**
          * {@inheritDoc}
          */
         @Override
-        public Either<A,B> orElseGet(final Supplier<? extends Either<? extends A,? extends B>> supplier) {
+        public Either<A,B> orElseGet(final Supplier<? extends Either<? super A,? super B>> supplier) {
             super.orElseGet(supplier);
             return this;
         }
@@ -559,6 +570,15 @@ public interface Either<A,B> extends Iterable<B> {
         public <E extends Throwable> Either<A,B> orElseThrow(final Supplier<? extends E> supplier) throws E {
             super.orElseThrow(supplier);
             return this;
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Either<A,B> peek(final Consumer<? super B> consumer) {
+            Either<A,B> result = super.peek(consumer);
+            consumer.accept(getRight());
+            return result;
         }
         /**
          * {@inheritDoc}
@@ -717,14 +737,14 @@ public interface Either<A,B> extends Iterable<B> {
          * {@inheritDoc}
          */
         @Override
-        public Either<A,B> orElse(final Either<? extends A,? extends B> other) {
+        public Either<A,B> orElse(final Either<? super A,? super B> other) {
             return Generics.unchecked(other);
         }
         /**
          * {@inheritDoc}
          */
         @Override
-        public Either<A,B> orElseGet(final Supplier<? extends Either<? extends A,? extends B>> supplier) {
+        public Either<A,B> orElseGet(final Supplier<? extends Either<? super A,? super B>> supplier) {
             super.orElseGet(supplier);
             return Generics.unchecked(supplier.get());
         }
