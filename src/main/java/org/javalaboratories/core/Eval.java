@@ -15,13 +15,17 @@
  */
 package org.javalaboratories.core;
 
-import org.javalaboratories.util.Generics;
+import org.javalaboratories.core.concurrency.PrimaryAction;
+import org.javalaboratories.core.concurrency.Promise;
+import org.javalaboratories.core.concurrency.Promises;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
+import java.util.stream.Stream;
 
 /**
  * There are multiple evaluation strategies supported by their respective
@@ -40,7 +44,7 @@ import java.util.function.Supplier;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public interface Eval<T> extends Functor<T>, Iterable<T> {
+public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
 
     /**
      * Provides an implementation of the {@code Always} strategy.
@@ -62,7 +66,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
      * @param <T> Type of resultant {@code value}.
      * @return an {@code Eager} strategy implementation.
      */
-    static <T> Eval<T> eager(final T value) { return new Eager<>(value);}
+    static <T> Eval<T> eager(final T value) { return new Always<>(() -> value);}
 
     /**
      * Provides an implementation of the {@code Later} strategy.
@@ -74,6 +78,21 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
      * @return an {@code Later} strategy implementation.
      */
     static <T> Eval<T> later(final Supplier<T> supplier) { return new Later<>(supplier);}
+
+
+    /**
+     * Provides an implementation of the {@code PromiseLater} strategy.
+     * <p>
+     * The evaluation is performed asynchronously and once just before use and
+     * cached.
+     *
+     * @param supplier function to compute evaluation of {@code value}.
+     * @param <T> Type of resultant {@code value}.
+     * @return an {@code Later} strategy implementation.
+     */
+    static <T> Eval<T> promiseLater(final Supplier<T> supplier) {
+        return new PromiseLater<>(supplier);
+    }
 
     /**
      * Returns {@code this} {@link Maybe} object that satisfies the {@code
@@ -110,6 +129,25 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
     <U> Eval<U> flatMap(final Function<? super T,? extends Eval<U>> mapper);
 
     /**
+     * @return encapsulated {@code value} from {@link Eval}. Some implementations
+     * evaluate the {@code value} lazily.
+     */
+    T get();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default Iterator<T> iterator() {
+        return toList().iterator();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    <U> Eval<U> map(final Function<? super T,? extends U> mapper);
+
+    /**
      * Transforms the {@link Eval} value with the {@code mapper} function with
      * the assistance of a recursive function.
      * <p>
@@ -126,10 +164,28 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
     <U> Eval<U> mapFn(final Function<? super T,? extends Recursion<U>> mapper);
 
     /**
-     * @return encapsulated {@code value} from {@link Eval}. Some implementations
-     * evaluate the {@code value} lazily.
+     * {@inheritDoc}
+     * <p>
+     * This operation does NOT evaluate the {@code value}, but allows read access
+     * to the current state of it.
      */
-    T get();
+    default Eval<T> peek(final Consumer<? super T> consumer) {
+        return (Eval<T>) Functor.super.peek(consumer);
+    }
+
+    /**
+     * Reserve the evaluated value for future use in an {@link Eval}.
+     * <p>
+     * Consider an {@code Always} implementation constantly deriving {@code
+     * values} that are expensive in terms of processing time and/or resources.
+     * In such circumstances, use this method to cache the resultant {@code
+     * value}.
+     *
+     * @return an {@link Eval} with the "cached" value.
+     */
+    default Eval <T> reserve() {
+        return this;
+    }
 
     /**
      * Returns an immutable list of containing {@code this} {@code value}.
@@ -153,8 +209,9 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
      *
      * @param <T> Type of lazily computed {@code value}.
      */
-    class Always<T> extends AbstractEval<T> {
+    class Always<T> implements Eval<T> {
         private final Supplier<T> source;
+        T value;
 
         /**
          * Constructs implementation of {@link Eval} with the {@code Always}
@@ -162,57 +219,117 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
          *
          * @param source function that computes the {@code value}.
          */
-        private Always(final Supplier<T> source) {
-            super(null);
+        public Always(final Supplier<T> source) {
             Objects.requireNonNull(source,"Supplier required");
             this.source = source;
         }
+
         /**
          * {@inheritDoc}
          */
         @Override
-        protected <U> Always<U> boxEval(U value) {
-            Eval<T> result = Eval.always(source);
-            ((Always<U>) result).value = value;
-            return (Always<U>) result;
+        public Maybe<Eval<T>> filter(Predicate<? super T> predicate) {
+            return Stream.of(value())
+                    .filter(predicate)
+                    .findFirst()
+                    .map(value -> Maybe.of(Eval.eager(value)))
+                    .orElse(Maybe.empty());
         }
+
         /**
          * {@inheritDoc}
          */
         @Override
+        public <U> Eval<U> flatMap(Function<? super T, ? extends Eval<U>> mapper) {
+            Objects.requireNonNull(mapper,"Expected mapping function");
+            return mapper.apply(value());
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public T get() {
+            return value();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <U> Eval<U> map(Function<? super T, ? extends U> mapper) {
+            Objects.requireNonNull(mapper,"Expected mapping function");
+            return flatMap(value -> Eval.always(() -> mapper.apply(value)));
+        }
+
+        /**
+         * {@inheritDoc}
+         * @deprecated considering alternative design to internalise this behaviour.
+         */
+        @Override
+        @Deprecated
+        public <U> Eval<U> mapFn(Function<? super T, ? extends Recursion<U>> mapper) {
+            return Eval.eager(mapper.apply(value()).result());
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Eval<T> peek(final Consumer<? super T> consumer) {
+            Objects.requireNonNull(consumer,"Expected consumer function");
+            consumer.accept(value());
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Eval<T> reserve() {
+            return flatMap(value -> Eval.later(() -> value()));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public List<T> toList() {
+            return Collections.singletonList(value());
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Maybe<T> toMaybe() {
+            return Maybe.ofNullable(value());
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            String value = this.value == null ? "unset" : String.valueOf(this.value);
+            return String.format("%s[%s]",getClass().getSimpleName(),value);
+        }
+
+        /**
+         * Override in derived classes to evaluate or compute the value by other
+         * means.
+         * <p>
+         * Because this method is used by core operations like {@link Eval#flatMap(Function)},
+         * {@link Eval#map(Function)} and others, this method must always return a
+         * {@code value}.
+         * <p>
+         * The default implementation is to immediately return a {@code value}.
+         *
+         * @return internal {@code value} encapsulated in this {@link Eval} object.
+         */
         protected T value() {
             value = source.get();
             return value;
-        }
-        Supplier<T> source() {
-            return source;
-        }
-    }
-
-    /**
-     * Implements the {@code Eager} strategy for the {@link Eval} interface.
-     * <p>
-     * The {@code value} is always evaluated just before use and never cached.
-     *
-     * @param <T> Type of {@code value} to be backed by this {@link Eval}
-     *           implementation.
-     */
-    class Eager<T> extends AbstractEval<T>  {
-        /**
-         * Constructs implementation of {@link Eval} with the {@code Eager}
-         * strategy.
-         *
-         * @param value the {@code value} of this {@link Eval}
-         */
-        private Eager(T value) {
-            super(value);
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected <U> AbstractEval<U> boxEval(final U value) {
-            return Generics.unchecked(Eval.eager(value));
         }
     }
 
@@ -236,15 +353,6 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
         }
         /**
          * {@inheritDoc}
-         */
-        @Override
-        protected <U> Later<U> boxEval(U value) {
-            Eval<T> result = Eval.later(source());
-            ((Later<U>) result).value = value;
-            return (Later<U>) result;
-        }
-        /**
-         * {@inheritDoc}
          * <p>
          * This implementation evaluates the {@code value} lazily and once only
          * and caches the resultant {@code value}.
@@ -254,6 +362,79 @@ public interface Eval<T> extends Functor<T>, Iterable<T> {
             if (value == null)
                 value = super.value();
             return value;
+        }
+    }
+
+    /**
+     * Implements the {@code PromiseLater} strategy for the {@link Eval}
+     * interface.
+     * <p>
+     * The evaluation of the {@code value} occurs asynchronously. The evaluation
+     * of the {@code value} is performed once and cached.
+     *
+     * @param <T> Type of lazily computed {@code value}.
+     */
+    class PromiseLater<T> extends Later<T> {
+        private final Promise<T> promise;
+        private Exception exception;
+
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Later}
+         * strategy.
+         *
+         * @param source function that computes the {@code value}.
+         */
+        private PromiseLater(final Supplier<T> source) {
+            super(source);
+            promise = Promises.newPromise(PrimaryAction.of(source,this::handle));
+        }
+        /**
+         * {@inheritDoc}
+         * <p>
+         * This implementation evaluates the {@code value} by blocking for the
+         * asynchronous process to complete -- evaluation only occurs once.
+         */
+        @Override
+        protected T value() {
+            if (value == null)
+                value = promise.getResult().orElse(null);
+            return value;
+        }
+
+        /**
+         * @return true to indicate asynchronous process is complete whether
+         * successfully or unsuccessfully.
+         */
+        public boolean isComplete() {
+            return promise.getState() != Promise.States.PENDING;
+        }
+
+        /**
+         * @return true to indicate asynchronous process has encountered an
+         * exception.
+         */
+        public boolean isRejected() {
+            return promise.getState() == Promise.States.REJECTED;
+        }
+
+        /**
+         * @return true to indicate asynchronous process has completed
+         * successfully.
+         */
+        public boolean isFulfilled() {
+            return promise.getState() == Promise.States.FULFILLED;
+        }
+
+        /**
+         * @return the exception thrown in the asynchronous process as a {@link
+         * Maybe} object.
+         */
+        public Maybe<Exception> getException() {
+            return Maybe.ofNullable(exception);
+        }
+
+        private void handle(final T value, final Throwable e) {
+            exception = (Exception) e;
         }
     }
 }

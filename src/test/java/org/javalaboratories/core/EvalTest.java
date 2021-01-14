@@ -15,14 +15,20 @@
  */
 package org.javalaboratories.core;
 
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EvalTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(EvalTest.class);
 
     private Eval<Integer> always,eager,later;
 
@@ -31,7 +37,11 @@ public class EvalTest {
         AtomicInteger intValue = new AtomicInteger(60);
         eager = Eval.eager(12);
         later = Eval.later(() -> 12 * 5);
-        always = Eval.always(() -> intValue.getAndIncrement() % 64); // Round robin evaluation
+        always = Eval.always(() -> {
+            int value =  intValue.getAndIncrement() % 64;
+            logger.debug("Next calculated value = {}",value);
+            return value;
+        }); // Round robin evaluation
     }
 
     @Test
@@ -40,11 +50,10 @@ public class EvalTest {
 
         // Then
         assertTrue(always instanceof Eval.Always);
-        assertTrue(eager instanceof Eval.Eager);
         assertTrue(later instanceof Eval.Later);
 
         assertEquals("Always[unset]",always.toString());
-        assertEquals("Eager[12]",eager.toString());
+        assertEquals("Always[unset]",eager.toString());
         assertEquals("Later[unset]",later.toString());
     }
 
@@ -77,7 +86,63 @@ public class EvalTest {
                 .get();
         assertEquals(12, eval1.get());
         assertEquals(60, eval2.get());
-        assertEquals(62, eval3.get());
+        assertEquals(61, eval3.get());
+    }
+
+    @Test
+    public void testFlatMap_Pass() {
+        // Given (setup)
+        Eval<Integer> intValue = Eval.eager(100);
+
+        // When
+        String result = later
+                .flatMap(v -> Eval.eager(v * intValue.get()))
+                .map(v -> v+"")
+                .get();
+
+        // Then
+        assertEquals("6000",result);
+    }
+
+    @Test
+    public void testPeek_Pass() {
+        // Given (setup)
+        LogCaptor logCaptor = LogCaptor.forClass(EvalTest.class);
+
+        // When
+        String eagerResult = eager
+                .map(v -> v + "")
+                .peek(v -> logger.info("(Eager) peek value as string \"{}\"",v))
+                .get();
+        String laterResult = later
+                .map(v -> v + "")
+                .peek(v -> logger.info("(Later) peek value as string \"{}\"",v))
+                .get();
+        String alwaysResult = always
+                .map(v -> v + "")
+                .peek(v -> logger.info("(Always) peek value as string \"{}\"",v))
+                .get();
+
+        // Then
+        assertEquals("12",eagerResult);
+        assertEquals("60",laterResult);
+        assertEquals("60",alwaysResult);
+        assertTrue(logCaptor.getInfoLogs().stream()
+                .anyMatch(s -> s.equals("(Eager) peek value as string \"12\"")));
+        assertTrue(logCaptor.getInfoLogs().stream()
+                .anyMatch(s -> s.equals("(Later) peek value as string \"60\"")));
+        assertTrue(logCaptor.getInfoLogs().stream()
+                .anyMatch(s -> s.equals("(Always) peek value as string \"60\"")));
+    }
+
+    @Test
+    public void testList_Pass() {
+        // Given (setup)
+
+        // When
+        List<Integer> list1 = eager.toList();
+        List<Integer> list2 = later.toList();
+        //List<Integer> list3 = always.map()
     }
 
     @Test
@@ -111,6 +176,4 @@ public class EvalTest {
             return Recursion.more(() -> sum(first + 1,last));
         }
     }
-
-
 }
