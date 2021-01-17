@@ -26,13 +26,13 @@ public abstract class AbstractConcurrencyTest {
         throw new IllegalStateException("Threw an exception in promise");
     }
 
-    int doLongRunningTask(String narrative) {
+    public int doLongRunningTask(String narrative) {
         sleep(1000);
         logger.info("doLongRunningTask: {} asynchronously", narrative);
         return 127;
     }
 
-    void sleep(long millis) {
+    public void sleep(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {

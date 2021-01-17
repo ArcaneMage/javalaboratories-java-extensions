@@ -16,21 +16,26 @@
 package org.javalaboratories.core;
 
 import nl.altindag.log.LogCaptor;
+import org.javalaboratories.core.concurrency.AbstractConcurrencyTest;
+import org.javalaboratories.core.concurrency.AsyncEval;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EvalTest {
+public class EvalTest extends AbstractConcurrencyTest {
 
     private static final Logger logger = LoggerFactory.getLogger(EvalTest.class);
 
-    private Eval<Integer> always,eager,later;
+    private Eval<Integer> always,alwaysR,eager,later,laterR;
+    private AsyncEval<Integer> asyncLater, asyncFailure;
 
     @BeforeEach
     public void setup() {
@@ -42,6 +47,11 @@ public class EvalTest {
             logger.debug("Next calculated value = {}",value);
             return value;
         }); // Round robin evaluation
+
+        alwaysR = Eval.alwaysRecursive(fibonacci(10));
+        laterR = Eval.laterRecursive(fibonacci(10));
+        asyncLater = Eval.asyncLater(() -> doLongRunningTask("Eval.asyncLater()"));
+        asyncFailure = Eval.asyncLater(() -> 100 / 0);
     }
 
     @Test
@@ -53,12 +63,13 @@ public class EvalTest {
         assertTrue(later instanceof Eval.Later);
 
         assertEquals("Always[unset]",always.toString());
+        assertEquals("Always[unset]", alwaysR.toString());
         assertEquals("Always[unset]",eager.toString());
         assertEquals("Later[unset]",later.toString());
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void testFilter_Pass() {
         // Given (setup)
 
@@ -86,7 +97,36 @@ public class EvalTest {
                 .get();
         assertEquals(12, eval1.get());
         assertEquals(60, eval2.get());
-        assertEquals(61, eval3.get());
+        assertEquals(62, eval3.get());
+    }
+
+    @Test
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public void testFilterNot_Pass() {
+        // Given (setup)
+
+        // Then
+        eager
+                .filterNot(v -> v < 12)
+                .orElseThrow(() -> new IllegalStateException("Illegal value"));
+
+        later
+                .filterNot(v -> v < 12)
+                .orElseThrow(() -> new IllegalStateException("Illegal value"));
+
+        always
+                .filterNot(v -> v < 12)
+                .orElseThrow(() -> new IllegalStateException("Illegal value"));
+
+        assertThrows(NoSuchElementException.class,() -> eager
+                .filterNot(v -> v > 11)
+                .get());
+        assertThrows(NoSuchElementException.class,() -> later
+                .filterNot(v -> v > 11)
+                .get());
+        assertThrows(NoSuchElementException.class,() -> always
+                .filterNot(v -> v > 11)
+                .get());
     }
 
     @Test
@@ -136,44 +176,135 @@ public class EvalTest {
     }
 
     @Test
-    public void testList_Pass() {
+    public void testToList_Pass() {
         // Given (setup)
 
         // When
         List<Integer> list1 = eager.toList();
         List<Integer> list2 = later.toList();
-        //List<Integer> list3 = always.map()
+        List<Integer> list3 = always.toList();
+
+        // Then
+        assertEquals(1, list1.size());
+        assertEquals(1, list2.size());
+        assertEquals(1, list3.size());
+
+        assertEquals(12, list1.get(0));
+        assertEquals(60, list2.get(0));
+        assertEquals(60, list3.get(0));
+
+        // Then -- Immutability?
+        assertThrows(UnsupportedOperationException.class, () -> list1.add(10));
+        assertThrows(UnsupportedOperationException.class, () -> list2.add(10));
+        assertThrows(UnsupportedOperationException.class, () -> list3.add(10));
     }
 
     @Test
-    public void testMapFn_Recursion_Pass() {
+    public void testToMaybe_Pass() {
         // Given (setup)
 
         // When
-        int result = eager.mapFn(this::fibonacci)
+        Maybe<Integer> maybe1 = eager.toMaybe();
+        Maybe<Integer> maybe2 = later.map(v -> (Integer) null).toMaybe();
+
+        // Then
+        assertFalse(maybe1.isEmpty());
+        assertTrue(maybe2.isEmpty());
+    }
+
+    @Test
+    public void testForEach_Pass() {
+        // Given (setup)
+
+        // When
+        AtomicInteger count = new AtomicInteger(0);
+        always.forEach(c -> count.getAndIncrement());
+        alwaysR.forEach(c -> count.getAndIncrement());
+        eager.forEach(c -> count.getAndIncrement());
+        later.forEach(c -> count.getAndIncrement());
+        laterR.forEach(c -> count.getAndIncrement());
+
+        // Then
+        assertEquals(5,count.get());
+    }
+
+    @Test
+    public void testReserve_Pass() {
+        // Given (setup)
+
+        // When
+        int value = always.get();
+        Eval<Integer> eval = always.reserve();
+        int value2 = eval.get();
+        int value3 = eval.get();
+
+        // Then
+        assertEquals(60,value);
+        assertEquals(61,value2);
+        assertEquals(61,value3);
+    }
+
+    @Test
+    public void testMap_Pass() {
+        // Given (setup)
+
+        // When
+        int result = alwaysR.map(value -> value + 10)
                 .get();
 
         // Then
-        System.out.println("\n"+result);
+        assertEquals(65, result);
     }
 
-    private Recursion<Integer> fibonacci(int count) {
+    @Test
+    public void testEval_Asynchronous_Pass() {
+        // Given (setup)
+
+        // When
+        int result = assertTimeout(Duration.ofMillis(1280),() -> asyncLater.map(value -> value * 2)
+                    .get());
+
+        // Then
+        assertEquals(254,result);
+        assertTrue(asyncLater.isComplete());
+        assertTrue(asyncLater.isFulfilled());
+        assertFalse(asyncLater.isRejected());
+    }
+
+    @Test
+    public void testEval_AsynchronousError_Fail() {
+        // Given (setup)
+
+        // When
+        assertThrows(NoSuchElementException.class, () -> asyncFailure.get());
+
+        // Then
+        assertTrue(asyncFailure.isComplete());
+        assertFalse(asyncFailure.isFulfilled());
+        assertTrue(asyncFailure.isRejected());
+        assertFalse(asyncFailure.getException().isEmpty());
+        asyncFailure.getException()
+                .ifPresent(e -> assertEquals("java.lang.ArithmeticException: / by zero",e.getMessage()));
+    }
+
+    private Trampoline<Integer> fibonacci(int count) {
         return fibonacci(count,0,1);
     }
 
-    private Recursion<Integer> fibonacci(int count, int current, int next) {
-        if ( count == 0) {
-            return Recursion.finish(current);
+    private Trampoline<Integer> fibonacci(int count, int current, int next) {
+        if (count == 0) {
+            return Trampoline.finish(current);
         } else {
-            return Recursion.more(() -> fibonacci(count -1, next, current + next));
+            return Trampoline.more(() -> fibonacci(count -1, next, current + next));
         }
     }
 
-    private Recursion<Integer> sum(int first, int last) {
-        if (first == last)
-            return Recursion.finish(last);
+    private Trampoline<Integer> sum(int first, int last) {
+        if (first == last) {
+            return Trampoline.finish(last);
+        }
         else {
-            return Recursion.more(() -> sum(first + 1,last));
+            return Trampoline.more(() -> sum(first + 1,last));
         }
     }
 }

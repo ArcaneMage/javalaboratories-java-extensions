@@ -23,23 +23,23 @@ import java.util.function.Supplier;
  * <p>
  * This is essentially the {@code Trampoline} design pattern. Simply put, it
  * provides {@code recursion} of a method without running out of stack memory.
- * The {@code pattern} supports {@code Tail Recursion}, providing two methods,
+ * The {@code pattern} supports {@code Tail Trampoline}, providing two methods,
  * one for the termination condition and the other the {@code tail call}.
  * <ol>
- *     <li>Recursion.finish(T result)</li>
- *     <li>Recursion.more(function)</li>
+ *     <li>Trampoline.finish(T result)</li>
+ *     <li>Trampoline.more(function)</li>
  * </ol>
  * Review the following code snippet which illustrates the typical use case
- * of the {@link Recursion} interface.
+ * of the {@link Trampoline} interface.
  * <pre>
  *     {@code
  *         ...
  *         ...
- *         public Recursion<Integer> sum(int first, int last) {
+ *         public Trampoline<Integer> sum(int first, int last) {
  *           if (first == last)
- *               return Recursion.finish(last);
+ *               return Trampoline.finish(last);
  *           else {
- *               return Recursion.more(() -> sum(first + 1,last));
+ *               return Trampoline.more(() -> sum(first + 1,last));
  *           }
  *         }
  *         ...
@@ -50,7 +50,12 @@ import java.util.function.Supplier;
  * @param <T> Type of resultant value from recursive function.
  */
 @FunctionalInterface
-public interface Recursion<T> extends Supplier<T> {
+public interface Trampoline<T> {
+
+    /**
+     * @return {@code value} from {@code this} {@link Trampoline} object.
+     */
+    T get();
 
     /**
      * Provides the next {@code function} to recurse (to call).
@@ -59,7 +64,7 @@ public interface Recursion<T> extends Supplier<T> {
      *
      * @return next function to call.
      */
-    default Recursion<T> next() {
+    default Trampoline<T> next() {
         return this;
     }
 
@@ -92,41 +97,41 @@ public interface Recursion<T> extends Supplier<T> {
      *
      * @param result the resultant computed {@code value} of the function.
      * @param <T> Type of resultant value.
-     * @return a new {@link Recursion} implementation containing the resultant
+     * @return a new {@link Trampoline} implementation containing the resultant
      * value.
      */
-    static <T> Recursion<T> finish(final T result) {
+    static <T> Trampoline<T> finish(final T result) {
         return () -> result;
     }
 
     /**
-     * Call this method to create an implementation of {@link Recursion}
+     * Call this method to create an implementation of {@link Trampoline}
      * function that will lazily execute the lambda {@code function} until it
-     * encounters the final {@link Recursion} implementation (Recursion.finish()).
+     * encounters the final {@link Trampoline} implementation (Trampoline.finish()).
      * <p>
-     * Recursion is performed with a loop, thus ensuring stack-safety.
+     * Trampoline is performed with a loop, thus ensuring stack-safety.
      *
      * @param function recursive function to execute.
      * @param <T> Type of resultant value from function.
      * @return the final function implementation with the resultant value.
      */
-    static <T> Recursion<T> more(final Recursion<Recursion<T>> function) {
+    static <T> Trampoline<T> more(final Trampoline<Trampoline<T>> function) {
         Objects.requireNonNull(function,"Expected recursive function");
-        return new Recursion<T>() {
+        return new Trampoline<T>() {
             @Override
             public boolean done() {
                 return false;
             }
             @Override
-            public Recursion<T> next() {
+            public Trampoline<T> next() {
                 return function.result();
             }
             @Override
             public T get() {
                 return iterate(this);
             }
-            T iterate(final Recursion<T> function) {
-                Recursion<T> f = function;
+            T iterate(final Trampoline<T> function) {
+                Trampoline<T> f = function;
                 while(!f.done()) {
                     f = f.next();
                 }

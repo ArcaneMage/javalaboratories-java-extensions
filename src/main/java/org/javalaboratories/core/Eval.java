@@ -15,17 +15,14 @@
  */
 package org.javalaboratories.core;
 
+import org.javalaboratories.core.concurrency.AsyncEval;
 import org.javalaboratories.core.concurrency.PrimaryAction;
 import org.javalaboratories.core.concurrency.Promise;
 import org.javalaboratories.core.concurrency.Promises;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.*;
-import java.util.stream.Stream;
 
 /**
  * There are multiple evaluation strategies supported by their respective
@@ -58,6 +55,18 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
     static <T> Eval<T> always(final Supplier<T> supplier) { return new Always<>(supplier);}
 
     /**
+     * Provides an implementation of the {@code Always} strategy.
+     * <p>
+     * The evaluation is <i>always</i> performed just before use and never cached.
+     *
+     * @param trampoline function to compute evaluation of {@code value}
+     *                   recursively with stack-safety.
+     * @param <T> Type of resultant {@code value}.
+     * @return an {@code Always} strategy implementation.
+     */
+    static <T> Eval<T> alwaysRecursive(final Trampoline<T> trampoline) { return new Always<>(trampoline);}
+
+    /**
      * Provides an implementation of the {@code Eager} strategy.
      * <p>
      * The evaluation is immediate and ready for use.
@@ -66,7 +75,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param <T> Type of resultant {@code value}.
      * @return an {@code Eager} strategy implementation.
      */
-    static <T> Eval<T> eager(final T value) { return new Always<>(() -> value);}
+    static <T> Eval<T> eager(final T value) { return Eval.always(() -> value);}
 
     /**
      * Provides an implementation of the {@code Later} strategy.
@@ -79,6 +88,17 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      */
     static <T> Eval<T> later(final Supplier<T> supplier) { return new Later<>(supplier);}
 
+    /**
+     * Provides an implementation of the {@code Later} strategy.
+     * <p>
+     * The evaluation is <i>always</i> performed just before use and never cached.
+     *
+     * @param trampoline function to compute evaluation of {@code value}
+     *                   recursively with stack-safety.
+     * @param <T> Type of resultant {@code value}.
+     * @return an {@code Always} strategy implementation.
+     */
+    static <T> Eval<T> laterRecursive(final Trampoline<T> trampoline) { return new Later<>(trampoline);}
 
     /**
      * Provides an implementation of the {@code PromiseLater} strategy.
@@ -90,8 +110,8 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param <T> Type of resultant {@code value}.
      * @return an {@code Later} strategy implementation.
      */
-    static <T> Eval<T> promiseLater(final Supplier<T> supplier) {
-        return new PromiseLater<>(supplier);
+    static <T> AsyncEval<T> asyncLater(final Supplier<T> supplier) {
+        return new AsyncLater<>(supplier);
     }
 
     /**
@@ -148,30 +168,12 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
     <U> Eval<U> map(final Function<? super T,? extends U> mapper);
 
     /**
-     * Transforms the {@link Eval} value with the {@code mapper} function with
-     * the assistance of a recursive function.
-     * <p>
-     * The evaluated {@code value} is passed to the recursive function for
-     * processing and the resultant {@code value} encapsulated within the
-     * returned {@link Eval}.
-     *
-     * @param <U> Type of transformed value.
-     * @param mapper function with which to perform the transformation.
-     * @return transformed {@link Eval} object.
-     *
-     * @see Recursion
-     */
-    <U> Eval<U> mapFn(final Function<? super T,? extends Recursion<U>> mapper);
-
-    /**
      * {@inheritDoc}
      * <p>
      * This operation does NOT evaluate the {@code value}, but allows read access
      * to the current state of it.
      */
-    default Eval<T> peek(final Consumer<? super T> consumer) {
-        return (Eval<T>) Functor.super.peek(consumer);
-    }
+    Eval<T> peek(final Consumer<? super T> consumer);
 
     /**
      * Reserve the evaluated value for future use in an {@link Eval}.
@@ -183,9 +185,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @return an {@link Eval} with the "cached" value.
      */
-    default Eval <T> reserve() {
-        return this;
-    }
+    Eval <T> reserve();
 
     /**
      * Returns an immutable list of containing {@code this} {@code value}.
@@ -194,13 +194,17 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @return a {@link List} object containing a {@code value} from {@code
      * this} object.
      */
-    List<T> toList();
+    default List<T> toList() {
+        return Collections.singletonList(get());
+    }
 
     /**
      * @return {@link Maybe} object with encapsulated {@code value}. Some
      * implementations evaluate the {@code value} lazily.
      */
-    Maybe<T> toMaybe();
+    default Maybe<T> toMaybe() {
+        return Maybe.ofEval(this);
+    }
 
     /**
      * Implements the {@code Always} strategy for the {@link Eval} interface.
@@ -210,37 +214,50 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param <T> Type of lazily computed {@code value}.
      */
     class Always<T> implements Eval<T> {
-        private final Supplier<T> source;
+        private final Trampoline<T> evaluate;
         T value;
 
         /**
          * Constructs implementation of {@link Eval} with the {@code Always}
          * strategy.
+         * <p>
+         * Accepts {@code trampoline} function, a function that is to be
+         * recursively called lazily with stack-safety.
          *
-         * @param source function that computes the {@code value}.
+         * @param trampoline function that computes the {@code value}.
+         * @see Trampoline
          */
-        public Always(final Supplier<T> source) {
-            Objects.requireNonNull(source,"Supplier required");
-            this.source = source;
+        public Always(final Trampoline<T> trampoline) {
+            Objects.requireNonNull(trampoline,"Expected recursive function");
+            evaluate = trampoline;
+        }
+
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Always}
+         * strategy.
+         *
+         * @param function function that computes the {@code value}.
+         */
+        public Always(final Supplier<T> function) {
+            Objects.requireNonNull(function,"Expected supplier");
+            this.evaluate = Trampoline.more(() -> Trampoline.finish(function.get()));
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public Maybe<Eval<T>> filter(Predicate<? super T> predicate) {
-            return Stream.of(value())
-                    .filter(predicate)
-                    .findFirst()
-                    .map(value -> Maybe.of(Eval.eager(value)))
-                    .orElse(Maybe.empty());
+        public Maybe<Eval<T>> filter(final Predicate<? super T> predicate) {
+            Objects.requireNonNull(predicate,"Expect predicate function");
+            T value = value();
+            return predicate.test(value) ? Maybe.of(this) : Maybe.empty();
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public <U> Eval<U> flatMap(Function<? super T, ? extends Eval<U>> mapper) {
+        public <U> Eval<U> flatMap(final Function<? super T, ? extends Eval<U>> mapper) {
             Objects.requireNonNull(mapper,"Expected mapping function");
             return mapper.apply(value());
         }
@@ -257,19 +274,9 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * {@inheritDoc}
          */
         @Override
-        public <U> Eval<U> map(Function<? super T, ? extends U> mapper) {
+        public <U> Eval<U> map(final Function<? super T, ? extends U> mapper) {
             Objects.requireNonNull(mapper,"Expected mapping function");
-            return flatMap(value -> Eval.always(() -> mapper.apply(value)));
-        }
-
-        /**
-         * {@inheritDoc}
-         * @deprecated considering alternative design to internalise this behaviour.
-         */
-        @Override
-        @Deprecated
-        public <U> Eval<U> mapFn(Function<? super T, ? extends Recursion<U>> mapper) {
-            return Eval.eager(mapper.apply(value()).result());
+            return flatMap(value -> Eval.eager(mapper.apply(value)));
         }
 
         /**
@@ -287,23 +294,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          */
         @Override
         public Eval<T> reserve() {
-            return flatMap(value -> Eval.later(() -> value()));
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public List<T> toList() {
-            return Collections.singletonList(value());
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Maybe<T> toMaybe() {
-            return Maybe.ofNullable(value());
+            return flatMap(Eval::eager);
         }
 
         /**
@@ -323,12 +314,19 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * {@link Eval#map(Function)} and others, this method must always return a
          * {@code value}.
          * <p>
-         * The default implementation is to immediately return a {@code value}.
+         * The default implementation is to evaluate the {@code value} by invoking
+         * the {@link Trampoline} object.
          *
          * @return internal {@code value} encapsulated in this {@link Eval} object.
+         * @throws IllegalStateException when {@link Trampoline} fails to {@code
+         * conclude}.
          */
         protected T value() {
-            value = source.get();
+            value = evaluate.result();
+            if (value instanceof Trampoline) {
+                throw new IllegalStateException("Trampoline unresolvable -- " +
+                        "review recursion logic");
+            }
             return value;
         }
     }
@@ -345,17 +343,32 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
         /**
          * Constructs implementation of {@link Eval} with the {@code Later}
          * strategy.
+         * <p>
+         * Accepts {@code trampoline} function, a function that is to be
+         * recursively called lazily with stack-safety.
+         *
+         * @param trampoline function that computes the {@code value}.
+         * @see Trampoline
+         */
+        public Later(final Trampoline<T> trampoline) {
+            super(trampoline);
+        }
+
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Later}
+         * strategy.
          *
          * @param source function that computes the {@code value}.
          */
         private Later(final Supplier<T> source) {
             super(source);
         }
+
         /**
          * {@inheritDoc}
          * <p>
-         * This implementation evaluates the {@code value} lazily and once only
-         * and caches the resultant {@code value}.
+         * This implementation evaluates the {@code value} lazily once and then
+         * caches the resultant {@code value}.
          */
         @Override
         protected T value() {
@@ -374,7 +387,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @param <T> Type of lazily computed {@code value}.
      */
-    class PromiseLater<T> extends Later<T> {
+    class AsyncLater<T> extends Later<T> implements AsyncEval<T> {
         private final Promise<T> promise;
         private Exception exception;
 
@@ -384,7 +397,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          *
          * @param source function that computes the {@code value}.
          */
-        private PromiseLater(final Supplier<T> source) {
+        private AsyncLater(final Supplier<T> source) {
             super(source);
             promise = Promises.newPromise(PrimaryAction.of(source,this::handle));
         }
@@ -393,41 +406,44 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * <p>
          * This implementation evaluates the {@code value} by blocking for the
          * asynchronous process to complete -- evaluation only occurs once.
+         *
+         * @throws NoSuchElementException evaluation failure in asynchronous task.
          */
         @Override
         protected T value() {
-            if (value == null)
+            if (value == null) {
                 value = promise.getResult().orElse(null);
+                if (isRejected()) {
+                    throw new NoSuchElementException("Evaluation not possible due" +
+                            " to asynchronous exception");
+                }
+            }
             return value;
         }
 
         /**
-         * @return true to indicate asynchronous process is complete whether
-         * successfully or unsuccessfully.
+         * {@inheritDoc}
          */
         public boolean isComplete() {
             return promise.getState() != Promise.States.PENDING;
         }
 
         /**
-         * @return true to indicate asynchronous process has encountered an
-         * exception.
-         */
-        public boolean isRejected() {
-            return promise.getState() == Promise.States.REJECTED;
-        }
-
-        /**
-         * @return true to indicate asynchronous process has completed
-         * successfully.
+         * {@inheritDoc}
          */
         public boolean isFulfilled() {
             return promise.getState() == Promise.States.FULFILLED;
         }
 
         /**
-         * @return the exception thrown in the asynchronous process as a {@link
-         * Maybe} object.
+         * {@inheritDoc}
+         */
+        public boolean isRejected() {
+            return promise.getState() == Promise.States.REJECTED;
+        }
+
+        /**
+         * {@inheritDoc}
          */
         public Maybe<Exception> getException() {
             return Maybe.ofNullable(exception);

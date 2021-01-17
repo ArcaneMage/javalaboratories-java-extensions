@@ -132,6 +132,18 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
     }
 
     /**
+     * Factory method to create an instance of the {@link Maybe} object
+     * from an {@link Eval} object.
+     *
+     * @param value an {@link Eval} object.
+     * @param <T> Type of underlying value encapsulated in {@link Eval} object.
+     * @return a {@code Maybe} encapsulating {@code value}
+     */
+    public static <T> Maybe<T> ofEval(final Eval<T> value) {
+        return ofNullable(value.get());
+    }
+
+    /**
      * Factory method to create an instance of the {@link Maybe} object.
      * <p>
      * If the use case demands the {@code value} to be {@code null}, this
@@ -345,7 +357,7 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
 
     /**
      * @return {@code value} if available, otherwise throws {@link
-     * NoSuchMethodException}.
+     * NoSuchElementException}.
      *
      * @throws NoSuchElementException if {@code value} is unavailable.
      */
