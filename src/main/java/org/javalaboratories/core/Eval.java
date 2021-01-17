@@ -358,10 +358,10 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * Constructs implementation of {@link Eval} with the {@code Later}
          * strategy.
          *
-         * @param source function that computes the {@code value}.
+         * @param function function that computes the {@code value}.
          */
-        private Later(final Supplier<T> source) {
-            super(source);
+        private Later(final Supplier<T> function) {
+            super(function);
         }
 
         /**
@@ -395,12 +395,13 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * Constructs implementation of {@link Eval} with the {@code Later}
          * strategy.
          *
-         * @param source function that computes the {@code value}.
+         * @param function function that computes the {@code value}.
          */
-        private AsyncLater(final Supplier<T> source) {
-            super(source);
-            promise = Promises.newPromise(PrimaryAction.of(source,this::handle));
+        private AsyncLater(final Supplier<T> function) {
+            super(function);
+            promise = Promises.newPromise(PrimaryAction.of(function,this::handle));
         }
+
         /**
          * {@inheritDoc}
          * <p>
