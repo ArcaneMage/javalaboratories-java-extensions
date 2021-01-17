@@ -1,8 +1,6 @@
 package org.javalaboratories.core.statistics;
 
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.util.Holder;
-import org.javalaboratories.util.Holders;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,15 +27,13 @@ public class ModeCalculator<T extends Number> implements StatisticalCalculator<T
     }
 
     public List<T> getData() {
-        Holder<List<T>> result = Holders.writableHolder();
-        result.set(new ArrayList<>());
-
+        List<T> result = new ArrayList<>();
         // Regenerate data to original form
         modeMap.forEach((k,v) ->
                 LongStream.range(0,v)
-                    .forEach(c -> result.get().add(k)));
+                    .forEach(c -> result.add(k)));
 
-        return Collections.unmodifiableList(result.get());
+        return Collections.unmodifiableList(result);
     }
 
     private boolean isModeCalculable(List<T> sortedKeys) {

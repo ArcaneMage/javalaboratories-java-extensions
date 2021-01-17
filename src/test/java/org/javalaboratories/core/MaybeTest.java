@@ -2,8 +2,6 @@ package org.javalaboratories.core;
 
 import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple;
-import org.javalaboratories.util.Holder;
-import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -213,7 +211,7 @@ public class MaybeTest {
 
     @Test
     public void testMap_Pass() {
-        assertEquals(11, (int) maybe.map (String::length).get());
+        assertEquals(11, (int) maybe.map(String::length).get());
     }
 
     @Test
@@ -269,14 +267,7 @@ public class MaybeTest {
 
     @Test
     public void testForEach_Pass() {
-        Holder<Boolean> forEachHolder = Holders.writableHolder(false);
-
-        maybe.forEach(v -> forEachHolder.set(true));
-        assertTrue(forEachHolder.get());
-
-        forEachHolder.set(false);
-        empty.forEach(v -> forEachHolder.set(true));
-        assertFalse(forEachHolder.get());
+        maybe.forEach(Eval.cpeek(value -> value.map(v -> v.equals("Hello World")),value -> assertTrue(value.get())));
     }
 
     @Test

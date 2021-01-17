@@ -67,6 +67,83 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
     static <T> Eval<T> alwaysRecursive(final Trampoline<T> trampoline) { return new Always<>(trampoline);}
 
     /**
+     * Provides an implementation of the {@code PromiseLater} strategy.
+     * <p>
+     * The evaluation is performed asynchronously and once just before use and
+     * cached.
+     *
+     * @param supplier function to compute evaluation of {@code value}.
+     * @param <T> Type of resultant {@code value}.
+     * @return an {@code Later} strategy implementation.
+     */
+    static <T> AsyncEval<T> asyncLater(final Supplier<T> supplier) {
+        return new AsyncLater<>(supplier);
+    }
+
+    /**
+     * A method to provide the ability to inspect the state of {@code Consumer}
+     * functions.
+     * <p>
+     * Designed to be used with the likes of {@link Collection#forEach} methods of
+     * or any {@link Consumer} function.
+     *
+     * @param consumer function provides an {@link Eval} object encapsulating
+     *                 current {@code value}.
+     * @param <T> Type of {@code value}
+     * @return a {@link Consumer} function with augmented {@code cpeek} behaviour
+     * to enable {@code value} inspection.
+     */
+    static <T> Consumer<T> cpeek(final Consumer<? super Eval<T>> consumer) {
+        return cpeek(value -> {consumer.accept(value); return null;},null);
+    }
+
+    /**
+     * A method to provide the ability to inspect the state of a {@code Consumer}
+     * and perform an {@code action} as result of that state.
+     * <p>
+     * Designed to be used with the likes of {@link Collection#forEach} methods of
+     * or any {@link Consumer} function. The {@code action} will always be
+     * executed even in the event of an exception, but there is no {@code
+     * action}, then it will be ignored.
+     * <p>
+     * This is particularly useful to both inspect and perform an action based
+     * on that state without any side-effects, which is in contrast to the
+     * {@link org.javalaboratories.util.Holder} class. Example below illustrates
+     * this:
+     * <pre>
+     *     {@code
+     *          Maybe<Integer> maybe = Maybe.of(100);
+     *          ...
+     *          ...
+     *          maybe.forEach(Eval.cpeek(value -> value.map(v -> v > 90),
+     *             value -> assertTrue(value.get());
+     *          ...
+     *          ...
+     *     }
+     * </pre>
+     *
+     * @param function function provides an {@link Eval} object encapsulating
+     *                 current {@code value}.
+     * @param <T> Type of {@code value}
+     * @param <U> Type of {@code value} returned from {@code function}
+     * @return a {@link Consumer} function with augmented {@code cpeek} behaviour
+     * to enable {@code value} inspection.
+     */
+    static <T,U> Consumer<T> cpeek(final Function<? super Eval<T>,? extends Eval<U>> function,
+                                   final Consumer<? super Eval<U>> action) {
+        Function<? super Eval<T>,? extends Eval<U>> fn = Objects.requireNonNull(function,"Expected function");
+        return value -> {
+            Eval<U> eval = null;
+            try {
+                eval = fn.apply(Eval.eager(value));
+            } finally {
+                if (action != null)
+                    action.accept(eval);
+            }
+        };
+    }
+
+    /**
      * Provides an implementation of the {@code Eager} strategy.
      * <p>
      * The evaluation is immediate and ready for use.
@@ -99,20 +176,6 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @return an {@code Always} strategy implementation.
      */
     static <T> Eval<T> laterRecursive(final Trampoline<T> trampoline) { return new Later<>(trampoline);}
-
-    /**
-     * Provides an implementation of the {@code PromiseLater} strategy.
-     * <p>
-     * The evaluation is performed asynchronously and once just before use and
-     * cached.
-     *
-     * @param supplier function to compute evaluation of {@code value}.
-     * @param <T> Type of resultant {@code value}.
-     * @return an {@code Later} strategy implementation.
-     */
-    static <T> AsyncEval<T> asyncLater(final Supplier<T> supplier) {
-        return new AsyncLater<>(supplier);
-    }
 
     /**
      * Returns {@code this} {@link Maybe} object that satisfies the {@code

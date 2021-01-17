@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -173,6 +174,33 @@ public class EvalTest extends AbstractConcurrencyTest {
                 .anyMatch(s -> s.equals("(Later) peek value as string \"60\"")));
         assertTrue(logCaptor.getInfoLogs().stream()
                 .anyMatch(s -> s.equals("(Always) peek value as string \"60\"")));
+    }
+
+    @Test
+    public void testCPeek_Pass() {
+        // Given (setup)
+        List<Integer> numbers = Arrays.asList(10,20,40,80,160);
+        LogCaptor logCaptor = LogCaptor.forClass(EvalTest.class);
+
+        // When
+        numbers.forEach(Eval.cpeek(value -> logger.info("Eval.map: {}",value.map(v -> v + 5).get())));
+        numbers.forEach(Eval.cpeek(value -> value.map(v -> true),
+                value -> {assertTrue(value.get()); logger.info("{}",value);}));
+
+        long logCount = logCaptor.getInfoLogs().stream()
+                .filter(s -> s.equals("Eval.map: 15") ||
+                             s.equals("Eval.map: 25") ||
+                             s.equals("Eval.map: 45") ||
+                             s.equals("Eval.map: 85") ||
+                             s.equals("Eval.map: 165"))
+                .count();
+        long logActions = logCaptor.getInfoLogs().stream()
+                .filter(s -> s.equals("Always[true]"))
+                .count();
+
+        // Then
+        assertEquals(5,logCount);
+        assertEquals(5,logActions);
     }
 
     @Test

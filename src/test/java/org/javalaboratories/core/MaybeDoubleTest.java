@@ -1,7 +1,5 @@
 package org.javalaboratories.core;
 
-import org.javalaboratories.util.Holder;
-import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -131,14 +129,7 @@ public class MaybeDoubleTest {
 
     @Test
     public void testForEach_Pass() {
-        Holder<Boolean> forEachHolder = Holders.writableHolder(false);
-
-        nullable.forEach(v -> forEachHolder.set(true));
-        assertTrue(forEachHolder.get());
-
-        forEachHolder.set(false);
-        empty.forEach(v -> forEachHolder.set(true));
-        assertFalse(forEachHolder.get());
+        nullable.forEach(Eval.cpeek(value -> value.map(v -> true),value -> assertTrue(value.get())));
     }
 
     @Test
