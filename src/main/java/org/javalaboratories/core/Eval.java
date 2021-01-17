@@ -471,14 +471,14 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
     /**
      * Implements the {@code Eager} strategy for the {@link Eval} interface.
      * <p>
-     * The evaluation of the {@code value} deferred until it is required for
-     * use. The evaluation of the {@code value} is performed once and cached.
+     * The evaluation of the {@code value} is immediate and ready for use.
      *
      * @param <T> Type of {@code value}.
      */
     final class Eager<T> extends Later<T> {
         private Eager(final T value) {
             super((Supplier<T>)() -> value);
+            // Cache the value immediately
             value();
         }
     }
