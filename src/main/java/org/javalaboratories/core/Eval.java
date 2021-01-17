@@ -107,7 +107,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * action}, then it will be ignored.
      * <p>
      * This is particularly useful to both inspect and perform an action based
-     * on that state without any side-effects, which is in contrast to the
+     * on a state without any side-effects, which is in contrast to the
      * {@link org.javalaboratories.util.Holder} class. Example below illustrates
      * this:
      * <pre>
