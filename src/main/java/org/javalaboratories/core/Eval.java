@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core;
 
+import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.concurrency.AsyncEval;
 import org.javalaboratories.core.concurrency.PrimaryAction;
 import org.javalaboratories.core.concurrency.Promise;
@@ -38,10 +39,34 @@ import java.util.function.*;
  *     <li>Always - the {@code value} is always evaluated just before use and
  *     never cached.</li>
  * </ol>
+ * <p>
+ * This implementation was inspired by the Scala's Cat implementation
+ * of {@code Eval}.
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
 public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
+
+    /**
+     * Evaluate object depicting {@code FALSE} Boolean values
+     */
+    Eval<Boolean> FALSE = Eval.eager(false);
+    /**
+     * Evaluate object depicting {@code TRUE} Boolean values
+     */
+    Eval<Boolean> TRUE = Eval.eager(true);
+    /**
+     * Evaluate object depicting {@code ZERO} Integer values
+     */
+    Eval<Integer> ZERO = Eval.eager(0);
+    /**
+     * Evaluate object depicting {@code ONE} Integer values
+     */
+    Eval<Integer> ONE = Eval.eager(1);
+    /**
+     * Evaluate object depicting {@code EMPTY} String values
+     */
+    Eval<String> EMPTY = Eval.eager("");
 
     /**
      * Provides an implementation of the {@code Always} strategy.
@@ -152,7 +177,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param <T> Type of resultant {@code value}.
      * @return an {@code Eager} strategy implementation.
      */
-    static <T> Eval<T> eager(final T value) { return Eval.always(() -> value);}
+    static <T> Eval<T> eager(final T value) { return new Eager<>(value);}
 
     /**
      * Provides an implementation of the {@code Later} strategy.
@@ -276,8 +301,10 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @param <T> Type of lazily computed {@code value}.
      */
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     class Always<T> implements Eval<T> {
         private final Trampoline<T> evaluate;
+        @EqualsAndHashCode.Include
         T value;
 
         /**
@@ -438,6 +465,21 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
             if (value == null)
                 value = super.value();
             return value;
+        }
+    }
+
+    /**
+     * Implements the {@code Eager} strategy for the {@link Eval} interface.
+     * <p>
+     * The evaluation of the {@code value} deferred until it is required for
+     * use. The evaluation of the {@code value} is performed once and cached.
+     *
+     * @param <T> Type of {@code value}.
+     */
+    final class Eager<T> extends Later<T> {
+        private Eager(final T value) {
+            super((Supplier<T>)() -> value);
+            value();
         }
     }
 

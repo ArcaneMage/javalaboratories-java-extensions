@@ -65,8 +65,17 @@ public class EvalTest extends AbstractConcurrencyTest {
 
         assertEquals("Always[unset]",always.toString());
         assertEquals("Always[unset]", alwaysR.toString());
-        assertEquals("Always[unset]",eager.toString());
+        assertEquals("Eager[12]",eager.toString());
         assertEquals("Later[unset]",later.toString());
+    }
+
+    @Test
+    public void testConstants_Pass() {
+        assertEquals(1,Eval.ONE.get());
+        assertEquals(0,Eval.ZERO.get());
+        assertEquals(true,Eval.TRUE.get());
+        assertEquals(false,Eval.FALSE.get());
+        assertEquals("",Eval.EMPTY.get());
     }
 
     @Test
@@ -195,7 +204,7 @@ public class EvalTest extends AbstractConcurrencyTest {
                              s.equals("Eval.map: 165"))
                 .count();
         long logActions = logCaptor.getInfoLogs().stream()
-                .filter(s -> s.equals("Always[true]"))
+                .filter(s -> s.equals("Eager[true]"))
                 .count();
 
         // Then
