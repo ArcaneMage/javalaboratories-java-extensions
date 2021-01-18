@@ -308,8 +308,7 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
      * @throws NullPointerException if {@code predicate} function is {@code null}.
      */
     public Maybe<T> filterNot(final Predicate<? super T> predicate) {
-        Maybe<T> result = filter(predicate);
-        return result.isPresent() ? Maybe.empty() : this;
+        return filter(predicate.negate());
     }
 
     /**

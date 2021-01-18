@@ -48,23 +48,23 @@ import java.util.function.*;
 public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
 
     /**
-     * Evaluate object depicting {@code FALSE} Boolean values
+     * Evaluate object for {@code FALSE} Boolean value
      */
     Eval<Boolean> FALSE = Eval.eager(false);
     /**
-     * Evaluate object depicting {@code TRUE} Boolean values
+     * Evaluate object for {@code TRUE} Boolean value
      */
     Eval<Boolean> TRUE = Eval.eager(true);
     /**
-     * Evaluate object depicting {@code ZERO} Integer values
+     * Evaluate object for {@code ZERO} Integer value
      */
     Eval<Integer> ZERO = Eval.eager(0);
     /**
-     * Evaluate object depicting {@code ONE} Integer values
+     * Evaluate object for {@code ONE} Integer value
      */
     Eval<Integer> ONE = Eval.eager(1);
     /**
-     * Evaluate object depicting {@code EMPTY} String values
+     * Evaluate object for {@code EMPTY} String value
      */
     Eval<String> EMPTY = Eval.eager("");
 
@@ -157,7 +157,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
         Predicate<? super Eval<T>> p = Objects.requireNonNull(predicate,"Expected predicate");
         return value -> {
             Eval<T> eval;
-            if ( action != null && p.test(eval = Eval.eager(value)))
+            if (action != null && p.test(eval = Eval.eager(value)))
                 action.accept(eval);
         };
     }
@@ -217,8 +217,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @throws NullPointerException if {@code predicate} function is {@code null}.
      */
     default Maybe<Eval<T>> filterNot(final Predicate<? super T> predicate) {
-        Maybe<Eval<T>> maybe = filter(predicate);
-        return maybe.isPresent() ? Maybe.empty() : Maybe.of(this);
+        return filter(predicate.negate());
     }
 
     /**
@@ -333,8 +332,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
         @Override
         public Maybe<Eval<T>> filter(final Predicate<? super T> predicate) {
             Objects.requireNonNull(predicate,"Expect predicate function");
-            T value = value();
-            return predicate.test(value) ? Maybe.of(this) : Maybe.empty();
+            return predicate.test(value()) ? Maybe.of(this) : Maybe.empty();
         }
 
         /**
