@@ -267,7 +267,7 @@ public class MaybeTest {
 
     @Test
     public void testForEach_Pass() {
-        maybe.forEach(Eval.cpeek(value -> value.map(v -> v.equals("Hello World")),value -> assertTrue(value.get())));
+        maybe.forEach(Eval.cpeek(value -> value.get().equals("Hello World"),value -> assertEquals("Hello World",value.get())));
     }
 
     @Test

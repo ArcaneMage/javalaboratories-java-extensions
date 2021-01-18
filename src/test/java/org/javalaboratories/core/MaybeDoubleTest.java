@@ -129,7 +129,7 @@ public class MaybeDoubleTest {
 
     @Test
     public void testForEach_Pass() {
-        nullable.forEach(Eval.cpeek(value -> value.map(v -> true),value -> assertTrue(value.get())));
+        nullable.forEach(Eval.cpeek(value -> value.get() > 90.0,value -> assertEquals(99.9999,value.get())));
     }
 
     @Test

@@ -193,8 +193,7 @@ public class EvalTest extends AbstractConcurrencyTest {
 
         // When
         numbers.forEach(Eval.cpeek(value -> logger.info("Eval.map: {}",value.map(v -> v + 5).get())));
-        numbers.forEach(Eval.cpeek(value -> value.map(v -> true),
-                value -> {assertTrue(value.get()); logger.info("{}",value);}));
+        numbers.forEach(Eval.cpeek(value -> value.get() > 0, value -> logger.info("{}",value)));
 
         long logCount = logCaptor.getInfoLogs().stream()
                 .filter(s -> s.equals("Eval.map: 15") ||
@@ -204,7 +203,11 @@ public class EvalTest extends AbstractConcurrencyTest {
                              s.equals("Eval.map: 165"))
                 .count();
         long logActions = logCaptor.getInfoLogs().stream()
-                .filter(s -> s.equals("Eager[true]"))
+                .filter(s -> s.equals("Eager[10]") ||
+                             s.equals("Eager[20]") ||
+                             s.equals("Eager[40]") ||
+                             s.equals("Eager[80]") ||
+                             s.equals("Eager[160]"))
                 .count();
 
         // Then
