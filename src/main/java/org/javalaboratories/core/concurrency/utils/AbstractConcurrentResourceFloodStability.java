@@ -30,16 +30,17 @@ import static org.javalaboratories.core.concurrency.utils.ResourceFloodStability
 
 /**
  * This class manages a thread pool of {@code flood workers} who are tasked with
- * sending multiple requests to the {@link Target's} {@code resource(s)}.
+ * sending multiple requests to the {@link ResourceFloodStability.Target} {@code
+ * resource(s)}.
  * <p>
  * The results are then returned, ({@link Runnable} types do not have the ability
  * to return values), to the client object. After calling the method
- * {@link AbstractConcurrentResourceFloodStability#flood()}, the default behaviour of
- * class is to immediately {@code flood} the {@link Target} without any concerns
- * for timing or synchronization the start process -- in other words there is no
- * "starter pistol". This may be sufficient for many tests, but other
- * strategies should be considered to increase the chances of thread interleaving
- * and race conditions.
+ * {@link AbstractConcurrentResourceFloodStability#flood()}, the default behaviour
+ * of class is to immediately {@code flood} the {@link ResourceFloodStability.Target}
+ * without any concerns for timing or synchronization of the start process -- in
+ * other words there is no "starter pistol". This may be sufficient for many tests,
+ * but other strategies should be considered to increase the chances of thread
+ * interleaving and race conditions.
  * <p>
  * Post-flood, all allocated resources associated with the
  * {@link FloodExecutorService} are destroyed. However, if the
@@ -47,7 +48,8 @@ import static org.javalaboratories.core.concurrency.utils.ResourceFloodStability
  * {@code flood} is unused for whatever reason, it is highly recommend to call
  * the {@link AbstractConcurrentResourceFloodStability#close()} method to clean up.
  *
- * @param <T> Type of value returned from the {@link Target's} {@code resource}
+ * @param <T> Type of value returned from the {@link ResourceFloodStability.Target}
+ * {@code resource}
  * @see Floodgate
  * @see Torrent
  */
@@ -82,7 +84,7 @@ public abstract class AbstractConcurrentResourceFloodStability<T> extends Abstra
      * <p>
      * This constructor assumes the {@code tag} is unnecessary.
      *
-     * @param clazz class of {@link Target} undergoing test.
+     * @param clazz class of {@link ResourceFloodStability.Target} undergoing test.
      * @param threads number of active threads tasked with sending requests
      *               to {@code resource}
      * @param iterations number of request repetitions per request thread
@@ -97,7 +99,7 @@ public abstract class AbstractConcurrentResourceFloodStability<T> extends Abstra
     /**
      * Constructs an instance of this {@link ConcurrentResourceFloodStability} object.
      * <p>
-     * @param clazz class of {@link Target} undergoing test.
+     * @param clazz class of {@link ResourceFloodStability.Target} undergoing test.
      * @param tag a meaningful name of the resource under test.
      * @param threads number of active threads tasked with sending requests
      *               to {@code resource}
@@ -114,7 +116,7 @@ public abstract class AbstractConcurrentResourceFloodStability<T> extends Abstra
     /**
      * Constructs an instance of this {@link ConcurrentResourceFloodStability} object.
      * <p>
-     * @param clazz class of {@link Target} undergoing test.
+     * @param clazz class of {@link ResourceFloodStability.Target} undergoing test.
      * @param tag a meaningful name of the resource under test.
      * @param threads number of active threads tasked with sending requests
      *               to {@code resource}
@@ -204,8 +206,8 @@ public abstract class AbstractConcurrentResourceFloodStability<T> extends Abstra
     }
 
     /**
-     * Floods the {@link Target} with requests and blocks the current thread,
-     * waiting for the flood to complete.
+     * Floods the {@link ResourceFloodStability.Target} with requests and blocks
+     * the current thread, waiting for the flood to complete.
      * <p>
      * Specify the {@code timeout} and its {@code unit} to inform
      * {@link ResourceFloodStability} how long to wait for flood completion. If
@@ -219,10 +221,10 @@ public abstract class AbstractConcurrentResourceFloodStability<T> extends Abstra
      * thread. For a more sophisticated mechanism, it is recommended to override
      * the {@code await} method.
      *
-     * @param timeout maximum time to wait
+     * @param timeout maximum time to wait.
      * @param unit the unit of the timeout.
-     * @return a list of values returned from each {@code thread} request,
-     * if possible.
+     * @return a list of values returned from each {@code thread} request, if
+     * possible.
      */
     public final List<T> flood(final long timeout, final TimeUnit unit) {
         if (this.getState() != OPENED)

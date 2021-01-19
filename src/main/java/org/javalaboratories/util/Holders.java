@@ -5,7 +5,7 @@ import org.javalaboratories.core.Eval;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  *
  * @deprecated class is replaced with a pure alternative, namely {@link Eval},
  * which does not have to rely on side-effects. Refer to the {@link Eval
- * #cpeek(Consumer)} and {@link Eval#cpeek(Function, Consumer)} methods for
+ * #cpeek(Consumer)} and {@link Eval#cpeek(Predicate, Consumer)} methods for
  * details.
  */
 @SuppressWarnings("WeakerAccess")

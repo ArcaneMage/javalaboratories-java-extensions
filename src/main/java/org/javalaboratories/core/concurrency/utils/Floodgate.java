@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 
 /**
  * This class has the ability to send multiple requests concurrently to the
- * {@link Target's} {@code resource(s)}.
+ * {@link ResourceFloodStability.Target} {@code resource(s)}.
  * <p>
  * It leverages the concept of {@code flood marshals}, {@link FloodMarshal}.
  * These marshals have the authority to tell the {@code flood workers} exactly
@@ -57,7 +57,8 @@ import java.util.function.Supplier;
  * working simultaneously. Both {@code threads} and {@code iterations/repetitions}
  * can be overridden via alternative constructors.
  *
- * @param <T> Type of value returned from {@link Target} {@code resource}
+ * @param <T> Type of value returned from {@link ResourceFloodStability.Target}
+ * {@code resource}
  * @see Floodgate
  */
 @Getter
