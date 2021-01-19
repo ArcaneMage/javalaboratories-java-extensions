@@ -70,6 +70,22 @@ public class EvalTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    public void testEqual_Pass() {
+        // Given (setup)
+        Eval<Integer> asyncLater = Eval.asyncLater(() -> 12).resolve();
+        Eval<Integer> later = Eval.later(() -> 12).resolve();
+        Eval<Integer> always = Eval.always(() -> 12).resolve();
+
+        // Then
+        assertNotEquals(eager,asyncLater);
+        assertNotEquals(asyncLater,later);
+        assertNotEquals(later,always);
+        assertEquals(eager,Eval.eager(12));
+        assertEquals(always,Eval.always(() -> 12).resolve());
+        assertEquals(later,Eval.later(() -> 12).resolve());
+    }
+
+    @Test
     public void testConstants_Pass() {
         assertEquals(1,Eval.ONE.get());
         assertEquals(0,Eval.ZERO.get());

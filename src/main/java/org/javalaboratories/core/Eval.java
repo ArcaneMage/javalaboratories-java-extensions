@@ -266,7 +266,18 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @return an {@link Eval} with the "cached" value.
      */
-    Eval <T> reserve();
+    Eval<T> reserve();
+
+    /**
+     * Invokes evaluation of the {@code value} and returns {@code this} with
+     * resolved {@code value}.
+     *
+     * @return Eval object with resolved value.
+     */
+    default Eval<T> resolve() {
+        get();
+        return this;
+    }
 
     /**
      * Returns an immutable list of containing {@code this} {@code value}.
@@ -296,6 +307,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      */
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     class Always<T> implements Eval<T> {
+        final Object lock = new Object();
         private final Trampoline<T> evaluate;
         @EqualsAndHashCode.Include
         T value;
@@ -384,7 +396,10 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          */
         @Override
         public String toString() {
-            String value = this.value == null ? "unset" : String.valueOf(this.value);
+            String value;
+            synchronized (lock) {
+                value = this.value == null ? "unset" : String.valueOf(this.value);
+            }
             return String.format("%s[%s]",getClass().getSimpleName(),value);
         }
 
@@ -404,12 +419,14 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * conclude}.
          */
         protected T value() {
-            value = evaluate.result();
-            if (value instanceof Trampoline) {
-                throw new IllegalStateException("Trampoline unresolvable -- " +
-                        "review recursion logic");
+            synchronized(lock) {
+                value = evaluate.result();
+                if (value instanceof Trampoline) {
+                    throw new IllegalStateException("Trampoline unresolvable -- " +
+                            "review recursion logic");
+                }
+                return value;
             }
-            return value;
         }
     }
 
@@ -421,6 +438,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @param <T> Type of lazily computed {@code value}.
      */
+    @EqualsAndHashCode(callSuper = true)
     class Later<T> extends Always<T> {
         /**
          * Constructs implementation of {@link Eval} with the {@code Later}
@@ -454,9 +472,11 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          */
         @Override
         protected T value() {
-            if (value == null)
-                value = super.value();
-            return value;
+            synchronized(lock) {
+                if (value == null)
+                    value = super.value();
+                return value;
+            }
         }
     }
 
@@ -467,11 +487,13 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @param <T> Type of {@code value}.
      */
+    @EqualsAndHashCode(callSuper = true)
     final class Eager<T> extends Later<T> {
         private Eager(final T value) {
             super((Supplier<T>)() -> value);
             // Cache the value immediately
-            value();
+            // It is okay to call this public instance method: class is final.
+            resolve();
         }
     }
 
@@ -484,7 +506,8 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @param <T> Type of lazily computed {@code value}.
      */
-    class AsyncLater<T> extends Later<T> implements AsyncEval<T> {
+    @EqualsAndHashCode(callSuper = true)
+    final class AsyncLater<T> extends Later<T> implements AsyncEval<T> {
         private final Promise<T> promise;
         private Exception exception;
 
@@ -509,14 +532,17 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          */
         @Override
         protected T value() {
-            if (value == null) {
-                value = promise.getResult().orElse(null);
-                if (isRejected()) {
-                    throw new NoSuchElementException("Evaluation not possible due" +
-                            " to asynchronous exception");
-                }
+            Maybe<T> maybe = promise.getResult();
+            if (isRejected()) {
+                throw new NoSuchElementException("Evaluation not possible due" +
+                        " to asynchronous exception");
             }
-            return value;
+            synchronized(lock) {
+                if (value == null) {
+                    value = maybe.orElse(null);
+                }
+                return value;
+            }
         }
 
         /**
@@ -544,11 +570,15 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * {@inheritDoc}
          */
         public Maybe<Exception> getException() {
-            return Maybe.ofNullable(exception);
+            synchronized (lock) {
+                return Maybe.ofNullable(exception);
+            }
         }
 
         private void handle(final T value, final Throwable e) {
-            exception = (Exception) e;
+            synchronized(lock) {
+                exception = (Exception) e;
+            }
         }
     }
 }
