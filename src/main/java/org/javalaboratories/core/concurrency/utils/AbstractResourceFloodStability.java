@@ -22,15 +22,15 @@ import java.util.Objects;
 
 /**
  * Partially implements the {@link ResourceFloodStability} interface, providing
- * {@link Target} object.
+ * {@link ResourceFloodStability.Target} object.
  * <p>
  * It is recommended to extend this class to provide behaviour for flooding
  * targets with requests. It formally registers the {@code target} that is to
- * undergo the flood test. All {@link ResourceFloodStability} objects should inherit
- * from this class, calling its constructor.
+ * undergo the flood test. All {@link ResourceFloodStability} objects should
+ * inherit from this class, calling its constructor.
  *
  * @param <T> Type of return value from targeted {@code resource} under test.
- * @see Target
+ * @see ResourceFloodStability.Target
  * @see AbstractConcurrentResourceFloodStability
  * @see Floodgate
  * @see Torrent
@@ -46,7 +46,7 @@ public abstract class AbstractResourceFloodStability<T> implements ResourceFlood
      * <p>
      * Use this constructor when targeting multiple targets.
      *
-     * @see Target
+     * @see ResourceFloodStability.Target
      */
     public AbstractResourceFloodStability() {
         target = Target.getIndeterminateTarget();
@@ -57,8 +57,8 @@ public abstract class AbstractResourceFloodStability<T> implements ResourceFlood
      * <p>
      * Use this constructor when targeting a specific aspect of the target,
      * for example web-server API or a particular method of the target
-     * object and it is encouraged to report the {@link Target} to clients
-     * of this object.
+     * object and it is encouraged to report the {@link
+     * ResourceFloodStability.Target} to clients of this object.
      * <p>
      * A {@code tag} provides a meaningful name of the {@code resource}
      * under test. It will form part of the {@code target} name. This would be
@@ -70,7 +70,7 @@ public abstract class AbstractResourceFloodStability<T> implements ResourceFlood
      * @param <U> type of resource object.
      *
      * @throws NullPointerException if {@code clazz} is null
-     * @see Target
+     * @see ResourceFloodStability.Target
      */
     public <U> AbstractResourceFloodStability(final Class<U> clazz, final String tag) {
         Class<U> c = Objects.requireNonNull(clazz);

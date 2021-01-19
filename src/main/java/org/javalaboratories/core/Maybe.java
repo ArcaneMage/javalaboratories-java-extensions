@@ -371,7 +371,7 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
      * Returns {@code value} of {@code this} object if available, otherwise the
      * {@code other} value is returned.
      *
-     * @deprecated Consider using the {@link this#orElse(Object)} instead.
+     * @deprecated Consider using the {@link Maybe#orElse(Object)} instead.
      */
     @Deprecated
     public T getOrElse(final T other) {
@@ -415,7 +415,7 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
      *
      * @param mapper function to apply the transformation, if {@code value} is
      *               nonempty.
-     * @param <U> Type of transformed {@value}
+     * @param <U> Type of transformed {@code value}
      * @return Maybe object of transformed {@code value}.
      * @throws NullPointerException if {@code mapper} is null.
      */

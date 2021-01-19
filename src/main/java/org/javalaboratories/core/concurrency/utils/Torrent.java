@@ -179,7 +179,8 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      *
      * @return a {@link Map} of {@link List} objects containing results from each
      * {@code flood worker}, ready for inspection.
-     * @throws IllegalStateException if not in {@link States#OPENED} state.
+     * @throws IllegalStateException if not in
+     * {@link ResourceFloodStability.States#OPENED} state.
      */
     @Override
     public Map<String,List<?>> flood() {

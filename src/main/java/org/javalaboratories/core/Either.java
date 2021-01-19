@@ -433,7 +433,7 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * applicable to this implementation. For example, {@code map}, {@code
      * flatMap} are fully implemented.
      * <p>
-     * Use the {@link Right#Right(Object)} or {@link Either#right(Object)} to
+     * Use the {@link Either#left(Object)} or {@link Either#right(Object)} to
      * create an instance of this object.
      * <p>
      * @param <A> Type of left value.
@@ -622,7 +622,7 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * flatMap} are fully implemented. Instead, this object is returned,
      * therefore such operations have no effect on the {@code left} value.
      * <p>
-     * Use the {@link Left#Left(Object)} or {@link Either#left(Object)} to
+     * Use the {@link Left#left(Object)} or {@link Either#right(Object)} to
      * create an instance of this object.
      * <p>
      * @param <A> Type of left value.
