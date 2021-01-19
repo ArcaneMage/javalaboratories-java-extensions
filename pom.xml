@@ -6,12 +6,12 @@
 
     <groupId>org.javalaboratories</groupId>
     <artifactId>java-extensions</artifactId>
-    <version>1.0.3-RELEASE</version>
+    <version>1.1.0-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>This is a library of Java utilities to help programming with lambda
-        just that a little bit more joyful, particularly for Java-8 developers
-        but not exclusively.</description>
+    <description>This is a library of utilities to encourage functional
+        programming in Java, particularly for Java-8 developers but not
+        exclusively.</description>
     <url>https://github.com/arcanemage/excelsior-software-java-extensions</url>
 
     <licenses>

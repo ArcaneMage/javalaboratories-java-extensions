@@ -1,4 +1,3 @@
-package org.javalaboratories.core.tuple;
 /*
  * Copyright 2020 Kevin Henry
  *
@@ -14,8 +13,9 @@ package org.javalaboratories.core.tuple;
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package org.javalaboratories.core.tuple;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.regex.Pattern;
 
@@ -44,5 +44,5 @@ public interface MatchablePatternAware {
      * @return pattern associated with element at {@code position}
      * @throws IllegalArgumentException if {@code position} value is invalid.
      */
-    Nullable<Pattern> getPattern(int position);
+    Maybe<Pattern> getPattern(int position);
 }

@@ -1,6 +1,6 @@
 package org.javalaboratories.core.tuple;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -10,12 +10,12 @@ public final class Tuples {
     @SuppressWarnings("unchecked")
     public static <T> T emptyTuple() { return (T) Tuple.of(); }
 
-    public static <T extends Tuple,E> Nullable<T> fromIterable(Iterable<E> iterable, int depth) {
+    public static <T extends Tuple,E> Maybe<T> fromIterable(Iterable<E> iterable, int depth) {
         return fromIterable(iterable, 0, depth);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Tuple,E> Nullable<T> fromIterable(Iterable<E> iterable, int start, int depth) {
+    public static <T extends Tuple,E> Maybe<T> fromIterable(Iterable<E> iterable, int start, int depth) {
         Iterator<E> it = iterable.iterator();
         T result = null;
         try {
@@ -45,7 +45,7 @@ public final class Tuples {
         } catch (NoSuchElementException e) {
             // Handled
         }
-        return Nullable.ofNullable(result);
+        return Maybe.ofNullable(result);
     }
 
     private Tuples() {}

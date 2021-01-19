@@ -68,7 +68,7 @@ public class DoubleStatisticalCalculatorsTest {
     @Test
     public void testToString_Pass() {
         assertEquals("DoubleStatisticalCalculators{count=10, sum=192.0, min=13.0, average=19.2, max=24.0, " +
-                "mode=Nullable[21.0], median=20.000000, variance=9.560000, standard-deviation=3.091925}", calculators.toString());
+                "mode=Maybe[21.0], median=20.000000, variance=9.560000, standard-deviation=3.091925}", calculators.toString());
     }
 
 }

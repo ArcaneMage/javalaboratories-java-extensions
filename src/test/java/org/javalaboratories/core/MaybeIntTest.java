@@ -1,7 +1,5 @@
 package org.javalaboratories.core;
 
-import org.javalaboratories.util.Holder;
-import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +11,12 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableIntTest {
+public class MaybeIntTest {
 
     private Optional<Integer> optional;
-    private NullableInt nullable;
-    private NullableInt nullable2;
-    private NullableInt empty;
+    private MaybeInt nullable;
+    private MaybeInt nullable2;
+    private MaybeInt empty;
 
     private static final Consumer<Integer> DO_NOTHING_CONSUMER = (value) -> {};
     private static final Runnable DO_NOTHING_RUNNABLE = () -> {};
@@ -26,9 +24,9 @@ public class NullableIntTest {
     @BeforeEach
     public void setup() {
         optional = Optional.of(99);
-        nullable = NullableInt.of(99);
-        nullable2 = NullableInt.of(optional);
-        empty = NullableInt.empty();
+        nullable = MaybeInt.of(99);
+        nullable2 = MaybeInt.of(optional);
+        empty = MaybeInt.empty();
     }
 
     @Test
@@ -40,14 +38,14 @@ public class NullableIntTest {
 
     @Test
     public void testEquals_Pass() {
-        NullableInt twin = NullableInt.of(99);
+        MaybeInt twin = MaybeInt.of(99);
         assertEquals(nullable,twin);
         assertEquals(nullable, nullable);
     }
 
     @Test
     public void testHashCode_Pass() {
-        NullableInt twin = NullableInt.of(99);
+        MaybeInt twin = MaybeInt.of(99);
         assertEquals(nullable.hashCode(),twin.hashCode());
     }
 
@@ -125,20 +123,13 @@ public class NullableIntTest {
 
     @Test
     public void testToNullable_Pass() {
-        Nullable<Integer> value = nullable.toNullable();
+        Maybe<Integer> value = nullable.toNullable();
         value.ifPresent((v -> assertEquals((Integer) 99,v)));
     }
 
     @Test
     public void testForEach_Pass() {
-        Holder<Boolean> forEachHolder = Holders.writableHolder(false);
-
-        nullable.forEach(v -> forEachHolder.set(true));
-        assertTrue(forEachHolder.get());
-
-        forEachHolder.set(false);
-        empty.forEach(v -> forEachHolder.set(true));
-        assertFalse(forEachHolder.get());
+        nullable.forEach(Eval.cpeek(value -> value.get() > 90,value -> assertEquals(99,value.get())));
     }
 
     @Test

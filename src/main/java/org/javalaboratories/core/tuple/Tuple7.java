@@ -1,7 +1,7 @@
 package org.javalaboratories.core.tuple;
 
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.function.Consumer7;
 import org.javalaboratories.core.function.Function7;
 
@@ -47,13 +47,13 @@ public final class Tuple7<T1,T2,T3,T4,T5,T6,T7> extends AbstractTuple {
      * Converts iterable into a tuple, if possible.
      * <p>
      * Creates a tuple to a depth of 7 from iterable object. If there is
-     * insufficient elements, then {@link Nullable} will be empty.
+     * insufficient elements, then {@link Maybe} will be empty.
      *
      * @param iterable Iterable object
      * @param <T> iterable type.
-     * @return A tuple in {@link Nullable} object container.
+     * @return A tuple in {@link Maybe} object container.
      */
-    public static <T> Nullable<Tuple7<T,T,T,T,T,T,T>> fromIterable(Iterable<T> iterable) {
+    public static <T> Maybe<Tuple7<T,T,T,T,T,T,T>> fromIterable(Iterable<T> iterable) {
         return Tuples.fromIterable(iterable, 7);
     }
 

@@ -1,19 +1,30 @@
 package org.javalaboratories.util;
 
+import org.javalaboratories.core.Eval;
+
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
  * Holder utility class
  * <p>
- * Generally used in lambda expressions to mutate objects declared as effectively final.
+ * Generally used in lambda expressions to mutate objects declared as
+ * effectively final.
  * <p>
  * Use this class to create a variety of {@code Holder} objects, which can be
  * thread-safe, immutable as well as mutable. Each factory method describes
  * the type writableHolder implementation it creates.
+ *
+ * @deprecated class is replaced with a pure alternative, namely {@link Eval},
+ * which does not have to rely on side-effects. Refer to the {@link Eval
+ * #cpeek(Consumer)} and {@link Eval#cpeek(Function, Consumer)} methods for
+ * details.
  */
 @SuppressWarnings("WeakerAccess")
+@Deprecated
 public final class Holders {
 
     /**

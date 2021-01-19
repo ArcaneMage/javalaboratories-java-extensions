@@ -16,7 +16,8 @@
 package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
+import org.javalaboratories.util.Generics;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -43,7 +44,7 @@ import java.util.function.Consumer;
  */
 @EqualsAndHashCode(callSuper=false)
 public final class TaskAction<T> extends AbstractAction<T> {
-    private final Consumer<T> task;
+    private final Consumer<? super T> task;
 
     /**
      * Constructor to setup internal handlers.
@@ -52,7 +53,7 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * @param task main task handler that will be executed asynchronously.
      * @throws NullPointerException if task parameter is null.
      */
-    private TaskAction(final Consumer<T> task) {
+    private TaskAction(final Consumer<? super T> task) {
         this(task, null);
     }
 
@@ -67,7 +68,7 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * @param completionHandler to handle task completion -- this is optional.
      * @throws NullPointerException if task parameter is null.
      */
-    private TaskAction(final Consumer<T> task, final BiConsumer<T,Throwable> completionHandler) {
+    private TaskAction(final Consumer<? super T> task, final BiConsumer<? super T,Throwable> completionHandler) {
         super(completionHandler);
         this.task = Objects.requireNonNull(task,"No task?");
     }
@@ -78,7 +79,7 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * @param task main task handler that will be executed asynchronously.
      * @throws NullPointerException if task parameter is null.
      */
-    public static <T> TaskAction<T> of(Consumer<T> task) {
+    public static <T> TaskAction<T> of(Consumer<? super T> task) {
         return new TaskAction<>(task);
     }
 
@@ -92,14 +93,14 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * @param completionHandler to handle task completion -- this is optional.
      * @throws NullPointerException if task parameter is null.
      */
-    public static <T> TaskAction<T> of(Consumer<T> task, BiConsumer<T,Throwable> completionHandler) {
+    public static <T> TaskAction<T> of(Consumer<? super T> task, BiConsumer<? super T,Throwable> completionHandler) {
         return new TaskAction<>(task, completionHandler);
     }
 
     /**
      * @return this {@link TaskAction} task handler.
      */
-    public Nullable<Consumer<T>> getTask() {
-        return Nullable.ofNullable(task);
+    public Maybe<Consumer<T>> getTask() {
+        return Generics.unchecked(Maybe.ofNullable(task));
     }
 }

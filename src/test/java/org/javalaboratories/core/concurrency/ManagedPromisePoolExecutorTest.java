@@ -67,7 +67,7 @@ public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
         pool.stop(500,false);
 
         // Then
-        assertTrue(logCaptor.getErrorLogs().contains("Termination of capacity (promises) interrupted -- promises not kept"));
+        assertTrue(logCaptor.getErrorLogs().contains("Termination of threads (promises) interrupted -- promises not kept"));
     }
 
     @Test

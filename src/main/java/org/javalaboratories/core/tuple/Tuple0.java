@@ -1,6 +1,6 @@
 package org.javalaboratories.core.tuple;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.*;
 import java.util.function.Function;
@@ -49,7 +49,7 @@ public final class Tuple0 implements Tuple {
     @Override
     public <R extends Tuple> R join(final Tuple that) {
         Objects.requireNonNull(that);
-        Nullable<R> result = Tuples.fromIterable(that.toList(),that.depth());
+        Maybe<R> result = Tuples.fromIterable(that.toList(),that.depth());
         return result.get();
     }
 

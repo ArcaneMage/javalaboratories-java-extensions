@@ -1,14 +1,12 @@
 package org.javalaboratories.core.statistics;
 
-import org.javalaboratories.util.Holder;
-import org.javalaboratories.util.Holders;
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-public class ModeCalculator<T extends Number> implements StatisticalCalculator<T, Nullable<Double>>{
+public class ModeCalculator<T extends Number> implements StatisticalCalculator<T, Maybe<Double>>{
     private Map<T,Long> modeMap = new HashMap<>();
 
     public void accept(T value) {
@@ -18,26 +16,24 @@ public class ModeCalculator<T extends Number> implements StatisticalCalculator<T
         modeMap.put(value,++count);
     }
 
-    public Nullable<Double> getResult() {
+    public Maybe<Double> getResult() {
         if ( modeMap.size() == 0)
             throw new InsufficientPopulationException("Could not calculate mode");
         List<T> result = modeMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        return isModeCalculable(result) ? Nullable.of(result.get(0).doubleValue()) : Nullable.empty();
+        return isModeCalculable(result) ? Maybe.of(result.get(0).doubleValue()) : Maybe.empty();
     }
 
     public List<T> getData() {
-        Holder<List<T>> result = Holders.writableHolder();
-        result.set(new ArrayList<>());
-
+        List<T> result = new ArrayList<>();
         // Regenerate data to original form
         modeMap.forEach((k,v) ->
                 LongStream.range(0,v)
-                    .forEach(c -> result.get().add(k)));
+                    .forEach(c -> result.add(k)));
 
-        return Collections.unmodifiableList(result.get());
+        return Collections.unmodifiableList(result);
     }
 
     private boolean isModeCalculable(List<T> sortedKeys) {

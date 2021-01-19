@@ -15,10 +15,12 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * The {@code Promise} object is a lightweight abstraction of the
@@ -42,7 +44,7 @@ import java.util.function.Consumer;
  * factory method of the {@link Promises} class with a {@link PrimaryAction}
  * action object, but then what about the results of the process? Use the
  * {@link Promise#getResult()} to retrieve the results. This method returns
- * a {@code Nullable} object because it is possible that the process may
+ * a {@code Maybe} object because it is possible that the process may
  * have resulted in an error or was terminated prematurely. Note: it will block
  * the current thread until the process has completed successfully or
  * otherwise.
@@ -163,6 +165,34 @@ public interface Promise<T> {
     Promise<T> await();
 
     /**
+     * Having completed the previous {@code promise}, now execute {@link Consumer}
+     * action asynchronously, and return a new {@link Promise} object to manage the
+     * asynchronous task and the underlying {@link CompletableFuture} future.
+     *
+     * @param action the action being processed asynchronously.
+     * @return a new {@link Promise} object to manage the {@link TaskAction} action
+     * object.
+     */
+    default Promise<T> thenAccept(final Consumer<? super T> action) {
+        Objects.requireNonNull(action);
+        return then(TaskAction.of(action));
+    }
+
+    /**
+     * Having completed the previous {@code promise}, now execute {@link Function}
+     * action asynchronously, and return a new {@link Promise} object to manage the
+     * asynchronous task and the underlying {@link CompletableFuture} future.
+     *
+     * @param function the action being processed asynchronously.
+     * @return a new {@link Promise} object to manage the {@link TaskAction} action
+     * object.
+     */
+    default <R> Promise<R> thenApply(final Function<? super T, ? extends R> function) {
+        Objects.requireNonNull(function);
+        return then(TransmuteAction.of(function));
+    }
+
+    /**
      * Having completed the previous action, now execute {@link TaskAction} action
      * asynchronously, and return a new {@link Promise} object to manage the
      * {@link TaskAction} object and the underlying {@link CompletableFuture} future.
@@ -171,7 +201,7 @@ public interface Promise<T> {
      * @return a new {@link Promise} object to manage the {@link TaskAction} action
      * object.
      */
-     Promise<T> then(TaskAction<T> action);
+     Promise<T> then(final TaskAction<T> action);
 
     /**
      * Having completed the previous action, now execute {@link TransmuteAction}
@@ -183,7 +213,7 @@ public interface Promise<T> {
      * @return a new {@link Promise} object to manage the {@link TransmuteAction}
      * action object.
      */
-    <R> Promise<R> then(TransmuteAction<T, R> action);
+    <R> Promise<R> then(final TransmuteAction<T,R> action);
 
     /**
      * @return the current {@link AbstractAction} object being managed by this
@@ -225,14 +255,14 @@ public interface Promise<T> {
      * <p>
      * This is a blocking call. It will wait for all of the asynchronous
      * processes to complete that relate to this {@link Promise} object, the
-     * result of which is described in the returned {@link Nullable} object.
+     * result of which is described in the returned {@link Maybe} object.
      * <p>
-     * If an exception is thrown in any of the processes, {@link Nullable} object
+     * If an exception is thrown in any of the processes, {@link Maybe} object
      * will be empty.
      *
-     * @return a {@link Nullable} object the describes the result.
+     * @return a {@link Maybe} object the describes the result.
      */
-    Nullable<T> getResult();
+    Maybe<T> getResult();
 
     /**
      * Handles any exception thrown asynchronously in the current/main thread.

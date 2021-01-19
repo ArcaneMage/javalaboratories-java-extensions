@@ -51,7 +51,7 @@ public class PromisesTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    public void testAll_PromisesException_Pass() {
+    public void testAll_PromisesException_Fail() {
         // Given
         List<PrimaryAction<Integer>> actions = Arrays.asList(
                 PrimaryAction.of(() -> doLongRunningTask("testAll_Promises_Pass[0]")),

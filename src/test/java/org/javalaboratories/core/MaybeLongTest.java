@@ -1,7 +1,5 @@
 package org.javalaboratories.core;
 
-import org.javalaboratories.util.Holder;
-import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +11,12 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableLongTest {
+public class MaybeLongTest {
 
     private Optional<Long> optional;
-    private NullableLong nullable;
-    private NullableLong nullable2;
-    private NullableLong empty;
+    private MaybeLong nullable;
+    private MaybeLong nullable2;
+    private MaybeLong empty;
 
     private static final Consumer<Long> DO_NOTHING_CONSUMER = (value) -> {};
     private static final Runnable DO_NOTHING_RUNNABLE = () -> {};
@@ -26,9 +24,9 @@ public class NullableLongTest {
     @BeforeEach
     public void setup() {
         optional = Optional.of(99L);
-        nullable = NullableLong.of(99L);
-        nullable2 = NullableLong.of(optional);
-        empty = NullableLong.empty();
+        nullable = MaybeLong.of(99L);
+        nullable2 = MaybeLong.of(optional);
+        empty = MaybeLong.empty();
     }
 
     @Test
@@ -40,14 +38,14 @@ public class NullableLongTest {
 
     @Test
     public void testEquals_Pass() {
-        NullableLong twin = NullableLong.of(99L);
+        MaybeLong twin = MaybeLong.of(99L);
         assertEquals(nullable,twin);
         assertEquals(nullable, nullable);
     }
 
     @Test
     public void testHashCode_Pass() {
-        NullableLong twin = NullableLong.of(99L);
+        MaybeLong twin = MaybeLong.of(99L);
         assertEquals(nullable.hashCode(),twin.hashCode());
     }
 
@@ -125,7 +123,7 @@ public class NullableLongTest {
 
     @Test
     public void testToNullable_Pass() {
-        Nullable<Long> value = nullable.toNullable();
+        Maybe<Long> value = nullable.toNullable();
         value.ifPresent((v -> assertEquals((Long) 99L,v)));
     }
 
@@ -137,13 +135,6 @@ public class NullableLongTest {
 
     @Test
     public void testForEach_Pass() {
-        Holder<Boolean> forEachHolder = Holders.writableHolder(false);
-
-        nullable.forEach(v -> forEachHolder.set(true));
-        assertTrue(forEachHolder.get());
-
-        forEachHolder.set(false);
-        empty.forEach(v -> forEachHolder.set(true));
-        assertFalse(forEachHolder.get());
+        nullable.forEach(Eval.cpeek(value -> value.get() > 90L,value -> assertEquals(99L,value.get())));
     }
 }

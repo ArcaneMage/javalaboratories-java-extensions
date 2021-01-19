@@ -1,4 +1,3 @@
-package org.javalaboratories.core.tuple;
 /*
  * Copyright 2020 Kevin Henry
  *
@@ -14,8 +13,9 @@ package org.javalaboratories.core.tuple;
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package org.javalaboratories.core.tuple;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -65,9 +65,9 @@ public abstract class AbstractMatcher extends AbstractTupleContainer implements 
      * {@inheritDoc}
      */
     @Override
-    public Nullable<Pattern> getPattern(int position) {
+    public Maybe<Pattern> getPattern(int position) {
         verify(position);
-        return Nullable.ofNullable(matchPatterns[position -1]);
+        return Maybe.ofNullable(matchPatterns[position -1]);
     }
 
     /**

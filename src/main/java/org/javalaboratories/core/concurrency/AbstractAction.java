@@ -16,7 +16,8 @@
 package org.javalaboratories.core.concurrency;
 
 import lombok.AllArgsConstructor;
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
+import org.javalaboratories.util.Generics;
 
 import java.util.function.BiConsumer;
 
@@ -30,7 +31,7 @@ import java.util.function.BiConsumer;
  * Action objects encapsulate task and completion handlers that are executed
  * within their own thread context.
  *
- * @param <T> Type of the object to be processed by the task.
+ * @param <T> Type of the object returned from the task.
  * @see AbstractAction
  * @see PrimaryAction
  * @see TaskAction
@@ -38,10 +39,10 @@ import java.util.function.BiConsumer;
  */
 @AllArgsConstructor()
 public abstract class AbstractAction<T> implements Action<T>  {
-    private final BiConsumer<T,Throwable> completionHandler;
+    private final BiConsumer<? super T,Throwable> completionHandler;
 
     @Override
-    public Nullable<BiConsumer<T,Throwable>> getCompletionHandler() {
-        return Nullable.ofNullable(completionHandler);
+    public Maybe<BiConsumer<T,Throwable>> getCompletionHandler() {
+        return Generics.unchecked(Maybe.ofNullable(completionHandler));
     }
 }

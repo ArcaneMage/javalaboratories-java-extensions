@@ -1,7 +1,7 @@
 package org.javalaboratories.core.tuple;
 
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -33,13 +33,13 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      * Converts iterable into a tuple, if possible.
      * <p>
      * Creates a tuple to a depth of 2 from iterable object. If there is
-     * insufficient elements, then {@link Nullable} will be empty.
+     * insufficient elements, then {@link Maybe} will be empty.
      *
      * @param iterable Iterable object
      * @param <T> iterable type.
-     * @return A tuple in {@link Nullable} object container.
+     * @return A tuple in {@link Maybe} object container.
      */
-    public static <T> Nullable<Tuple2<T,T>> fromIterable(Iterable<T> iterable) {
+    public static <T> Maybe<Tuple2<T,T>> fromIterable(Iterable<T> iterable) {
         return Tuples.fromIterable(iterable, 2);
     }
 
@@ -63,6 +63,26 @@ public final class Tuple2<T1,T2> extends AbstractTuple {
      */
     public <T> Tuple3<T1,T,T2> addAt2(T value) {
         return add(2,value);
+    }
+
+    /**
+     * @return {@link Pair} object representing this {@link Tuple}
+     */
+    public Pair<T1,T2> asPair() {
+        return new Pair<T1,T2>() {
+            @Override
+            public T1 _1() {
+                return t1;
+            }
+            @Override
+            public T2 _2() {
+                return t2;
+            }
+            @Override
+            public String toString() {
+                return String.format("Pair[%s,%s]",_1(),_2());
+            }
+        };
     }
 
     /**

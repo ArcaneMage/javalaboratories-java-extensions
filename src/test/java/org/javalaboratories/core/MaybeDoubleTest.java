@@ -1,7 +1,5 @@
 package org.javalaboratories.core;
 
-import org.javalaboratories.util.Holder;
-import org.javalaboratories.util.Holders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +11,12 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
-public class NullableDoubleTest {
+public class MaybeDoubleTest {
 
     private Optional<Double> optional;
-    private NullableDouble nullable;
-    private NullableDouble nullable2;
-    private NullableDouble empty;
+    private MaybeDouble nullable;
+    private MaybeDouble nullable2;
+    private MaybeDouble empty;
 
     private static final Consumer<Double> DO_NOTHING_CONSUMER = (value) -> {};
     private static final Runnable DO_NOTHING_RUNNABLE = () -> {};
@@ -26,9 +24,9 @@ public class NullableDoubleTest {
     @BeforeEach
     public void setup() {
         optional = Optional.of(99.9999);
-        nullable = NullableDouble.of(99.9999);
-        nullable2 = NullableDouble.of(optional);
-        empty = NullableDouble.empty();
+        nullable = MaybeDouble.of(99.9999);
+        nullable2 = MaybeDouble.of(optional);
+        empty = MaybeDouble.empty();
     }
 
     @Test
@@ -40,14 +38,14 @@ public class NullableDoubleTest {
 
     @Test
     public void testEquals_Pass() {
-        NullableDouble twin = NullableDouble.of(99.9999);
+        MaybeDouble twin = MaybeDouble.of(99.9999);
         assertEquals(nullable,twin);
         assertEquals(nullable, nullable);
     }
 
     @Test
     public void testHashCode_Pass() {
-        NullableDouble twin = NullableDouble.of(99.9999);
+        MaybeDouble twin = MaybeDouble.of(99.9999);
         assertEquals(nullable.hashCode(),twin.hashCode());
     }
 
@@ -125,20 +123,13 @@ public class NullableDoubleTest {
 
     @Test
     public void testToNullable_Pass() {
-        Nullable<Double> value = nullable.toNullable();
+        Maybe<Double> value = nullable.toNullable();
         value.ifPresent((v -> assertEquals((Double) 99.9999,v)));
     }
 
     @Test
     public void testForEach_Pass() {
-        Holder<Boolean> forEachHolder = Holders.writableHolder(false);
-
-        nullable.forEach(v -> forEachHolder.set(true));
-        assertTrue(forEachHolder.get());
-
-        forEachHolder.set(false);
-        empty.forEach(v -> forEachHolder.set(true));
-        assertFalse(forEachHolder.get());
+        nullable.forEach(Eval.cpeek(value -> value.get() > 90.0,value -> assertEquals(99.9999,value.get())));
     }
 
     @Test

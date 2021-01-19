@@ -15,7 +15,8 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import org.javalaboratories.core.Nullable;
+import org.javalaboratories.core.Maybe;
+import org.javalaboratories.util.Generics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +49,35 @@ import java.util.function.Supplier;
  *             .IfPresent(result -> System.out::println(result));
  *     }
  * </pre>
+ *
+ * Here is another example using an alternative implementation of {@link Promise}
+ * object which supports event-driven notification in several easy steps:
+ * <pre>
+ *     {@code
+ *          // First, implement listener classes
+ *          public static class PromiseEventListener implements PromiseEventSubscriber {
+ *              ...
+ *              ...
+ *              public void notify (Event event, EventState<?> value {
+ *                   if (event.isAny(PRIMARY_ACTION_EVENT,TASK_ACTION_EVENT,TRANSMUTE_ACTION_EVENT)) {
+ *                      logger.info("Received event {}, state {}",event.getEventId(),value.getValue());
+ *                   }
+ *              }
+ *          }
+ *          ...
+ *          ...
+ *          List<PromiseEventListener> listeners = Arrays.toList(new PromiseEventListener(),...);
+ *
+ *          // Then instantiate Promise object with the factory method
+ *          Promise<String> promise = Promises
+ *              .newPromise(PrimaryAction.of(() -> doLongRunningTask("Reading integer value from database")),listeners)
+ *              .then(TransmuteAction.of(value -> "Value read from the database: "+value));
+ *     }
+ * </pre>
+ * The above example illustrates the ability to not only define your {@link
+ * Action} handlers but also notify {@code listeners/subscribers} of {@link
+ * PromiseEvents} -- there is no limit to the number of listeners, and to avoid
+ * blocking, they are notified asynchronously.
  */
 @SuppressWarnings("WeakerAccess")
 public final class Promises {
@@ -117,7 +147,7 @@ public final class Promises {
      */
     public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions, boolean settle) {
 
-        List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncUndertaking<>(managedPoolService,action));
+        List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncPromiseTask<>(managedPoolService,action));
 
         // Start new thread process that will wait on aforementioned asynchronous
         // processes
@@ -129,7 +159,25 @@ public final class Promises {
             return promises;
         });
 
-        return newPromise(action,() -> new AsyncUndertaking<>(managedPoolService,action));
+        return newPromise(action,() -> new AsyncPromiseTask<>(managedPoolService,action));
+    }
+
+    /**
+     * Factory method to create instances of {@link Promise} objects.
+     * <p>
+     * Not only is the {@link Promise} object created, but post creation, the
+     * the {@link Supplier} function is executed asynchronously and the
+     * {@link Promise} returned to the client.
+     *
+     * @param supplier a {@link Supplier} the task to be executed
+     *                 asynchronously.
+     * @param <T> Type of value returned from asynchronous task.
+     * @return a new {@link Promise} object.
+     * @throws NullPointerException if {@code action} is null
+     * @see AsyncPromiseTask
+     */
+    public static <T> Promise<T> newPromise(final Supplier<? extends T> supplier) {
+        return newPromise(PrimaryAction.of(Objects.requireNonNull(supplier,"No supplier")));
     }
 
     /**
@@ -144,9 +192,81 @@ public final class Promises {
      * @param <T> Type of value returned from asynchronous task.
      * @return a new {@link Promise} object.
      * @throws NullPointerException if {@code action} is null
+     * @see AsyncPromiseTask
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
-        return newPromise(action, () -> new AsyncUndertaking<>(managedPoolService,action));
+        return newPromise(action, () -> new AsyncPromiseTask<>(managedPoolService,action));
+    }
+    /**
+     * Factory method to create instances of event-driven {@link Promise}
+     * objects.
+     * <p>
+     * Not only is the {@link Promise} object created, but post creation, the
+     * the {@link Supplier} task is executed asynchronously and the {@link Promise}
+     * returned to the client.
+     * <p>
+     * This implementation of a {@link Promise} object has the ability to publish
+     * events to its {@code subscribers}. There are three types of events all
+     * subscribers are notified on:
+     * <ol>
+     *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
+     *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
+     *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
+     * </ol>
+     * There is no limit to the number of {@code subscribers}, but if a
+     * {@code subscriber} is considered "toxic" (unhandled exception raised),
+     * the {@code subscriber} will be banned from event notification.
+     * Notification of events are performed asynchronously to avoid blocking
+     * in the main/current thread.
+     *
+     * @param supplier a {@link PrimaryAction} encapsulating the task to be
+     *               executed asynchronously.
+     * @param subscribers a collection of {@link PromiseEventSubscriber}
+     *                    objects.
+     * @param <T> Type of value returned from asynchronous task.
+     * @return a new {@link Promise} object.
+     * @throws NullPointerException if {@code action} is null
+     * @see AsyncPromiseTaskPublisher
+     */
+    public static <T> Promise<T> newPromise(final Supplier<? extends T> supplier,
+                                            final List<? extends PromiseEventSubscriber> subscribers) {
+        return newPromise(PrimaryAction.of(supplier),subscribers);
+    }
+
+    /**
+     * Factory method to create instances of event-driven {@link Promise}
+     * objects.
+     * <p>
+     * Not only is the {@link Promise} object created, but post creation, the
+     * the {@link PrimaryAction} task is executed asynchronously and the
+     * {@link Promise} returned to the client.
+     * <p>
+     * This implementation of a {@link Promise} object has the ability to publish
+     * events to its {@code subscribers}. There are three types of events all
+     * subscribers are notified on:
+     * <ol>
+     *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
+     *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
+     *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
+     * </ol>
+     * There is no limit to the number of {@code subscribers}, but if a
+     * {@code subscriber} is considered "toxic" (unhandled exception raised),
+     * the {@code subscriber} will be banned from event notification.
+     * Notification of events are performed asynchronously to avoid blocking
+     * in the main/current thread.
+     *
+     * @param action a {@link PrimaryAction} encapsulating the task to be
+     *               executed asynchronously.
+     * @param subscribers a collection of {@link PromiseEventSubscriber}
+     *                    objects.
+     * @param <T> Type of value returned from asynchronous task.
+     * @return a new {@link Promise} object.
+     * @throws NullPointerException if {@code action} is null
+     * @see AsyncPromiseTaskPublisher
+     */
+    public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
+                                            final List<? extends PromiseEventSubscriber> subscribers) {
+        return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedPoolService,action,subscribers));
     }
 
     /**
@@ -175,8 +295,7 @@ public final class Promises {
      * @param <U> Type promise implementation returned.
      * @return a {@link List} collection of {@link Promise} objects.
      *
-     * @throws NullPointerException if {@code action} is null
-     * @throws NullPointerException if {@code function} is null
+     * @throws NullPointerException if {@code action} or {@code function}is null
      */
     private static <T,U extends Promise<T>> List<Promise<T>> all(final List<PrimaryAction<T>> actions,
                                                                  final Function<PrimaryAction<T>,Supplier<U>> function) {
@@ -203,7 +322,7 @@ public final class Promises {
      * This factory method is really provided for further development purposes,
      * a mechanism to create an alternative implementation of {@link Promise}
      * objects. Therefore, it is recommended to use
-     * {@link Promises#newPromise(PrimaryAction) instead, as this method
+     * {@link Promises#newPromise(PrimaryAction)} instead, as this method
      * provides the default implementation.
      *
      * @param action a {@link PrimaryAction} encapsulating the task to be
@@ -230,15 +349,14 @@ public final class Promises {
      * @param promise the {@link Promise} object that implements {@link Invocable}
      * @param <T> The type of the resultant value returned from the asynchronous
      *           task.
-     * @return {@link Nullable} encapsulates {@link Invocable} implementation.
+     * @return {@link Maybe} encapsulates {@link Invocable} implementation.
      */
-    @SuppressWarnings("unchecked")
-    private static <T> Nullable<Invocable<T>> asInvocable(final Promise<T> promise) {
-        Nullable<Invocable<T>> result;
+    private static <T> Maybe<Invocable<T>> asInvocable(final Promise<T> promise) {
+        Maybe<Invocable<T>> result;
         try {
-            result = Nullable.of(Objects.requireNonNull((Invocable<T>) promise));
+            result = Generics.unchecked(Maybe.of(Objects.requireNonNull(promise)));
         } catch (ClassCastException e) {
-            result = Nullable.empty();
+            result = Maybe.empty();
         }
         return result;
     }

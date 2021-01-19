@@ -1,4 +1,3 @@
-package org.javalaboratories.core;
 /*
  * Copyright 2020 Kevin Henry
  *
@@ -14,6 +13,7 @@ package org.javalaboratories.core;
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package org.javalaboratories.core;
 
 import org.javalaboratories.util.Holder;
 import org.javalaboratories.util.Holders;
@@ -183,11 +183,11 @@ public final class Reducers {
                 NO_CHARACTERISTICS);
     }
 
-    public static <T> Reducer<T,?,Nullable<T>> maxBy(Comparator<? super T>  comparator) {
+    public static <T> Reducer<T,?, Maybe<T>> maxBy(Comparator<? super T>  comparator) {
         return reduce(BinaryOperator.maxBy(comparator));
     }
 
-    public static <T> Reducer<T,?,Nullable<T>> minBy(Comparator<? super T>  comparator) {
+    public static <T> Reducer<T,?, Maybe<T>> minBy(Comparator<? super T>  comparator) {
         return reduce(BinaryOperator.minBy(comparator));
     }
 
@@ -314,12 +314,12 @@ public final class Reducers {
         );
     }
 
-    private static <T> Reducer<T, Holder<T>,Nullable<T>> reduce(BinaryOperator<T> operator) {
+    private static <T> Reducer<T, Holder<T>, Maybe<T>> reduce(BinaryOperator<T> operator) {
         return new ReducerImpl<>(
                 Holders::writableHolder,
                 (a,v) -> a.set(operator.apply(a.get() != null ? a.get() : v,v)),
                 (l,r) -> { l.set(operator.apply((l.get()),r.get())); return l; },
-                (result) -> Nullable.ofNullable(result.get()),
+                (result) -> Maybe.ofNullable(result.get()),
                 NO_CHARACTERISTICS
         );
     }
