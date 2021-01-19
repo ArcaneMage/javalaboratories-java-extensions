@@ -48,7 +48,7 @@ readability and how it neatly manages both "unhappy" and "happy" outcomes.
 Provided implementations of the `Either` are right-biased, which means operations like `map`,`flatMap` and others have 
 no effect on the `Left` implementation, such operations return the "left" value unchanged.
 ### Eval
-Some objects are expensive to create due to perhaps database access and/or complex calculation. Rather than creating
+Some objects are expensive to create due to perhaps database access and/or complex calculations. Rather than creating
 these objects before they are actually needed, `Eval` can leverage a lazy strategy, offering the access to the underlying
  `value` only at the point of use. Essentially, the library introduces three main strategies:
  1. _Always_ - Evaluation always retrieves the `value` at the point of use -- no caching is involved.
@@ -71,7 +71,7 @@ these objects before they are actually needed, `Eval` can leverage a lazy strate
         // eval = Later[7]
 ```
 In the above case, `eval` object caches the results of the calculation, hence no repetition of the "Running expensive 
-calculation" message. Please review javadoc for supported operations. 
+calculation" message. Review javadoc for additional details on supported operations. 
 ### EventBroadcaster
 `EventBroadcaster` class has the ability to notify its `subscribera` of events they are interested in. It is a partial
 implementation of the `Observer Design Pattern`. To complete the design pattern, implement the `EventSubscriber` 
