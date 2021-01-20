@@ -14,7 +14,7 @@ configuration below:
         <dependency>
           <groupId>org.javalaboratories</groupId>
           <artifactId>java-extensions</artifactId>
-          <version>1.0.3-RELEASE</version>
+          <version>1.1.0-RELEASE</version>
         </dependency>
 ```
 ### Either
