@@ -11,11 +11,17 @@ This is a library of utilities to encourage functional programming in Java, part
 The library is now available for download from Maven Central Repository. In the POM file add the maven dependency 
 configuration below:
 ```
+        <!-- https://mvnrepository.com/artifact/org.javalaboratories/java-extensions -->
         <dependency>
           <groupId>org.javalaboratories</groupId>
           <artifactId>java-extensions</artifactId>
           <version>1.1.0-RELEASE</version>
         </dependency>
+```
+Alternatively, amend the `build.gradle` file with the following:
+```
+        // https://mvnrepository.com/artifact/org.javalaboratories/java-extensions
+        compile group: 'org.javalaboratories', name: 'java-extensions', version: '1.1.0-RELEASE'
 ```
 ### Either
 `Either` class is a container, similar to the `Maybe` and `Optional` classes, that represents one of two possible values
