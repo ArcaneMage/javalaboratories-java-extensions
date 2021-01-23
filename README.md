@@ -18,7 +18,7 @@ configuration below:
           <version>1.1.0-RELEASE</version>
         </dependency>
 ```
-Alternatively, amend the `build.gradle` file with the following:
+Alternatively, for `Gradle` users, amend the `build.gradle` file with the following:
 ```
         // https://mvnrepository.com/artifact/org.javalaboratories/java-extensions
         compile group: 'org.javalaboratories', name: 'java-extensions', version: '1.1.0-RELEASE'
@@ -324,3 +324,9 @@ collections and persistable. Here are some examples of usage:
 ## Feedback
 Development is ongoing. I have many ideas in the pipeline, and of course will consider your ideas and recommendations. 
 If you encounter any bugs, please raise an issue(s).
+
+## License
+Licensed under the Apache License, Version 2.0 (the "License")
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
