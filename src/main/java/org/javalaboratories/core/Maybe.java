@@ -506,6 +506,13 @@ public final class Maybe<T> implements Monad<T>, Iterable<T> {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public <U> Maybe<U> pure(final U value) {
+        return ofNullable(value);
+    }
+
+    /**
      * @return a {@link Stream} object containing the {@code value} if {@code this}
      * is nonempty, otherwise an empty {@code Stream} is returned.
      */

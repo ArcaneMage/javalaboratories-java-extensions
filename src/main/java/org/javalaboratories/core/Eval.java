@@ -370,16 +370,6 @@ public interface Eval<T> extends Monad<T>, Iterable<T>, Serializable {
 
         /**
          * {@inheritDoc}
-         * @param mapper
-         */
-        @Override
-        public <U> Eval<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
-            Objects.requireNonNull(mapper,"Expected mapping function");
-            return (Eval<U>) Objects.requireNonNull(mapper.apply(value()));
-        }
-
-        /**
-         * {@inheritDoc}
          */
         @Override
         public T get() {

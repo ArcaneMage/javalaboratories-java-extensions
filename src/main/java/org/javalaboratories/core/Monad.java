@@ -32,7 +32,7 @@ import java.util.function.Function;
  *
  * @param <T> Type of value within the {@code monad}.
  */
-public interface Monad<T> extends Functor<T> {
+public interface Monad<T> extends Applicative<T> {
 
     /**
      * Transforms the function's contained value to a new {@code monad}
@@ -70,12 +70,12 @@ public interface Monad<T> extends Functor<T> {
         @SuppressWarnings("unchecked")
         Monad<U> self = (Monad<U>) this;
 
-        Monad<U> result;
+        // Attempt to return flattened value. If not possible, this monad is
+        // returned instead.
         try {
-            result = flatMap(f);
+            return flatMap(f);
         } catch (ClassCastException e) {
-            result = self;
+            return self;
         }
-        return result;
     }
 }

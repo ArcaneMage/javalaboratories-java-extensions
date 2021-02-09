@@ -29,7 +29,6 @@ import java.util.function.Function;
  *
  * @param <T> Type of value within the {@code functor}.
  */
-@FunctionalInterface
 public interface Functor<T> extends ImmutableValue<T> {
 
     /**
