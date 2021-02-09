@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  * <p>
  * @param <T> type writableHolder variable to hold.
  *
- * @deprecated class is replaced with a pure alternative, namely {@link Eval},
+ * @deprecated Class is replaced with a pure alternative, namely {@link Eval},
  * which does not have to rely on side-effects. Refer to the {@link Eval
  * #cpeek(Consumer)} and {@link Eval#cpeek(Predicate, Consumer)}  methods for
  * details.

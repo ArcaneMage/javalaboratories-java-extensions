@@ -45,7 +45,7 @@ import java.util.function.*;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
+public interface Eval<T> extends Monad<T>, Iterable<T>, Serializable {
 
     /**
      * Evaluate object for {@code FALSE} Boolean value
@@ -227,13 +227,32 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param mapper function with which to perform the transformation.
      * @return transformed {@link Eval} object.
      */
-    <U> Eval<U> flatMap(final Function<? super T,? extends Eval<U>> mapper);
+    @Override
+    default <U> Eval<U> flatMap(final Function<? super T,? extends Monad<U>> mapper) {
+        return (Eval<U>) Monad.super.flatMap(mapper);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default <U> Eval<U> flatten() {
+        return (Eval<U>) Monad.super.flatten();
+    }
 
     /**
      * @return encapsulated {@code value} from {@link Eval}. Some implementations
      * evaluate the {@code value} lazily.
      */
     T get();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default T getOrElse(T other) {
+        return get();
+    }
 
     /**
      * {@inheritDoc}
@@ -254,7 +273,9 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * This operation does NOT evaluate the {@code value}, but allows read access
      * to the current state of it.
      */
-    Eval<T> peek(final Consumer<? super T> consumer);
+    default Eval<T> peek(final Consumer<? super T> consumer) {
+        return (Eval<T>) Monad.super.peek(consumer);
+    }
 
     /**
      * Reserve the evaluated value for future use in an {@link Eval}.
@@ -349,11 +370,12 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
 
         /**
          * {@inheritDoc}
+         * @param mapper
          */
         @Override
-        public <U> Eval<U> flatMap(final Function<? super T, ? extends Eval<U>> mapper) {
+        public <U> Eval<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
             Objects.requireNonNull(mapper,"Expected mapping function");
-            return mapper.apply(value());
+            return (Eval<U>) Objects.requireNonNull(mapper.apply(value()));
         }
 
         /**
@@ -370,17 +392,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
         @Override
         public <U> Eval<U> map(final Function<? super T, ? extends U> mapper) {
             Objects.requireNonNull(mapper,"Expected mapping function");
-            return flatMap(value -> Eval.eager(mapper.apply(value)));
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Eval<T> peek(final Consumer<? super T> consumer) {
-            Objects.requireNonNull(consumer,"Expected consumer function");
-            consumer.accept(value());
-            return this;
+            return Eval.eager(mapper.apply(value()));
         }
 
         /**

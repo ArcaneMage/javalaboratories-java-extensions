@@ -110,11 +110,11 @@ public class EitherTest {
         Either<String,Either<String,Integer>> value127 = Either.right(Either.right(127));
 
         // When
-        Either<Exception,String> left = coffee
+        Either<String,Integer> left = coffee
                 .flatten();
-        Either<Exception,String> right = teacup
+        Either<String,Integer> right = teacup
                 .flatten();
-        Either<Exception,String> right2 = value127
+        Either<String,Integer> right2 = value127
                 .flatten();
         // Then
         assertEquals("Left[too-strong-coffee]",left.toString());

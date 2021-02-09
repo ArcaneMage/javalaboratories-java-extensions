@@ -162,7 +162,8 @@ public class EvalTest extends AbstractConcurrencyTest {
 
         // When
         String result = later
-                .flatMap(v -> Eval.eager(v * intValue.get()))
+//                .flatMap(v -> Eval.eager(v * intValue.get()))
+                .flatMap(v -> Maybe.of(v))
                 .map(v -> v+"")
                 .get();
 
