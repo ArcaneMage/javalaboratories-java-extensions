@@ -15,8 +15,6 @@
  */
 package org.javalaboratories.core;
 
-import org.javalaboratories.core.tuple.Pair;
-import org.javalaboratories.util.Arguments;
 import org.javalaboratories.util.Generics;
 
 import java.util.*;
@@ -454,6 +452,14 @@ public interface Either<A,B> extends Monad<B>, Iterable<B> {
         public boolean isLeft() {
             return false;
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected <C> Right<A,C> pure(final C value) {
+            return new Right<>(value);
+        }
     }
 
     /**
@@ -512,6 +518,14 @@ public interface Either<A,B> extends Monad<B>, Iterable<B> {
         @Override
         public boolean isLeft() {
             return true;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected <C> Left<A,C> pure(final C value) {
+            return Generics.unchecked(this);
         }
     }
 }

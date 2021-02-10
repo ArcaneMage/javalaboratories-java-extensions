@@ -32,7 +32,7 @@ import java.util.function.Function;
  *
  * @param <T> Type of value within the {@code monad}.
  */
-public interface Monad<T> extends Applicative<T> {
+public interface Monad<T> extends Functor<T> {
 
     /**
      * Transforms the function's contained value to a new {@code monad}

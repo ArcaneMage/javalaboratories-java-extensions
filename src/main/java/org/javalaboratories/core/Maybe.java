@@ -112,8 +112,8 @@ import java.util.stream.Stream;
  * @see MaybeLong
  * @author Kevin H, Java Laboratories
  */
-@EqualsAndHashCode
-public final class Maybe<T> implements Monad<T>, Iterable<T> {
+@EqualsAndHashCode(callSuper=false)
+public final class Maybe<T> extends Applicative<T> implements Iterable<T> {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<T> delegate;
@@ -322,7 +322,7 @@ public final class Maybe<T> implements Monad<T>, Iterable<T> {
     @Override
     public <U> Maybe<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
         T value = value();
-        return value != null ? (Maybe<U>) Monad.super.flatMap(mapper) : Maybe.empty();
+        return value != null ? (Maybe<U>) super.flatMap(mapper) : Maybe.empty();
     }
 
     /**
@@ -336,7 +336,7 @@ public final class Maybe<T> implements Monad<T>, Iterable<T> {
      */
     @Override
     public <U> Maybe<U> flatten() {
-        return (Maybe<U>) Monad.super.flatten();
+        return (Maybe<U>) super.flatten();
     }
 
     /**
@@ -417,15 +417,14 @@ public final class Maybe<T> implements Monad<T>, Iterable<T> {
      *
      * @param mapper function to apply the transformation, if {@code value} is
      *               nonempty.
-     * @param <U> Type of transformed {@code value}
      * @return Maybe object of transformed {@code value}.
      * @throws NullPointerException if {@code mapper} is null.
      */
     @Override
-    public <U> Maybe<U> map(final Function<? super T, ? extends U> mapper) {
+    public <R> Maybe<R> map(final Function<? super T, ? extends R> mapper) {
         Objects.requireNonNull(mapper);
 
-        Optional<U> result = delegate.map(mapper);
+        Optional<R> result = delegate.map(mapper);
         return result.map(Maybe::of).orElseGet(Maybe::empty);
     }
 
@@ -502,14 +501,7 @@ public final class Maybe<T> implements Monad<T>, Iterable<T> {
      */
     @Override
     public Maybe<T> peek(final Consumer<? super T> consumer) {
-        return (Maybe<T>) Monad.super.peek(consumer);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public <U> Maybe<U> pure(final U value) {
-        return ofNullable(value);
+        return (Maybe<T>) super.peek(consumer);
     }
 
     /**
@@ -637,6 +629,14 @@ public final class Maybe<T> implements Monad<T>, Iterable<T> {
     public <U> Maybe<Pair<Maybe<T>,Maybe<U>>> zip(final Maybe<U> that) {
         Objects.requireNonNull(that);
         return !isEmpty() && !that.isEmpty() ? Maybe.of(Tuple.of(this,that).asPair()) : Maybe.empty();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected <U> Maybe<U> pure(final U value) {
+        return Maybe.ofNullable(value);
     }
 
     /**

@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 @EqualsAndHashCode
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
-abstract class AbstractEither<A,B> implements Either<A,B> {
+abstract class AbstractEither<A,B> extends Applicative<B> implements Either<A,B> {
     private final A left;
     private final B right;
 
@@ -145,7 +145,7 @@ abstract class AbstractEither<A,B> implements Either<A,B> {
      * {@inheritDoc}
      */
     @Override
-    public <C> Either<A,C> map(final Function<? super B, ? extends C> mapper) {
+    public <C> AbstractEither<A,C> map(final Function<? super B,? extends C> mapper) {
         Objects.requireNonNull(mapper);
         Either<A,C> self = Generics.unchecked(this);
         return isLeft() ? self : newRight(Objects.requireNonNull(mapper.apply(getRight())));

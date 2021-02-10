@@ -30,7 +30,7 @@ import java.util.function.Function;
  *
  * @param <T> Type of this {@code applicable container}
  */
-public interface Applicative<T> extends Functor<T> {
+public abstract class Applicative<T> implements Monad<T> {
 
     /**
      * Returns a new {@code applicable functor} containing the {@code value}.
@@ -39,13 +39,13 @@ public interface Applicative<T> extends Functor<T> {
      * @param <U> Type of value.
      * @return new {@code applicable} container.
      */
-    <U> Applicative<U> pure(final U value);
+    protected abstract <U> Applicative<U> pure(final U value);
 
     /**
      * {@inheritDoc}
      * @throws NullPointerException if mapper is null.
      */
-    default <R> Applicative<R> map(final Function<? super T, ? extends R> mapper) {
+    public <R> Applicative<R> map(final Function<? super T, ? extends R> mapper) {
         Objects.requireNonNull(mapper);
         return pure(mapper.apply(get()));
     }
@@ -60,7 +60,7 @@ public interface Applicative<T> extends Functor<T> {
      * {@code applicable}
      * @throws NullPointerException if function is null;
      */
-    default <R> Function<? super Applicative<T>,? extends Applicative<R>> apply(Applicative<Function<? super T,? extends R>> function)  {
+    public <R> Function<? super Applicative<T>,? extends Applicative<R>> apply(Applicative<Function<? super T,? extends R>> function)  {
         Objects.requireNonNull(function);
         return applicative -> {
             R result = function.get().apply(applicative.get());
