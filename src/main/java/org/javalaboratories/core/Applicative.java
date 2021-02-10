@@ -30,7 +30,7 @@ import java.util.function.Function;
  *
  * @param <T> Type of this {@code applicable container}
  */
-public abstract class Applicative<T> implements Monad<T> {
+public abstract class Applicative<T> implements Functor<T> {
 
     /**
      * Returns a new {@code applicable functor} containing the {@code value}.

@@ -113,7 +113,7 @@ import java.util.stream.Stream;
  * @author Kevin H, Java Laboratories
  */
 @EqualsAndHashCode(callSuper=false)
-public final class Maybe<T> extends Applicative<T> implements Iterable<T> {
+public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable<T> {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<T> delegate;
@@ -322,7 +322,7 @@ public final class Maybe<T> extends Applicative<T> implements Iterable<T> {
     @Override
     public <U> Maybe<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
         T value = value();
-        return value != null ? (Maybe<U>) super.flatMap(mapper) : Maybe.empty();
+        return value != null ? (Maybe<U>) Monad.super.flatMap(mapper) : Maybe.empty();
     }
 
     /**
@@ -336,7 +336,7 @@ public final class Maybe<T> extends Applicative<T> implements Iterable<T> {
      */
     @Override
     public <U> Maybe<U> flatten() {
-        return (Maybe<U>) super.flatten();
+        return (Maybe<U>) Monad.super.flatten();
     }
 
     /**
