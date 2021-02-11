@@ -19,14 +19,10 @@ import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.concurrency.PrimaryAction;
 import org.javalaboratories.core.concurrency.Promise;
 import org.javalaboratories.core.concurrency.Promises;
+import org.javalaboratories.util.Arguments;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -353,7 +349,7 @@ class Always<T> extends Eval<T> implements Serializable {
     transient private final Trampoline<T> evaluate;
 
     @EqualsAndHashCode.Include
-    final Value<T> value;
+    final EvalValue<T> value;
 
     /**
      * Constructs implementation of {@link Eval} with the {@code Always}
@@ -362,7 +358,18 @@ class Always<T> extends Eval<T> implements Serializable {
      * @param function function that computes the {@code value}.
      */
     Always(final Supplier<T> function) {
-        this(Trampoline.more(() -> Trampoline.finish(Objects.requireNonNull(function,"Expected supplier").get())));
+       this(function, new EvalValue<>());
+    }
+
+    /**
+     * Constructs implementation of {@link Eval} with the {@code Always}
+     * strategy.
+     *
+     * @param function function that computes the {@code value}.
+     * @param value container to manager to be evaluated values;
+     */
+    Always(final Supplier<T> function, final EvalValue<T> value) {
+        this(Trampoline.more(() -> Trampoline.finish(Objects.requireNonNull(function,"Expected supplier").get())), value);
     }
 
     /**
@@ -376,9 +383,24 @@ class Always<T> extends Eval<T> implements Serializable {
      * @see Trampoline
      */
     Always(final Trampoline<T> trampoline) {
-        Objects.requireNonNull(trampoline,"Expected recursive function");
+        this(trampoline,new EvalValue<>());
+    }
+
+    /**
+     * Constructs implementation of {@link Eval} with the {@code Always}
+     * strategy.
+     * <p>
+     * Accepts {@code trampoline} function, a function that is to be
+     * recursively called lazily with stack-safety.
+     *
+     * @param trampoline function that computes the {@code value}.
+     * @param value container to manage to be evaluated values.
+     * @see Trampoline
+     */
+    Always(final Trampoline<T> trampoline, final EvalValue<T> value) {
+        Arguments.requireNonNull("Expected both trampoline and value objects",trampoline, value);
         evaluate = trampoline;
-        value = new Value<>();
+        this.value = value;
     }
 
     /**
@@ -428,10 +450,6 @@ class Always<T> extends Eval<T> implements Serializable {
      */
     @Override
     public String toString() {
-        String value;
-        synchronized (lock) {
-            value = this.value == null ? "unset" : String.valueOf(this.value);
-        }
         return String.format("%s[%s]",getClass().getSimpleName(),value);
     }
 
@@ -460,7 +478,7 @@ class Always<T> extends Eval<T> implements Serializable {
      */
     protected T value() {
         synchronized(lock) {
-            value.set(evaluate.result());
+            value.setGet(evaluate.result());
             if (value.get() instanceof Trampoline) {
                 throw new IllegalStateException("Trampoline unresolvable -- " +
                         "review recursion logic");
@@ -468,28 +486,46 @@ class Always<T> extends Eval<T> implements Serializable {
             return value.get();
         }
     }
+
     /**
      * Encapsulates {@code value} yet to be evaluated by the {@link Eval}
      * implementations.
-     *
+     * <p>
+     * This mutable object is thread-safe.
      * @param <E> Type of {@code value}
      */
     @EqualsAndHashCode
-    static final class Value<E> implements Serializable {
+    static final class EvalValue<E> implements Serializable {
         private E element;
+        private final boolean caching;
 
+        private final List<Consumer<E>> modes =
+                     Arrays.asList(value -> {if (element == null) element = value;},
+                                   value -> element = value);
         /**
          * Default constructor
+         * <p>
+         * Caching disabled
          */
-        public Value() {
+        public EvalValue() {
+            this(false);
+        }
+        /**
+         * Constructs this {@code value}
+         * <p>
+         * @param caching set to {@code true} to enable "caching" (write once).
+         */
+        public EvalValue(boolean caching) {
             element = null;
+            this.caching = caching;
         }
         /**
          * Sets this {@code value}
          */
-        public void set(final E e) {
+        public E setGet(final E e) {
             synchronized(this) {
-                element = e;
+                modes.get(caching ? 0 : 1).accept(e);
+                return element;
             }
         }
         /**
@@ -500,13 +536,19 @@ class Always<T> extends Eval<T> implements Serializable {
                 return element;
             }
         }
+        /**
+         * @return {@code true} if container is occupied.
+         */
         public boolean isEmpty() {
             synchronized (this) {
                 return element == null;
             }
         }
+        @Override
         public String toString() {
-            return isEmpty() ? "unset" : String.valueOf(this.element);
+            synchronized (this) {
+                return isEmpty() ? "unset" : String.valueOf(this.element);
+            }
         }
     }
 }
@@ -532,7 +574,7 @@ class Later<T> extends Always<T> {
      * @see Trampoline
      */
     Later(final Trampoline<T> trampoline) {
-        super(trampoline);
+        super(trampoline, new EvalValue<>(true));
     }
 
     /**
@@ -542,7 +584,7 @@ class Later<T> extends Always<T> {
      * @param function function that computes the {@code value}.
      */
     Later(final Supplier<T> function) {
-        super(function);
+        super(function, new EvalValue<>(true));
     }
 
     /**
@@ -551,21 +593,6 @@ class Later<T> extends Always<T> {
     @Override
     protected <U> Later<U> pure(final U value) {
         return new Later<>((Supplier<U>) () -> value);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This implementation evaluates the {@code value} lazily once and then
-     * caches the resultant {@code value}.
-     */
-    @Override
-    protected T value() {
-        synchronized(lock) {
-            if (value.isEmpty())
-                value.set(super.value());
-            return value.get();
-        }
     }
 }
 
@@ -635,10 +662,7 @@ final class AsyncEval<T> extends Later<T>  {
                     " to asynchronous exception");
         }
         synchronized(lock) {
-            if (value.isEmpty()) {
-                value.set(maybe.orElse(null));
-            }
-            return value.get();
+            return value.setGet(maybe.orElse(null));
         }
     }
 
