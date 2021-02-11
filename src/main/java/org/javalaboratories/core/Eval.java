@@ -339,13 +339,23 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * @param <T> Type of lazily computed {@code value}.
      */
     @EqualsAndHashCode(callSuper=false,onlyExplicitlyIncluded=true)
-    static class Always<T> extends Eval<T> {
+    private static class Always<T> extends Eval<T> {
 
         final Object lock = new Object();
         private final Trampoline<T> evaluate;
 
         @EqualsAndHashCode.Include
-        T value;
+        final Value<T> value;
+
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Always}
+         * strategy.
+         *
+         * @param function function that computes the {@code value}.
+         */
+        private Always(final Supplier<T> function) {
+            this(Trampoline.more(() -> Trampoline.finish(Objects.requireNonNull(function,"Expected supplier").get())));
+        }
 
         /**
          * Constructs implementation of {@link Eval} with the {@code Always}
@@ -360,17 +370,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
         private Always(final Trampoline<T> trampoline) {
             Objects.requireNonNull(trampoline,"Expected recursive function");
             evaluate = trampoline;
-        }
-
-        /**
-         * Constructs implementation of {@link Eval} with the {@code Always}
-         * strategy.
-         *
-         * @param function function that computes the {@code value}.
-         */
-        private Always(final Supplier<T> function) {
-            Objects.requireNonNull(function,"Expected supplier");
-            this.evaluate = Trampoline.more(() -> Trampoline.finish(function.get()));
+            value = new Value<>();
         }
 
         /**
@@ -452,12 +452,12 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
          */
         protected T value() {
             synchronized(lock) {
-                value = evaluate.result();
-                if (value instanceof Trampoline) {
+                value.set(evaluate.result());
+                if (value.get() instanceof Trampoline) {
                     throw new IllegalStateException("Trampoline unresolvable -- " +
                             "review recursion logic");
                 }
-                return value;
+                return value.get();
             }
         }
     }
@@ -471,7 +471,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * @param <T> Type of lazily computed {@code value}.
      */
     @EqualsAndHashCode(callSuper = true)
-    static class Later<T> extends Always<T> {
+    private static class Later<T> extends Always<T> {
         /**
          * Constructs implementation of {@link Eval} with the {@code Later}
          * strategy.
@@ -513,9 +513,9 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
         @Override
         protected T value() {
             synchronized(lock) {
-                if (value == null)
-                    value = super.value();
-                return value;
+                if (value.isEmpty())
+                    value.set(super.value());
+                return value.get();
             }
         }
     }
@@ -528,7 +528,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * @param <T> Type of {@code value}.
      */
     @EqualsAndHashCode(callSuper = true)
-    static final class Eager<T> extends Later<T> {
+    private static final class Eager<T> extends Later<T> {
         private Eager(final T value) {
             super((Supplier<T>)() -> value);
             // Cache the value immediately
@@ -586,10 +586,10 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
                         " to asynchronous exception");
             }
             synchronized(lock) {
-                if (value == null) {
-                    value = maybe.orElse(null);
+                if (value.isEmpty()) {
+                    value.set(maybe.orElse(null));
                 }
-                return value;
+                return value.get();
             }
         }
 
@@ -627,6 +627,48 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
             synchronized(lock) {
                 exception = (Exception) e;
             }
+        }
+    }
+
+    /**
+     * Encapsulates {@code value} yet to be evaluated by the {@link Eval}
+     * implementations.
+     *
+     * @param <E> Type of {@code value}
+     */
+    @EqualsAndHashCode
+    private static final class Value<E> implements Serializable {
+        private E element;
+
+        /**
+         * Default constructor
+         */
+        public Value() {
+            element = null;
+        }
+        /**
+         * Sets this {@code value}
+         */
+        public void set(final E e) {
+            synchronized(this) {
+                element = e;
+            }
+        }
+        /**
+         * Retrieves this current value.
+         */
+        public E get() {
+            synchronized(this) {
+                return element;
+            }
+        }
+        public boolean isEmpty() {
+            synchronized (this) {
+                return element == null;
+            }
+        }
+        public String toString() {
+            return isEmpty() ? "unset" : String.valueOf(this.element);
         }
     }
 }
