@@ -88,7 +88,7 @@ import java.util.function.Supplier;
 @EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
-abstract public class Either<A,B> extends Applicative<B> implements Monad<B>, Iterable<B>  {
+public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Iterable<B>  {
 
     @Getter(value=AccessLevel.PACKAGE)
     private final A left;
@@ -150,12 +150,12 @@ abstract public class Either<A,B> extends Applicative<B> implements Monad<B>, It
     /**
      * @return {@code true} is this conforms to the {@code Left} behaviour.
      */
-    abstract public boolean isLeft();
+    public abstract boolean isLeft();
 
     /**
      * @return {@code true} is this conforms to the {@code Right} behaviour.
      */
-    abstract public boolean isRight();
+    public abstract boolean isRight();
 
     /**
      * Creates an instance of an Either with a {@code left} value.
@@ -381,9 +381,7 @@ abstract public class Either<A,B> extends Applicative<B> implements Monad<B>, It
     public <C> Either<A,C> map(final Function<? super B,? extends C> mapper) {
         @SuppressWarnings("unchecked")
         Either<A,C> self = (Either<A,C>) this;
-        @SuppressWarnings("unchecked")
-        Either<A,C> result = (Either<A,C>) (isLeft() ? self : super.map(mapper));
-        return result;
+        return isLeft() ? self : (Either<A,C>) super.<C>map(mapper);
     }
 
     /**
