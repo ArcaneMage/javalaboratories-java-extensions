@@ -17,7 +17,6 @@ package org.javalaboratories.core;
 
 import nl.altindag.log.LogCaptor;
 import org.javalaboratories.core.concurrency.AbstractConcurrencyTest;
-import org.javalaboratories.core.concurrency.AsyncEval;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -36,7 +35,7 @@ public class EvalTest extends AbstractConcurrencyTest {
     private static final Logger logger = LoggerFactory.getLogger(EvalTest.class);
 
     private Eval<Integer> always,alwaysR,eager,later,laterR;
-    private AsyncEval<Integer> asyncLater, asyncFailure;
+    private AsyncEval<Integer> asyncEval, asyncFailure;
 
     @BeforeEach
     public void setup() {
@@ -51,7 +50,7 @@ public class EvalTest extends AbstractConcurrencyTest {
 
         alwaysR = Eval.alwaysRecursive(fibonacci(10));
         laterR = Eval.laterRecursive(fibonacci(10));
-        asyncLater = Eval.asyncLater(() -> doLongRunningTask("Eval.asyncLater()"));
+        asyncEval = Eval.asyncLater(() -> doLongRunningTask("Eval.asyncLater()"));
         asyncFailure = Eval.asyncLater(() -> 100 / 0);
     }
 
@@ -60,8 +59,8 @@ public class EvalTest extends AbstractConcurrencyTest {
         // Given (setup)
 
         // Then
-        assertTrue(always instanceof Eval.Always);
-        assertTrue(later instanceof Eval.Later);
+        assertTrue(always instanceof Always);
+        assertTrue(later instanceof Later);
 
         assertEquals("Always[unset]",always.toString());
         assertEquals("Always[unset]", alwaysR.toString());
@@ -318,14 +317,14 @@ public class EvalTest extends AbstractConcurrencyTest {
         // Given (setup)
 
         // When
-        int result = assertTimeout(Duration.ofMillis(1280),() -> asyncLater.map(value -> value * 2)
+        int result = assertTimeout(Duration.ofMillis(1280),() -> asyncEval.map(value -> value * 2)
                     .get());
 
         // Then
         assertEquals(254,result);
-        assertTrue(asyncLater.isComplete());
-        assertTrue(asyncLater.isFulfilled());
-        assertFalse(asyncLater.isRejected());
+        assertTrue(asyncEval.isComplete());
+        assertTrue(asyncEval.isFulfilled());
+        assertFalse(asyncEval.isRejected());
     }
 
     @Test
