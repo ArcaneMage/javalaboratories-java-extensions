@@ -31,13 +31,27 @@ import java.util.function.Supplier;
  *
  * @param <T> Type of lazily computed {@code value}.
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper=true)
 public class AsyncEval<T> extends Eval<T> {
 
     private transient final Promise<T> promise;
     private final Eval<T> delegate;
     private final Object lock = new Object();
     private Exception exception;
+
+    /**
+     * Provides an implementation of the {@code PromiseLater} strategy.
+     * <p>
+     * The evaluation is performed asynchronously and once just before use and
+     * cached.
+     *
+     * @param supplier function to compute evaluation of {@code value}.
+     * @param <T> Type of resultant {@code value}.
+     * @return an {@code Later} strategy implementation.
+     */
+    public static <T> AsyncEval<T> asyncLater(final Supplier<T> supplier) {
+        return new AsyncEval<>(supplier);
+    }
 
     /**
      * Constructs implementation of {@link Eval} with the {@code Later}

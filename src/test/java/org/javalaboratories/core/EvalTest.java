@@ -16,8 +16,8 @@
 package org.javalaboratories.core;
 
 import nl.altindag.log.LogCaptor;
-import org.javalaboratories.core.Eval.AsyncEval;
 import org.javalaboratories.core.concurrency.AbstractConcurrencyTest;
+import org.javalaboratories.core.concurrency.AsyncEval;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -51,8 +51,8 @@ public class EvalTest extends AbstractConcurrencyTest {
 
         alwaysR = Eval.alwaysRecursive(fibonacci(10));
         laterR = Eval.laterRecursive(fibonacci(10));
-        asyncEval = Eval.asyncLater(() -> doLongRunningTask("Eval.asyncLater()"));
-        asyncFailure = Eval.asyncLater(() -> 100 / 0);
+        asyncEval = AsyncEval.asyncLater(() -> doLongRunningTask("Eval.asyncLater()"));
+        asyncFailure = AsyncEval.asyncLater(() -> 100 / 0);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class EvalTest extends AbstractConcurrencyTest {
     @Test
     public void testEqual_Pass() {
         // Given (setup)
-        Eval<Integer> asyncLater = Eval.asyncLater(() -> 12).resolve();
+        Eval<Integer> asyncLater = AsyncEval.asyncLater(() -> 12).resolve();
         Eval<Integer> later = Eval.later(() -> 12).resolve();
         Eval<Integer> always = Eval.always(() -> 12).resolve();
 
