@@ -329,7 +329,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
     public static class Always<T> extends Eval<T> implements Serializable {
 
         transient final Object lock = new Object();
-        transient private final Trampoline<T> evaluate;
+        private transient final Trampoline<T> evaluate;
 
         @EqualsAndHashCode.Include
         private final EvalValue<T> value;
@@ -463,12 +463,12 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
          */
         protected T value() {
             synchronized(lock) {
-                value.setGet(evaluate.result());
-                if (value.get() instanceof Trampoline) {
+                T value = this.value.setGet(evaluate.result());
+                if (value instanceof Trampoline) {
                     throw new IllegalStateException("Trampoline unresolvable -- " +
                             "review recursion logic");
                 }
-                return value.get();
+                return value;
             }
         }
 
@@ -538,7 +538,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      *
      * @param <T> Type of lazily computed {@code value}.
      */
-    @EqualsAndHashCode(callSuper = true)
+    @EqualsAndHashCode(callSuper=true)
     public static class Later<T> extends Always<T> {
         /**
          * Constructs implementation of {@link Eval} with the {@code Later}
@@ -580,7 +580,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      *
      * @param <T> Type of {@code value}.
      */
-    @EqualsAndHashCode(callSuper = true)
+    @EqualsAndHashCode(callSuper=true)
     public static final class Eager<T> extends Later<T> {
         Eager(final T value) {
             super((Supplier<T>)() -> value);
