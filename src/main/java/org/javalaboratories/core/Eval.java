@@ -16,9 +16,6 @@
 package org.javalaboratories.core;
 
 import lombok.EqualsAndHashCode;
-import org.javalaboratories.core.concurrency.PrimaryAction;
-import org.javalaboratories.core.concurrency.Promise;
-import org.javalaboratories.core.concurrency.Promises;
 import org.javalaboratories.util.Arguments;
 
 import java.io.Serializable;
@@ -92,20 +89,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * @return an {@code Always} strategy implementation.
      */
     public static <T> Eval<T> alwaysRecursive(final Trampoline<T> trampoline) { return new Always<>(trampoline);}
-
-    /**
-     * Provides an implementation of the {@code PromiseLater} strategy.
-     * <p>
-     * The evaluation is performed asynchronously and once just before use and
-     * cached.
-     *
-     * @param supplier function to compute evaluation of {@code value}.
-     * @param <T> Type of resultant {@code value}.
-     * @return an {@code Later} strategy implementation.
-     */
-    public static <T> AsyncEval<T> asyncLater(final Supplier<T> supplier) {
-        return new AsyncEval<>(supplier);
-    }
 
     /**
      * A method to provide the ability to inspect the state of {@code Consumer}
@@ -333,372 +316,285 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * @return internal {@code value} encapsulated in this {@link Eval} object.
      */
     protected abstract T value();
-}
 
-/**
- * Implements the {@code Always} strategy for the {@link Eval} interface.
- * <p>
- * The {@code value} is always evaluated just before use and never cached.
- *
- * @param <T> Type of lazily computed {@code value}.
- */
-@EqualsAndHashCode(callSuper=false,onlyExplicitlyIncluded=true)
-class Always<T> extends Eval<T> implements Serializable {
-
-    transient final Object lock = new Object();
-    transient private final Trampoline<T> evaluate;
-
-    @EqualsAndHashCode.Include
-    final EvalValue<T> value;
 
     /**
-     * Constructs implementation of {@link Eval} with the {@code Always}
-     * strategy.
-     *
-     * @param function function that computes the {@code value}.
-     */
-    Always(final Supplier<T> function) {
-       this(function, new EvalValue<>());
-    }
-
-    /**
-     * Constructs implementation of {@link Eval} with the {@code Always}
-     * strategy.
-     *
-     * @param function function that computes the {@code value}.
-     * @param value container to manager to be evaluated values;
-     */
-    Always(final Supplier<T> function, final EvalValue<T> value) {
-        this(Trampoline.more(() -> Trampoline.finish(Objects.requireNonNull(function,"Expected supplier").get())), value);
-    }
-
-    /**
-     * Constructs implementation of {@link Eval} with the {@code Always}
-     * strategy.
+     * Implements the {@code Always} strategy for the {@link Eval} interface.
      * <p>
-     * Accepts {@code trampoline} function, a function that is to be
-     * recursively called lazily with stack-safety.
+     * The {@code value} is always evaluated just before use and never cached.
      *
-     * @param trampoline function that computes the {@code value}.
-     * @see Trampoline
+     * @param <T> Type of lazily computed {@code value}.
      */
-    Always(final Trampoline<T> trampoline) {
-        this(trampoline,new EvalValue<>());
-    }
+    @EqualsAndHashCode(callSuper=false,onlyExplicitlyIncluded=true)
+    public static class Always<T> extends Eval<T> implements Serializable {
 
-    /**
-     * Constructs implementation of {@link Eval} with the {@code Always}
-     * strategy.
-     * <p>
-     * Accepts {@code trampoline} function, a function that is to be
-     * recursively called lazily with stack-safety.
-     *
-     * @param trampoline function that computes the {@code value}.
-     * @param value container to manage to be evaluated values.
-     * @see Trampoline
-     */
-    Always(final Trampoline<T> trampoline, final EvalValue<T> value) {
-        Arguments.requireNonNull("Expected both trampoline and value objects",trampoline, value);
-        evaluate = trampoline;
-        this.value = value;
-    }
+        transient final Object lock = new Object();
+        transient private final Trampoline<T> evaluate;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Maybe<Eval<T>> filter(final Predicate<? super T> predicate) {
-        Objects.requireNonNull(predicate,"Expect predicate function");
-        return predicate.test(value()) ? Maybe.of(this) : Maybe.empty();
-    }
+        @EqualsAndHashCode.Include
+        private final EvalValue<T> value;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public T get() {
-        return value();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public T getOrElse(T other) {
-        return get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <U> Eval<U> map(final Function<? super T, ? extends U> mapper) {
-        Objects.requireNonNull(mapper,"Expected mapping function");
-        return Eval.eager(mapper.apply(value()));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Eval<T> reserve() {
-        return flatMap(Eval::eager);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return String.format("%s[%s]",getClass().getSimpleName(),value);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected <U> Always<U> pure(final U value) {
-        return new Always<>((Supplier<U>) () -> value);
-    }
-
-    /**
-     * Override in derived classes to evaluate or compute the value by other
-     * means.
-     * <p>
-     * Because this method is used by core operations like {@link Eval#flatMap(Function)},
-     * {@link Eval#map(Function)} and others, this method must always return a
-     * {@code value}.
-     * <p>
-     * The default implementation is to evaluate the {@code value} by invoking
-     * the {@link Trampoline} object.
-     *
-     * @return internal {@code value} encapsulated in this {@link Eval} object.
-     * @throws IllegalStateException when {@link Trampoline} fails to {@code
-     * conclude}.
-     */
-    protected T value() {
-        synchronized(lock) {
-            value.setGet(evaluate.result());
-            if (value.get() instanceof Trampoline) {
-                throw new IllegalStateException("Trampoline unresolvable -- " +
-                        "review recursion logic");
-            }
-            return value.get();
-        }
-    }
-
-    /**
-     * Encapsulates {@code value} yet to be evaluated by the {@link Eval}
-     * implementations.
-     * <p>
-     * This mutable object is thread-safe.
-     * @param <E> Type of {@code value}
-     */
-    @EqualsAndHashCode
-    static final class EvalValue<E> implements Serializable {
-        private E element;
-        private final boolean caching;
-
-        private final List<Consumer<E>> modes =
-                     Arrays.asList(value -> {if (element == null) element = value;},
-                                   value -> element = value);
         /**
-         * Default constructor
+         * Constructs implementation of {@link Eval} with the {@code Always}
+         * strategy.
+         *
+         * @param function function that computes the {@code value}.
+         */
+        public Always(final Supplier<T> function) {
+            this(function, false);
+        }
+
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Always}
+         * strategy.
+         *
+         * @param function function that computes the {@code value}.
+         * @param caching set to {@code true} to cache evaluated result: behave
+         *                  like {@code Later}.
+         */
+        Always(final Supplier<T> function, final boolean caching) {
+            this(Trampoline.more(() -> Trampoline.finish(Objects.requireNonNull(function,"Expected supplier").get())), caching);
+        }
+
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Always}
+         * strategy.
          * <p>
-         * Caching disabled
+         * Accepts {@code trampoline} function, a function that is to be
+         * recursively called lazily with stack-safety.
+         *
+         * @param trampoline function that computes the {@code value}.
+         * @see Trampoline
          */
-        public EvalValue() {
-            this(false);
+        public Always(final Trampoline<T> trampoline) {
+            this(trampoline,false);
         }
+
         /**
-         * Constructs this {@code value}
+         * Constructs implementation of {@link Eval} with the {@code Always}
+         * strategy.
          * <p>
-         * @param caching set to {@code true} to enable "caching" (write once).
+         * Accepts {@code trampoline} function, a function that is to be
+         * recursively called lazily with stack-safety.
+         *
+         * @param trampoline function that computes the {@code value}.
+         * @param caching set to {@code true} to cache evaluated result: behave
+         *                  like {@code Later}.
+         * @see Trampoline
          */
-        public EvalValue(boolean caching) {
-            element = null;
-            this.caching = caching;
+        Always(final Trampoline<T> trampoline, final boolean caching) {
+            Arguments.requireNonNull("Expected both trampoline and value objects",trampoline, caching);
+            evaluate = trampoline;
+            this.value = new EvalValue<>(caching);
         }
+
         /**
-         * Sets this {@code value}
+         * {@inheritDoc}
          */
-        public E setGet(final E e) {
-            synchronized(this) {
-                modes.get(caching ? 0 : 1).accept(e);
-                return element;
-            }
+        @Override
+        public Maybe<Eval<T>> filter(final Predicate<? super T> predicate) {
+            Objects.requireNonNull(predicate,"Expect predicate function");
+            return predicate.test(value()) ? Maybe.of(this) : Maybe.empty();
         }
+
         /**
-         * Retrieves this current value.
+         * {@inheritDoc}
          */
-        public E get() {
-            synchronized(this) {
-                return element;
-            }
+        @Override
+        public T get() {
+            return value();
         }
+
         /**
-         * @return {@code true} if container is occupied.
+         * {@inheritDoc}
          */
-        public boolean isEmpty() {
-            synchronized (this) {
-                return element == null;
-            }
+        @Override
+        public T getOrElse(T other) {
+            return get();
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <U> Eval<U> map(final Function<? super T, ? extends U> mapper) {
+            Objects.requireNonNull(mapper,"Expected mapping function");
+            return Eval.eager(mapper.apply(value()));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Eval<T> reserve() {
+            return flatMap(Eval::eager);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public String toString() {
-            synchronized (this) {
-                return isEmpty() ? "unset" : String.valueOf(this.element);
+            return String.format("%s[%s]",getClass().getSimpleName(),value);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected <U> Always<U> pure(final U value) {
+            return (Always<U>) Eval.always(() -> value);
+        }
+
+        /**
+         * Override in derived classes to evaluate or compute the value by other
+         * means.
+         * <p>
+         * Because this method is used by core operations like {@link Eval#flatMap(Function)},
+         * {@link Eval#map(Function)} and others, this method must always return a
+         * {@code value}.
+         * <p>
+         * The default implementation is to evaluate the {@code value} by invoking
+         * the {@link Trampoline} object.
+         *
+         * @return internal {@code value} encapsulated in this {@link Eval} object.
+         * @throws IllegalStateException when {@link Trampoline} fails to {@code
+         * conclude}.
+         */
+        protected T value() {
+            synchronized(lock) {
+                value.setGet(evaluate.result());
+                if (value.get() instanceof Trampoline) {
+                    throw new IllegalStateException("Trampoline unresolvable -- " +
+                            "review recursion logic");
+                }
+                return value.get();
+            }
+        }
+
+        /**
+         * Encapsulates {@code value} yet to be evaluated by the {@link Eval}
+         * implementations.
+         * <p>
+         * This mutable object is thread-safe.
+         * @param <E> Type of {@code value}
+         */
+        @EqualsAndHashCode
+        private static final class EvalValue<E> implements Serializable {
+            private E element;
+            private final boolean caching;
+
+            private final List<Consumer<E>> modes =
+                    Arrays.asList(value -> {if (element == null) element = value;},
+                            value -> element = value);
+            /**
+             * Constructs this {@code value}
+             * <p>
+             * @param caching set to {@code true} to enable "caching" (write once).
+             */
+            private EvalValue(boolean caching) {
+                element = null;
+                this.caching = caching;
+            }
+            /**
+             * Sets this {@code value}
+             */
+            public E setGet(final E e) {
+                synchronized(this) {
+                    modes.get(caching ? 0 : 1).accept(e);
+                    return element;
+                }
+            }
+            /**
+             * Retrieves this current value.
+             */
+            public E get() {
+                synchronized(this) {
+                    return element;
+                }
+            }
+            /**
+             * @return {@code true} if container is occupied.
+             */
+            public boolean isEmpty() {
+                synchronized (this) {
+                    return element == null;
+                }
+            }
+            @Override
+            public String toString() {
+                synchronized (this) {
+                    return isEmpty() ? "unset" : String.valueOf(this.element);
+                }
             }
         }
     }
-}
 
-/**
- * Implements the {@code Later} strategy for the {@link Eval} interface.
- * <p>
- * The evaluation of the {@code value} deferred until it is required for
- * use. The evaluation of the {@code value} is performed once and cached.
- *
- * @param <T> Type of lazily computed {@code value}.
- */
-@EqualsAndHashCode(callSuper = true)
-class Later<T> extends Always<T> {
     /**
-     * Constructs implementation of {@link Eval} with the {@code Later}
-     * strategy.
+     * Implements the {@code Later} strategy for the {@link Eval} interface.
      * <p>
-     * Accepts {@code trampoline} function, a function that is to be
-     * recursively called lazily with stack-safety.
+     * The evaluation of the {@code value} deferred until it is required for
+     * use. The evaluation of the {@code value} is performed once and cached.
      *
-     * @param trampoline function that computes the {@code value}.
-     * @see Trampoline
+     * @param <T> Type of lazily computed {@code value}.
      */
-    Later(final Trampoline<T> trampoline) {
-        super(trampoline, new EvalValue<>(true));
+    @EqualsAndHashCode(callSuper = true)
+    public static class Later<T> extends Always<T> {
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Later}
+         * strategy.
+         * <p>
+         * Accepts {@code trampoline} function, a function that is to be
+         * recursively called lazily with stack-safety.
+         *
+         * @param trampoline function that computes the {@code value}.
+         * @see Trampoline
+         */
+        public Later(final Trampoline<T> trampoline) {
+            super(trampoline,true);
+        }
+
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Later}
+         * strategy.
+         *
+         * @param function function that computes the {@code value}.
+         */
+        public Later(final Supplier<T> function) {
+            super(function,true);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected <U> Later<U> pure(final U value) {
+            return (Later<U>) Eval.later(() -> value);
+        }
     }
 
     /**
-     * Constructs implementation of {@link Eval} with the {@code Later}
-     * strategy.
-     *
-     * @param function function that computes the {@code value}.
-     */
-    Later(final Supplier<T> function) {
-        super(function, new EvalValue<>(true));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected <U> Later<U> pure(final U value) {
-        return new Later<>((Supplier<U>) () -> value);
-    }
-}
-
-/**
- * Implements the {@code Eager} strategy for the {@link Eval} interface.
- * <p>
- * The evaluation of the {@code value} is immediate and ready for use.
- *
- * @param <T> Type of {@code value}.
- */
-@EqualsAndHashCode(callSuper = true)
-final class Eager<T> extends Later<T> {
-    Eager(final T value) {
-        super((Supplier<T>)() -> value);
-        // Cache the value immediately
-        // It is okay to call this public instance method: class is final.
-        resolve();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected <U> Eager<U> pure(final U value) {
-        return new Eager<>(value);
-    }
-}
-
-/**
- * Implements the {@code PromiseLater} strategy for the {@link Eval}
- * interface.
- * <p>
- * The evaluation of the {@code value} occurs asynchronously. The evaluation
- * of the {@code value} is performed once and cached.
- *
- * @param <T> Type of lazily computed {@code value}.
- */
-@EqualsAndHashCode(callSuper = true)
-final class AsyncEval<T> extends Later<T>  {
-    private final Promise<T> promise;
-    private Exception exception;
-
-    /**
-     * Constructs implementation of {@link Eval} with the {@code Later}
-     * strategy.
-     *
-     * @param function function that computes the {@code value}.
-     */
-    AsyncEval(final Supplier<T> function) {
-        super(function);
-        promise = Promises.newPromise(PrimaryAction.of(function,this::handle));
-    }
-
-    /**
-     * {@inheritDoc}
+     * Implements the {@code Eager} strategy for the {@link Eval} interface.
      * <p>
-     * This implementation evaluates the {@code value} by blocking for the
-     * asynchronous process to complete -- evaluation only occurs once.
+     * The evaluation of the {@code value} is immediate and ready for use.
      *
-     * @throws NoSuchElementException evaluation failure in asynchronous task.
+     * @param <T> Type of {@code value}.
      */
-    @Override
-    protected T value() {
-        Maybe<T> maybe = promise.getResult();
-        if (isRejected()) {
-            throw new NoSuchElementException("Evaluation not possible due" +
-                    " to asynchronous exception");
+    @EqualsAndHashCode(callSuper = true)
+    public static final class Eager<T> extends Later<T> {
+        Eager(final T value) {
+            super((Supplier<T>)() -> value);
+            // Cache the value immediately
+            // It is okay to call this public instance method: class is final.
+            resolve();
         }
-        synchronized(lock) {
-            return value.setGet(maybe.orElse(null));
-        }
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isComplete() {
-        return promise.getState() != Promise.States.PENDING;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isFulfilled() {
-        return promise.getState() == Promise.States.FULFILLED;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isRejected() {
-        return promise.getState() == Promise.States.REJECTED;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Maybe<Exception> getException() {
-        synchronized (lock) {
-            return Maybe.ofNullable(exception);
-        }
-    }
-
-    private void handle(final T value, final Throwable e) {
-        synchronized(lock) {
-            exception = (Exception) e;
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected <U> Eager<U> pure(final U value) {
+            return (Eager<U>) Eval.eager(value);
         }
     }
 }

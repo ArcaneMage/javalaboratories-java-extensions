@@ -16,6 +16,7 @@
 package org.javalaboratories.core;
 
 import nl.altindag.log.LogCaptor;
+import org.javalaboratories.core.Eval.AsyncEval;
 import org.javalaboratories.core.concurrency.AbstractConcurrencyTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,8 +60,8 @@ public class EvalTest extends AbstractConcurrencyTest {
         // Given (setup)
 
         // Then
-        assertTrue(always instanceof Always);
-        assertTrue(later instanceof Later);
+        assertTrue(always instanceof Eval.Always);
+        assertTrue(later instanceof Eval.Later);
 
         assertEquals("Always[unset]",always.toString());
         assertEquals("Always[unset]", alwaysR.toString());
