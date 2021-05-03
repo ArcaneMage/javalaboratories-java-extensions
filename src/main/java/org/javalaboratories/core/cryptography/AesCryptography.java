@@ -1,6 +1,7 @@
 package org.javalaboratories.core.cryptography;
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.javalaboratories.core.util.Arguments;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -65,6 +66,7 @@ public final class AesCryptography {
      * @throws IllegalCryptographyStateException encryption failure.
      */
     public static String encrypt(final String s, final String key) {
+        Arguments.requireNonNull("Expected both a String to encrypt and Key objects",s,key);
         byte[] b;
         try {
             KeyGenerator kgen = KeyGenerator.getInstance("AES");
@@ -87,6 +89,7 @@ public final class AesCryptography {
      * @throws IllegalCryptographyStateException decryption failure.
      */
     public static String decrypt(final String s, final String key)  {
+        Arguments.requireNonNull("Expected both a String to decrypt and a Key",s,key);
         byte[] decryptBytes;
         try {
             KeyGenerator kgen = KeyGenerator.getInstance("AES");
