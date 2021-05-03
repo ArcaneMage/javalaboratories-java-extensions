@@ -1,10 +1,12 @@
-package org.javalaboratories.util;
+package org.javalaboratories.core.util;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import org.javalaboratories.core.Eval;
 
 /**
  * Holder utility class

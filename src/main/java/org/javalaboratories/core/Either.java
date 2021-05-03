@@ -19,8 +19,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.javalaboratories.util.Arguments;
-import org.javalaboratories.util.Generics;
+import org.javalaboratories.core.util.Arguments;
+import org.javalaboratories.core.util.Generics;
 
 import java.util.*;
 import java.util.function.Consumer;

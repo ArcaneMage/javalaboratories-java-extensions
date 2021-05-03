@@ -65,33 +65,40 @@ public class AsyncEval<T> extends Eval<T> {
     }
 
     /**
-     * {@inheritDoc}
+     * @return {code true} when evaluation has completed.
      */
-    public boolean isComplete() {
+    public boolean isCompleted() {
         return promise.getState() != Promise.States.PENDING;
     }
 
     /**
-     * {@inheritDoc}
+     * @return {code true} when evaluation fulfilled successfully.
      */
     public boolean isFulfilled() {
         return promise.getState() == Promise.States.FULFILLED;
     }
 
     /**
-     * {@inheritDoc}
+     * @return {code true} when evaluation has been rejected.
      */
     public boolean isRejected() {
         return promise.getState() == Promise.States.REJECTED;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Maybe<Exception> getException() {
         synchronized (lock) {
             return Maybe.ofNullable(exception);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        String s = delegate.toString();
+        String classname = delegate.getClass().getSimpleName();
+        return s.replaceFirst(classname,this.getClass().getSimpleName());
     }
 
     /**

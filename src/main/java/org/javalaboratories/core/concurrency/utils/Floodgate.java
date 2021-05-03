@@ -17,7 +17,7 @@ package org.javalaboratories.core.concurrency.utils;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.javalaboratories.util.Arguments;
+import org.javalaboratories.core.util.Arguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -6,7 +6,7 @@
 
     <groupId>org.javalaboratories</groupId>
     <artifactId>java-extensions</artifactId>
-    <version>1.1.0-RELEASE</version>
+    <version>1.1.1-RELEASE</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>This is a library of utilities to encourage functional
@@ -49,6 +49,7 @@
         <lombok-version>1.18.16</lombok-version>
         <logback-version>1.2.3</logback-version>
         <junit-version>5.5.2</junit-version>
+        <sun-xml-sercurity-version>1.0</sun-xml-sercurity-version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -63,6 +64,11 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.security</groupId>
+            <artifactId>xml-security-impl</artifactId>
+            <version>${sun-xml-sercurity-version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.hakky54</groupId>

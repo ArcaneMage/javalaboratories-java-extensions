@@ -29,7 +29,7 @@ import java.util.function.Function;
  *
  * @param <T> Type of value within the {@code functor}.
  */
-public interface Functor<T> extends ImmutableValue<T> {
+public interface Functor<T> extends Context<T> {
 
     /**
      * Transforms the contained {@code value} and returns a new {@code

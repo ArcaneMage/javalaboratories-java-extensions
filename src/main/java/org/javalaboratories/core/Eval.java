@@ -16,7 +16,8 @@
 package org.javalaboratories.core;
 
 import lombok.EqualsAndHashCode;
-import org.javalaboratories.util.Arguments;
+import org.javalaboratories.core.util.Arguments;
+import org.javalaboratories.core.util.Holder;
 
 import java.io.Serializable;
 import java.util.*;
@@ -117,7 +118,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * <p>
      * This is particularly useful to both inspect and perform an action based
      * on a state without any side-effects, which is in contrast to the
-     * {@link org.javalaboratories.util.Holder} class. The purity of the functions
+     * {@link Holder} class. The purity of the functions
      * is dependent on the implementation. Example below illustrates this:
      * <pre>
      *     {@code
@@ -317,7 +318,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      */
     protected abstract T value();
 
-
     /**
      * Implements the {@code Always} strategy for the {@link Eval} interface.
      * <p>
@@ -401,31 +401,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
          * {@inheritDoc}
          */
         @Override
-        public T get() {
-            return value();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public T getOrElse(T other) {
-            return get();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <U> Eval<U> map(final Function<? super T, ? extends U> mapper) {
-            Objects.requireNonNull(mapper,"Expected mapping function");
-            return Eval.eager(mapper.apply(value()));
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
         public Eval<T> reserve() {
             return flatMap(Eval::eager);
         }
@@ -479,14 +454,15 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
          * This mutable object is thread-safe.
          * @param <E> Type of {@code value}
          */
-        @EqualsAndHashCode
+        @EqualsAndHashCode()
         private static final class EvalValue<E> implements Serializable {
             private E element;
             private final boolean caching;
 
+            @EqualsAndHashCode.Exclude
             private final List<Consumer<E>> modes =
                     Arrays.asList(value -> {if (element == null) element = value;},
-                            value -> element = value);
+                                  value -> element = value);
             /**
              * Constructs this {@code value}
              * <p>

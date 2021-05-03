@@ -16,6 +16,8 @@
 package org.javalaboratories.core;
 
 import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -91,11 +93,19 @@ public interface Trampoline<T> {
         return true;
     }
 
+    default <U> Trampoline<U> map(final Function<? super T, ? extends U> mapper) {
+        return Trampoline.finish(mapper.apply(result()));
+    }
+
+    default <U> Trampoline<U> flatMap(final Function<? super T, ? extends Trampoline<U>> mapper) {
+        return mapper.apply(result());
+    }
+
     /**
      * Call this method to return the final value and terminate the {@code
      * recursion}.
      *
-     * @param result the resultant computed {@code value} of the function.
+     * @param result the resu, ltant computed {@code value} of the function.
      * @param <T> Type of resultant value.
      * @return a new {@link Trampoline} implementation containing the resultant
      * value.
@@ -123,6 +133,10 @@ public interface Trampoline<T> {
                 return false;
             }
             @Override
+            public <U> Trampoline<U> map(final Function<? super T, ? extends U> mapper) {
+                return reduce(value -> value.map(mapper));
+            }
+            @Override
             public Trampoline<T> next() {
                 return function.result();
             }
@@ -130,7 +144,11 @@ public interface Trampoline<T> {
             public T get() {
                 return iterate(this);
             }
-            T iterate(final Trampoline<T> function) {
+            @Override
+            public <U> Trampoline<U> flatMap(final Function<? super T, ? extends Trampoline<U>> mapper) {
+                return reduce(value -> value.flatMap(mapper));
+            }
+            public T iterate(final Trampoline<T> function) {
                 Trampoline<T> f = function;
                 while(!f.done()) {
                     f = f.next();
@@ -138,5 +156,9 @@ public interface Trampoline<T> {
                 return f.result();
             }
         };
+    }
+
+    default <R> R reduce(final Function<? super Trampoline<T>, ? extends R> more) {
+        return more.apply(next());
     }
 }

@@ -20,7 +20,7 @@ import org.javalaboratories.core.event.Event;
 import org.javalaboratories.core.event.EventBroadcaster;
 import org.javalaboratories.core.event.EventPublisher;
 import org.javalaboratories.core.event.EventSource;
-import org.javalaboratories.util.Arguments;
+import org.javalaboratories.core.util.Arguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

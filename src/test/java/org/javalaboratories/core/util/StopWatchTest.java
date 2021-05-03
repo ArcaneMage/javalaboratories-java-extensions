@@ -1,6 +1,6 @@
-package org.javalaboratories.util;
+package org.javalaboratories.core.util;
 
-import org.javalaboratories.util.StopWatch.State;
+import org.javalaboratories.core.util.StopWatch.State;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

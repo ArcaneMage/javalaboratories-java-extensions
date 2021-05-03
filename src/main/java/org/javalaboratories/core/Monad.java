@@ -52,7 +52,7 @@ public interface Monad<T> extends Functor<T> {
     default <U> Monad<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
         Objects.requireNonNull(mapper,"Expected mapper function");
         T value = get();
-        return Objects.requireNonNull(mapper.apply(value));
+        return Objects.requireNonNull((mapper.apply(value)));
     }
 
     /**
@@ -66,7 +66,7 @@ public interface Monad<T> extends Functor<T> {
      */
     default <U> Monad<U> flatten() {
         @SuppressWarnings("unchecked")
-        Function<? super T, ? extends Monad<U>> f = v -> (Monad<U>) v;
+        Function<? super T,? extends Monad<U>> f = v -> (Monad<U>) v;
         @SuppressWarnings("unchecked")
         Monad<U> self = (Monad<U>) this;
 

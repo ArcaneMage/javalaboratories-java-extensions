@@ -16,7 +16,7 @@
 package org.javalaboratories.core.concurrency;
 
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.util.Generics;
+import org.javalaboratories.core.util.Generics;
 
 import java.util.ArrayList;
 import java.util.Collections;
