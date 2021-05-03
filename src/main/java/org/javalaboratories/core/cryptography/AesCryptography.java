@@ -105,7 +105,7 @@ public final class AesCryptography {
     }
 
     /**
-     * Encrypt input stream data.
+     * Encrypt input stream data using the default {@code KEY}
      *
      * @param stream input stream to encrypt.
      * @return encrypted stream.
@@ -115,7 +115,7 @@ public final class AesCryptography {
     }
 
     /**
-     * Decrypt decrypt stream data.
+     * Decrypt decrypt stream data using the default {@code KEY}.
      *
      * @param stream input stream to encrypt.
      * @return decrypted string.
@@ -125,7 +125,7 @@ public final class AesCryptography {
     }
 
     /**
-     * Encrypt encrypt string
+     * Encrypt encrypt string using the default {@code KEY}.
      *
      * @param s input string/content to encrypt.
      * @return encrypted stream.
@@ -135,7 +135,7 @@ public final class AesCryptography {
     }
 
     /**
-     * Decrypt encrypt string
+     * Decrypt encrypt string using the default {@code KEY}.
      *
      * @param s input string/content to decrypt.
      * @return encrypted stream.
