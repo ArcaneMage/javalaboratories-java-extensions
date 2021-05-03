@@ -12,7 +12,7 @@
     <description>This is a library of utilities to encourage functional
         programming in Java, particularly for Java-8 developers but not
         exclusively.</description>
-    <url>https://github.com/arcanemage/excelsior-software-java-extensions</url>
+    <url>https://github.com/arcanemage/javalaboratories-java-extensions</url>
 
     <licenses>
         <license>
@@ -40,9 +40,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/arcanemage/excelsior-software-java-extensions.git</connection>
-        <developerConnection>scm:git:ssh://github.com/arcanemage/excelsior-software-java-extensions.git</developerConnection>
-        <url>http://github.com/arcanemage/excelsior-software-java-extensions</url>
+        <connection>scm:git:git://github.com/arcanemage/javalaboratories-java-extensions.git</connection>
+        <developerConnection>scm:git:ssh://github.com/arcanemage/javalaboratories-java-extensions.git</developerConnection>
+        <url>http://github.com/arcanemage/javalaboratories-java-extensions</url>
     </scm>
 
     <properties>
