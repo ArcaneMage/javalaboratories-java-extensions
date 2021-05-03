@@ -42,7 +42,7 @@ public final class AesCryptography {
      * @return encrypted resultant string from input stream.
      */
     public static String encrypt(final InputStream stream, String key) {
-        return encrypt(toString(stream), key);
+        return encrypt(streamToString(stream), key);
     }
 
     /**
@@ -53,7 +53,7 @@ public final class AesCryptography {
      * @return descrypted resultant string from input stream.
      */
     public static String decrypt(final InputStream stream, String key) {
-        return decrypt(toString(stream),key);
+        return decrypt(streamToString(stream),key);
     }
 
     /**
@@ -141,7 +141,7 @@ public final class AesCryptography {
         return decrypt(s, KEY);
     }
 
-    private static String toString(final InputStream stream) {
+    private static String streamToString(final InputStream stream) {
         String result;
         try (InputStreamReader reader = new InputStreamReader(stream)) {
             char[] buffer = new char[MAX_BUFFER_SZ];
