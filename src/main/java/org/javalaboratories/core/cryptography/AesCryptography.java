@@ -14,6 +14,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * AES Cryptography utility class to enable encryption and decryption of
  * string and streams.
+ * <p>
+ * At the heart of the encryption/decryption logic is the String type, but
+ * unfortunately, there is a limit on the size of this object, which
+ * is ~2GB. Therefore, if the <code>InputStream</code> happens to be greater
+ * than this, then it may run into problems. However, this class will be
+ * useful for most use cases except for large files, ie > 2GB.
+ * <p>
+ * Will be looking at including additional methods for large file
+ * encryption.
  */
 public final class AesCryptography {
 
@@ -92,20 +101,44 @@ public final class AesCryptography {
         return new String(decryptBytes);
     }
 
-    public static String encrypt(final InputStream content) {
-        return encrypt(content, KEY);
+    /**
+     * Encrypt input stream data.
+     *
+     * @param stream input stream to encrypt.
+     * @return encrypted stream.
+     */
+    public static String encrypt(final InputStream stream) {
+        return encrypt(stream, KEY);
     }
 
-    public static String decrypt(final InputStream content) {
-        return decrypt(content, KEY);
+    /**
+     * Decrypt decrypt stream data.
+     *
+     * @param stream input stream to encrypt.
+     * @return decrypted string.
+     */
+    public static String decrypt(final InputStream stream) {
+        return decrypt(stream, KEY);
     }
 
-    public static String encrypt(final String content) {
-        return encrypt(content, KEY);
+    /**
+     * Encrypt encrypt string
+     *
+     * @param s input string/content to encrypt.
+     * @return encrypted stream.
+     */
+    public static String encrypt(final String s) {
+        return encrypt(s, KEY);
     }
 
-    public static String decrypt(final String encryptStr) {
-        return decrypt(encryptStr, KEY);
+    /**
+     * Decrypt encrypt string
+     *
+     * @param s input string/content to decrypt.
+     * @return encrypted stream.
+     */
+    public static String decrypt(final String s) {
+        return decrypt(s, KEY);
     }
 
     private static String toString(final InputStream stream) {
