@@ -1,7 +1,5 @@
 package org.javalaboratories.util;
 
-import org.javalaboratories.core.Eval;
-
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Consumer;

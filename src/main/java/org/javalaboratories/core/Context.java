@@ -29,7 +29,7 @@ import java.util.function.Function;
  *
  * @param <T> Type of value in the container.
  */
-public interface ImmutableValue<T> {
+public interface ImmutableContext<T> {
 
     /**
      * Safely extracts the contained value.
@@ -80,5 +80,9 @@ public interface ImmutableValue<T> {
      */
     default T get() {
         return getOrElse(null);
+    }
+
+    default <U> ImmutableContext<U> toContext(final ImmutableContext<U> context) {
+        return context;
     }
 }
