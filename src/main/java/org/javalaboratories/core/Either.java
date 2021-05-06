@@ -110,7 +110,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, It
      * @return an {@link Either} object with the {@link Right} implementation.
      * @see Either#right(Object)
      */
-    static <A,B> Either<A,B> of(final B value) {
+    public static <A,B> Either<A,B> of(final B value) {
         return right(value);
     }
 
@@ -126,7 +126,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, It
      * @param <B> Type of the right value
      * @return an {@link Either} object with the {@link Right} implementation.
      */
-    static <A,B> Either<A,B> left(final A value) {
+    public static <A,B> Either<A,B> left(final A value) {
         return new Left<>(value);
     }
 
@@ -143,7 +143,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, It
      * @param <B> Type of the right value
      * @return an {@link Either} object with the {@link Right} implementation.
      */
-    static <A,B> Either<A,B> right(final B value) {
+    public static <A,B> Either<A,B> right(final B value) {
         return new Right<>(value);
     }
 
@@ -180,6 +180,22 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, It
      * @return an instance of an {@code Either} implementation.
      */
     abstract <C,D> Either<C,D> newRight(final D value);
+
+    /**
+     * Provides the ability to perform a sequence functorial computations on
+     * the {@code applicable functor} container.
+     *
+     * @param applicative to apply computation.
+     * @param <C> Type of value transformed having applied the function.
+     * @return a new applicative with resultant value having applied the
+     * encapsulated function.
+     * @throws NullPointerException if function is null;
+     */
+    public <C> Either<A,C> apply(final Applicative<Function<? super B,? extends C>> applicative) {
+        @SuppressWarnings("unchecked")
+        Either<A,C> self = (Either<A,C>) this;
+        return isLeft() ? self : (Either<A,C>) super.apply(applicative);
+    }
 
     /**
      * Returns {@code true} if this is a {@link Right} implementation and the
