@@ -16,9 +16,7 @@
 package org.javalaboratories.core;
 
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Function interface supports stack-safe recursion of methods.
@@ -93,10 +91,24 @@ public interface Trampoline<T> {
         return true;
     }
 
+    /**
+     * Transforms trampoline via {@code mapper} function.
+     *
+     * @param mapper Function with which to perform the transformation.
+     * @param <U> type of resultant transformation.
+     * @return new Trampoline containing transformed content.
+     */
     default <U> Trampoline<U> map(final Function<? super T, ? extends U> mapper) {
         return Trampoline.finish(mapper.apply(result()));
     }
 
+    /**
+     * Transforms trampoline via the flatMap {@code mapper} function.
+     *
+     * @param mapper Function with which to perform the transformation.
+     * @param <U> type of resultant transformation.
+     * @return new Trampoline containing transformed content.
+     */
     default <U> Trampoline<U> flatMap(final Function<? super T, ? extends Trampoline<U>> mapper) {
         return mapper.apply(result());
     }
