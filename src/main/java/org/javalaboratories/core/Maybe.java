@@ -18,8 +18,8 @@ package org.javalaboratories.core;
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple;
-import org.javalaboratories.util.Arguments;
-import org.javalaboratories.util.Generics;
+import org.javalaboratories.core.util.Arguments;
+import org.javalaboratories.core.util.Generics;
 
 import java.util.*;
 import java.util.function.*;
@@ -112,8 +112,8 @@ import java.util.stream.Stream;
  * @see MaybeLong
  * @author Kevin H, Java Laboratories
  */
-@EqualsAndHashCode
-public final class Maybe<T> implements Functor<T>, Iterable<T> {
+@EqualsAndHashCode(callSuper=false)
+public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable<T> {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<T> delegate;
@@ -319,10 +319,10 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
      * @param mapper function with which to perform the transformation.
      * @return transformed {@link Maybe} object.
      */
-    public <U> Maybe<U> flatMap(final Function<? super T, ? extends Maybe<U>> mapper) {
-        Objects.requireNonNull(mapper);
+    @Override
+    public <U> Maybe<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
         T value = value();
-        return value != null ? Objects.requireNonNull(mapper.apply(value)) : Maybe.empty();
+        return value != null ? (Maybe<U>) Monad.super.flatMap(mapper) : Maybe.empty();
     }
 
     /**
@@ -334,9 +334,9 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
      * @param <U> Type of value within {@code nested} {@link Maybe} object.
      * @return flattened {@link Maybe} object.
      */
+    @Override
     public <U> Maybe<U> flatten() {
-        T value = value();
-        return value instanceof Maybe ? Generics.unchecked(value) : Generics.unchecked(this);
+        return (Maybe<U>) Monad.super.flatten();
     }
 
     /**
@@ -349,6 +349,7 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
      * @return results of {@code function} is {@code this} is nonempty, or
      * {@code emptyValue}
      */
+    @Override
     public <U> U fold(final U emptyValue, final Function<? super T,? extends U> function) {
         Objects.requireNonNull(function);
         return fold(Collections.singletonList(this),emptyValue,(a,b) -> function.apply(b));
@@ -374,6 +375,7 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
      * @deprecated Consider using the {@link Maybe#orElse(Object)} instead.
      */
     @Deprecated
+    @Override
     public T getOrElse(final T other) {
         return orElse(other);
     }
@@ -415,14 +417,14 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
      *
      * @param mapper function to apply the transformation, if {@code value} is
      *               nonempty.
-     * @param <U> Type of transformed {@code value}
      * @return Maybe object of transformed {@code value}.
      * @throws NullPointerException if {@code mapper} is null.
      */
-    public <U> Maybe<U> map(final Function<? super T, ? extends U> mapper) {
+    @Override
+    public <R> Maybe<R> map(final Function<? super T, ? extends R> mapper) {
         Objects.requireNonNull(mapper);
 
-        Optional<U> result = delegate.map(mapper);
+        Optional<R> result = delegate.map(mapper);
         return result.map(Maybe::of).orElseGet(Maybe::empty);
     }
 
@@ -437,7 +439,7 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
      * @throws NullPointerException if {@code supplier} is {@code null} or resultant
      * {@link Maybe} returned from {@code supplier} function.
      */
-    public Maybe<T> or (final Supplier<? extends Maybe<? super T>> supplier) {
+    public Maybe<T> or(final Supplier<? extends Maybe<? super T>> supplier) {
         Objects.requireNonNull(supplier);
         T value = value();
         return value != null ? this : Objects.requireNonNull(Generics.unchecked(supplier.get()));
@@ -497,11 +499,9 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Maybe<T> peek(final Consumer<? super T> consumer) {
-        Maybe<T> result = (Maybe<T>) Functor.super.peek(consumer);
-        T value = isEmpty() ? null : value();
-        consumer.accept(value);
-        return result;
+        return (Maybe<T>) super.peek(consumer);
     }
 
     /**
@@ -629,6 +629,34 @@ public final class Maybe<T> implements Functor<T>, Iterable<T> {
     public <U> Maybe<Pair<Maybe<T>,Maybe<U>>> zip(final Maybe<U> that) {
         Objects.requireNonNull(that);
         return !isEmpty() && !that.isEmpty() ? Maybe.of(Tuple.of(this,that).asPair()) : Maybe.empty();
+    }
+
+    /**
+     * Provides the ability to perform a sequence functorial computations on
+     * the {@code applicable functor} container.
+     *
+     * @param applicative to apply computation.
+     * @param <R> Type of value transformed having applied the function.
+     * @return a new applicative with resultant value having applied the
+     * encapsulated function.
+     * @throws NullPointerException if function is null;
+     */
+    public <R> Maybe<R> apply(final Applicative<Function<? super T,? extends R>> applicative)  {
+        Objects.requireNonNull(applicative);
+
+        //  If the value is Nothing it is literally impossible to apply the
+        //  function as there is no value to apply it to
+        return isEmpty()
+            ? Maybe.empty()
+            : (Maybe<R>) super.apply(applicative);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected <U> Maybe<U> pure(final U value) {
+        return Maybe.ofNullable(value);
     }
 
     /**

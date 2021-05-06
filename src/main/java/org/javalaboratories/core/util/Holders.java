@@ -1,12 +1,12 @@
-package org.javalaboratories.util;
-
-import org.javalaboratories.core.Eval;
+package org.javalaboratories.core.util;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import org.javalaboratories.core.Eval;
 
 /**
  * Holder utility class
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  * thread-safe, immutable as well as mutable. Each factory method describes
  * the type writableHolder implementation it creates.
  *
- * @deprecated class is replaced with a pure alternative, namely {@link Eval},
+ * @deprecated Class is replaced with a pure alternative, namely {@link Eval},
  * which does not have to rely on side-effects. Refer to the {@link Eval
  * #cpeek(Consumer)} and {@link Eval#cpeek(Predicate, Consumer)} methods for
  * details.

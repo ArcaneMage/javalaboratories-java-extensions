@@ -17,7 +17,7 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.util.Generics;
+import org.javalaboratories.core.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

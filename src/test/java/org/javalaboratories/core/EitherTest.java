@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import static org.javalaboratories.core.Either.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EitherTest {
@@ -34,8 +35,8 @@ public class EitherTest {
 
     @BeforeEach
     public void setup() {
-        left = Either.left(new Exception("Something has gone wrong"));
-        right = Either.right(100);
+        left = left(new Exception("Something has gone wrong"));
+        right = right(100);
     }
 
     @Test
@@ -52,7 +53,7 @@ public class EitherTest {
     @Test
     public void testEquals_Pass() {
         // Given (setup)
-        Either<Exception,Integer> twin = Either.right(100);
+        Either<Exception,Integer> twin = right(100);
 
         // Then
         assertNotEquals(left,right);
@@ -105,16 +106,16 @@ public class EitherTest {
     @Test
     public void testFlatten_Pass() {
         // Given
-        Either<String,Either<String,Integer>> coffee = Either.left("too-strong-coffee");
-        Either<String,Either<String,Integer>> teacup = Either.right(Either.left("weak-tea"));
-        Either<String,Either<String,Integer>> value127 = Either.right(Either.right(127));
+        Either<String,Either<String,Integer>> coffee = left("too-strong-coffee");
+        Either<String,Either<String,Integer>> teacup = right(left("weak-tea"));
+        Either<String,Either<String,Integer>> value127 = right(right(127));
 
         // When
-        Either<Exception,String> left = coffee
+        Either<String,Integer> left = coffee
                 .flatten();
-        Either<Exception,String> right = teacup
+        Either<String,Integer> right = teacup
                 .flatten();
-        Either<Exception,String> right2 = value127
+        Either<String,Integer> right2 = value127
                 .flatten();
         // Then
         assertEquals("Left[too-strong-coffee]",left.toString());
@@ -134,7 +135,7 @@ public class EitherTest {
                 .getOrElse(null);
 
         String lresult = left
-                .flatMap(value -> Either.left(new Exception("Something else")))
+                .flatMap(value -> left(new Exception("Something else")))
                 .fold(Exception::getMessage,value -> null);
 
         // Then
@@ -237,7 +238,7 @@ public class EitherTest {
     @Test
     public void testOf_Instantiation_Pass() {
         // Given (setup)
-        Either<Exception,Integer> twin = Either.of(100);
+        Either<Exception,Integer> twin = of(100);
 
         // Then
         assertEquals(twin,right);
@@ -248,8 +249,8 @@ public class EitherTest {
         // Given (setup)
 
         // When
-        Either<Exception,Integer> left = this.left.orElse(Either.right(255));
-        Either<Exception,Integer> right = this.right.orElse(Either.right(255));
+        Either<Exception,Integer> left = this.left.orElse(right(255));
+        Either<Exception,Integer> right = this.right.orElse(right(255));
 
         // Then
         assertEquals(255,left.getOrElse(-1));
@@ -261,8 +262,8 @@ public class EitherTest {
         // Given (setup)
 
         // When
-        Either<Exception,Integer> left = this.left.orElseGet(() -> Either.right(255));
-        Either<Exception,Integer> right = this.right.orElseGet(() -> Either.right(255));
+        Either<Exception,Integer> left = this.left.orElseGet(() -> right(255));
+        Either<Exception,Integer> right = this.right.orElseGet(() -> right(255));
 
         // Then
         assertEquals(255,left.getOrElse(-1));
@@ -293,6 +294,26 @@ public class EitherTest {
         assertEquals("Something has gone wrong",swappedLeft.fold(functionB,functionA));
         assertEquals("{Transformed} Something has gone wrong",swappedLeftMapped.fold(functionB,functionA));
         assertEquals("100",swappedRight.fold(functionB,functionA));
+    }
+
+    @Test
+    public void testApplicative_Pass() {
+        // When
+        Either<String,Integer> number = Either.right(0);
+        Either<String,Integer> string = Either.left("Frustration afoot!");
+
+        // Given
+        Function<Integer,Integer> add = n -> n + 10;
+
+        Either<String,Integer> value = number.apply(Either.right(add))
+                .apply(Either.right(add));
+
+        Either<String,Integer> value2 = string.apply(Either.left(add))
+                .apply(Either.left(add));
+
+        // Then
+        assertEquals(Either.of(20),value);
+        assertEquals(Either.left("Frustration afoot!"),value2);
     }
 
     @Test
@@ -364,10 +385,10 @@ public class EitherTest {
     //
     private static class Parser {
         public Either<Exception,String> parse(String value) {
-            return Either.right("Hello World! "+value);
+            return right("Hello World! "+value);
         }
         public Either<Exception,String> readFromFile(File file) {
-            return Either.left(new FileNotFoundException("Cannot open \""+file+"\""));
+            return left(new FileNotFoundException("Cannot open \""+file+"\""));
         }
     }
 

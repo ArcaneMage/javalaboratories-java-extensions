@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import org.javalaboratories.util.Generics;
+import org.javalaboratories.core.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

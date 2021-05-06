@@ -1,4 +1,4 @@
-package org.javalaboratories.util;
+package org.javalaboratories.core.util;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;

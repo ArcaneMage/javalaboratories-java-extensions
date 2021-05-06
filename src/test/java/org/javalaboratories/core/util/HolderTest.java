@@ -1,4 +1,4 @@
-package org.javalaboratories.util;
+package org.javalaboratories.core.util;
 
 
 import org.junit.jupiter.api.BeforeEach;

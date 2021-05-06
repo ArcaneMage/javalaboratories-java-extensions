@@ -16,14 +16,15 @@
 package org.javalaboratories.core;
 
 import lombok.EqualsAndHashCode;
-import org.javalaboratories.core.concurrency.AsyncEval;
-import org.javalaboratories.core.concurrency.PrimaryAction;
-import org.javalaboratories.core.concurrency.Promise;
-import org.javalaboratories.core.concurrency.Promises;
+import org.javalaboratories.core.util.Arguments;
+import org.javalaboratories.core.util.Holder;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * There are multiple evaluation strategies supported by their respective
@@ -45,28 +46,27 @@ import java.util.function.*;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
-
+public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable {
     /**
      * Evaluate object for {@code FALSE} Boolean value
      */
-    Eval<Boolean> FALSE = Eval.eager(false);
+    public static final Eval<Boolean> FALSE = Eval.eager(false);
     /**
      * Evaluate object for {@code TRUE} Boolean value
      */
-    Eval<Boolean> TRUE = Eval.eager(true);
+    public static final  Eval<Boolean> TRUE = Eval.eager(true);
     /**
      * Evaluate object for {@code ZERO} Integer value
      */
-    Eval<Integer> ZERO = Eval.eager(0);
+    public static final  Eval<Integer> ZERO = Eval.eager(0);
     /**
      * Evaluate object for {@code ONE} Integer value
      */
-    Eval<Integer> ONE = Eval.eager(1);
+    public static final  Eval<Integer> ONE = Eval.eager(1);
     /**
      * Evaluate object for {@code EMPTY} String value
      */
-    Eval<String> EMPTY = Eval.eager("");
+    public static final Eval<String> EMPTY = Eval.eager("");
 
     /**
      * Provides an implementation of the {@code Always} strategy.
@@ -77,7 +77,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param <T> Type of resultant {@code value}.
      * @return an {@code Always} strategy implementation.
      */
-    static <T> Eval<T> always(final Supplier<T> supplier) { return new Always<>(supplier);}
+    public static <T> Eval<T> always(final Supplier<T> supplier) { return new Always<>(supplier);}
 
     /**
      * Provides an implementation of the {@code Always} strategy.
@@ -89,21 +89,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param <T> Type of resultant {@code value}.
      * @return an {@code Always} strategy implementation.
      */
-    static <T> Eval<T> alwaysRecursive(final Trampoline<T> trampoline) { return new Always<>(trampoline);}
-
-    /**
-     * Provides an implementation of the {@code PromiseLater} strategy.
-     * <p>
-     * The evaluation is performed asynchronously and once just before use and
-     * cached.
-     *
-     * @param supplier function to compute evaluation of {@code value}.
-     * @param <T> Type of resultant {@code value}.
-     * @return an {@code Later} strategy implementation.
-     */
-    static <T> AsyncEval<T> asyncLater(final Supplier<T> supplier) {
-        return new AsyncLater<>(supplier);
-    }
+    public static <T> Eval<T> alwaysRecursive(final Trampoline<T> trampoline) { return new Always<>(trampoline);}
 
     /**
      * A method to provide the ability to inspect the state of {@code Consumer}
@@ -118,7 +104,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @return a {@link Consumer} function with augmented {@code cpeek} behaviour
      * to enable {@code value} inspection.
      */
-    static <T> Consumer<T> cpeek(final Consumer<? super Eval<T>> consumer) {
+    public static <T> Consumer<T> cpeek(final Consumer<? super Eval<T>> consumer) {
         return cpeek(value -> true,consumer);
     }
 
@@ -132,7 +118,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * <p>
      * This is particularly useful to both inspect and perform an action based
      * on a state without any side-effects, which is in contrast to the
-     * {@link org.javalaboratories.util.Holder} class. The purity of the functions
+     * {@link Holder} class. The purity of the functions
      * is dependent on the implementation. Example below illustrates this:
      * <pre>
      *     {@code
@@ -153,7 +139,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @return a {@link Consumer} function with augmented {@code cpeek} behaviour
      * to enable {@code value} inspection.
      */
-    static <T> Consumer<T> cpeek(final Predicate<? super Eval<T>> predicate, final Consumer<? super Eval<T>> action) {
+    public static <T> Consumer<T> cpeek(final Predicate<? super Eval<T>> predicate, final Consumer<? super Eval<T>> action) {
         Predicate<? super Eval<T>> p = Objects.requireNonNull(predicate,"Expected predicate");
         return value -> {
             Eval<T> eval;
@@ -171,7 +157,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param <T> Type of resultant {@code value}.
      * @return an {@code Eager} strategy implementation.
      */
-    static <T> Eval<T> eager(final T value) { return new Eager<>(value);}
+    public static <T> Eval<T> eager(final T value) { return new Eager<>(value);}
 
     /**
      * Provides an implementation of the {@code Later} strategy.
@@ -182,7 +168,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param <T> Type of resultant {@code value}.
      * @return an {@code Later} strategy implementation.
      */
-    static <T> Eval<T> later(final Supplier<T> supplier) { return new Later<>(supplier);}
+    public static <T> Eval<T> later(final Supplier<T> supplier) { return new Later<>(supplier);}
 
     /**
      * Provides an implementation of the {@code Later} strategy.
@@ -194,7 +180,21 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param <T> Type of resultant {@code value}.
      * @return an {@code Always} strategy implementation.
      */
-    static <T> Eval<T> laterRecursive(final Trampoline<T> trampoline) { return new Later<>(trampoline);}
+    public static <T> Eval<T> laterRecursive(final Trampoline<T> trampoline) { return new Later<>(trampoline);}
+
+    /**
+     * Provides the ability to perform a sequence functorial computations on
+     * the {@code applicable functor} container.
+     *
+     * @param applicative to apply computation.
+     * @param <R> Type of value transformed having applied the function.
+     * @return a new applicative with resultant value having applied the
+     * encapsulated function.
+     * @throws NullPointerException if function is null;
+     */
+    public <R> Eval<R> apply(final Applicative<Function<? super T,? extends R>> applicative)  {
+        return (Eval<R>) super.apply(applicative);
+    }
 
     /**
      * Returns {@code this} {@link Maybe} object that satisfies the {@code
@@ -205,7 +205,10 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * test.
      * @throws NullPointerException if {@code predicate} function is {@code null}.
      */
-    Maybe<Eval<T>> filter(final Predicate<? super T> predicate);
+    public Maybe<Eval<T>> filter(final Predicate<? super T> predicate) {
+        Objects.requireNonNull(predicate,"Expect predicate function");
+        return predicate.test(value()) ? Maybe.of(this) : Maybe.empty();
+    }
 
     /**
      * Returns {@code this} {@link Maybe} object that does NOT satisfy the
@@ -216,7 +219,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * test if {@code this} is nonempty.
      * @throws NullPointerException if {@code predicate} function is {@code null}.
      */
-    default Maybe<Eval<T>> filterNot(final Predicate<? super T> predicate) {
+    public Maybe<Eval<T>> filterNot(final Predicate<? super T> predicate) {
         return filter(predicate.negate());
     }
 
@@ -227,26 +230,42 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @param mapper function with which to perform the transformation.
      * @return transformed {@link Eval} object.
      */
-    <U> Eval<U> flatMap(final Function<? super T,? extends Eval<U>> mapper);
-
-    /**
-     * @return encapsulated {@code value} from {@link Eval}. Some implementations
-     * evaluate the {@code value} lazily.
-     */
-    T get();
+    @Override
+    public <U> Eval<U> flatMap(final Function<? super T,? extends Monad<U>> mapper) {
+        return (Eval<U>) Monad.super.flatMap(mapper);
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    default Iterator<T> iterator() {
+    public<U> Eval<U> flatten() {
+        return (Eval<U>) Monad.super.flatten();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public T getOrElse(T other) {
+        return value();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Iterator<T> iterator() {
         return toList().iterator();
     }
 
     /**
      * {@inheritDoc}
      */
-    <U> Eval<U> map(final Function<? super T,? extends U> mapper);
+    @Override
+    public <U> Eval<U> map(final Function<? super T,? extends U> mapper) {
+        return (Eval<U>) super.<U>map(mapper);
+    }
 
     /**
      * {@inheritDoc}
@@ -254,7 +273,10 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * This operation does NOT evaluate the {@code value}, but allows read access
      * to the current state of it.
      */
-    Eval<T> peek(final Consumer<? super T> consumer);
+    @Override
+    public Eval<T> peek(final Consumer<? super T> consumer) {
+        return (Eval<T>) Monad.super.peek(consumer);
+    }
 
     /**
      * Reserve the evaluated value for future use in an {@link Eval}.
@@ -266,7 +288,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @return an {@link Eval} with the "cached" value.
      */
-    Eval<T> reserve();
+    public abstract Eval<T> reserve();
 
     /**
      * Invokes evaluation of the {@code value} and returns {@code this} with
@@ -274,7 +296,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @return Eval object with resolved value.
      */
-    default Eval<T> resolve() {
+    public Eval<T> resolve() {
         get();
         return this;
     }
@@ -286,7 +308,7 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @return a {@link List} object containing a {@code value} from {@code
      * this} object.
      */
-    default List<T> toList() {
+    public List<T> toList() {
         return Collections.singletonList(get());
     }
 
@@ -294,9 +316,21 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      * @return {@link Maybe} object with encapsulated {@code value}. Some
      * implementations evaluate the {@code value} lazily.
      */
-    default Maybe<T> toMaybe() {
+    public Maybe<T> toMaybe() {
         return Maybe.ofEval(this);
     }
+
+    /**
+     * Override in derived classes to evaluate or compute the value by other
+     * means.
+     * <p>
+     * Because this method is used by core operations like {@link Eval#flatMap(Function)},
+     * {@link Eval#map(Function)} and others, this method must always return a
+     * {@code value}.
+     *
+     * @return internal {@code value} encapsulated in this {@link Eval} object.
+     */
+    protected abstract T value();
 
     /**
      * Implements the {@code Always} strategy for the {@link Eval} interface.
@@ -305,12 +339,36 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @param <T> Type of lazily computed {@code value}.
      */
-    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-    class Always<T> implements Eval<T> {
-        final Object lock = new Object();
-        private final Trampoline<T> evaluate;
+    @EqualsAndHashCode(callSuper=false,onlyExplicitlyIncluded=true)
+    public static class Always<T> extends Eval<T> implements Serializable {
+
+        transient final Object lock = new Object();
+        private transient final Trampoline<T> evaluate;
+
         @EqualsAndHashCode.Include
-        T value;
+        private final EvalValue<T> value;
+
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Always}
+         * strategy.
+         *
+         * @param function function that computes the {@code value}.
+         */
+        public Always(final Supplier<T> function) {
+            this(function, false);
+        }
+
+        /**
+         * Constructs implementation of {@link Eval} with the {@code Always}
+         * strategy.
+         *
+         * @param function function that computes the {@code value}.
+         * @param caching set to {@code true} to cache evaluated result: behave
+         *                  like {@code Later}.
+         */
+        Always(final Supplier<T> function, final boolean caching) {
+            this(Trampoline.more(() -> Trampoline.finish(Objects.requireNonNull(function,"Expected supplier").get())), caching);
+        }
 
         /**
          * Constructs implementation of {@link Eval} with the {@code Always}
@@ -322,20 +380,26 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * @param trampoline function that computes the {@code value}.
          * @see Trampoline
          */
-        private Always(final Trampoline<T> trampoline) {
-            Objects.requireNonNull(trampoline,"Expected recursive function");
-            evaluate = trampoline;
+        public Always(final Trampoline<T> trampoline) {
+            this(trampoline,false);
         }
 
         /**
          * Constructs implementation of {@link Eval} with the {@code Always}
          * strategy.
+         * <p>
+         * Accepts {@code trampoline} function, a function that is to be
+         * recursively called lazily with stack-safety.
          *
-         * @param function function that computes the {@code value}.
+         * @param trampoline function that computes the {@code value}.
+         * @param caching set to {@code true} to cache evaluated result: behave
+         *                  like {@code Later}.
+         * @see Trampoline
          */
-        public Always(final Supplier<T> function) {
-            Objects.requireNonNull(function,"Expected supplier");
-            this.evaluate = Trampoline.more(() -> Trampoline.finish(function.get()));
+        Always(final Trampoline<T> trampoline, final boolean caching) {
+            Arguments.requireNonNull("Expected both trampoline and value objects",trampoline, caching);
+            evaluate = trampoline;
+            this.value = new EvalValue<>(caching);
         }
 
         /**
@@ -351,42 +415,6 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * {@inheritDoc}
          */
         @Override
-        public <U> Eval<U> flatMap(final Function<? super T, ? extends Eval<U>> mapper) {
-            Objects.requireNonNull(mapper,"Expected mapping function");
-            return mapper.apply(value());
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public T get() {
-            return value();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <U> Eval<U> map(final Function<? super T, ? extends U> mapper) {
-            Objects.requireNonNull(mapper,"Expected mapping function");
-            return flatMap(value -> Eval.eager(mapper.apply(value)));
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Eval<T> peek(final Consumer<? super T> consumer) {
-            Objects.requireNonNull(consumer,"Expected consumer function");
-            consumer.accept(value());
-            return this;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
         public Eval<T> reserve() {
             return flatMap(Eval::eager);
         }
@@ -396,11 +424,15 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          */
         @Override
         public String toString() {
-            String value;
-            synchronized (lock) {
-                value = this.value == null ? "unset" : String.valueOf(this.value);
-            }
             return String.format("%s[%s]",getClass().getSimpleName(),value);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected <U> Always<U> pure(final U value) {
+            return (Always<U>) Eval.always(() -> value);
         }
 
         /**
@@ -420,12 +452,70 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          */
         protected T value() {
             synchronized(lock) {
-                value = evaluate.result();
+                T value = this.value.setGet(evaluate.result());
                 if (value instanceof Trampoline) {
                     throw new IllegalStateException("Trampoline unresolvable -- " +
                             "review recursion logic");
                 }
                 return value;
+            }
+        }
+
+        /**
+         * Encapsulates {@code value} yet to be evaluated by the {@link Eval}
+         * implementations.
+         * <p>
+         * This mutable object is thread-safe.
+         * @param <E> Type of {@code value}
+         */
+        @EqualsAndHashCode()
+        private static final class EvalValue<E> implements Serializable {
+            private E element;
+            private final boolean caching;
+
+            @EqualsAndHashCode.Exclude
+            private final List<Consumer<E>> modes =
+                    Arrays.asList(value -> {if (element == null) element = value;},
+                                  value -> element = value);
+            /**
+             * Constructs this {@code value}
+             * <p>
+             * @param caching set to {@code true} to enable "caching" (write once).
+             */
+            private EvalValue(boolean caching) {
+                element = null;
+                this.caching = caching;
+            }
+            /**
+             * Sets this {@code value}
+             */
+            public E setGet(final E e) {
+                synchronized(this) {
+                    modes.get(caching ? 0 : 1).accept(e);
+                    return element;
+                }
+            }
+            /**
+             * Retrieves this current value.
+             */
+            public E get() {
+                synchronized(this) {
+                    return element;
+                }
+            }
+            /**
+             * @return {@code true} if container is occupied.
+             */
+            public boolean isEmpty() {
+                synchronized (this) {
+                    return element == null;
+                }
+            }
+            @Override
+            public String toString() {
+                synchronized (this) {
+                    return isEmpty() ? "unset" : String.valueOf(this.element);
+                }
             }
         }
     }
@@ -438,8 +528,8 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @param <T> Type of lazily computed {@code value}.
      */
-    @EqualsAndHashCode(callSuper = true)
-    class Later<T> extends Always<T> {
+    @EqualsAndHashCode(callSuper=true)
+    public static class Later<T> extends Always<T> {
         /**
          * Constructs implementation of {@link Eval} with the {@code Later}
          * strategy.
@@ -450,8 +540,8 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          * @param trampoline function that computes the {@code value}.
          * @see Trampoline
          */
-        private Later(final Trampoline<T> trampoline) {
-            super(trampoline);
+        public Later(final Trampoline<T> trampoline) {
+            super(trampoline,true);
         }
 
         /**
@@ -460,23 +550,16 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
          *
          * @param function function that computes the {@code value}.
          */
-        private Later(final Supplier<T> function) {
-            super(function);
+        public Later(final Supplier<T> function) {
+            super(function,true);
         }
 
         /**
          * {@inheritDoc}
-         * <p>
-         * This implementation evaluates the {@code value} lazily once and then
-         * caches the resultant {@code value}.
          */
         @Override
-        protected T value() {
-            synchronized(lock) {
-                if (value == null)
-                    value = super.value();
-                return value;
-            }
+        protected <U> Later<U> pure(final U value) {
+            return (Later<U>) Eval.later(() -> value);
         }
     }
 
@@ -487,98 +570,21 @@ public interface Eval<T> extends Functor<T>, Iterable<T>, Serializable {
      *
      * @param <T> Type of {@code value}.
      */
-    @EqualsAndHashCode(callSuper = true)
-    final class Eager<T> extends Later<T> {
-        private Eager(final T value) {
+    @EqualsAndHashCode(callSuper=true)
+    public static final class Eager<T> extends Later<T> {
+        Eager(final T value) {
             super((Supplier<T>)() -> value);
             // Cache the value immediately
             // It is okay to call this public instance method: class is final.
             resolve();
         }
-    }
-
-    /**
-     * Implements the {@code PromiseLater} strategy for the {@link Eval}
-     * interface.
-     * <p>
-     * The evaluation of the {@code value} occurs asynchronously. The evaluation
-     * of the {@code value} is performed once and cached.
-     *
-     * @param <T> Type of lazily computed {@code value}.
-     */
-    @EqualsAndHashCode(callSuper = true)
-    final class AsyncLater<T> extends Later<T> implements AsyncEval<T> {
-        private final Promise<T> promise;
-        private Exception exception;
-
-        /**
-         * Constructs implementation of {@link Eval} with the {@code Later}
-         * strategy.
-         *
-         * @param function function that computes the {@code value}.
-         */
-        private AsyncLater(final Supplier<T> function) {
-            super(function);
-            promise = Promises.newPromise(PrimaryAction.of(function,this::handle));
-        }
 
         /**
          * {@inheritDoc}
-         * <p>
-         * This implementation evaluates the {@code value} by blocking for the
-         * asynchronous process to complete -- evaluation only occurs once.
-         *
-         * @throws NoSuchElementException evaluation failure in asynchronous task.
          */
         @Override
-        protected T value() {
-            Maybe<T> maybe = promise.getResult();
-            if (isRejected()) {
-                throw new NoSuchElementException("Evaluation not possible due" +
-                        " to asynchronous exception");
-            }
-            synchronized(lock) {
-                if (value == null) {
-                    value = maybe.orElse(null);
-                }
-                return value;
-            }
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public boolean isComplete() {
-            return promise.getState() != Promise.States.PENDING;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public boolean isFulfilled() {
-            return promise.getState() == Promise.States.FULFILLED;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public boolean isRejected() {
-            return promise.getState() == Promise.States.REJECTED;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public Maybe<Exception> getException() {
-            synchronized (lock) {
-                return Maybe.ofNullable(exception);
-            }
-        }
-
-        private void handle(final T value, final Throwable e) {
-            synchronized(lock) {
-                exception = (Exception) e;
-            }
+        protected <U> Eager<U> pure(final U value) {
+            return (Eager<U>) Eval.eager(value);
         }
     }
 }

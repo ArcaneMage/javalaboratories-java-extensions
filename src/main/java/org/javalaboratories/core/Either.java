@@ -15,8 +15,12 @@
  */
 package org.javalaboratories.core;
 
-import org.javalaboratories.util.Arguments;
-import org.javalaboratories.util.Generics;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import org.javalaboratories.core.util.Arguments;
+import org.javalaboratories.core.util.Generics;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -81,8 +85,16 @@ import java.util.function.Supplier;
  * @see Left
  * @see Right
  */
-@SuppressWarnings("UnusedReturnValue")
-public interface Either<A,B> extends Functor<B>, Iterable<B> {
+@EqualsAndHashCode(callSuper=false)
+@AllArgsConstructor(access=AccessLevel.PACKAGE)
+@Getter
+public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Iterable<B>  {
+
+    @Getter(value=AccessLevel.PACKAGE)
+    private final A left;
+
+    @Getter(value=AccessLevel.PACKAGE)
+    private final B right;
 
     /**
      * Factory method to create an instance of {@link Right} implementation
@@ -98,7 +110,7 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @return an {@link Either} object with the {@link Right} implementation.
      * @see Either#right(Object)
      */
-    static <A,B> Either<A,B> of(final B value) {
+    public static <A,B> Either<A,B> of(final B value) {
         return right(value);
     }
 
@@ -114,7 +126,7 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @param <B> Type of the right value
      * @return an {@link Either} object with the {@link Right} implementation.
      */
-    static <A,B> Either<A,B> left(final A value) {
+    public static <A,B> Either<A,B> left(final A value) {
         return new Left<>(value);
     }
 
@@ -131,8 +143,58 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @param <B> Type of the right value
      * @return an {@link Either} object with the {@link Right} implementation.
      */
-    static <A,B> Either<A,B> right(final B value) {
+    public static <A,B> Either<A,B> right(final B value) {
         return new Right<>(value);
+    }
+
+    /**
+     * @return {@code true} is this conforms to the {@code Left} behaviour.
+     */
+    public abstract boolean isLeft();
+
+    /**
+     * @return {@code true} is this conforms to the {@code Right} behaviour.
+     */
+    public abstract boolean isRight();
+
+    /**
+     * Creates an instance of an Either with a {@code left} value.
+     * <p>
+     * The {@code right} value will be null.
+     *
+     * @param value to be contained in the {@code Either} container.
+     * @param <C> Type of left value.
+     * @param <D> Type of right value.
+     * @return an instance of an {@code Either} implementation.
+     */
+    abstract <C,D> Either<C,D> newLeft(final C value);
+
+    /**
+     * Creates an instance of an Either with a {@code right} value.
+     * <p>
+     * The {@code left} value will be null.
+     *
+     * @param value to be contained in the {@code Either} container.
+     * @param <C> Type of left value.
+     * @param <D> Type of right value.
+     * @return an instance of an {@code Either} implementation.
+     */
+    abstract <C,D> Either<C,D> newRight(final D value);
+
+    /**
+     * Provides the ability to perform a sequence functorial computations on
+     * the {@code applicable functor} container.
+     *
+     * @param applicative to apply computation.
+     * @param <C> Type of value transformed having applied the function.
+     * @return a new applicative with resultant value having applied the
+     * encapsulated function.
+     * @throws NullPointerException if function is null;
+     */
+    public <C> Either<A,C> apply(final Applicative<Function<? super B,? extends C>> applicative) {
+        @SuppressWarnings("unchecked")
+        Either<A,C> self = (Either<A,C>) this;
+        return isLeft() ? self : (Either<A,C>) super.apply(applicative);
     }
 
     /**
@@ -145,7 +207,9 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      *
      * @return {@code true} if {@code element} passes equality test.
      */
-    boolean contains(B element);
+    public boolean contains(B element) {
+        return !isLeft() && getRight().equals(element);
+    }
 
     /**
      * Returns the resultant value of the executed {@link Predicate} function
@@ -160,9 +224,9 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * this is a {@link Left} implementation.
      * @throws NullPointerException if no {@code predicate} is null.
      */
-    default boolean exists(final Predicate<? super B> predicate) {
-        Objects.requireNonNull(predicate,"Expected predicate function");
-        return false;
+    public boolean exists(final Predicate<? super B> predicate) {
+        Objects.requireNonNull(predicate);
+        return !isLeft() && predicate.test(getRight());
     }
 
     /**
@@ -182,9 +246,9 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @return maybe object containing possible {@code either} object.
      * @throws NullPointerException if no {@code predicate} is null.
      */
-    default Maybe<Either<A,B>> filter(final Predicate<? super B> predicate) {
-        Objects.requireNonNull(predicate,"Expected predicate function");
-        return null;
+    public Maybe<Either<A,B>> filter(final Predicate<? super B> predicate) {
+        Objects.requireNonNull(predicate);
+        return isLeft() ? Maybe.of(this) : exists(predicate) ? Maybe.of(this) : Maybe.empty();
     }
 
     /**
@@ -203,9 +267,9 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @param other to return if {@link Right} does not satisfy {@code predicate}
      * @return resultant {@link Either}.
      */
-    default Either<A,B> filterOrElse(final Predicate<? super B> predicate, final A other) {
-        Arguments.requireNonNull(predicate,other,"Expected predicate function and other");
-        return null;
+    public Either<A,B> filterOrElse(final Predicate<? super B> predicate, A other) {
+        Arguments.requireNonNull(predicate, other);
+        return isLeft() ? this : filter(predicate).isPresent() ? this : newLeft(other);
     }
 
     /**
@@ -220,14 +284,14 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * validation.
      * <p>
      * @param mapper function to execute
-     * @param <C> Type of the left value (transformed)
      * @param <D> Type of the right value (transformed)
      * @return the transformed {@link Either} object.
      * @throws NullPointerException if no {@code predicate} is null.
      */
-    default <C,D> Either<C,D> flatMap(final Function<? super B,? extends Either<C,D>> mapper) {
-        Objects.requireNonNull(mapper,"Expected flatMap mapper");
-        return null;
+    @Override
+    public <D> Either<A,D> flatMap(final Function<? super B,? extends Monad<D>> mapper) {
+        Either<A,D> self = Generics.unchecked(this);
+        return isLeft() ? self : (Either<A,D>) Monad.super.flatMap(mapper);
     }
 
     /**
@@ -241,12 +305,15 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * object. Implementations should call this method first to enable
      * validation.
      * <p>
-     * @param <C> Type of the left value (transformed)
      * @param <D> Type of the right value (transformed)
      * @return the transformed {@link Either} object.
      * @throws NullPointerException if no {@code predicate} is null.
      */
-    <C,D> Either<C,D> flatten();
+    @Override
+    public <D> Either<A,D> flatten() {
+        Either<A,D> self = Generics.unchecked(this);
+        return isLeft() ? self : (Either<A,D>) Monad.super.flatten();
+    }
 
     /**
      * Folds internal {@code values} as dictated by {@code fa} and {@code fb}
@@ -263,9 +330,9 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @throws NullPointerException if either of the {@code function} parameters
      * is null.
      */
-    default <C> C fold(final Function<? super A,? extends C> fa, final Function<? super B,? extends C> fb) {
-        Arguments.requireNonNull(fa,fb,"Expected fold functions");
-        return null;
+    public <C> C fold(final Function<? super A, ? extends C> fa, final Function<? super B, ? extends C> fb) {
+        Arguments.requireNonNull(fa, fb);
+        return isLeft() ? fa.apply(getLeft()) : fb.apply(getRight());
     }
 
     /**
@@ -284,9 +351,9 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @return the transformed {@link Either} object.
      * @throws NullPointerException if no {@code predicate} is null.
      */
-    default boolean forAll(final Predicate<? super B> predicate) {
-        Objects.requireNonNull(predicate,"Expected predicate function");
-        return false;
+    public boolean forAll(final Predicate<? super B> predicate) {
+        Objects.requireNonNull(predicate);
+        return isLeft() || exists(predicate);
     }
 
     /**
@@ -297,17 +364,18 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @return the given {@link Right} value or {@code other} for the
      * {@link Left} implementation.
      */
-    B getOrElse(final B other);
+    @Override
+    public B getOrElse(final B other) {
+        return isLeft() ? other : getRight();
+    }
 
     /**
-     * @return {@code true} is this conforms to the {@code Left} behaviour.
+     * {@inheritDoc}
      */
-    boolean isLeft();
-
-    /**
-     * @return {@code true} is this conforms to the {@code Right} behaviour.
-     */
-    boolean isRight();
+    @Override
+    public Iterator<B> iterator() {
+        return toList().iterator();
+    }
 
     /**
      * Transforms the {@code right} value and returns a new {@link Either}
@@ -325,9 +393,11 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @return a new {@link Either} object encapsulating transformed
      * {@code right} value.
      */
-    default <C> Either<A,C> map(final Function<? super B,? extends C> mapper) {
-        Objects.requireNonNull(mapper,"Expected map function");
-        return null;
+    @Override
+    public <C> Either<A,C> map(final Function<? super B,? extends C> mapper) {
+        @SuppressWarnings("unchecked")
+        Either<A,C> self = (Either<A,C>) this;
+        return isLeft() ? self : (Either<A,C>) super.<C>map(mapper);
     }
 
     /**
@@ -338,7 +408,9 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      *              implementation.
      * @return current value of right-biased implementations.
      */
-    Either<A,B> orElse(final Either<? super A,? super B> other);
+    public Either<A,B> orElse(final Either<? super A,? super B> other) {
+        return isLeft() ? Generics.unchecked(other) : this;
+    }
 
     /**
      * For {@link Right} implementation, returns this object or derives it from
@@ -351,9 +423,9 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @param supplier function executed by {@link Left} implementation.
      * @return this {@code Right} or derives it from the {@code supplier}
      */
-    default Either<A,B> orElseGet(Supplier<? extends Either<? super A,? super B>> supplier) {
+    public Either<A,B> orElseGet(final Supplier<? extends Either<? super A,? super B>> supplier) {
         Objects.requireNonNull(supplier);
-        return null;
+        return isLeft() ? Generics.unchecked(supplier.get()) : this;
     }
 
     /**
@@ -370,19 +442,19 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @return this {@code Right} or derives it from the {@code supplier}
      * @throws NullPointerException if no {@code predicate} is null.
      */
-    default <E extends Throwable> Either<A,B> orElseThrow(Supplier<? extends E> supplier) throws E {
+    public <E extends Throwable> Either<A,B> orElseThrow(final Supplier<? extends E> supplier) throws E {
         Objects.requireNonNull(supplier);
-        return null;
+        if (isRight())
+            return this;
+        throw supplier.get();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    default Either<A,B> peek(final Consumer<? super B> consumer) {
-        Either<A,B> result = (Either<A,B>) Functor.super.peek(consumer);
-        consumer.accept(null);
-        return result;
+    public Either<A,B> peek(final Consumer<? super B> consumer) {
+        return (Either<A,B>) Monad.super.peek(consumer);
     }
 
     /**
@@ -393,7 +465,9 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * Right} and vice versa.
      * @return new swapped {@link Either} object.
      */
-    Either<B,A> swap();
+    public Either<B,A> swap() {
+        return isLeft() ? newRight(getLeft()) : newLeft(getRight());
+    }
 
     /**
      * For {@link Right} implementation, returns an immutable list of the
@@ -402,7 +476,12 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * <p>
      * @return a collection of a single {@code right} value, if it exists.
      */
-    List<B> toList();
+    public List<B> toList() {
+        B right = getRight();
+        return isLeft()
+                ? Collections.unmodifiableList(Collections.emptyList()) : right != null
+                  ? Collections.singletonList(right) : Collections.emptyList();
+    }
 
     /**
      * For {@link Right} implementation, returns an immutable map of the
@@ -411,9 +490,12 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * <p>
      * @return a map of a single {@code right} value, if it exists.
      */
-    default <K> Map<K,B> toMap(final Function<? super B, ? extends K> keyMapper) {
+    public <K> Map<K,B> toMap(final Function<? super B, ? extends K> keyMapper) {
         Objects.requireNonNull(keyMapper);
-        return null;
+        B right = getRight();
+        return isLeft()
+                ? Collections.emptyMap() : right != null
+                  ? Collections.singletonMap(keyMapper.apply(right),right) : Collections.emptyMap();
     }
 
     /**
@@ -423,7 +505,17 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      *
      * @return Maybe object encapsulating possible value.
      */
-    Maybe<B> toMaybe();
+    public Maybe<B> toMaybe() {
+        return isLeft() ? Maybe.empty() : Maybe.of(getRight());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return isRight() ? String.format("Right[%s]", getRight()) : String.format("Left[%s]", getLeft());
+    }
 
     /**
      * Implements the {@link Either} interface, conforming to {@code Right}
@@ -439,8 +531,7 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * @param <A> Type of left value.
      * @param <B> Type of right value.
      */
-    final class Right<A,B> extends AbstractEither<A,B> {
-
+    public final static class Right<A,B> extends Either<A,B> {
         /**
          * Constructs this {@link Either} object.
          * <p>
@@ -449,83 +540,23 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
         public Right(B right) {
             super(null, right);
         }
+
         /**
          * {@inheritDoc}
          */
         @Override
-        public boolean contains(B element) {
-            return getRight().equals(element);
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean exists(final Predicate<? super B> predicate) {
-            super.exists(predicate);
-            return predicate.test(getRight());
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Maybe<Either<A,B>> filter(final Predicate<? super B> predicate)  {
-            super.filter(predicate);
-            return exists(predicate) ? Maybe.of(this) : Maybe.empty();
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Either<A,B> filterOrElse(final Predicate<? super B> predicate, A other) {
-            super.filterOrElse(predicate,other);
-            return filter(predicate).isPresent() ? this : Either.left(other);
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <C,D> Either<C,D> flatMap(final Function<? super B,? extends Either<C,D>> mapper) {
-            super.flatMap(mapper);
-            return Generics.unchecked(Objects.requireNonNull(mapper.apply(getRight())));
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <C,D> Either<C,D> flatten() {
-            return (getRight() instanceof Either) ? Generics.unchecked(getRight()) : Generics.unchecked(this);
+        <C,D> Either<C,D> newLeft(C value) {
+            return new Left<>(value);
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public <C> C fold(final Function<? super A,? extends C> fa, final Function<? super B,? extends C> fb) {
-            super.fold(fa,fb);
-            return fb.apply(getRight());
+        <C,D> Either<C,D> newRight(D value) {
+            return new Right<>(value);
         }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean forAll(final Predicate<? super B> predicate) {
-            super.forAll(predicate);
-            return exists(predicate);
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public B getOrElse(final B other) {
-            return getRight();
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Iterator<B> iterator() {
-            return toList().iterator();
-        }
+
         /**
          * {@inheritDoc}
          */
@@ -533,6 +564,7 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
         public boolean isRight() {
             return true;
         }
+
         /**
          * {@inheritDoc}
          */
@@ -540,76 +572,13 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
         public boolean isLeft() {
             return false;
         }
+
         /**
          * {@inheritDoc}
          */
         @Override
-        public <C> Either<A,C> map(final Function<? super B,? extends C> mapper) {
-            super.map(mapper);
-            return Either.right(Objects.requireNonNull(mapper.apply(getRight())));
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Either<A,B> orElse(final Either<? super A,? super B> other) {
-            return this;
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Either<A,B> orElseGet(final Supplier<? extends Either<? super A,? super B>> supplier) {
-            super.orElseGet(supplier);
-            return this;
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <E extends Throwable> Either<A,B> orElseThrow(final Supplier<? extends E> supplier) throws E {
-            super.orElseThrow(supplier);
-            return this;
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Either<A,B> peek(final Consumer<? super B> consumer) {
-            Either<A,B> result = super.peek(consumer);
-            consumer.accept(getRight());
-            return result;
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Either<B,A> swap() {
-            return left(getRight());
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public List<B> toList() {
-            B element = getRight();
-            return element != null ? Collections.singletonList(element) : Collections.emptyList();
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <K> Map<K,B> toMap(final Function<? super B, ? extends K> keyMapper) {
-            super.toMap(keyMapper);
-            B element = getRight();
-            return element != null ? Collections.singletonMap(keyMapper.apply(element),element) : Collections.emptyMap();
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Maybe<B> toMaybe() {
-            return Maybe.of(getRight());
+        protected <C> Right<A,C> pure(final C value) {
+            return new Right<>(value);
         }
     }
 
@@ -622,14 +591,13 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
      * flatMap} are fully implemented. Instead, this object is returned,
      * therefore such operations have no effect on the {@code left} value.
      * <p>
-     * Use the {@link Left#left(Object)} or {@link Either#right(Object)} to
+     * Use the {@link Either#left(Object)} or {@link Either#right(Object)} to
      * create an instance of this object.
      * <p>
      * @param <A> Type of left value.
      * @param <B> Type of right value.
      */
-    final class Left<A,B> extends AbstractEither<A,B> {
-
+    public final static class Left<A,B> extends Either<A,B> {
         /**
          * Constructs this {@link Either} object.
          * <p>
@@ -638,79 +606,23 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
         public Left(A left) {
             super(left, null);
         }
+
         /**
          * {@inheritDoc}
          */
         @Override
-        public boolean contains(B element) {
-            return false;
+        <C,D> Either<C,D> newLeft(C value) {
+            return new Left<>(value);
         }
+
         /**
          * {@inheritDoc}
          */
         @Override
-        public boolean exists(final Predicate<? super B> predicate) {
-            super.exists(predicate);
-            return false;
+        <C,D> Either<C,D> newRight(D value) {
+            return new Right<>(value);
         }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Maybe<Either<A,B>> filter(final Predicate<? super B> predicate) {
-            super.filter(predicate);
-            return Maybe.of(this);
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Either<A,B> filterOrElse(final Predicate<? super B> predicate, A other) {
-            super.filterOrElse(predicate,other);
-            return this;
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <C,D> Either<C,D> flatMap(final Function<? super B,? extends Either<C,D>> mapper) {
-            super.flatMap(mapper);
-            return Generics.unchecked(this);
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <C,D> Either<C,D> flatten() {
-            return this.flatMap(r -> Generics.unchecked(this));
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <C> C fold(final Function<? super A,? extends C> fa, final Function<? super B,? extends C> fb) {
-            super.fold(fa,fb);
-            return fa.apply(getLeft());
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean forAll(final Predicate<? super B> predicate) {
-            super.forAll(predicate);
-            return true;
-        }
-        @Override
-        public B getOrElse(final B other) {
-            return other;
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Iterator<B> iterator() {
-            return toList().iterator();
-        }
+
         /**
          * {@inheritDoc}
          */
@@ -718,6 +630,7 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
         public boolean isRight() {
             return false;
         }
+
         /**
          * {@inheritDoc}
          */
@@ -725,64 +638,13 @@ public interface Either<A,B> extends Functor<B>, Iterable<B> {
         public boolean isLeft() {
             return true;
         }
+
         /**
          * {@inheritDoc}
          */
         @Override
-        public <C> Either<A,C> map(final Function<? super B,? extends C> mapper) {
-            super.map(mapper);
+        protected <C> Left<A,C> pure(final C value) {
             return Generics.unchecked(this);
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Either<A,B> orElse(final Either<? super A,? super B> other) {
-            return Generics.unchecked(other);
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Either<A,B> orElseGet(final Supplier<? extends Either<? super A,? super B>> supplier) {
-            super.orElseGet(supplier);
-            return Generics.unchecked(supplier.get());
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <E extends Throwable> Either<A,B> orElseThrow(final Supplier<? extends E> supplier) throws E {
-            super.orElseThrow(supplier);
-            throw supplier.get();
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Either<B,A> swap() {
-            return right(getLeft());
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public List<B> toList() {
-            return Collections.unmodifiableList(Collections.emptyList());
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public <K> Map<K,B> toMap(final Function<? super B, ? extends K> keyMapper) {
-            return Collections.emptyMap();
-        }
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Maybe<B> toMaybe() {
-            return Maybe.empty();
         }
     }
 }

@@ -1,6 +1,5 @@
 package org.javalaboratories.core.tuple;
 
-
 import org.javalaboratories.core.Maybe;
 
 import java.util.Objects;

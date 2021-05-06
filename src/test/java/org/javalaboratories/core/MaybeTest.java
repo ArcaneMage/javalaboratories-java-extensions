@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -169,6 +170,37 @@ public class MaybeTest {
     @Test
     public void testGet_Fail() {
         assertThrows(NoSuchElementException.class, () -> empty.get());
+    }
+
+    @Test
+    public void testMap_FunctorLaws_Pass() {
+        // Given
+        Maybe<Integer> value = Maybe.of(-1);
+
+        // (1) Identity law
+        assertEquals(value, value.map(Function.identity()));
+        assertEquals(value, value.map(x -> x));
+
+        // (2) If a function composition (g), (h), then the resulting functor should be the
+        // same as calling f with (h) and then with (g)
+        assertEquals(value.map(x -> (x + 1) * 2),value.map(x -> x + 1).map(x -> x * 2));
+    }
+
+    @Test
+    public void testFlatMap_MonadLaws_Pass() {
+        // Given
+        Maybe<Integer> value = Maybe.of(-1);
+        Function<Integer,Maybe<Integer>> fa = x -> Maybe.of(x * 2);
+        Function<Integer,Maybe<Integer>> fb = Maybe::of;
+
+        // (1) Left Identity law
+        assertEquals(value.flatMap(fa), fa.apply(-1));
+
+        // (2) Right Identity law
+        assertEquals(value.flatMap(fb), value);
+
+        // (3) Associative law
+        assertEquals(value.flatMap(fa).flatMap(fb),fa.apply(value.get()).flatMap(fb));
     }
 
     @Test
@@ -377,6 +409,25 @@ public class MaybeTest {
         assertTrue(maybePair3.isEmpty());
         assertEquals("Hello World",pair._1().orElse(null));
         assertEquals(64,pair._2().orElse(null));
+    }
+
+    @Test
+    public void testApplicable_Pass() {
+        // When
+        Maybe<Integer> number = Maybe.of(0);
+        Maybe<Integer> nothing = Maybe.empty();
+
+        // Given
+        Function<Integer,Integer> add = n -> n + 10;
+
+        Maybe<Integer> value1 = number.apply(Maybe.of(add))
+                                     .apply(Maybe.of(add));
+
+        Maybe<Integer> value2 = nothing.apply(Maybe.of(add));
+
+        // Then
+        assertEquals(Maybe.of(20),value1);
+        assertTrue(value2.isEmpty());
     }
 
     // Some contrived use case for flatMap

@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,7 +37,7 @@ public class EvalTest extends AbstractConcurrencyTest {
     private static final Logger logger = LoggerFactory.getLogger(EvalTest.class);
 
     private Eval<Integer> always,alwaysR,eager,later,laterR;
-    private AsyncEval<Integer> asyncLater, asyncFailure;
+    private AsyncEval<Integer> asyncEval, asyncFailure;
 
     @BeforeEach
     public void setup() {
@@ -51,8 +52,8 @@ public class EvalTest extends AbstractConcurrencyTest {
 
         alwaysR = Eval.alwaysRecursive(fibonacci(10));
         laterR = Eval.laterRecursive(fibonacci(10));
-        asyncLater = Eval.asyncLater(() -> doLongRunningTask("Eval.asyncLater()"));
-        asyncFailure = Eval.asyncLater(() -> 100 / 0);
+        asyncEval = AsyncEval.asyncLater(() -> doLongRunningTask("Eval.asyncLater()"));
+        asyncFailure = AsyncEval.asyncLater(() -> 100 / 0);
     }
 
     @Test
@@ -60,19 +61,22 @@ public class EvalTest extends AbstractConcurrencyTest {
         // Given (setup)
 
         // Then
-        assertTrue(always instanceof Eval.Always);
+        assertTrue(eager instanceof Eval.Eager);
         assertTrue(later instanceof Eval.Later);
+        assertTrue(always instanceof Eval.Always);
+        assertNotNull(asyncEval);
 
         assertEquals("Always[unset]",always.toString());
         assertEquals("Always[unset]", alwaysR.toString());
         assertEquals("Eager[12]",eager.toString());
         assertEquals("Later[unset]",later.toString());
+        assertEquals("AsyncEval[unset]", asyncEval.toString());
     }
 
     @Test
     public void testEqual_Pass() {
         // Given (setup)
-        Eval<Integer> asyncLater = Eval.asyncLater(() -> 12).resolve();
+        Eval<Integer> asyncLater = AsyncEval.asyncLater(() -> 12).resolve();
         Eval<Integer> later = Eval.later(() -> 12).resolve();
         Eval<Integer> always = Eval.always(() -> 12).resolve();
 
@@ -301,6 +305,32 @@ public class EvalTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    public void testFlatMap_MonadLaws_Pass() {
+        // Given
+        Eval<Integer> eagerEval = Eval.eager(-1);
+        Eval<Integer> laterEval = Eval.later(() -> -1);
+        Eval<Integer> alwaysEval = Eval.always(() -> -1);
+
+        // Then
+        assertTrue(verifyMonadLaws(eagerEval, x -> Eval.eager(x * 2),Eval::eager));
+        assertTrue(verifyMonadLaws(laterEval, x -> Eval.later(() -> x * 2), x -> Eval.later(() -> x).resolve()));
+        assertTrue(verifyMonadLaws(alwaysEval, x -> Eval.always(() -> x * 2), x -> Eval.always(() -> x).resolve()));
+    }
+
+    @Test
+    public void testMap_FunctorLaws_Pass() {
+        // Given
+        Eval<Integer> eagerEval = Eval.eager(-1);
+        Eval<Integer> laterEval = Eval.later(() -> -1);
+        Eval<Integer> alwaysEval = Eval.always(() -> -1);
+
+        // Then
+        assertTrue(verifyFunctorLaws(eagerEval));
+       // TODO:  assertTrue(verifyFunctorLaws(laterEval.resolve()));
+       // ToDO:  assertTrue(verifyFunctorLaws(alwaysEval.resolve()));
+    }
+
+    @Test
     public void testMap_Pass() {
         // Given (setup)
 
@@ -317,14 +347,14 @@ public class EvalTest extends AbstractConcurrencyTest {
         // Given (setup)
 
         // When
-        int result = assertTimeout(Duration.ofMillis(1280),() -> asyncLater.map(value -> value * 2)
+        int result = assertTimeout(Duration.ofMillis(1280),() -> asyncEval.map(value -> value * 2)
                     .get());
 
         // Then
         assertEquals(254,result);
-        assertTrue(asyncLater.isComplete());
-        assertTrue(asyncLater.isFulfilled());
-        assertFalse(asyncLater.isRejected());
+        assertTrue(asyncEval.isCompleted());
+        assertTrue(asyncEval.isFulfilled());
+        assertFalse(asyncEval.isRejected());
     }
 
     @Test
@@ -335,12 +365,54 @@ public class EvalTest extends AbstractConcurrencyTest {
         assertThrows(NoSuchElementException.class, () -> asyncFailure.get());
 
         // Then
-        assertTrue(asyncFailure.isComplete());
+        assertTrue(asyncFailure.isCompleted());
         assertFalse(asyncFailure.isFulfilled());
         assertTrue(asyncFailure.isRejected());
         assertFalse(asyncFailure.getException().isEmpty());
         asyncFailure.getException()
                 .ifPresent(e -> assertEquals("java.lang.ArithmeticException: / by zero",e.getMessage()));
+    }
+
+    @Test
+    public void testEval_Applicative_Pass() {
+        // When
+        Eval<Integer> number1 = Eval.later(() -> 0);
+        Eval<Integer> number2 = Eval.eager(0);
+
+        // Given
+        Function<Integer,Integer> add = n -> n + 10;
+
+        Eval<Integer> value1 = number1.apply(Eval.later(() -> add))
+                                      .apply(Eval.later(() -> add));
+
+        Eval<Integer> value2 = number2.apply(Eval.eager(add))
+                                      .apply(Eval.eager(add));
+
+        // Then
+        assertEquals(20,value1.get());
+        assertEquals(20,value2.get());
+    }
+
+    private boolean verifyMonadLaws(final Eval<Integer> value,
+                                    Function<Integer,Eval<Integer>> leftIdent,
+                                    Function<Integer,Eval<Integer>> rightIdent) {
+        return
+                // (1) Left Identity law
+                value.flatMap(leftIdent).equals(leftIdent.apply(-1))
+                // (2) Right Identity law
+                && value.flatMap(rightIdent).equals(value)
+                // (3) Associative law
+                && value.flatMap(leftIdent).flatMap(rightIdent).equals(leftIdent.apply(value.get()).flatMap(rightIdent));
+   }
+
+    private boolean verifyFunctorLaws(final Eval<Integer> value) {
+        return
+                // (1) Identity law
+                value.equals(value.map(Function.identity()))
+                && value.equals(value.map(x -> x))
+                // (2) If a function composition (g), (h), then the resulting functor should be the
+                // same as calling f with (h) and then with (g)
+                && value.map(x -> (x + 1) * 2).equals(value.map(x -> x + 1).map(x -> x * 2));
     }
 
     private Trampoline<Integer> fibonacci(int count) {

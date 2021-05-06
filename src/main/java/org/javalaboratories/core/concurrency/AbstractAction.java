@@ -17,7 +17,7 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.AllArgsConstructor;
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.util.Generics;
+import org.javalaboratories.core.util.Generics;
 
 import java.util.function.BiConsumer;
 
