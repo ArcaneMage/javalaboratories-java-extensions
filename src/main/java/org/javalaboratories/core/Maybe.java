@@ -632,6 +632,26 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
     }
 
     /**
+     * Provides the ability to perform a sequence functorial computations on
+     * the {@code applicable functor} container.
+     *
+     * @param applicative to apply computation.
+     * @param <R> Type of value transformed having applied the function.
+     * @return a new applicative with resultant value having applied the
+     * encapsulated function.
+     * @throws NullPointerException if function is null;
+     */
+    public <R> Maybe<R> apply(final Applicative<Function<? super T,? extends R>> applicative)  {
+        Objects.requireNonNull(applicative);
+
+        //  If the value is Nothing it is literally impossible to apply the
+        //  function as there is no value to apply it to
+        return isEmpty()
+            ? Maybe.empty()
+            : (Maybe<R>) super.apply(applicative);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

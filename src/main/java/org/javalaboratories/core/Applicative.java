@@ -56,15 +56,13 @@ public abstract class Applicative<T> implements Functor<T> {
      *
      * @param applicative to apply computation.
      * @param <R> Type of value transformed having applied the function.
-     * @return a new function with encapsulated function to be applied to
-     * {@code applicable}
+     * @return a new applicative with resultant value having applied the
+     * encapsulated function.
      * @throws NullPointerException if function is null;
      */
-    public <R> Function<? super Applicative<T>,? extends Applicative<R>> apply(final Applicative<Function<? super T,? extends R>> applicative)  {
+    protected <R> Applicative<R> apply(final Applicative<Function<? super T,? extends R>> applicative)  {
         Objects.requireNonNull(applicative);
-        return a -> {
-            R result = applicative.get().apply(a.get());
-            return a.pure(result);
-        };
+        Function<? super T,? extends R> f = applicative.get();
+        return pure(f.apply(get()));
     }
 }

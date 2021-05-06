@@ -183,6 +183,20 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
     public static <T> Eval<T> laterRecursive(final Trampoline<T> trampoline) { return new Later<>(trampoline);}
 
     /**
+     * Provides the ability to perform a sequence functorial computations on
+     * the {@code applicable functor} container.
+     *
+     * @param applicative to apply computation.
+     * @param <R> Type of value transformed having applied the function.
+     * @return a new applicative with resultant value having applied the
+     * encapsulated function.
+     * @throws NullPointerException if function is null;
+     */
+    public <R> Eval<R> apply(final Applicative<Function<? super T,? extends R>> applicative)  {
+        return (Eval<R>) super.apply(applicative);
+    }
+
+    /**
      * Returns {@code this} {@link Maybe} object that satisfies the {@code
      * predicate} function.
      *

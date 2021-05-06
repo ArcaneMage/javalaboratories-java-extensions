@@ -411,6 +411,25 @@ public class MaybeTest {
         assertEquals(64,pair._2().orElse(null));
     }
 
+    @Test
+    public void testApplicable_Pass() {
+        // When
+        Maybe<Integer> number = Maybe.of(0);
+        Maybe<Integer> nothing = Maybe.empty();
+
+        // Given
+        Function<Integer,Integer> add = n -> n + 10;
+
+        Maybe<Integer> value1 = number.apply(Maybe.of(add))
+                                     .apply(Maybe.of(add));
+
+        Maybe<Integer> value2 = nothing.apply(Maybe.of(add));
+
+        // Then
+        assertEquals(Maybe.of(20),value1);
+        assertTrue(value2.isEmpty());
+    }
+
     // Some contrived use case for flatMap
     private static class Parser {
         public Maybe<String> parse(String value) {

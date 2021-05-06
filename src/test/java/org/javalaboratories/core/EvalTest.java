@@ -373,6 +373,26 @@ public class EvalTest extends AbstractConcurrencyTest {
                 .ifPresent(e -> assertEquals("java.lang.ArithmeticException: / by zero",e.getMessage()));
     }
 
+    @Test
+    public void testEval_Applicative_Pass() {
+        // When
+        Eval<Integer> number1 = Eval.later(() -> 0);
+        Eval<Integer> number2 = Eval.eager(0);
+
+        // Given
+        Function<Integer,Integer> add = n -> n + 10;
+
+        Eval<Integer> value1 = number1.apply(Eval.later(() -> add))
+                                      .apply(Eval.later(() -> add));
+
+        Eval<Integer> value2 = number2.apply(Eval.eager(add))
+                                      .apply(Eval.eager(add));
+
+        // Then
+        assertEquals(20,value1.get());
+        assertEquals(20,value2.get());
+    }
+
     private boolean verifyMonadLaws(final Eval<Integer> value,
                                     Function<Integer,Eval<Integer>> leftIdent,
                                     Function<Integer,Eval<Integer>> rightIdent) {
