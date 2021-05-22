@@ -143,7 +143,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
         Predicate<? super Eval<T>> p = Objects.requireNonNull(predicate,"Expected predicate");
         return value -> {
             Eval<T> eval;
-            if (action != null && p.test(eval = Eval.eager(value)))
+            if (action != null && p.test((eval = Eval.eager(value))))
                 action.accept(eval);
         };
     }
@@ -406,15 +406,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
          * {@inheritDoc}
          */
         @Override
-        public Maybe<Eval<T>> filter(final Predicate<? super T> predicate) {
-            Objects.requireNonNull(predicate,"Expect predicate function");
-            return predicate.test(value()) ? Maybe.of(this) : Maybe.empty();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
         public Eval<T> reserve() {
             return flatMap(Eval::eager);
         }
@@ -492,14 +483,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
             public E setGet(final E e) {
                 synchronized(this) {
                     modes.get(caching ? 0 : 1).accept(e);
-                    return element;
-                }
-            }
-            /**
-             * Retrieves this current value.
-             */
-            public E get() {
-                synchronized(this) {
                     return element;
                 }
             }

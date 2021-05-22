@@ -430,6 +430,16 @@ public class MaybeTest {
         assertTrue(value2.isEmpty());
     }
 
+    @Test
+    public void testToEither_Pass() {
+        // Given
+        Either<Exception,Integer> either = Either.right(5);
+        Maybe<Integer> maybe = Maybe.ofEither(either);
+
+        // Then
+        assertEquals(Maybe.of(5),maybe);
+    }
+
     // Some contrived use case for flatMap
     private static class Parser {
         public Maybe<String> parse(String value) {

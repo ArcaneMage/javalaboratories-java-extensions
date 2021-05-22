@@ -144,6 +144,23 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
     }
 
     /**
+     * Factory method to create an instance of the {@link Maybe} object
+     * from an {@link Either} object.
+     *
+     * @param value an {@link Either} object.
+     * @param <A> Type of "right" underlying value encapsulated in {@link Either}
+     *          object
+     * @param <B> Type of "left" underlying value encapsulated in {@link Either}
+     *          object.
+     * @return a {@code Maybe} encapsulating {@code value}
+     */
+    public static <A,B> Maybe<B> ofEither(final Either<A,B> value) {
+        return value == null
+                ? Maybe.empty()
+                : value.toMaybe();
+    }
+
+    /**
      * Factory method to create an instance of the {@link Maybe} object.
      * <p>
      * If the use case demands the {@code value} to be {@code null}, this
@@ -167,7 +184,9 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
      * @return an {@code empty} {@link Maybe} object.
      */
     public static <T> Maybe<T> empty() {
-        return Generics.unchecked(EMPTY);
+        @SuppressWarnings("unchecked")
+        Maybe<T> result = (Maybe<T>) EMPTY;
+        return result;
     }
 
     /**

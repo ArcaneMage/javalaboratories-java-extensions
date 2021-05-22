@@ -175,6 +175,20 @@ public class EvalTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    public void testFlatten_Pass() {
+        // Given (setup)
+        Eval<Eval<Integer>> value = Eval.eager(Eval.eager(105));
+
+        // When
+        String result = value
+                .<Integer>flatten()
+                .fold("", Object::toString);
+
+        // Then
+        assertEquals("105",result);
+    }
+
+    @Test
     public void testPeek_Pass() {
         // Given (setup)
         LogCaptor logCaptor = LogCaptor.forClass(EvalTest.class);
@@ -212,8 +226,8 @@ public class EvalTest extends AbstractConcurrencyTest {
         LogCaptor logCaptor = LogCaptor.forClass(EvalTest.class);
 
         // When
-        numbers.forEach(Eval.cpeek(value -> logger.info("Eval.map: {}",value.map(v -> v + 5).get())));
-        numbers.forEach(Eval.cpeek(value -> value.get() > 0, value -> logger.info("{}",value)));
+        numbers.forEach(Eval.cpeek(value -> logger.info("Eval.map: {}",value.map(v -> v + 5).fold(0,Function.identity()))));
+        numbers.forEach(Eval.cpeek(value -> value.fold(0,Function.identity()) > 5, value -> logger.info("{}",value)));
 
         long logCount = logCaptor.getInfoLogs().stream()
                 .filter(s -> s.equals("Eval.map: 15") ||
