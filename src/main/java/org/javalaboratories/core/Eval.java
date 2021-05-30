@@ -229,6 +229,8 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * @param <U> Type of transformed value.
      * @param mapper function with which to perform the transformation.
      * @return transformed {@link Eval} object.
+     *
+     * TODO: Resolve trampoline behaviour to enable flatMap recursion
      */
     @Override
     public <U> Eval<U> flatMap(final Function<? super T,? extends Monad<U>> mapper) {
