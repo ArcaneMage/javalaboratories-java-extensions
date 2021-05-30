@@ -563,7 +563,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
      * Returns {@link Map} containing {@code this} value if nonempty, otherwise
      * an empty {@code Map} collection is returned.
      *
-     * @param keyMapper function to derive unique key with which insert the
+     * @param keyMapper function to derive unique key with which to insert the
      * {@code value}
      * @param <K>   Type of {@code map} key
      * @return a map containing {@code this} nonempty value, or an {@code empty}
