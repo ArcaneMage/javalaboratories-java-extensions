@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core;
 
+import org.javalaboratories.core.handlers.ThrowableSupplier;
 import org.javalaboratories.core.util.Arguments;
 import org.javalaboratories.core.util.Generics;
 
@@ -36,6 +37,10 @@ import java.util.function.Supplier;
  */
 public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable {
 
+
+    private static final String FAILED_TO_RETRIEVE_MESSAGE = "Failed to retrieve exception from Try object";
+    private static final UnsupportedOperationException UNSUPPORTED_OPERATION_EXCEPTION = new UnsupportedOperationException();
+
     /**
      * Factory method of Try object.
      * <p>
@@ -46,7 +51,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * @param <T> resultant type of computation.
      * @return Try object.
      */
-    public static <T> Try<T> of(final Supplier<T> supplier) {
+    public static <T, E extends Throwable> Try<T> of(final ThrowableSupplier<T,E> supplier) {
         Objects.requireNonNull(supplier);
         Try<T> result;
         try {
@@ -113,9 +118,10 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      */
     public Try<Throwable> failed() {
         if (isSuccess()) {
-            return failure(new UnsupportedOperationException());
+            return failure(UNSUPPORTED_OPERATION_EXCEPTION);
         } else {
-            return success(getThrowableValue(this).fold(null,Function.identity()));
+            return success(getThrowableValue(this)
+                                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
         }
     }
 
@@ -137,7 +143,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
             if (predicate.test(get()))
                 result = this;
             else
-                result = failure(new UnsupportedOperationException());
+                result = failure(UNSUPPORTED_OPERATION_EXCEPTION);
         } else {
             result = this;
         }
@@ -162,7 +168,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
             if (!predicate.test(get()))
                 result = this;
             else
-                result = failure(new UnsupportedOperationException());
+                result = failure(UNSUPPORTED_OPERATION_EXCEPTION);
         } else {
             result = this;
         }
@@ -209,7 +215,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
         if (isSuccess()) {
             result = fb.apply(get());
         } else {
-            Throwable t = getThrowableValue(this).fold(null, Function.identity());
+            Throwable t = getThrowableValue(this)
+                                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
             result = fa.apply(t);
         }
         return result;
@@ -307,7 +314,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
     public <U> Try<U> recover(final Function<? super Throwable, ? extends U> fn) {
         Objects.requireNonNull(fn, "Expected recover function");
         if (isFailure()) {
-            Throwable t = getThrowableValue(this).fold(null, Function.identity());
+            Throwable t = getThrowableValue(this)
+                                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
             return success(fn.apply(t));
         } else {
             @SuppressWarnings("unchecked")
@@ -337,7 +345,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
     public Either<Throwable, T> toEither() {
         return isSuccess()
                 ? Either.right(get())
-                : Either.left(getThrowableValue(this).fold(null, Function.identity()));
+                : Either.left(getThrowableValue(this)
+                                    .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
     }
 
     /**
@@ -370,8 +379,10 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
         try {
             context.get();
         } catch (Throwable t) {
+            // All exceptions are encased in RuntimeException object so they
+            // need to be 'unpacked' for analysis.
             @SuppressWarnings("unchecked")
-            U value = (U) t;
+            U value = (U) t.getCause();
             result = Maybe.of(value);
         }
         return result;

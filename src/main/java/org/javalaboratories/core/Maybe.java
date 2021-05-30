@@ -219,7 +219,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
      * @return the final result of of the fold operation.
      */
     public static <T,U> U fold(final Iterable<Maybe<T>> maybes,U identity,final BiFunction<U,? super T,U> accumulator) {
-        Arguments.requireNonNull("Requires values,identity and accumulator",identity,maybes,accumulator);
+        Arguments.requireNonNull("Requires values,identity and accumulator",maybes,identity,accumulator);
         U result = identity;
         for (Maybe<T> value : maybes) {
             if (value.isPresent())
