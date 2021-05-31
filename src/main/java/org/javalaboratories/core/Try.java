@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core;
 
+import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.handlers.ThrowableSupplier;
 import org.javalaboratories.core.util.Arguments;
 import org.javalaboratories.core.util.Generics;
@@ -32,6 +33,33 @@ import java.util.function.Supplier;
  * {@link Either} class type.
  * <p>
  * This implementation of {@code Try} class is inspired by Scala's Try class.
+ * Below are some use case examples demonstrating elegant recovery strategies:
+ * <pre>
+ *     {@code
+ *         // Recovering from arithmetic exceptions: result1="Result1=1000"
+ *         String result1 = Try.of(() -> 100 / 0)
+ *                             .recover(t -> t instanceof ArithmeticException ? 100 : 100)
+ *                             .map(n -> n * 10)
+ *                             .filter(n -> n > 500)
+ *                             .fold("",n -> "Result1="+n);
+ *
+ *         // Using orElse to recover: result2="Result2=2500"
+ *         String result2 = Try.of(() -> 100 / 0)
+ *                             .orElse(100)
+ *                             .map(n -> n * 25)
+ *                             .filter(n -> n > 500)
+ *                             .fold("",n -> "Result2="+n);
+ *
+ *         // IOExceptions are handled gracefully too: result3=0
+ *         int result3 = Try.of(() -> new String(Files.readAllBytes(Paths.get("does-not-exist.txt"))))
+ *                             .orElse("")
+ *                             .map(String::length)
+ *                             .fold(-1,Function.identity());
+ *     }
+ * </pre>
+ * There are many more operations available, the API is documented, so explore
+ * them. Potentially there is case to abandon the use of the try-catch block in
+ * favour of a more functional programming approach.
  *
  * @param <T> resultant type of computation/operation
  */
@@ -44,7 +72,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
     /**
      * Factory method of Try object.
      * <p>
-     * The returned type mayby of {@link Success} or {@link Failure} depending
+     * The returned type maybe of {@link Success} or {@link Failure} depending
      * on computation behaviour.
      *
      * @param supplier function encapsulating computation/operation.
@@ -120,7 +148,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
         if (isSuccess()) {
             return failure(UNSUPPORTED_OPERATION_EXCEPTION);
         } else {
-            return success(getThrowableValue(this)
+            return success(getThrowableValue()
                                 .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
         }
     }
@@ -215,7 +243,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
         if (isSuccess()) {
             result = fb.apply(get());
         } else {
-            Throwable t = getThrowableValue(this)
+            Throwable t = getThrowableValue()
                                 .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
             result = fa.apply(t);
         }
@@ -314,7 +342,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
     public <U> Try<U> recover(final Function<? super Throwable, ? extends U> fn) {
         Objects.requireNonNull(fn, "Expected recover function");
         if (isFailure()) {
-            Throwable t = getThrowableValue(this)
+            Throwable t = getThrowableValue()
                                 .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
             return success(fn.apply(t));
         } else {
@@ -322,6 +350,17 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
             Try<U> result = (Try<U>) this;
             return result;
         }
+    }
+
+    /**
+     * @return an {@link Either} object: {@link Either.Right} encapsulating value;
+     * {@link Either.Left} encapsulating exception.
+     */
+    public Either<Throwable, T> toEither() {
+        return isSuccess()
+                ? Either.right(get())
+                : Either.left(getThrowableValue()
+                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
     }
 
     /**
@@ -339,17 +378,6 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
     }
 
     /**
-     * @return an {@link Either} object: {@link Either.Right} encapsulating value;
-     * {@link Either.Left} encapsulating exception.
-     */
-    public Either<Throwable, T> toEither() {
-        return isSuccess()
-                ? Either.right(get())
-                : Either.left(getThrowableValue(this)
-                                    .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
-    }
-
-    /**
      * Returns {@link Map} containing {@code this} value if nonempty, otherwise
      * an empty {@code Map} collection is returned.
      *
@@ -361,7 +389,11 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      */
     public <K> Map<K, T> toMap(final Function<? super T, ? extends K> keyMapper) {
         Objects.requireNonNull(keyMapper);
-        K key = keyMapper.apply(get());
+        K k = null;
+        if (isSuccess()) {
+            k = keyMapper.apply(get());
+        }
+        K key = k;
         return fold(Collections.emptyMap(), value -> Collections.singletonMap(key, value));
     }
 
@@ -374,8 +406,9 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
                 : Maybe.empty();
     }
 
-    private <U extends Throwable> Maybe<U> getThrowableValue(Try<T> context) {
+    private <U extends Throwable> Maybe<U> getThrowableValue() {
         Maybe<U> result = Maybe.empty();
+        Try<T> context = this;
         try {
             context.get();
         } catch (Throwable t) {
@@ -393,6 +426,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      *
      * @param <T> type of underling value.
      */
+    @EqualsAndHashCode(callSuper = false)
     public final static class Failure<T> extends Try<T> {
 
         private final Throwable throwable;
@@ -442,6 +476,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      *
      * @param <T> type of underlying value.
      */
+    @EqualsAndHashCode(callSuper = false)
     public final static class Success<T> extends Try<T> {
         private final T value;
 
@@ -482,5 +517,4 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
             return new Success<>(value);
         }
     }
-
 }
