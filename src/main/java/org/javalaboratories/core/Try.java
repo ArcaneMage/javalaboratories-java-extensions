@@ -58,13 +58,12 @@ import java.util.function.Supplier;
  *     }
  * </pre>
  * There are many more operations available, the API is documented, so explore
- * them. Potentially there is case to abandon the use of the try-catch block in
- * favour of a more functional programming approach.
+ * go ahead and them. Potentially there is case to abandon the use of the
+ * try-catch block in favour of a more functional programming approach.
  *
  * @param <T> resultant type of computation/operation
  */
 public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable {
-
 
     private static final String FAILED_TO_RETRIEVE_MESSAGE = "Failed to retrieve exception from Try object";
     private static final UnsupportedOperationException UNSUPPORTED_OPERATION_EXCEPTION = new UnsupportedOperationException();
@@ -76,10 +75,10 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * on computation behaviour.
      *
      * @param supplier function encapsulating computation/operation.
-     * @param <T> resultant type of computation.
+     * @param <T>      resultant type of computation.
      * @return Try object.
      */
-    public static <T, E extends Throwable> Try<T> of(final ThrowableSupplier<T,E> supplier) {
+    public static <T, E extends Throwable> Try<T> of(final ThrowableSupplier<T, E> supplier) {
         Objects.requireNonNull(supplier);
         Try<T> result;
         try {
@@ -97,7 +96,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * decided bu the {@link Try#of} factory method.
      *
      * @param throwable exception type.
-     * @param <T> type of resultant computation.
+     * @param <T>       type of resultant computation.
      * @return Try object, {@link Failure}.
      */
     public static <T> Try<T> failure(final Throwable throwable) {
@@ -112,7 +111,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * decided bu the {@link Try#of} factory method.
      *
      * @param value resultant value of type.
-     * @param <T> type of resultant computation.
+     * @param <T>   type of resultant computation.
      * @return Try object, {@link Success}.
      */
     public static <T> Try<T> success(final T value) {
@@ -149,7 +148,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
             return failure(UNSUPPORTED_OPERATION_EXCEPTION);
         } else {
             return success(getThrowableValue()
-                                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
+                    .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
         }
     }
 
@@ -206,6 +205,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
     /**
      * {@inheritDoc}
      * <p>
+     *
      * @return resultant {@link Try} having applied the given function to that
      * value.
      */
@@ -231,10 +231,10 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * Applies {@code fa} if this is a {@link Failure} or {@code fb} if this is
      * a {@link Success}.
      *
-     * @param fa the function to apply if this is a {@link Failure}
-     * @param fb the function to apply if this is a {@link Success}
+     * @param fa  the function to apply if this is a {@link Failure}
+     * @param fb  the function to apply if this is a {@link Success}
      * @param <U> resultant type having applied {@code fa} or {@code fb}
-     *           function.
+     *            function.
      * @return the results of applying the function.
      */
     public <U> U fold(final Function<? super Throwable, ? extends U> fa, final Function<? super T, ? extends U> fb) {
@@ -244,7 +244,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
             result = fb.apply(get());
         } else {
             Throwable t = getThrowableValue()
-                                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
+                            .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
             result = fa.apply(t);
         }
         return result;
@@ -273,6 +273,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
     /**
      * {@inheritDoc}
      * <p>
+     *
      * @return resultant {@link Try} having applied the given function to that
      * value.
      */
@@ -291,7 +292,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * it's a {@link Failure}.
      *
      * @param other default value if this is a {@link Failure}
-     * @param <U> type of underlying value.
+     * @param <U>   type of underlying value.
      * @return {@link Try} object.
      */
     public <U> Try<U> orElse(final U other) {
@@ -308,8 +309,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * exception is thrown.
      *
      * @param supplier supplies exception to be thrown if this is a {@link
-     * Failure}
-     * @param <E> type of exception.
+     *                 Failure}
+     * @param <E>      type of exception.
      * @return value of this {@link Try} object.
      * @throws E exception.
      */
@@ -335,7 +336,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * The function is not applied for {@link Success} objects, but {@code this}
      * is returned.
      *
-     * @param fn function to be applied to enable recovery.
+     * @param fn  function to be applied to enable recovery.
      * @param <U> type of recovered value.
      * @return {@link Try} object, maybe recovered from {@link Failure} object.
      */
@@ -343,7 +344,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
         Objects.requireNonNull(fn, "Expected recover function");
         if (isFailure()) {
             Throwable t = getThrowableValue()
-                                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
+                            .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
             return success(fn.apply(t));
         } else {
             @SuppressWarnings("unchecked")
@@ -360,13 +361,14 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
         return isSuccess()
                 ? Either.right(get())
                 : Either.left(getThrowableValue()
-                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
+                                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
     }
 
     /**
      * Returns an immutable list of containing {@code this} nonempty, {@code
      * value}.
      * <p>
+     *
      * @return a {@link List} object containing a {@code value} from {@code
      * this} object, if available. Otherwise, an {@code empty} {@code List} is
      * returned.
@@ -382,8 +384,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * an empty {@code Map} collection is returned.
      *
      * @param keyMapper function to derive unique key with which to insert the
-     * {@code value}
-     * @param <K>   Type of {@code map} key
+     *                  {@code value}
+     * @param <K>       Type of {@code map} key
      * @return a map containing {@code this} nonempty value, or an {@code empty}
      * map.
      */
@@ -437,7 +439,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
 
         /**
          * {@inheritDoc}
-         *
+         * <p>
          * This implementation returns the underlying exception encapsulated in
          * {@link RuntimeException}.
          */
