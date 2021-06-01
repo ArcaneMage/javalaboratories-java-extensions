@@ -266,6 +266,17 @@ public class TryTest {
     }
 
     @Test
+    public void testStream_Pass() {
+        // When
+        int size = aTry1.stream()
+                .map(String::length)
+                .reduce(0,(a,b) -> b);
+
+        // Then
+        assertEquals(35,size);
+    }
+
+    @Test
     public void testToList_Pass() {
         // Given
         List<String> list1 = aTry1.toList();

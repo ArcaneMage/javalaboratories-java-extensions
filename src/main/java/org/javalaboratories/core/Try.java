@@ -26,13 +26,18 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
- * The {@code Try} monad represents a computation/operation that may either
- * results in an exception, or return successfully. It is similar to the
- * {@link Either} class type.
+ * The {@code Try} class represents a computation/operation that may either
+ * result in an exception, or a success. It is similar to the {@link Either}
+ * class type but it dynamically decides the success/failure state.
  * <p>
- * This implementation of {@code Try} class is inspired by Scala's Try class.
+ * This implementation of {@code Try} class is inspired by Scala's Try class,
+ * and is considered to be a monad as well as a functor, which means the context
+ * of the container is transformable via the {@code flatmap} and {@code map}
+ * methods.
+ * <p>
  * Below are some use case examples demonstrating elegant recovery strategies:
  * <pre>
  *     {@code
@@ -57,8 +62,8 @@ import java.util.function.Supplier;
  *                             .fold(-1,Function.identity());
  *     }
  * </pre>
- * There are many more operations available, the API is documented, so explore
- * go ahead and them. Potentially there is case to abandon the use of the
+ * There are many more operations available, the API is documented, so go ahead
+ * and explore them. Potentially there is a case to abandon the use of the
  * try-catch block in favour of a more functional programming approach.
  *
  * @param <T> resultant type of computation/operation
@@ -66,7 +71,7 @@ import java.util.function.Supplier;
 public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable {
 
     private static final String FAILED_TO_RETRIEVE_MESSAGE = "Failed to retrieve exception from Try object";
-    private static final UnsupportedOperationException UNSUPPORTED_OPERATION_EXCEPTION = new UnsupportedOperationException();
+    private static final NoSuchElementException NO_SUCH_ELEMENT_EXCEPTION = new NoSuchElementException();
 
     /**
      * Factory method of Try object.
@@ -145,7 +150,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      */
     public Try<Throwable> failed() {
         if (isSuccess()) {
-            return failure(UNSUPPORTED_OPERATION_EXCEPTION);
+            return failure(NO_SUCH_ELEMENT_EXCEPTION);
         } else {
             return success(getThrowableValue()
                     .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
@@ -170,7 +175,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
             if (predicate.test(get()))
                 result = this;
             else
-                result = failure(UNSUPPORTED_OPERATION_EXCEPTION);
+                result = failure(NO_SUCH_ELEMENT_EXCEPTION);
         } else {
             result = this;
         }
@@ -195,7 +200,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
             if (!predicate.test(get()))
                 result = this;
             else
-                result = failure(UNSUPPORTED_OPERATION_EXCEPTION);
+                result = failure(NO_SUCH_ELEMENT_EXCEPTION);
         } else {
             result = this;
         }
@@ -204,7 +209,6 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
 
     /**
      * {@inheritDoc}
-     * <p>
      *
      * @return resultant {@link Try} having applied the given function to that
      * value.
@@ -272,7 +276,6 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
 
     /**
      * {@inheritDoc}
-     * <p>
      *
      * @return resultant {@link Try} having applied the given function to that
      * value.
@@ -351,6 +354,18 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
             Try<U> result = (Try<U>) this;
             return result;
         }
+    }
+
+    /**
+     * Converts this {@code value} to a stream for processing.
+     * <p>
+     * If {@code this} is a {@link Failure}, an empty {@code stream} is returned;
+     * otherwise {@link Success} is returned.
+     *
+     * @return a stream object is return, empty if {@link Failure}.
+     */
+    public Stream<T> stream() {
+        return fold(Stream.of(),Stream::of);
     }
 
     /**
