@@ -46,7 +46,7 @@ import java.util.function.Supplier;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable {
+public abstract class Eval<T> extends Applicative<T> implements Monad<T>, ExportableContext<T>, Iterable<T>, Serializable {
     /**
      * Evaluate object for {@code FALSE} Boolean value
      */
@@ -310,8 +310,24 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * @return a {@link List} object containing a {@code value} from {@code
      * this} object.
      */
+    @Override
     public List<T> toList() {
         return Collections.singletonList(get());
+    }
+
+    /**
+     * Returns an immutable {@link Map} that represents the current state
+     * of this {@link Eval}.
+     *
+     * @param keyMapper supply key for the context {@code value}.
+     * @param <K> type of key used to map {@code this} value.
+     * @return an immutable Map.
+     */
+    @Override
+    public <K> Map<K,T> toMap(final Function<? super T,? extends K> keyMapper) {
+        Objects.requireNonNull(keyMapper,"Require keyMapper function");
+        return Collections.unmodifiableMap(fold(Collections.emptyMap(),
+                value -> Collections.singletonMap(keyMapper.apply(value),value)));
     }
 
     /**
@@ -320,6 +336,17 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      */
     public Maybe<T> toMaybe() {
         return Maybe.ofEval(this);
+    }
+
+    /**
+     * Returns an immutable {@link Set} that represents the state of {@code this}
+     * {@link Eval}.
+     *
+     * @return an immutable set object.
+     */
+    @Override
+    public Set<T> toSet() {
+        return Collections.unmodifiableSet(fold(Collections.emptySet(),Collections::singleton));
     }
 
     /**

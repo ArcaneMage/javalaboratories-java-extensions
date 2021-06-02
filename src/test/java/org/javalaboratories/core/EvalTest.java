@@ -24,9 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -271,6 +269,49 @@ public class EvalTest extends AbstractConcurrencyTest {
         assertThrows(UnsupportedOperationException.class, () -> list1.add(10));
         assertThrows(UnsupportedOperationException.class, () -> list2.add(10));
         assertThrows(UnsupportedOperationException.class, () -> list3.add(10));
+    }
+
+    @Test
+    public void testToMap_Pass() {
+        // Given (setup)
+
+        // When
+        Map<String,Integer> map1 = eager.toMap(n -> "key1");
+        Map<String,Integer> map2 = later.toMap(n -> "key1");
+        Map<String,Integer> map3 = always.toMap(n -> "key1");
+
+        // Then
+        assertEquals(1, map1.size());
+        assertEquals(1, map2.size());
+        assertEquals(1, map3.size());
+
+        assertEquals(12, map1.get("key1"));
+        assertEquals(60, map2.get("key1"));
+        assertEquals(60, map3.get("key1"));
+
+        // Then -- Immutability?
+        assertThrows(UnsupportedOperationException.class, () -> map1.put("key2",10));
+        assertThrows(UnsupportedOperationException.class, () -> map2.put("key2",10));
+        assertThrows(UnsupportedOperationException.class, () -> map3.put("key2",10));
+    }
+
+
+    @Test
+    public void testToSet_Pass() {
+        // When
+        Set<Integer> set1 = eager.toSet();
+        Set<Integer> set2 = later.toSet();
+        Set<Integer> set3 = always.toSet();
+
+        // Then
+        assertTrue(set1.contains(12));
+        assertTrue(set2.contains(60));
+        assertTrue(set3.contains(60));
+
+        // Immutability?
+        assertThrows(UnsupportedOperationException.class, () -> set1.add(10));
+        assertThrows(UnsupportedOperationException.class, () -> set2.add(10));
+        assertThrows(UnsupportedOperationException.class, () -> set3.add(10));
     }
 
     @Test

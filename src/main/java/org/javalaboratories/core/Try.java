@@ -68,7 +68,7 @@ import java.util.stream.Stream;
  *
  * @param <T> resultant type of computation/operation
  */
-public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable {
+public abstract class Try<T> extends Applicative<T> implements Monad<T>, ExportableContext<T>, Iterable<T>, Serializable {
 
     private static final String FAILED_TO_RETRIEVE_MESSAGE = "Failed to retrieve exception from Try object";
     private static final NoSuchElementException NO_SUCH_ELEMENT_EXCEPTION = new NoSuchElementException();
@@ -388,6 +388,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * this} object, if available. Otherwise, an {@code empty} {@code List} is
      * returned.
      */
+    @Override
     public List<T> toList() {
         return isSuccess()
                 ? Collections.singletonList(get())
@@ -404,6 +405,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
      * @return a map containing {@code this} nonempty value, or an {@code empty}
      * map.
      */
+    @Override
     public <K> Map<K, T> toMap(final Function<? super T, ? extends K> keyMapper) {
         Objects.requireNonNull(keyMapper);
         K k = null;
@@ -421,6 +423,18 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Iterabl
         return isSuccess()
                 ? Maybe.of(get())
                 : Maybe.empty();
+    }
+
+    /**
+     * Returns a {@link Set} containing {@code this} value if nonempty.
+     *
+     * @return a set of this context.
+     */
+    @Override
+    public Set<T> toSet() {
+        return isSuccess()
+                ? Collections.singleton(get())
+                : Collections.emptySet();
     }
 
     private <U extends Throwable> Maybe<U> getThrowableValue() {

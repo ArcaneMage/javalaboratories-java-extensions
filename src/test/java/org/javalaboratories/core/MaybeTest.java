@@ -5,10 +5,7 @@ import org.javalaboratories.core.tuple.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -289,12 +286,16 @@ public class MaybeTest {
 
     @Test
     public void testToList_Pass() {
-        List<String> list = maybe.toList();
-        assertEquals("Hello World", list.get(0));
-        assertEquals(1, list.size());
+        List<String> list1 = maybe.toList();
+        assertEquals("Hello World", list1.get(0));
+        assertEquals(1, list1.size());
 
-        list = empty.toList();
-        assertEquals(0, list.size());
+        List<String> list2 = empty.toList();
+        assertEquals(0, list2.size());
+
+        // Immutability
+        assertThrows(UnsupportedOperationException.class,() -> list1.add("second"));
+        assertThrows(UnsupportedOperationException.class,() -> list2.add("second"));
     }
 
     @Test
@@ -309,6 +310,23 @@ public class MaybeTest {
 
         Map<String,String> emptyMap = empty.toMap(v -> "first");
         assertEquals(0, emptyMap.size());
+
+        // Immutability
+        assertThrows(UnsupportedOperationException.class,() -> map.put("second","110"));
+        assertThrows(UnsupportedOperationException.class,() -> emptyMap.put("second","120"));
+    }
+
+    @Test
+    public void testToSet_Pass() {
+        Set<String> set1 = maybe.toSet();
+        assertTrue(set1.contains("Hello World"));
+
+        Set<String> set2 = empty.toSet();
+        assertEquals(0, set2.size());
+
+        // Immutability
+        assertThrows(UnsupportedOperationException.class,() -> set1.add("110"));
+        assertThrows(UnsupportedOperationException.class,() -> set2.add("120"));
     }
 
     @Test

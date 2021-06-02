@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -349,6 +350,23 @@ public class EitherTest {
         // Immutability
         assertThrows(UnsupportedOperationException.class,() -> lmap.put("LeftKey",110));
         assertThrows(UnsupportedOperationException.class,() -> rmap.put("RightKey",120));
+    }
+
+    @Test
+    public void testToSet_Pass() {
+        // Given (setup)
+
+        // When
+        Set<Integer> lset = left.toSet();
+        Set<Integer> rset = right.toSet();
+
+        // Then
+        assertEquals(0,lset.size());
+        assertTrue(rset.contains(100));
+
+        // Immutability
+        assertThrows(UnsupportedOperationException.class,() -> lset.add(110));
+        assertThrows(UnsupportedOperationException.class,() -> rset.add(120));
     }
 
     @Test

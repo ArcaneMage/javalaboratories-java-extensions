@@ -21,15 +21,8 @@ import org.javalaboratories.core.tuple.Tuple;
 import org.javalaboratories.core.util.Arguments;
 import org.javalaboratories.core.util.Generics;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.Serializable;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -125,7 +118,7 @@ import java.util.stream.Stream;
  * @author Kevin H, Java Laboratories
  */
 @EqualsAndHashCode(callSuper=false)
-public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable<T> {
+public final class Maybe<T> extends Applicative<T> implements Monad<T>, ExportableContext<T>, Iterable<T>, Serializable {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<T> delegate;
@@ -574,6 +567,19 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
         T value = value();
         return Collections.unmodifiableMap(fold(Collections.singletonList(this),Collections.emptyMap(),
                 (a,b) -> Collections.singletonMap(keyMapper.apply(b),value)));
+    }
+
+    /**
+     * Returns a {@link Set} containing {@code this} value if nonempty.
+     *
+     * @return a set of this context. Set container will be empty if this
+     * context is empty.
+     */
+    @Override
+    public Set<T> toSet() {
+        return !isEmpty()
+                ? Collections.singleton(get())
+                : Collections.emptySet();
     }
 
     /**

@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -287,6 +288,10 @@ public class TryTest {
         assertEquals("This is a test file with some text.",list1.get(0));
 
         assertEquals(0,list2.size());
+
+        // Then -- Immutability?
+        assertThrows(UnsupportedOperationException.class, () -> list1.add("10"));
+        assertThrows(UnsupportedOperationException.class, () -> list2.add(10));
     }
 
     @Test
@@ -300,6 +305,25 @@ public class TryTest {
         assertEquals("This is a test file with some text.",map1.get("key1"));
 
         assertEquals(0,map2.size());
+
+        // Then -- Immutability?
+        assertThrows(UnsupportedOperationException.class, () -> map1.put("key2","10"));
+        assertThrows(UnsupportedOperationException.class, () -> map2.put("key2",10));
+    }
+
+    @Test
+    public void testToSet_Pass() {
+        // Given
+        Set<String> set1 = aTry1.toSet();
+        Set<Integer> set2 = aTry2.toSet();
+
+        // Then
+        assertEquals(1,set1.size());
+        assertTrue(set1.contains("This is a test file with some text."));
+        assertEquals(0,set2.size());
+
+        assertThrows(UnsupportedOperationException.class, () -> set1.add("10"));
+        assertThrows(UnsupportedOperationException.class, () -> set2.add(10));
     }
 
     @Test
