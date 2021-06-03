@@ -29,9 +29,9 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * The {@code Try} class represents a computation/operation that may either
- * result in an exception, or a success. It is similar to the {@link Either}
- * class type but it dynamically decides the success/failure state.
+ * The {@code Try} class represents a computation/operation that may either result
+ * in an exception or a success. It is similar to the {@link Either} class type
+ * but it dynamically decides the success/failure state.
  * <p>
  * This implementation of {@code Try} class is inspired by Scala's Try class,
  * and is considered to be a monad as well as a functor, which means the context
