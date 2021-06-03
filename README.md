@@ -323,7 +323,7 @@ collections and persistable. Here are some examples of usage:
 
 ### Try
 `Try` is another class that represents a computation/operation that may either result in an exception or a success.
-It is similar to the `Either` class type but it dynamically decides the success/failure state. This implementation of the
+It is similar to the `Either` class type, but it dynamically decides the success/failure state. The implementation of the
 `Try` class is inspired by Scala's Try class, and is considered to be a monad as well as a functor, which means the 
 context of the container is transformable via the `flatMap` and `map` methods.
 
