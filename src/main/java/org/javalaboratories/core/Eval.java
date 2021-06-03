@@ -46,7 +46,7 @@ import java.util.function.Supplier;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public abstract class Eval<T> extends Applicative<T> implements Monad<T>, ExportableContext<T>, Iterable<T>, Serializable {
+public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
     /**
      * Evaluate object for {@code FALSE} Boolean value
      */

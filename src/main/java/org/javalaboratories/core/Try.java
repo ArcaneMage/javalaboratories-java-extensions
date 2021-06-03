@@ -68,9 +68,9 @@ import java.util.stream.Stream;
  *
  * @param <T> resultant type of computation/operation
  */
-public abstract class Try<T> extends Applicative<T> implements Monad<T>, ExportableContext<T>, Iterable<T>, Serializable {
+public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
 
-    private static final String FAILED_TO_RETRIEVE_MESSAGE = "Failed to retrieve exception from Try object";
+    private static final IllegalStateException FAILED_TO_RETRIEVE_EXCEPTION = new IllegalStateException("Failed to retrieve exception from Try object");
     private static final NoSuchElementException NO_SUCH_ELEMENT_EXCEPTION = new NoSuchElementException();
 
     /**
@@ -153,7 +153,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
             return failure(NO_SUCH_ELEMENT_EXCEPTION);
         } else {
             return success(getThrowableValue()
-                    .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
+                    .orElseThrow(() -> FAILED_TO_RETRIEVE_EXCEPTION));
         }
     }
 
@@ -248,7 +248,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
             result = fb.apply(get());
         } else {
             Throwable t = getThrowableValue()
-                            .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
+                            .orElseThrow(() -> FAILED_TO_RETRIEVE_EXCEPTION);
             result = fa.apply(t);
         }
         return result;
@@ -347,7 +347,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
         Objects.requireNonNull(fn, "Expected recover function");
         if (isFailure()) {
             Throwable t = getThrowableValue()
-                            .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE));
+                            .orElseThrow(() -> FAILED_TO_RETRIEVE_EXCEPTION);
             return success(fn.apply(t));
         } else {
             @SuppressWarnings("unchecked")
@@ -376,7 +376,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
         return isSuccess()
                 ? Either.right(get())
                 : Either.left(getThrowableValue()
-                                .orElseThrow(() -> new IllegalStateException(FAILED_TO_RETRIEVE_MESSAGE)));
+                                .orElseThrow(() -> FAILED_TO_RETRIEVE_EXCEPTION));
     }
 
     /**

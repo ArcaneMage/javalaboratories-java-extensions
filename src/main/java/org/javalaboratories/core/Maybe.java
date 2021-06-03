@@ -118,7 +118,7 @@ import java.util.stream.Stream;
  * @author Kevin H, Java Laboratories
  */
 @EqualsAndHashCode(callSuper=false)
-public final class Maybe<T> extends Applicative<T> implements Monad<T>, ExportableContext<T>, Iterable<T>, Serializable {
+public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<T> delegate;

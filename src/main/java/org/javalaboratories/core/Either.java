@@ -88,7 +88,7 @@ import java.util.function.Supplier;
 @EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
-public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, ExportableContext<B>, Iterable<B>  {
+public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Exportable<B>, Iterable<B>  {
 
     @Getter(value=AccessLevel.PACKAGE)
     private final A left;

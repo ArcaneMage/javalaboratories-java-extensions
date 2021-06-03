@@ -30,7 +30,7 @@ import java.util.function.Function;
  *
  * @param <T> type of underlying value in context.
  */
-public interface ExportableContext<T> {
+public interface Exportable<T> {
 
     /**
      * Transforms context {@code value} into a {@link List}, if possible.
