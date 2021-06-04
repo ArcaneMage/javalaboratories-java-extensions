@@ -321,6 +321,37 @@ collections and persistable. Here are some examples of usage:
         // Outputs: "Earth's distance from Sun 92955807"
 ```
 
+### Try
+`Try` is another class that represents a computation/operation that may either result in an exception or a success.
+It is similar to the `Either` class type, but it dynamically decides the success/failure state. The implementation of the
+`Try` class is inspired by Scala's Try class, and is considered to be a monad as well as a functor, which means the 
+context of the container is transformable via the `flatMap` and `map` methods.
+
+Below are some use cases demonstrating the elegant recovery strategies and other features:
+````
+        // Recovering from arithmetic exceptions: result1="Result1=1000"
+        String result1 = Try.of(() -> 100 / 0)
+                            .recover(t -> t instanceof ArithmeticException ? 100 : 100)
+                            .map(n -> n * 10)
+                            .filter(n -> n > 500)
+                            .fold("",n -> "Result1="+n);
+
+        // Using orElse to recover: result2="Result2=2500"
+        String result2 = Try.of(() -> 100 / 0)
+                            .orElse(100)
+                            .map(n -> n * 25)
+                            .filter(n -> n > 500)
+                            .fold("",n -> "Result2="+n);
+
+        // IOExceptions are handled gracefully too: result3=0
+        int result3 = Try.of(() -> new String(Files.readAllBytes(Paths.get("does-not-exist.txt"))))
+                            .orElse("")
+                            .map(String::length)
+                            .fold(-1,Function.identity());
+````
+There are many more operations available, the API is documented, so go ahead and explore them. There is a potential case
+to abandon the use of the try-catch block in favour of a more functional programming approach.
+
 ## Feedback
 Development is ongoing. I have many ideas in the pipeline, and of course will consider your ideas and recommendations. 
 If you encounter any bugs, please raise an issue(s).

@@ -46,7 +46,7 @@ import java.util.function.Supplier;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable {
+public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
     /**
      * Evaluate object for {@code FALSE} Boolean value
      */
@@ -143,7 +143,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
         Predicate<? super Eval<T>> p = Objects.requireNonNull(predicate,"Expected predicate");
         return value -> {
             Eval<T> eval;
-            if (action != null && p.test(eval = Eval.eager(value)))
+            if (action != null && p.test((eval = Eval.eager(value))))
                 action.accept(eval);
         };
     }
@@ -229,6 +229,8 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * @param <U> Type of transformed value.
      * @param mapper function with which to perform the transformation.
      * @return transformed {@link Eval} object.
+     *
+     * TODO: Resolve trampoline behaviour to enable flatMap recursion
      */
     @Override
     public <U> Eval<U> flatMap(final Function<? super T,? extends Monad<U>> mapper) {
@@ -308,8 +310,24 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      * @return a {@link List} object containing a {@code value} from {@code
      * this} object.
      */
+    @Override
     public List<T> toList() {
         return Collections.singletonList(get());
+    }
+
+    /**
+     * Returns an immutable {@link Map} that represents the current state
+     * of this {@link Eval}.
+     *
+     * @param keyMapper supply key for the context {@code value}.
+     * @param <K> type of key used to map {@code this} value.
+     * @return an immutable Map.
+     */
+    @Override
+    public <K> Map<K,T> toMap(final Function<? super T,? extends K> keyMapper) {
+        Objects.requireNonNull(keyMapper,"Require keyMapper function");
+        return Collections.unmodifiableMap(fold(Collections.emptyMap(),
+                value -> Collections.singletonMap(keyMapper.apply(value),value)));
     }
 
     /**
@@ -318,6 +336,17 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
      */
     public Maybe<T> toMaybe() {
         return Maybe.ofEval(this);
+    }
+
+    /**
+     * Returns an immutable {@link Set} that represents the state of {@code this}
+     * {@link Eval}.
+     *
+     * @return an immutable set object.
+     */
+    @Override
+    public Set<T> toSet() {
+        return Collections.unmodifiableSet(fold(Collections.emptySet(),Collections::singleton));
     }
 
     /**
@@ -406,15 +435,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
          * {@inheritDoc}
          */
         @Override
-        public Maybe<Eval<T>> filter(final Predicate<? super T> predicate) {
-            Objects.requireNonNull(predicate,"Expect predicate function");
-            return predicate.test(value()) ? Maybe.of(this) : Maybe.empty();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
         public Eval<T> reserve() {
             return flatMap(Eval::eager);
         }
@@ -492,14 +512,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Iterab
             public E setGet(final E e) {
                 synchronized(this) {
                     modes.get(caching ? 0 : 1).accept(e);
-                    return element;
-                }
-            }
-            /**
-             * Retrieves this current value.
-             */
-            public E get() {
-                synchronized(this) {
                     return element;
                 }
             }

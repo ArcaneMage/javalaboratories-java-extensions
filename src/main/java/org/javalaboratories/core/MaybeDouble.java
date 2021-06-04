@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import java.util.stream.DoubleStream;
 
 @SuppressWarnings("WeakerAccess")
-public class MaybeDouble implements Iterable<Double> {
+public final class MaybeDouble implements Iterable<Double> {
 
     private Maybe<Double> value;
 

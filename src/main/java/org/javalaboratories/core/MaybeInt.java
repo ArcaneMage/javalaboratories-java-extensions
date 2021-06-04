@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 @SuppressWarnings("WeakerAccess")
-public class MaybeInt implements Iterable<Integer> {
+public final class MaybeInt implements Iterable<Integer> {
 
     private Maybe<Integer> value;
 

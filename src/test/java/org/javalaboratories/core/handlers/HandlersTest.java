@@ -96,6 +96,14 @@ public class HandlersTest {
     }
 
     @Test
+    public void testSupplier_Pass() {
+        Supplier<Integer> supplier = Handlers.supplier(() -> doSomethingMethod("testSupplier_Pass - doSomethingMethod"));
+        assertNotNull(supplier);
+        assertEquals(255,supplier.get());
+    }
+
+
+    @Test
     public void testConsumer_Fail() {
         Consumer<String> consumer = Handlers.consumer(this::doSomethingMethodThrowsException);
         assertThrows(RuntimeException.class, () -> consumer.accept("testConsumer_Fail - doSomethingMethodThrowsException"));
@@ -244,6 +252,22 @@ public class HandlersTest {
         Runnable runtime4 = Handlers.runnable(() -> doSomethingMethodThrowsError("testRunnable_Fail - doSomethingMethodThrowsError"));
         assertThrows(RuntimeException.class, runtime4::run);
     }
+
+    @Test
+    public void testSupplier_Fail() {
+        Supplier<Integer> supplier = Handlers.supplier(() -> {doSomethingMethodThrowsException("testSupplier_Fail - doSomethingMethodThrowsException"); return 1;});
+        assertThrows(RuntimeException.class, supplier::get);
+
+        Supplier<Integer> supplier2 = Handlers.supplier(() -> {doSomethingMethodThrowsIOException("testSupplier_Fail - doSomethingMethodThrowsIOException"); return 1;});
+        assertThrows(RuntimeException.class, supplier2::get);
+
+        Supplier<Integer> supplier3 = Handlers.supplier(() -> {doSomethingMethodThrowsRuntimeException("testSupplier_Fail - doSomethingMethodThrowsRuntimeException"); return 1;});
+        assertThrows(RuntimeException.class, supplier3::get);
+
+        Supplier<Integer> supplier4 = Handlers.supplier(() -> {doSomethingMethodThrowsError("testSupplier_Fail - doSomethingMethodThrowsError"); return 1;});
+        assertThrows(RuntimeException.class, supplier4::get);
+    }
+
 
 
     private int doSomethingMethod(String s) {

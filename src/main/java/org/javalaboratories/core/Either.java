@@ -88,7 +88,7 @@ import java.util.function.Supplier;
 @EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
-public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Iterable<B>  {
+public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Exportable<B>, Iterable<B>  {
 
     @Getter(value=AccessLevel.PACKAGE)
     private final A left;
@@ -476,11 +476,11 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, It
      * <p>
      * @return a collection of a single {@code right} value, if it exists.
      */
+    @Override
     public List<B> toList() {
         B right = getRight();
         return isLeft()
-                ? Collections.unmodifiableList(Collections.emptyList()) : right != null
-                  ? Collections.singletonList(right) : Collections.emptyList();
+                ? Collections.emptyList() : Collections.singletonList(right);
     }
 
     /**
@@ -490,12 +490,12 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, It
      * <p>
      * @return a map of a single {@code right} value, if it exists.
      */
+    @Override
     public <K> Map<K,B> toMap(final Function<? super B, ? extends K> keyMapper) {
         Objects.requireNonNull(keyMapper);
         B right = getRight();
         return isLeft()
-                ? Collections.emptyMap() : right != null
-                  ? Collections.singletonMap(keyMapper.apply(right),right) : Collections.emptyMap();
+                ? Collections.emptyMap() : Collections.singletonMap(keyMapper.apply(right),right);
     }
 
     /**
@@ -507,6 +507,18 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, It
      */
     public Maybe<B> toMaybe() {
         return isLeft() ? Maybe.empty() : Maybe.of(getRight());
+    }
+
+    /**
+     * @return an immutable {@link Set} that represents {@code this} {@link
+     * Either}. For {@link Left} instances, an empty Set is return; {@link Right}
+     * instances, if the value exists, it will be encapsulated in the {@link Set}.
+     */
+    @Override
+    public Set<B> toSet() {
+        B right = getRight();
+        return isLeft()
+                ? Collections.emptySet() : Collections.singleton(right);
     }
 
     /**

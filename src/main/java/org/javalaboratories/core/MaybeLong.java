@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import java.util.stream.LongStream;
 
 @SuppressWarnings("WeakerAccess")
-public class MaybeLong implements Iterable<Long> {
+public final class MaybeLong implements Iterable<Long> {
 
     private Maybe<Long> value;
 

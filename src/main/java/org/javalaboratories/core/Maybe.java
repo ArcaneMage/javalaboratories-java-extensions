@@ -21,8 +21,13 @@ import org.javalaboratories.core.tuple.Tuple;
 import org.javalaboratories.core.util.Arguments;
 import org.javalaboratories.core.util.Generics;
 
+import java.io.Serializable;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -113,7 +118,7 @@ import java.util.stream.Stream;
  * @author Kevin H, Java Laboratories
  */
 @EqualsAndHashCode(callSuper=false)
-public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable<T> {
+public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<T> delegate;
@@ -144,6 +149,23 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
     }
 
     /**
+     * Factory method to create an instance of the {@link Maybe} object
+     * from an {@link Either} object.
+     *
+     * @param value an {@link Either} object.
+     * @param <A> Type of "right" underlying value encapsulated in {@link Either}
+     *          object
+     * @param <B> Type of "left" underlying value encapsulated in {@link Either}
+     *          object.
+     * @return a {@code Maybe} encapsulating {@code value}
+     */
+    public static <A,B> Maybe<B> ofEither(final Either<A,B> value) {
+        return value == null
+                ? Maybe.empty()
+                : value.toMaybe();
+    }
+
+    /**
      * Factory method to create an instance of the {@link Maybe} object.
      * <p>
      * If the use case demands the {@code value} to be {@code null}, this
@@ -167,7 +189,9 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
      * @return an {@code empty} {@link Maybe} object.
      */
     public static <T> Maybe<T> empty() {
-        return Generics.unchecked(EMPTY);
+        @SuppressWarnings("unchecked")
+        Maybe<T> result = (Maybe<T>) EMPTY;
+        return result;
     }
 
     /**
@@ -188,7 +212,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
      * @return the final result of of the fold operation.
      */
     public static <T,U> U fold(final Iterable<Maybe<T>> maybes,U identity,final BiFunction<U,? super T,U> accumulator) {
-        Arguments.requireNonNull("Requires values,identity and accumulator",identity,maybes,accumulator);
+        Arguments.requireNonNull("Requires values,identity and accumulator",maybes,identity,accumulator);
         U result = identity;
         for (Maybe<T> value : maybes) {
             if (value.isPresent())
@@ -532,7 +556,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
      * Returns {@link Map} containing {@code this} value if nonempty, otherwise
      * an empty {@code Map} collection is returned.
      *
-     * @param keyMapper function to derive unique key with which insert the
+     * @param keyMapper function to derive unique key with which to insert the
      * {@code value}
      * @param <K>   Type of {@code map} key
      * @return a map containing {@code this} nonempty value, or an {@code empty}
@@ -543,6 +567,19 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Iterable
         T value = value();
         return Collections.unmodifiableMap(fold(Collections.singletonList(this),Collections.emptyMap(),
                 (a,b) -> Collections.singletonMap(keyMapper.apply(b),value)));
+    }
+
+    /**
+     * Returns a {@link Set} containing {@code this} value if nonempty.
+     *
+     * @return a set of this context. Set container will be empty if this
+     * context is empty.
+     */
+    @Override
+    public Set<T> toSet() {
+        return !isEmpty()
+                ? Collections.singleton(get())
+                : Collections.emptySet();
     }
 
     /**

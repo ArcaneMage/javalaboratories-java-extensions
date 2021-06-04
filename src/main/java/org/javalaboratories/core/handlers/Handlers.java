@@ -48,7 +48,7 @@ public final class Handlers {
      * @param <T> type of input into the operation.
      * @return consumer object that handles the exception.
      */
-    public static <T,E extends Throwable> Consumer<T> consumer(ThrowableConsumer<T,E> consumer) {
+    public static <T,E extends Throwable> Consumer<T> consumer(final ThrowableConsumer<T,E> consumer) {
         Objects.requireNonNull(consumer);
         return t -> {
             try {
@@ -68,7 +68,7 @@ public final class Handlers {
      * @param <U> type of input into the operation.
      * @return consumer object that handles the exception.
      */
-    public static <T,U,E extends Throwable> BiConsumer<T,U> biConsumer(ThrowableBiConsumer<T,U,E> biConsumer) {
+    public static <T,U,E extends Throwable> BiConsumer<T,U> biConsumer(final ThrowableBiConsumer<T,U,E> biConsumer) {
         Objects.requireNonNull(biConsumer);
         return (t,u) -> {
             try {
@@ -88,7 +88,7 @@ public final class Handlers {
      * @param <R> type of result from the operation
      * @return function object that handles the exception
      */
-    public static <T,R,E extends Throwable> Function<T,R> function(ThrowableFunction<T,R,E> function) {
+    public static <T,R,E extends Throwable> Function<T,R> function(final ThrowableFunction<T,R,E> function) {
         Objects.requireNonNull(function);
         return t -> {
             R result = null;
@@ -111,7 +111,7 @@ public final class Handlers {
      * @param <R> type of result from the operation
      * @return function object that handles the exception
      */
-    public static <T,U,R,E extends Throwable> BiFunction<T,U,R> biFunction(ThrowableBiFunction<T,U,R,E> function) {
+    public static <T,U,R,E extends Throwable> BiFunction<T,U,R> biFunction(final ThrowableBiFunction<T,U,R,E> function) {
         Objects.requireNonNull(function);
         return (t,u) -> {
             R result = null;
@@ -132,7 +132,7 @@ public final class Handlers {
      * @param <T> type of input into the operation
      * @return predicate object that handles the exception
      */
-    public static <T,E extends Throwable> Predicate<T> predicate(ThrowablePredicate<T,E> predicate) {
+    public static <T,E extends Throwable> Predicate<T> predicate(final ThrowablePredicate<T,E> predicate) {
         Objects.requireNonNull(predicate);
         return t -> {
             boolean result = false;
@@ -154,7 +154,7 @@ public final class Handlers {
      * @param <U> type of second inout into the operation
      * @return predicate object that handles the exception
      */
-    public static <T,U,E extends Throwable> BiPredicate<T,U> biPredicate(ThrowableBiPredicate<T,U,E> predicate) {
+    public static <T,U,E extends Throwable> BiPredicate<T,U> biPredicate(final ThrowableBiPredicate<T,U,E> predicate) {
         Objects.requireNonNull(predicate);
         return (t,u) -> {
             boolean result = false;
@@ -175,7 +175,7 @@ public final class Handlers {
      * @param <T> type of input into the operation.
      * @return unary operator object that handles the exception.
      */
-    public static <T,E extends Throwable> UnaryOperator<T> unaryOperator(ThrowableUnaryOperator<T,E> unaryOperator) {
+    public static <T,E extends Throwable> UnaryOperator<T> unaryOperator(final ThrowableUnaryOperator<T,E> unaryOperator) {
         Objects.requireNonNull(unaryOperator);
         return t -> {
             T result = null;
@@ -196,7 +196,7 @@ public final class Handlers {
      * @param <T> type of input into the operation.
      * @return unary operator object that handles the exception.
      */
-    public static <T,E extends Throwable> BinaryOperator<T> binaryOperator(ThrowableBinaryOperator<T,E> binaryOperator) {
+    public static <T,E extends Throwable> BinaryOperator<T> binaryOperator(final ThrowableBinaryOperator<T,E> binaryOperator) {
         Objects.requireNonNull(binaryOperator);
         return (t,u) -> {
             T result = null;
@@ -217,7 +217,7 @@ public final class Handlers {
      * @param <T> type of input into the operation.
      * @return callable object that handles the exception.
      */
-    public static <T, E extends Throwable> Callable<T> callable(ThrowableCallable<T,E> callable) {
+    public static <T, E extends Throwable> Callable<T> callable(final ThrowableCallable<T,E> callable) {
         Objects.requireNonNull(callable);
         return () -> {
             T result = null;
@@ -237,7 +237,7 @@ public final class Handlers {
      * @param runnable function that throws a checked exception.
      * @return runnable object that handles the exception.
      */
-    public static <E extends Throwable> Runnable runnable(ThrowableRunnable<E> runnable) {
+    public static <E extends Throwable> Runnable runnable(final ThrowableRunnable<E> runnable) {
         Objects.requireNonNull(runnable);
         return () -> {
             try {
@@ -245,6 +245,28 @@ public final class Handlers {
             } catch(Throwable throwable) {
                 handle(throwable);
             }
+        };
+    }
+
+    /**
+     * Wraps supplier {@link ThrowableSupplier} into {@link Supplier} function,
+     * which handles the checked exception.
+     *
+     * @param supplier function that throws a checked exception.
+     * @param <T> type of input into the operation
+     * @param <E> type of exception.
+     * @return supplier function that handles the exception.
+     */
+    public static <T,E extends Throwable> Supplier<T> supplier(final ThrowableSupplier<T,E> supplier) {
+        Objects.requireNonNull(supplier);
+        return () -> {
+            T result = null;
+            try {
+                result = supplier.get();
+            } catch (Throwable throwable) {
+                handle(throwable);
+            }
+            return result;
         };
     }
 
