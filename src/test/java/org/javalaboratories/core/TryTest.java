@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -208,6 +209,16 @@ public class TryTest {
 
         // Then
         assertThrows(IllegalArgumentException.class, () -> aTry2.orElseThrow(IllegalArgumentException::new));
+        assertEquals("This is a test file with some text.",string);
+    }
+
+    @Test
+    public void testOrElseThrowChecked_Pass() throws IOException {
+        // When
+        String string = aTry1.orElseThrow(IOException::new);
+
+        // Then
+        assertThrows(IOException.class, () -> aTry2.orElseThrow(IOException::new));
         assertEquals("This is a test file with some text.",string);
     }
 

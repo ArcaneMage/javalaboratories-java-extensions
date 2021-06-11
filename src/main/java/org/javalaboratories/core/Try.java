@@ -18,7 +18,6 @@ package org.javalaboratories.core;
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.handlers.ThrowableSupplier;
 import org.javalaboratories.core.util.Arguments;
-import org.javalaboratories.core.util.Generics;
 
 import java.io.Serializable;
 import java.util.*;
@@ -283,11 +282,11 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
     @Override
     public <U> Try<U> map(final Function<? super T, ? extends U> mapper) {
         Objects.requireNonNull(mapper, "Function expected");
-        @SuppressWarnings("unchecked")
-        Try<U> self = (Try<U>) this;
-        return isSuccess()
-                ? Generics.unchecked(super.map(mapper))
-                : self;
+        if (isSuccess()) {
+            return (Try<U>) super.<U>map(mapper);
+        } else {
+            return failure(getThrowableValue().get());
+        }
     }
 
     /**
@@ -295,12 +294,10 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * it's a {@link Failure}.
      *
      * @param other default value if this is a {@link Failure}
-     * @param <U>   type of underlying value.
      * @return {@link Try} object.
      */
-    public <U> Try<U> orElse(final U other) {
-        @SuppressWarnings("unchecked")
-        Try<U> result = (Try<U>) this;
+    public Try<T> orElse(final T other) {
+        Try<T> result =  this;
         if (!isSuccess()) {
             result = success(other);
         }
@@ -308,8 +305,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
     }
 
     /**
-     * Returns {@code this} value if this is a {@link Success}, otherwise supplied
-     * exception is thrown.
+     * Returns {@code this} value if this is a {@link Success}, otherwise
+     * supplied exception is thrown.
      *
      * @param supplier supplies exception to be thrown if this is a {@link
      *                 Failure}
@@ -318,10 +315,11 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * @throws E exception.
      */
     public <E extends Throwable> T orElseThrow(final Supplier<? extends E> supplier) throws E {
+        E error = Objects.requireNonNull(supplier.get(),"Expected function");
         if (isSuccess()) {
             return get();
         } else {
-            throw supplier.get();
+            throw error;
         }
     }
 
@@ -340,19 +338,16 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * is returned.
      *
      * @param fn  function to be applied to enable recovery.
-     * @param <U> type of recovered value.
      * @return {@link Try} object, maybe recovered from {@link Failure} object.
      */
-    public <U> Try<U> recover(final Function<? super Throwable, ? extends U> fn) {
+    public Try<T> recover(final Function<? super Throwable, ? extends T> fn) {
         Objects.requireNonNull(fn, "Expected recover function");
         if (isFailure()) {
             Throwable t = getThrowableValue()
                             .orElseThrow(() -> FAILED_TO_RETRIEVE_EXCEPTION);
             return success(fn.apply(t));
         } else {
-            @SuppressWarnings("unchecked")
-            Try<U> result = (Try<U>) this;
-            return result;
+            return this;
         }
     }
 
