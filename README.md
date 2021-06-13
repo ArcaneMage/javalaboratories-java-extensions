@@ -251,10 +251,9 @@ StopWatch provides a convenient means for timings of methods. There are no expli
 stop the timings, because these are naturally determined through the process of invoking the function that is currently
 being timed. In other words, executing the function will start the `StopWatch` and when the function comes to a 
 natural/unnatural conclusion, the `StopWatch` is automatically stopped. Number of instances of `StopWatch` is unlimited,
-and so useful statistics are available of all the timed functions via the class' methods or via the `StopWatch.print()` 
-method which prints pre-formatted data into a string. Every `StopWatch` instance has a unique name, which is useful when 
-reviewing the statistics. Use the `StopWatch.time(Runnable)` or the `StopWatch.time(Consumer)` method to start the timings,
-the latter is particularly useful for `Collection.forEach(Consumer)` and/or streams.
+and so useful statistics are available of all the timed functions via the class' methods or via the `StopWatch.getTime` 
+methods. Every `StopWatch` instance has a unique name, which is useful when reviewing the timings. Use the
+`StopWatch.time(Runnable)` method to start the timings,
 ```
          StopWatch stopWatch = StopWatch.watch("methodOne");
          StopWatch stopWatch2 = StopWatch.watch("methodTwo");
@@ -262,21 +261,12 @@ the latter is particularly useful for `Collection.forEach(Consumer)` and/or stre
          // This is a common usecase of the StopWatch
          stopWatch.time(() -> doSomethingMethod(1000));
  
-         // Here is aother sceanario where the for each loop is measured.
-         List<Integer> numbers = Arrays.asList(1,2,3,4);
-    
-         numbers.forEach(stopWatch2.time(n -> doSomethingMethod2(n)));
-    
-         // This command will print statistics for all StopWatch instances
-         System.out.println(StopWatch.print());
-    
+         // Want review all the timings? This is easy!
+         StopWatch.forEach((a,b) -> logger.info("{} \t-> {}",a,b));
+         
          // Output :-
-    
-         Method                       Time (s)    %       Cycles Cycle Time(s)
-         --------------------------------------------------------------------
-         methodOne                00:00:00.504   8%            1 00:00:00.504
-         methodTwo                00:00:01.451  92%            4 00:00:00.363
-
+         10:47:20.394 [main] INFO  StopWatch - methodOne 	-> 00:00:01.000
+         10:47:20.399 [main] INFO  StopWatch - methodTwo 	-> 00:00:00.000
 ```
 ### Tuples
 A tuple can be considered as a container of ordered elements of different types. Each element may not relate to each
