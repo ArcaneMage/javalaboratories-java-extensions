@@ -56,7 +56,6 @@ public class StopWatchTest {
 
         StopWatch.forEach((a,b) -> { logger.info("{} \t-> {}",a,b); index[0]++; });
 
-        StopWatch.forEach((a,b) -> logger.info("{} \t-> {}",a,b));
         assertEquals(3, index[0]);
     }
 
