@@ -103,6 +103,7 @@ public class StopWatchTest {
 
         // Then
         assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
+        assertEquals(4, stopWatch1.getCycles());
     }
 
     @Test

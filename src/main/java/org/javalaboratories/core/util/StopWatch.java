@@ -16,6 +16,7 @@
 package org.javalaboratories.core.util;
 
 import lombok.EqualsAndHashCode;
+import org.javalaboratories.core.Try;
 
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +53,7 @@ public final class StopWatch {
 
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 
+    private long cycles;
     private long time;
     private final String name;
 
@@ -82,8 +84,8 @@ public final class StopWatch {
     }
 
     /**
-     * Clears the container of all {@link StopWatch} instances in the {@code watches}
-     * container.
+     * Clears the container of all {@link StopWatch} instances in the {@code
+     * watches} container.
      * <p>
      * Container is considered empty after calling this method and no longer
      * manages orphaned {@link StopWatch} objects.
@@ -99,16 +101,38 @@ public final class StopWatch {
     private StopWatch(final String name) {
         Objects.requireNonNull(name,"Name?");
         time = 0;
+        cycles = 0;
         this.name = name;
     }
 
     /**
-     * @return current stopwatch time. If zero, the process hasn't started yet
-     * or is incomplete.
+     * If there are multiple cycles/iterations (number of times the method {@link
+     * StopWatch#time(Runnable)} is called, an average of time elapsed is returned.
+     *
+     * @return current running total of {@code StopWatch} time. If zero, the
+     * process may not started yet or is incomplete.
      */
     public long getTime() {
         synchronized(this) {
-            return time;
+            return Try.of(() -> time / cycles)
+                    .orElse(0L)
+                    .fold(0L,n -> n);
+        }
+    }
+
+    /**
+     * Returns number of cycles/iterations. This represents the number of times
+     * the {@link StopWatch#time} is called.
+     * <p>
+     * Therefore {@code getTime} maintains a running total. If the value
+     * returned is divided by the number of {@code cycles}, this would yield the
+     * average time.
+     *
+     * @return number of cycles/iterations.
+     */
+    public long getCycles() {
+        synchronized (this) {
+            return cycles;
         }
     }
 
@@ -118,6 +142,7 @@ public final class StopWatch {
     public void reset() {
         synchronized (this) {
             time = 0;
+            cycles = 0;
         }
     }
 
@@ -214,7 +239,8 @@ public final class StopWatch {
                 consumer.accept(s);
             } finally {
                 synchronized(this) {
-                    time = System.nanoTime() - start;
+                    cycles++;
+                    time += System.nanoTime() - start;
                 }
             }
         };
