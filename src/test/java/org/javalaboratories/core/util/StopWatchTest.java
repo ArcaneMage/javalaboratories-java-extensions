@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -89,6 +91,18 @@ public class StopWatchTest {
             }
         });
         assertTrue(stopWatch5.getTime(TimeUnit.MILLISECONDS) > 600);
+    }
+
+    @Test
+    public void testTime_Iteration_Pass() {
+        // Given
+        List<Integer> numbers = Arrays.asList(1,2,3,4);
+
+        // When
+        numbers.forEach(stopWatch1.time(n -> doSomethingVoidMethod(100)));
+
+        // Then
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
     }
 
     @Test

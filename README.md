@@ -253,7 +253,7 @@ being timed. In other words, executing the function will start the `StopWatch` a
 natural/unnatural conclusion, the `StopWatch` is automatically stopped. Number of instances of `StopWatch` is unlimited,
 and so useful statistics are available of all the timed functions via the class' methods or via the `StopWatch.getTime` 
 methods. Every `StopWatch` instance has a unique name, which is useful when reviewing the timings. Use the
-`StopWatch.time(Runnable)` method to start the timings,
+`StopWatch.time(Runnable)` method to start the timings.
 ```
          StopWatch stopWatch = StopWatch.watch("methodOne");
          StopWatch stopWatch2 = StopWatch.watch("methodTwo");

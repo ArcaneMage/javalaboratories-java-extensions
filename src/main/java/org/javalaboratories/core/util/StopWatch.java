@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * StopWatch provides a convenient means for timings of methods or routines.
@@ -166,7 +167,36 @@ public final class StopWatch {
      */
     public void time(final Runnable runnable) {
         Objects.requireNonNull(runnable, "Runnable function?");
-        action(runnable).run();
+        action(s -> runnable.run()).accept(null);
+    }
+
+    /**
+     * This function is similar to {@link StopWatch#time(Runnable)} but designed
+     * to be used with {@code forEach} methods of collections or {@code Streams}.
+     * <p>
+     * It will start the timings just before {@code accept} method is invoked;
+     * and stop the timing {@code post-accept} method. This occurs on every
+     * iteration of the {@code forEach} loop.
+     * <pre>
+     *     {@code
+     *         // Given
+     *         List<Integer> numbers = Arrays.asList(1,2,3,4);
+     *
+     *         // When
+     *         numbers.forEach(stopWatch1.time(n -> doSomethingVoidMethodForMilliseconds(100)));
+     *
+     *         // Then
+     *         assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
+     *     }
+     * </pre>
+     *
+     * @param consumer function
+     * @param <T> type of parameter accepted to be consumed.
+     * @return Consumer object with encapsulated timer logic.
+     */
+    public <T> Consumer<T> time(final Consumer<? super T> consumer) {
+        Objects.requireNonNull(consumer,"Consumer function?");
+        return action(consumer);
     }
 
     /**
@@ -177,11 +207,11 @@ public final class StopWatch {
         return getTimeAsString();
     }
 
-    private Runnable action(final Runnable runnable) {
-        return () -> {
+    private <T> Consumer<T> action(final Consumer<? super T> consumer) {
+        return (s) -> {
             long start = System.nanoTime();
             try {
-                runnable.run();
+                consumer.accept(s);
             } finally {
                 synchronized(this) {
                     time = System.nanoTime() - start;
