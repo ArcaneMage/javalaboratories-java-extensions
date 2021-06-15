@@ -16,12 +16,14 @@
 package org.javalaboratories.core.util;
 
 import lombok.EqualsAndHashCode;
+import org.javalaboratories.core.Try;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * StopWatch provides a convenient means for timings of methods or routines.
@@ -51,6 +53,7 @@ public final class StopWatch {
 
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 
+    private long cycles;
     private long time;
     private final String name;
 
@@ -81,14 +84,14 @@ public final class StopWatch {
     }
 
     /**
-     * Clears the container of all {@link StopWatch} instances in the {@code watches}
-     * container.
+     * Clears the container of all {@link StopWatch} instances in the {@code
+     * watches} container.
      * <p>
      * Container is considered empty after calling this method and no longer
      * manages orphaned {@link StopWatch} objects.
      */
     public static void clear() {
-        forEach((n,s) -> s.reset());
+        forEach((n, s) -> s.reset());
         watches.clear();
     }
 
@@ -98,16 +101,38 @@ public final class StopWatch {
     private StopWatch(final String name) {
         Objects.requireNonNull(name,"Name?");
         time = 0;
+        cycles = 0;
         this.name = name;
     }
 
     /**
-     * @return current stopwatch time. If zero, the process hasn't started yet
-     * or is incomplete.
+     * If there are multiple cycles/iterations (number of times the method {@link
+     * StopWatch#time(Runnable)} is called, an average of time elapsed is returned.
+     *
+     * @return current running total of {@code StopWatch} time. If zero, the
+     * process may not started yet or is incomplete.
      */
     public long getTime() {
         synchronized(this) {
-            return time;
+            return Try.of(() -> time / cycles)
+                    .orElse(0L)
+                    .fold(0L,n -> n);
+        }
+    }
+
+    /**
+     * Returns number of cycles/iterations. This represents the number of times
+     * the {@link StopWatch#time} is called.
+     * <p>
+     * Therefore {@code getTime} maintains a running total. If the value
+     * returned is divided by the number of {@code cycles}, this would yield the
+     * average time.
+     *
+     * @return number of cycles/iterations.
+     */
+    public long getCycles() {
+        synchronized (this) {
+            return cycles;
         }
     }
 
@@ -117,6 +142,7 @@ public final class StopWatch {
     public void reset() {
         synchronized (this) {
             time = 0;
+            cycles = 0;
         }
     }
 
@@ -129,7 +155,7 @@ public final class StopWatch {
      * @param unit to convert the time.
      * @return {@link StopWatch} time converted to {@link TimeUnit}.
      */
-    public long getTime(TimeUnit unit) {
+    public long getTime(final TimeUnit unit) {
         Objects.requireNonNull(unit);
         return unit.convert(getTime(),TimeUnit.NANOSECONDS);
     }
@@ -166,7 +192,36 @@ public final class StopWatch {
      */
     public void time(final Runnable runnable) {
         Objects.requireNonNull(runnable, "Runnable function?");
-        action(runnable).run();
+        action(s -> runnable.run()).accept(null);
+    }
+
+    /**
+     * This function is similar to {@link StopWatch#time(Runnable)} but designed
+     * to be used with {@code forEach} methods of collections or {@code Streams}.
+     * <p>
+     * It will start the timings just before {@code accept} method is invoked;
+     * and stop the timing {@code post-accept} method. This occurs on every
+     * iteration of the {@code forEach} loop.
+     * <pre>
+     *     {@code
+     *         // Given
+     *         List<Integer> numbers = Arrays.asList(1,2,3,4);
+     *
+     *         // When
+     *         numbers.forEach(stopWatch1.time(n -> doSomethingVoidMethodForMilliseconds(100)));
+     *
+     *         // Then
+     *         assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
+     *     }
+     * </pre>
+     *
+     * @param consumer function
+     * @param <T> type of parameter accepted to be consumed.
+     * @return Consumer object with encapsulated timer logic.
+     */
+    public <T> Consumer<T> time(final Consumer<? super T> consumer) {
+        Objects.requireNonNull(consumer,"Consumer function?");
+        return action(consumer);
     }
 
     /**
@@ -177,14 +232,15 @@ public final class StopWatch {
         return getTimeAsString();
     }
 
-    private Runnable action(final Runnable runnable) {
-        return () -> {
+    private <T> Consumer<T> action(final Consumer<? super T> consumer) {
+        return (s) -> {
             long start = System.nanoTime();
             try {
-                runnable.run();
+                consumer.accept(s);
             } finally {
                 synchronized(this) {
-                    time = System.nanoTime() - start;
+                    cycles++;
+                    time += System.nanoTime() - start;
                 }
             }
         };
