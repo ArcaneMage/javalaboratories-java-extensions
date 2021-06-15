@@ -91,7 +91,7 @@ public final class StopWatch {
      * manages orphaned {@link StopWatch} objects.
      */
     public static void clear() {
-        forEach((n,s) -> s.reset());
+        forEach((n, s) -> s.reset());
         watches.clear();
     }
 
@@ -155,7 +155,7 @@ public final class StopWatch {
      * @param unit to convert the time.
      * @return {@link StopWatch} time converted to {@link TimeUnit}.
      */
-    public long getTime(TimeUnit unit) {
+    public long getTime(final TimeUnit unit) {
         Objects.requireNonNull(unit);
         return unit.convert(getTime(),TimeUnit.NANOSECONDS);
     }
