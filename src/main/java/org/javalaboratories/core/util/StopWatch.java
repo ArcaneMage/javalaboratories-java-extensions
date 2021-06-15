@@ -42,6 +42,7 @@ import java.util.function.Consumer;
  *
  *          // This is a common usecase of the StopWatch
  *          stopWatch.time(() -> doSomethingMethod(1000));
+ *     }
  * </pre>
  *
  * This class is considered thread-safe.
@@ -186,6 +187,7 @@ public final class StopWatch {
      *
      *          // This is a common usecase of the StopWatch
      *          stopWatch.time(() -> doSomethingMethod(1000));
+     *     }
      * </pre>
      *
      * @param runnable function that encapsulates the process to be timed.
