@@ -107,6 +107,30 @@ public final class StopWatch {
     }
 
     /**
+     * This is the current time, as opposed to the average time as {@link
+     * StopWatch#getTime()} returns.
+     *
+     * @return time in its "natural" form in nanoseconds.
+     */
+    public long getRawTime() {
+        return getRawTime(TimeUnit.NANOSECONDS);
+    }
+
+    /**
+     * This is the current time, as opposed to the average time as {@link
+     * StopWatch#getTime()} returns.
+     *
+     * @param unit to convert the raw time.
+     * @return time in its "natural" form.
+     */
+    public long getRawTime(final TimeUnit unit) {
+        Objects.requireNonNull(unit);
+        synchronized (this) {
+            return unit.convert(time,TimeUnit.NANOSECONDS);
+        }
+    }
+
+    /**
      * If there are multiple cycles/iterations (number of times the method {@link
      * StopWatch#time(Runnable)} is called, an average of time elapsed is returned.
      *
@@ -134,16 +158,6 @@ public final class StopWatch {
     public long getCycles() {
         synchronized (this) {
             return cycles;
-        }
-    }
-
-    /**
-     * Zeroes the {@link StopWatch}.
-     */
-    public void reset() {
-        synchronized (this) {
-            time = 0;
-            cycles = 0;
         }
     }
 
@@ -176,6 +190,16 @@ public final class StopWatch {
                 TimeUnit.MINUTES.convert(nanos,TimeUnit.NANOSECONDS) % 60,
                 TimeUnit.SECONDS.convert(nanos, TimeUnit.NANOSECONDS) % 60,
                 TimeUnit.MILLISECONDS.convert(nanos,TimeUnit.NANOSECONDS) % 1000);
+    }
+
+    /**
+     * Zeroes the {@link StopWatch}.
+     */
+    public void reset() {
+        synchronized (this) {
+            time = 0;
+            cycles = 0;
+        }
     }
 
     /**

@@ -91,6 +91,7 @@ public class StopWatchTest {
             }
         });
         assertTrue(stopWatch5.getTime(TimeUnit.MILLISECONDS) > 600);
+        assertEquals(stopWatch5.getRawTime(TimeUnit.NANOSECONDS),stopWatch5.getTime());
     }
 
     @Test
@@ -104,6 +105,22 @@ public class StopWatchTest {
         // Then
         assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
         assertEquals(4, stopWatch1.getCycles());
+    }
+
+    @Test
+    public void testRawTime_Pass() {
+        // Given
+        List<Integer> numbers = Arrays.asList(1,2,3,4);
+        assertEquals(stopWatch1.getRawTime(),stopWatch1.getTime());
+
+        // Then
+        numbers.forEach(stopWatch1.time(n -> doSomethingVoidMethod(100)));
+
+        // Then
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
+        assertEquals(4, stopWatch1.getCycles());
+        assertNotEquals(stopWatch1.getRawTime(),stopWatch1.getTime());
+        assertNotEquals(stopWatch1.getRawTime(TimeUnit.NANOSECONDS),stopWatch1.getTime());
     }
 
     @Test
