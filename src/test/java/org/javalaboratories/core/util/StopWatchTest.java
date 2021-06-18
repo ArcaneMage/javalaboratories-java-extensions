@@ -145,7 +145,7 @@ public class StopWatchTest {
     @Test
     public void testToString_Pass() {
         String sw = stopWatch1.toString();
-        assertEquals("00:00:00.000", stopWatch1.toString());
+        assertEquals("StopWatch[00:00:00.000]", stopWatch1.toString());
 
         stopWatch1.time(() -> {
             doSomethingVoidMethod(125);

@@ -18,6 +18,7 @@ package org.javalaboratories.core.util;
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Try;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,12 +51,12 @@ import java.util.function.Consumer;
  * @author Kevin Henry, JavaLaboratories
  */
 @EqualsAndHashCode
-public final class StopWatch {
+public final class StopWatch implements Serializable {
 
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 
-    private long cycles;
-    private long time;
+    private volatile long cycles;
+    private volatile long time;
     private final String name;
 
     /**
@@ -125,9 +126,7 @@ public final class StopWatch {
      */
     public long getRawTime(final TimeUnit unit) {
         Objects.requireNonNull(unit);
-        synchronized (this) {
-            return unit.convert(time,TimeUnit.NANOSECONDS);
-        }
+        return unit.convert(time,TimeUnit.NANOSECONDS);
     }
 
     /**
@@ -138,11 +137,9 @@ public final class StopWatch {
      * process may not started yet or is incomplete.
      */
     public long getTime() {
-        synchronized(this) {
-            return Try.of(() -> time / cycles)
-                    .orElse(0L)
-                    .fold(0L,n -> n);
-        }
+        return Try.of(() -> time / cycles)
+                .orElse(0L)
+                .fold(0L,n -> n);
     }
 
     /**
@@ -156,9 +153,7 @@ public final class StopWatch {
      * @return number of cycles/iterations.
      */
     public long getCycles() {
-        synchronized (this) {
-            return cycles;
-        }
+        return cycles;
     }
 
     /**
@@ -255,7 +250,7 @@ public final class StopWatch {
      */
     @Override
     public String toString() {
-        return getTimeAsString();
+        return "StopWatch["+getTimeAsString()+"]";
     }
 
     private <T> Consumer<T> action(final Consumer<? super T> consumer) {
