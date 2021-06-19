@@ -92,6 +92,17 @@ public class StopWatchTest {
         });
         assertTrue(stopWatch5.getTime(TimeUnit.MILLISECONDS) > 600);
         assertEquals(stopWatch5.getRawTime(TimeUnit.NANOSECONDS),stopWatch5.getTime());
+
+        // Time supplier
+        StopWatch stopWatch6 = StopWatch.watch("MethodSix");
+        int value = stopWatch6.time(() -> {
+            for (int i = 0; i < 5; i++) {
+                doSomethingVoidMethod(125);
+            }
+            return 512;
+        });
+        assertTrue(stopWatch6.getTime(TimeUnit.MILLISECONDS) > 600);
+        assertEquals(512, value);
     }
 
     @Test

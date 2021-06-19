@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * StopWatch provides a convenient means for timings of methods or routines.
@@ -204,7 +205,7 @@ public final class StopWatch implements Serializable {
      *     {@code
      *          StopWatch stopWatch = new StopWatch();
      *
-     *          // This is a common usecase of the StopWatch
+     *          // This is a common use case of the StopWatch
      *          stopWatch.time(() -> doSomethingMethod(1000));
      *     }
      * </pre>
@@ -214,6 +215,28 @@ public final class StopWatch implements Serializable {
     public void time(final Runnable runnable) {
         Objects.requireNonNull(runnable, "Runnable function?");
         action(s -> runnable.run()).accept(null);
+    }
+
+    /**
+     * This is then variant on the {@link StopWatch#time(Runnable)} that kicks
+     * off the timed process;
+     * <pre>
+     *     {@code
+     *          StopWatch stopWatch = new StopWatch();
+     *
+     *          // A value is returned from the timed computation
+     *          int retval = stopWatch.time(() -> doSomethingMethod(1000));
+     *          System.out.println(retval);
+     *     }
+     * </pre>
+     * @param supplier function encapsulating computation to be timed, a value
+     *                 is returned.
+     * @param <T> type of returned value.
+     * @return value from timed computation.
+     */
+    public <T> T time(final Supplier<? extends T> supplier) {
+        Objects.requireNonNull(supplier,"Supplier function?");
+        return action(supplier);
     }
 
     /**
@@ -260,10 +283,22 @@ public final class StopWatch implements Serializable {
                 consumer.accept(s);
             } finally {
                 synchronized(this) {
-                    cycles++;
                     time += System.nanoTime() - start;
+                    cycles++;
                 }
             }
         };
+    }
+
+    private <T> T action(final Supplier<? extends T> supplier) {
+        long start = System.nanoTime();
+        try {
+            return supplier.get();
+        } finally {
+            synchronized(this) {
+                time += System.nanoTime() - start;
+                cycles++;
+            }
+        }
     }
 }
