@@ -199,6 +199,35 @@ public final class StopWatch implements Serializable {
     }
 
     /**
+     * This function is similar to {@link StopWatch#time(Runnable)} but designed
+     * to be used with {@code forEach} methods of collections or {@code Streams}.
+     * <p>
+     * It will start the timings just before {@code accept} method is invoked;
+     * and stop the timing {@code post-accept} method. This occurs on every
+     * iteration of the {@code forEach} loop.
+     * <pre>
+     *     {@code
+     *         // Given
+     *         List<Integer> numbers = Arrays.asList(1,2,3,4);
+     *
+     *         // When
+     *         numbers.forEach(stopWatch1.time(n -> doSomethingVoidMethodForMilliseconds(100)));
+     *
+     *         // Then
+     *         assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
+     *     }
+     * </pre>
+     *
+     * @param consumer function
+     * @param <T> type of parameter accepted to be consumed.
+     * @return Consumer object with encapsulated timer logic.
+     */
+    public <T> Consumer<T> time(final Consumer<? super T> consumer) {
+        Objects.requireNonNull(consumer,"Consumer function?");
+        return action(consumer);
+    }
+
+    /**
      * This is the all important method that kicks off the timed process.
      *
      * <pre>
@@ -237,35 +266,6 @@ public final class StopWatch implements Serializable {
     public <T> T time(final Supplier<? extends T> supplier) {
         Objects.requireNonNull(supplier,"Supplier function?");
         return action(supplier);
-    }
-
-    /**
-     * This function is similar to {@link StopWatch#time(Runnable)} but designed
-     * to be used with {@code forEach} methods of collections or {@code Streams}.
-     * <p>
-     * It will start the timings just before {@code accept} method is invoked;
-     * and stop the timing {@code post-accept} method. This occurs on every
-     * iteration of the {@code forEach} loop.
-     * <pre>
-     *     {@code
-     *         // Given
-     *         List<Integer> numbers = Arrays.asList(1,2,3,4);
-     *
-     *         // When
-     *         numbers.forEach(stopWatch1.time(n -> doSomethingVoidMethodForMilliseconds(100)));
-     *
-     *         // Then
-     *         assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
-     *     }
-     * </pre>
-     *
-     * @param consumer function
-     * @param <T> type of parameter accepted to be consumed.
-     * @return Consumer object with encapsulated timer logic.
-     */
-    public <T> Consumer<T> time(final Consumer<? super T> consumer) {
-        Objects.requireNonNull(consumer,"Consumer function?");
-        return action(consumer);
     }
 
     /**
