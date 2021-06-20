@@ -282,10 +282,7 @@ public final class StopWatch implements Serializable {
             try {
                 consumer.accept(s);
             } finally {
-                synchronized(this) {
-                    time += System.nanoTime() - start;
-                    cycles++;
-                }
+                finalise(start);
             }
         };
     }
@@ -295,10 +292,14 @@ public final class StopWatch implements Serializable {
         try {
             return supplier.get();
         } finally {
-            synchronized(this) {
-                time += System.nanoTime() - start;
-                cycles++;
-            }
+            finalise(start);
+        }
+    }
+
+    private void finalise(final long start) {
+        synchronized(this) {
+            time += System.nanoTime() - start;
+            cycles++;
         }
     }
 }
