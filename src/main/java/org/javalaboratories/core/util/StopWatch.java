@@ -18,12 +18,14 @@ package org.javalaboratories.core.util;
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Try;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * StopWatch provides a convenient means for timings of methods or routines.
@@ -50,12 +52,12 @@ import java.util.function.Consumer;
  * @author Kevin Henry, JavaLaboratories
  */
 @EqualsAndHashCode
-public final class StopWatch {
+public final class StopWatch implements Serializable {
 
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 
-    private long cycles;
-    private long time;
+    private volatile long cycles;
+    private volatile long time;
     private final String name;
 
     /**
@@ -107,6 +109,28 @@ public final class StopWatch {
     }
 
     /**
+     * This is the current time, as opposed to the average time as {@link
+     * StopWatch#getTime()} returns.
+     *
+     * @return time in its "natural" form in nanoseconds.
+     */
+    public long getRawTime() {
+        return getRawTime(TimeUnit.NANOSECONDS);
+    }
+
+    /**
+     * This is the current time, as opposed to the average time as {@link
+     * StopWatch#getTime()} returns.
+     *
+     * @param unit to convert the raw time.
+     * @return time in its "natural" form.
+     */
+    public long getRawTime(final TimeUnit unit) {
+        Objects.requireNonNull(unit);
+        return unit.convert(time,TimeUnit.NANOSECONDS);
+    }
+
+    /**
      * If there are multiple cycles/iterations (number of times the method {@link
      * StopWatch#time(Runnable)} is called, an average of time elapsed is returned.
      *
@@ -114,11 +138,9 @@ public final class StopWatch {
      * process may not started yet or is incomplete.
      */
     public long getTime() {
-        synchronized(this) {
-            return Try.of(() -> time / cycles)
-                    .orElse(0L)
-                    .fold(0L,n -> n);
-        }
+        return Try.of(() -> time / cycles)
+                .orElse(0L)
+                .fold(0L,n -> n);
     }
 
     /**
@@ -132,19 +154,7 @@ public final class StopWatch {
      * @return number of cycles/iterations.
      */
     public long getCycles() {
-        synchronized (this) {
-            return cycles;
-        }
-    }
-
-    /**
-     * Zeroes the {@link StopWatch}.
-     */
-    public void reset() {
-        synchronized (this) {
-            time = 0;
-            cycles = 0;
-        }
+        return cycles;
     }
 
     /**
@@ -179,13 +189,23 @@ public final class StopWatch {
     }
 
     /**
+     * Zeroes the {@link StopWatch}.
+     */
+    public void reset() {
+        synchronized (this) {
+            time = 0;
+            cycles = 0;
+        }
+    }
+
+    /**
      * This is the all important method that kicks off the timed process.
      *
      * <pre>
      *     {@code
      *          StopWatch stopWatch = new StopWatch();
      *
-     *          // This is a common usecase of the StopWatch
+     *          // This is a common use case of the StopWatch
      *          stopWatch.time(() -> doSomethingMethod(1000));
      *     }
      * </pre>
@@ -195,6 +215,28 @@ public final class StopWatch {
     public void time(final Runnable runnable) {
         Objects.requireNonNull(runnable, "Runnable function?");
         action(s -> runnable.run()).accept(null);
+    }
+
+    /**
+     * This is then variant on the {@link StopWatch#time(Runnable)} that kicks
+     * off the timed process;
+     * <pre>
+     *     {@code
+     *          StopWatch stopWatch = new StopWatch();
+     *
+     *          // A value is returned from the timed computation
+     *          int retval = stopWatch.time(() -> doSomethingMethod(1000));
+     *          System.out.println(retval);
+     *     }
+     * </pre>
+     * @param supplier function encapsulating computation to be timed, a value
+     *                 is returned.
+     * @param <T> type of returned value.
+     * @return value from timed computation.
+     */
+    public <T> T time(final Supplier<? extends T> supplier) {
+        Objects.requireNonNull(supplier,"Supplier function?");
+        return action(supplier);
     }
 
     /**
@@ -231,7 +273,7 @@ public final class StopWatch {
      */
     @Override
     public String toString() {
-        return getTimeAsString();
+        return "StopWatch["+getTimeAsString()+"]";
     }
 
     private <T> Consumer<T> action(final Consumer<? super T> consumer) {
@@ -240,11 +282,24 @@ public final class StopWatch {
             try {
                 consumer.accept(s);
             } finally {
-                synchronized(this) {
-                    cycles++;
-                    time += System.nanoTime() - start;
-                }
+                record(start);
             }
         };
+    }
+
+    private <T> T action(final Supplier<? extends T> supplier) {
+        long start = System.nanoTime();
+        try {
+            return supplier.get();
+        } finally {
+            record(start);
+        }
+    }
+
+    private void record(final long start) {
+        synchronized(this) {
+            time += System.nanoTime() - start;
+            cycles++;
+        }
     }
 }
