@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -59,6 +61,23 @@ public class StopWatchTest {
         StopWatch.forEach((a,b) -> { logger.info("{} \t-> {}",a,b); index[0]++; });
 
         assertEquals(3, index[0]);
+    }
+
+    @Test
+    public void testCompareTo_Pass() {
+        // Given
+        stopWatch1.time(() -> doSomethingVoidMethod(300));
+        stopWatch2.time(() -> doSomethingVoidMethod(150));
+        stopWatch3.time(() -> doSomethingVoidMethod(75));
+
+        List<StopWatch> list = Arrays.asList(stopWatch1,stopWatch2,stopWatch3);
+
+        // When
+        Collections.sort(list);
+
+        // Then
+        assertTrue((list.get(0).getTime() < list.get(1).getTime()) &&
+                   (list.get(1).getTime() < list.get(2).getTime()));
     }
 
     @Test
@@ -151,6 +170,16 @@ public class StopWatchTest {
 
         stopWatch1.reset();
         assertEquals(0,stopWatch1.getTime());
+    }
+
+    @Test
+    public void testGetTimeAsString() {
+        // Given
+        stopWatch1.time(() -> doSomethingVoidMethod(500));
+
+        String s = stopWatch1.format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
+
+        assertTrue(s.startsWith("00:00:00.50"));
     }
 
     @Test

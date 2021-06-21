@@ -19,6 +19,9 @@ import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Try;
 
 import java.io.Serializable;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,7 +55,7 @@ import java.util.function.Supplier;
  * @author Kevin Henry, JavaLaboratories
  */
 @EqualsAndHashCode
-public final class StopWatch implements Serializable {
+public final class StopWatch implements Serializable, Comparable<StopWatch> {
 
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 
@@ -109,6 +112,37 @@ public final class StopWatch implements Serializable {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(StopWatch other) {
+        Objects.requireNonNull(other);
+        return Long.compare(this.getTime(), other.getTime());
+    }
+
+    /**
+     * Returns a string representation of {@link StopWatch} time formatted
+     * by the providewd {@code formatter}.
+     *
+     * @param formatter that encapsulates a pattern with which to format
+     *                  the current time.
+     * @return formatted time as a String.
+     */
+    public String format(final DateTimeFormatter formatter) {
+        Objects.requireNonNull(formatter,"Formatter?");
+        long nanos = getTime();
+        LocalTime localTime = LocalTime.of (
+                (int) TimeUnit.HOURS.convert(nanos,TimeUnit.NANOSECONDS) % 24,
+                (int) TimeUnit.MINUTES.convert(nanos,TimeUnit.NANOSECONDS) % 60,
+                (int) TimeUnit.SECONDS.convert(nanos,TimeUnit.NANOSECONDS) % 60,
+                (int) nanos % 1000000000
+        );
+        return formatter
+                .withZone(ZoneId.systemDefault())
+                .format(localTime);
+    }
+
+    /**
      * This is the current time, as opposed to the average time as {@link
      * StopWatch#getTime()} returns.
      *
@@ -131,8 +165,9 @@ public final class StopWatch implements Serializable {
     }
 
     /**
-     * If there are multiple cycles/iterations (number of times the method {@link
-     * StopWatch#time(Runnable)} is called, an average of time elapsed is returned.
+     * If there are multiple cycles/iterations (number of times the method
+     * {@link StopWatch#time(Runnable)} is called, an average of time elapsed
+     * is returned.
      *
      * @return current running total of {@code StopWatch} time. If zero, the
      * process may not started yet or is incomplete.
@@ -148,8 +183,8 @@ public final class StopWatch implements Serializable {
      * the {@link StopWatch#time} is called.
      * <p>
      * Therefore {@code getTime} maintains a running total. If the value
-     * returned is divided by the number of {@code cycles}, this would yield the
-     * average time.
+     * returned is divided by the number of {@code cycles}, this would yield
+     * the average time.
      *
      * @return number of cycles/iterations.
      */
@@ -180,12 +215,7 @@ public final class StopWatch implements Serializable {
      * @return {@link StopWatch} time in {@link String} form.
      */
     public String getTimeAsString() {
-        long nanos = getTime();
-        return String.format("%02d:%02d:%02d.%03d",
-                TimeUnit.HOURS.convert(nanos,TimeUnit.NANOSECONDS) % 24,
-                TimeUnit.MINUTES.convert(nanos,TimeUnit.NANOSECONDS) % 60,
-                TimeUnit.SECONDS.convert(nanos, TimeUnit.NANOSECONDS) % 60,
-                TimeUnit.MILLISECONDS.convert(nanos,TimeUnit.NANOSECONDS) % 1000);
+        return format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
     }
 
     /**
@@ -273,11 +303,11 @@ public final class StopWatch implements Serializable {
      */
     @Override
     public String toString() {
-        return "StopWatch["+getTimeAsString()+"]";
+        return "StopWatch["+ getTimeAsString()+"]";
     }
 
     private <T> Consumer<T> action(final Consumer<? super T> consumer) {
-        return (s) -> {
+        return s -> {
             long start = System.nanoTime();
             try {
                 consumer.accept(s);
