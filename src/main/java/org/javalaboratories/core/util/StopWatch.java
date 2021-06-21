@@ -122,7 +122,7 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
 
     /**
      * Returns a string representation of {@link StopWatch} time formatted
-     * by the providewd {@code formatter}.
+     * by the provided {@code formatter}.
      *
      * @param formatter that encapsulates a pattern with which to format
      *                  the current time.
