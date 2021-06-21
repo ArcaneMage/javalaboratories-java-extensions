@@ -143,6 +143,20 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
     }
 
     /**
+     * Returns number of cycles/iterations. This represents the number of times
+     * the {@link StopWatch#time} is called.
+     * <p>
+     * Therefore {@code getTime} maintains a running total. If the value
+     * returned is divided by the number of {@code cycles}, this would yield
+     * the average time.
+     *
+     * @return number of cycles/iterations.
+     */
+    public long getCycles() {
+        return cycles;
+    }
+
+    /**
      * This is the current time, as opposed to the average time as {@link
      * StopWatch#getTime()} returns.
      *
@@ -176,20 +190,6 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
         return Try.of(() -> time / cycles)
                 .orElse(0L)
                 .fold(0L,n -> n);
-    }
-
-    /**
-     * Returns number of cycles/iterations. This represents the number of times
-     * the {@link StopWatch#time} is called.
-     * <p>
-     * Therefore {@code getTime} maintains a running total. If the value
-     * returned is divided by the number of {@code cycles}, this would yield
-     * the average time.
-     *
-     * @return number of cycles/iterations.
-     */
-    public long getCycles() {
-        return cycles;
     }
 
     /**
