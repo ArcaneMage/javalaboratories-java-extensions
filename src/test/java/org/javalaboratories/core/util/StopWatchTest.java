@@ -173,13 +173,16 @@ public class StopWatchTest {
     }
 
     @Test
-    public void testGetTimeAsString() {
+    public void testFormat_Pass() {
         // Given
-        stopWatch1.time(() -> doSomethingVoidMethod(500));
+        stopWatch1.time(() -> doSomethingVoidMethod(1557));
 
-        String s = stopWatch1.format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
+        // When
+        String s = stopWatch1.format(DateTimeFormatter.ofPattern("HH:mm:ss.n"));
 
-        assertTrue(s.startsWith("00:00:00.50"));
+        // Then
+        logger.info("Slept ~1557ms and formatted to {}",s);
+        assertTrue(s.startsWith("00:00:01.5"));
     }
 
     @Test
