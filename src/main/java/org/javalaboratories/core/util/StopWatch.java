@@ -57,6 +57,7 @@ import java.util.function.Supplier;
 @EqualsAndHashCode
 public final class StopWatch implements Serializable, Comparable<StopWatch> {
 
+    private static final String DEFAULT_DATETIME_FORMAT ="HH:mm:ss.SSS";
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 
     private volatile long cycles;
@@ -215,7 +216,7 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
      * @return {@link StopWatch} time in {@link String} form.
      */
     public String getTimeAsString() {
-        return format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
+        return format(DateTimeFormatter.ofPattern(DEFAULT_DATETIME_FORMAT));
     }
 
     /**
