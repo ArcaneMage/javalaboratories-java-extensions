@@ -19,6 +19,9 @@ import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Try;
 
 import java.io.Serializable;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,8 +33,8 @@ import java.util.function.Supplier;
 /**
  * StopWatch provides a convenient means for timings of methods or routines.
  * <p>
- * There are no explicit methods to start and stop the timings, because these
- * are naturally determined through the process of invoking the function that
+ * There are no explicit methods to start and stop the timings because these
+ * are naturally determined through the process of invoking a function that
  * is currently being timed. In other words, calling the function will start the
  * {@link StopWatch} and all the function comes to a natural/unnatural
  * conclusion, the {@link StopWatch} is automatically stopped.
@@ -42,18 +45,19 @@ import java.util.function.Supplier;
  *     {@code
  *          StopWatch stopWatch = new StopWatch();
  *
- *          // This is a common usecase of the StopWatch
+ *          // This is a common use case of the StopWatch
  *          stopWatch.time(() -> doSomethingMethod(1000));
  *     }
  * </pre>
  *
  * This class is considered thread-safe.
  *
- * @author Kevin Henry, JavaLaboratories
+ * @author Kevin Henry, Java Laboratories
  */
 @EqualsAndHashCode
-public final class StopWatch implements Serializable {
+public final class StopWatch implements Serializable, Comparable<StopWatch> {
 
+    private static final String DEFAULT_DATETIME_FORMAT ="HH:mm:ss.SSS";
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 
     private volatile long cycles;
@@ -109,6 +113,51 @@ public final class StopWatch implements Serializable {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(final StopWatch other) {
+        Objects.requireNonNull(other);
+        return Long.compare(this.getTime(), other.getTime());
+    }
+
+    /**
+     * Returns a string representation of {@link StopWatch} time formatted
+     * by the provided {@code formatter}.
+     *
+     * @param formatter that encapsulates a pattern with which to format
+     *                  the current time.
+     * @return formatted time as a String.
+     */
+    public String format(final DateTimeFormatter formatter) {
+        Objects.requireNonNull(formatter,"Formatter?");
+        long nanos = getTime();
+        LocalTime localTime = LocalTime.of (
+                (int) TimeUnit.HOURS.convert(nanos,TimeUnit.NANOSECONDS) % 24,
+                (int) TimeUnit.MINUTES.convert(nanos,TimeUnit.NANOSECONDS) % 60,
+                (int) TimeUnit.SECONDS.convert(nanos,TimeUnit.NANOSECONDS) % 60,
+                (int) nanos % 1000000000
+        );
+        return formatter
+                .withZone(ZoneId.systemDefault())
+                .format(localTime);
+    }
+
+    /**
+     * Returns number of cycles/iterations. This represents the number of times
+     * the {@link StopWatch#time} is called.
+     * <p>
+     * Therefore {@code getTime} maintains a running total. If the value
+     * returned is divided by the number of {@code cycles}, this would yield
+     * the average time.
+     *
+     * @return number of cycles/iterations.
+     */
+    public long getCycles() {
+        return cycles;
+    }
+
+    /**
      * This is the current time, as opposed to the average time as {@link
      * StopWatch#getTime()} returns.
      *
@@ -131,8 +180,9 @@ public final class StopWatch implements Serializable {
     }
 
     /**
-     * If there are multiple cycles/iterations (number of times the method {@link
-     * StopWatch#time(Runnable)} is called, an average of time elapsed is returned.
+     * If there are multiple cycles/iterations (number of times the method
+     * {@link StopWatch#time(Runnable)} is called, an average of time elapsed
+     * is returned.
      *
      * @return current running total of {@code StopWatch} time. If zero, the
      * process may not started yet or is incomplete.
@@ -141,20 +191,6 @@ public final class StopWatch implements Serializable {
         return Try.of(() -> time / cycles)
                 .orElse(0L)
                 .fold(0L,n -> n);
-    }
-
-    /**
-     * Returns number of cycles/iterations. This represents the number of times
-     * the {@link StopWatch#time} is called.
-     * <p>
-     * Therefore {@code getTime} maintains a running total. If the value
-     * returned is divided by the number of {@code cycles}, this would yield the
-     * average time.
-     *
-     * @return number of cycles/iterations.
-     */
-    public long getCycles() {
-        return cycles;
     }
 
     /**
@@ -180,12 +216,7 @@ public final class StopWatch implements Serializable {
      * @return {@link StopWatch} time in {@link String} form.
      */
     public String getTimeAsString() {
-        long nanos = getTime();
-        return String.format("%02d:%02d:%02d.%03d",
-                TimeUnit.HOURS.convert(nanos,TimeUnit.NANOSECONDS) % 24,
-                TimeUnit.MINUTES.convert(nanos,TimeUnit.NANOSECONDS) % 60,
-                TimeUnit.SECONDS.convert(nanos, TimeUnit.NANOSECONDS) % 60,
-                TimeUnit.MILLISECONDS.convert(nanos,TimeUnit.NANOSECONDS) % 1000);
+        return format(DateTimeFormatter.ofPattern(DEFAULT_DATETIME_FORMAT));
     }
 
     /**
@@ -196,6 +227,35 @@ public final class StopWatch implements Serializable {
             time = 0;
             cycles = 0;
         }
+    }
+
+    /**
+     * This function is similar to {@link StopWatch#time(Runnable)} but designed
+     * to be used with {@code forEach} methods of collections or {@code Streams}.
+     * <p>
+     * It will start the timings just before {@code accept} method is invoked;
+     * and stop the timing {@code post-accept} method. This occurs on every
+     * iteration of the {@code forEach} loop.
+     * <pre>
+     *     {@code
+     *         // Given
+     *         List<Integer> numbers = Arrays.asList(1,2,3,4);
+     *
+     *         // When
+     *         numbers.forEach(stopWatch1.time(n -> doSomethingVoidMethodForMilliseconds(100)));
+     *
+     *         // Then
+     *         assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
+     *     }
+     * </pre>
+     *
+     * @param consumer function
+     * @param <T> type of parameter accepted to be consumed.
+     * @return Consumer object with encapsulated timer logic.
+     */
+    public <T> Consumer<T> time(final Consumer<? super T> consumer) {
+        Objects.requireNonNull(consumer,"Consumer function?");
+        return action(consumer);
     }
 
     /**
@@ -240,44 +300,15 @@ public final class StopWatch implements Serializable {
     }
 
     /**
-     * This function is similar to {@link StopWatch#time(Runnable)} but designed
-     * to be used with {@code forEach} methods of collections or {@code Streams}.
-     * <p>
-     * It will start the timings just before {@code accept} method is invoked;
-     * and stop the timing {@code post-accept} method. This occurs on every
-     * iteration of the {@code forEach} loop.
-     * <pre>
-     *     {@code
-     *         // Given
-     *         List<Integer> numbers = Arrays.asList(1,2,3,4);
-     *
-     *         // When
-     *         numbers.forEach(stopWatch1.time(n -> doSomethingVoidMethodForMilliseconds(100)));
-     *
-     *         // Then
-     *         assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) >= 100);
-     *     }
-     * </pre>
-     *
-     * @param consumer function
-     * @param <T> type of parameter accepted to be consumed.
-     * @return Consumer object with encapsulated timer logic.
-     */
-    public <T> Consumer<T> time(final Consumer<? super T> consumer) {
-        Objects.requireNonNull(consumer,"Consumer function?");
-        return action(consumer);
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     public String toString() {
-        return "StopWatch["+getTimeAsString()+"]";
+        return "StopWatch["+ getTimeAsString()+"]";
     }
 
     private <T> Consumer<T> action(final Consumer<? super T> consumer) {
-        return (s) -> {
+        return s -> {
             long start = System.nanoTime();
             try {
                 consumer.accept(s);
