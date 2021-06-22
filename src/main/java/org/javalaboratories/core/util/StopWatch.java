@@ -33,8 +33,8 @@ import java.util.function.Supplier;
 /**
  * StopWatch provides a convenient means for timings of methods or routines.
  * <p>
- * There are no explicit methods to start and stop the timings, because these
- * are naturally determined through the process of invoking the function that
+ * There are no explicit methods to start and stop the timings because these
+ * are naturally determined through the process of invoking a function that
  * is currently being timed. In other words, calling the function will start the
  * {@link StopWatch} and all the function comes to a natural/unnatural
  * conclusion, the {@link StopWatch} is automatically stopped.
@@ -45,14 +45,14 @@ import java.util.function.Supplier;
  *     {@code
  *          StopWatch stopWatch = new StopWatch();
  *
- *          // This is a common usecase of the StopWatch
+ *          // This is a common use case of the StopWatch
  *          stopWatch.time(() -> doSomethingMethod(1000));
  *     }
  * </pre>
  *
  * This class is considered thread-safe.
  *
- * @author Kevin Henry, JavaLaboratories
+ * @author Kevin Henry, Java Laboratories
  */
 @EqualsAndHashCode
 public final class StopWatch implements Serializable, Comparable<StopWatch> {
@@ -116,7 +116,7 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(StopWatch other) {
+    public int compareTo(final StopWatch other) {
         Objects.requireNonNull(other);
         return Long.compare(this.getTime(), other.getTime());
     }
