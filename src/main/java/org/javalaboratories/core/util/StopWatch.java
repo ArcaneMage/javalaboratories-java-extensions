@@ -133,10 +133,10 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
         Objects.requireNonNull(formatter,"Formatter?");
         long nanos = getTime();
         LocalTime localTime = LocalTime.of (
-                (int) TimeUnit.HOURS.convert(nanos,TimeUnit.NANOSECONDS) % 24,
-                (int) TimeUnit.MINUTES.convert(nanos,TimeUnit.NANOSECONDS) % 60,
-                (int) TimeUnit.SECONDS.convert(nanos,TimeUnit.NANOSECONDS) % 60,
-                (int) nanos % 1000000000
+                (int) (TimeUnit.HOURS.convert(nanos,TimeUnit.NANOSECONDS) % 24),
+                (int) (TimeUnit.MINUTES.convert(nanos,TimeUnit.NANOSECONDS) % 60),
+                (int) (TimeUnit.SECONDS.convert(nanos,TimeUnit.NANOSECONDS) % 60),
+                (int) (nanos % 1000000000)
         );
         return formatter
                 .withZone(ZoneId.systemDefault())
