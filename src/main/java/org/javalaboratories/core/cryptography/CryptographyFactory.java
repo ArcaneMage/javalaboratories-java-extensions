@@ -16,30 +16,94 @@
 
 package org.javalaboratories.core.cryptography;
 
+/**
+ * This cryptographic factory creates AES, MD5 and other cryptographic objects.
+ * <p>
+ * It's an abstraction over the JCE, providing a consistent easily understood
+ * interfaces. For example:
+ * <pre>
+ *     {@code
+ *          Cryptography cryptography = CryptographyFactory.getAesCryptography();
+ *          byte[] result = cryptography.encrypt("Hello World".getBytes());
+ *          ...
+ *          System.out.println(Base64.encodeBase64String(result))
+ *          ...
+ *          Outputs -> "d9WYwk6LrIzw8zsNWnijsw=="
+ *     }
+ * </pre>
+ */
 public final class CryptographyFactory {
 
+    /**
+     * Default constructor made private to inhibit instantiation.
+     */
     private CryptographyFactory() {}
 
+    /**
+     * Returns {@link Cryptography} object that does not require {@code keys}
+     * to enable encryption and decryption.
+     *
+     * @return Cryptography interface implementation that supports Advance
+     * Encryption Standard.
+     */
     public static Cryptography getAesCryptography() {
-        return getAesCryptography(AesKeyBitLengths.BITS_128);
+        return getAesCryptography(AesKeyLengths.BITS_128);
     }
 
-    public static Cryptography getAesCryptography(final AesKeyBitLengths keyLength) {
+    /**
+     * Returns {@link Cryptography} object that does not require {@code keys}
+     * to enable encryption and decryption.
+     *
+     * @param keyLength length of bits required for key.
+     * @return Cryptography interface implementation that supports Advance
+     * Encryption Standard.
+     */
+    public static Cryptography getAesCryptography(final AesKeyLengths keyLength) {
         return new AesCryptography(keyLength);
     }
 
+    /**
+     * Returns {@link SymmetricCryptography} object that requires {@code
+     * keys} to enable encryption and decryption.
+     *
+     * @return SymmetricCryptography interface implementation that supports
+     * Advance Encryption Standard.
+     */
     public static SymmetricCryptography getAesSymmetricCryptography() {
-        return getAesSymmetricCryptography(AesKeyBitLengths.BITS_128);
+        return getAesSymmetricCryptography(AesKeyLengths.BITS_128);
     }
 
-    public static SymmetricCryptography getAesSymmetricCryptography(final AesKeyBitLengths keyLength) {
+    /**
+     * Returns {@link SymmetricCryptography} object that requires {@code
+     * keys} to enable encryption and decryption.
+     *
+     * @param keyLength length of bits required for key.
+     * @return SymmetricCryptography interface implementation that supports
+     * Advance Encryption Standard.
+     */
+    public static SymmetricCryptography getAesSymmetricCryptography(final AesKeyLengths keyLength) {
         return new AesCryptography(keyLength);
     }
 
+    /**
+     * Returns {@link Cryptography} object that does not require {@code keys}
+     * to enable encryption and decryption.
+     *
+     * @return Cryptography interface implementation that supports Message
+     * Digest hashing.
+     */
     public static Cryptography getMdCryptography() {
         return getMdCryptography(MdAlgorithms.MD5);
     }
 
+    /**
+     * Returns {@link Cryptography} object that does not require {@code keys}
+     * to enable encryption and decryption.
+     *
+     * @param algorithm algorithm to apply to perform message digest hashing.
+     * @return Cryptography interface implementation that supports Message
+     * Digest hashing.
+     */
     public static Cryptography getMdCryptography(MdAlgorithms algorithm) {
         return new MdCryptography(algorithm);
     }

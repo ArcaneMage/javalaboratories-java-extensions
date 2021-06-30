@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.cryptography;
 
-public enum AesKeyBitLengths {
+public enum AesKeyLengths {
 
     BITS_128(128),
     BITS_192(192),
@@ -23,7 +23,7 @@ public enum AesKeyBitLengths {
 
     private final int bits;
 
-    AesKeyBitLengths(int bits) {
+    AesKeyLengths(int bits) {
         this.bits = bits;
     }
 

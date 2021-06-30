@@ -52,9 +52,9 @@ public final class AesCryptography implements Cryptography, SymmetricCryptograph
     private static final String AES_ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final int MAX_BUFFER_SZ = 64;
 
-    private final AesKeyBitLengths keyLength;
+    private final AesKeyLengths keyLength;
 
-    AesCryptography(final AesKeyBitLengths keyLength) {
+    AesCryptography(final AesKeyLengths keyLength) {
         Objects.requireNonNull(keyLength,"AESKeyLengths?");
         this.keyLength = keyLength;
     }
