@@ -15,19 +15,16 @@
  */
 package org.javalaboratories.core.cryptography;
 
-public enum AESKeyLengths {
+public enum MdAlgorithms {
+    MD2("MD2"), MD5("MD5"), SHA1("SHA-1"), SHA256("SHA-256"), SHA384("SHA-384"), SHA512("SHA-512");
 
-    BITS_128(128),
-    BITS_192(192),
-    BITS_256(256);
+    private String algorithm;
 
-    private final int bits;
-
-    AESKeyLengths(int bits) {
-        this.bits = bits;
+    MdAlgorithms(String algorithm) {
+        this.algorithm = algorithm;
     }
 
-    public int getLength() {
-        return bits;
+    public String getAlgorithm() {
+        return this.algorithm;
     }
 }

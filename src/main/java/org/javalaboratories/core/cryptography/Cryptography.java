@@ -15,21 +15,16 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
 /**
  * A class that implements this interface has the ability to both encrypt and
  * decrypt data.
- * <p>
- * The implementation only supports symmetric keys unless otherwise stated. Some
- * methods do not require keys with which to perform the operation, but if the
- * underlying implementation does not support/require keys, they must make this
- * explicitly clear in the documentation and throw an {@link
- * UnsupportedOperationException} exception.
+ *
+ * Some implementations can only support one-way encryption, and such
+ * implementations must make it explicitly clear in the documentation and
+ * raise an {@link UnsupportedOperationException} where applicable.
  *
  * @see CryptographyFactory
- * @see AESCryptography
+ * @see AesCryptography
  */
 public interface Cryptography {
 
@@ -46,31 +41,6 @@ public interface Cryptography {
 
     /**
      * This method reads the {@code byte[]} array and returns an array of
-     * decrypted bytes in {@code byte[]} array, using the symmetric {@code
-     * key}.
-     *
-     * @param data an array of {@code byte[]} to be encrypted.
-     * @param key encryption secret key
-     * @return an array of decrypted bytes.
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
-     */
-    byte[] decrypt(final String key, final byte[] data);
-
-    /**
-     * Reads an {@link InputStream} decrypts and outputs the encrypted data to
-     * the {@link OutputStream}.
-     *
-     * @param istream stream to be encrypted
-     * @param ostream stream of encrypted data.
-     * @param key encryption secret key
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
-     */
-    void decrypt(final String key, final InputStream istream, final OutputStream ostream);
-
-    /**
-     * This method reads the {@code byte[]} array and returns an array of
      * encrypted bytes in {@code byte[]} array.
      *
      * @param data an array of {@code byte[]} to be encrypted.
@@ -79,29 +49,4 @@ public interface Cryptography {
      * @throws CryptographyException encapsulates cryptographic error.
      */
     byte[] encrypt(final byte[] data);
-
-    /**
-     * This method reads the {@code byte[]} array and returns an array of
-     * encrypted bytes in {@code byte[]} array, using the symmetric {@code
-     * key}.
-     *
-     * @param data an array of {@code byte[]} to be encrypted.
-     * @param key encryption secret key
-     * @return an array of encrypted bytes.
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
-     */
-    byte[] encrypt(final String key, final byte[] data);
-
-    /**
-     * Reads an {@link InputStream} encrypts and outputs the encrypted data to
-     * the {@link OutputStream}.
-     *
-     * @param istream stream to be encrypted
-     * @param ostream stream of encrypted data.
-     * @param key encryption secret key
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
-     */
-    void encrypt(final String key, final InputStream istream, final OutputStream ostream);
 }

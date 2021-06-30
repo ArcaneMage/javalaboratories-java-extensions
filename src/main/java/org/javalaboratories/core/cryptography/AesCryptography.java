@@ -31,16 +31,20 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * Example below illustrates usage :-
  * <pre>
  *     {@code
- *          Cryptography cryptography = CryptographyFactory.getAdvancedEncryptionStandard();
- *          byte[] result = cryptography.encrypt(SECRET_KEY, "Hello World".getBytes());
+ *          Cryptography cryptography = CryptographyFactory.getAesCryptography();
+ *          byte[] result = cryptography.encrypt("Hello World".getBytes());
  *          ...
  *          System.out.println(Base64.encodeBase64String(result))
  *          ...
  *          Outputs -> "d9WYwk6LrIzw8zsNWnijsw=="
  *     }
  * </pre>
+ *
+ * @see CryptographyFactory
+ * @see Cryptography
+ * @see SymmetricCryptography
  */
-public final class AESCryptography implements Cryptography {
+public final class AesCryptography implements Cryptography, SymmetricCryptography {
 
     private static final String KEY = "0246810121416180";
 
@@ -48,9 +52,9 @@ public final class AESCryptography implements Cryptography {
     private static final String AES_ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final int MAX_BUFFER_SZ = 64;
 
-    private final AESKeyLengths keyLength;
+    private final AesKeyBitLengths keyLength;
 
-    AESCryptography(final AESKeyLengths keyLength) {
+    AesCryptography(final AesKeyBitLengths keyLength) {
         Objects.requireNonNull(keyLength,"AESKeyLengths?");
         this.keyLength = keyLength;
     }
@@ -192,7 +196,7 @@ public final class AESCryptography implements Cryptography {
         Objects.requireNonNull(key);
         String result;
         int length = keyLength.getLength() / 8;
-        if (key.length() > length) {
+        if (key.length() >= length) {
             result = key.substring(0,length);
         } else {
             result = key + String.format("%" + (length - key.length()) + "s", "0").replace(" ", "0"); // Right Padding

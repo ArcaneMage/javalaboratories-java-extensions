@@ -20,11 +20,27 @@ public final class CryptographyFactory {
 
     private CryptographyFactory() {}
 
-    public static Cryptography getAdvancedEncryptionStandard() {
-        return getAdvancedEncryptionStandard(AESKeyLengths.BITS_128);
+    public static Cryptography getAesCryptography() {
+        return getAesCryptography(AesKeyBitLengths.BITS_128);
     }
 
-    public static Cryptography getAdvancedEncryptionStandard(final AESKeyLengths keyLength) {
-        return new AESCryptography(keyLength);
+    public static Cryptography getAesCryptography(final AesKeyBitLengths keyLength) {
+        return new AesCryptography(keyLength);
+    }
+
+    public static SymmetricCryptography getAesSymmetricCryptography() {
+        return getAesSymmetricCryptography(AesKeyBitLengths.BITS_128);
+    }
+
+    public static SymmetricCryptography getAesSymmetricCryptography(final AesKeyBitLengths keyLength) {
+        return new AesCryptography(keyLength);
+    }
+
+    public static Cryptography getMdCryptography() {
+        return getMdCryptography(MdAlgorithms.MD5);
+    }
+
+    public static Cryptography getMdCryptography(MdAlgorithms algorithm) {
+        return new MdCryptography(algorithm);
     }
 }
