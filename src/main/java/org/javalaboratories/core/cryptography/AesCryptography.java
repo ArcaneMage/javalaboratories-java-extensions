@@ -179,17 +179,17 @@ public final class AesCryptography implements Cryptography, SymmetricCryptograph
     @Override
     public byte[] decrypt(final String key, final byte[] data)  {
         Arguments.requireNonNull("Expected both a String to decrypt and a Key",data,key);
-        byte[] decryptBytes;
+        byte[] result;
         try {
             String k = normaliseKey(key);
             Cipher cipher = Cipher.getInstance(AES_ALGORITHM);
             IvParameterSpec iv = new IvParameterSpec(new byte[16]);
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(k.getBytes(UTF_8), "AES"),iv);
-            decryptBytes = cipher.doFinal(data);
+            result = cipher.doFinal(data);
         } catch (Exception e) {
             throw new CryptographyException("Failed to decrypt content",e);
         }
-        return decryptBytes;
+        return result;
     }
 
     private String normaliseKey(final String key) {
