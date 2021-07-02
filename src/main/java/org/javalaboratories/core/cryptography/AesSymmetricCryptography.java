@@ -44,7 +44,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @see Cryptography
  * @see SymmetricCryptography
  */
-public final class AesCryptography implements Cryptography, SymmetricCryptography {
+public final class AesSymmetricCryptography implements Cryptography, SymmetricCryptography {
 
     private static final String KEY = "0246810121416180";
 
@@ -54,8 +54,8 @@ public final class AesCryptography implements Cryptography, SymmetricCryptograph
 
     private final AesKeyLengths keyLength;
 
-    AesCryptography(final AesKeyLengths keyLength) {
-        Objects.requireNonNull(keyLength,"AESKeyLengths?");
+    AesSymmetricCryptography(final AesKeyLengths keyLength) {
+        Objects.requireNonNull(keyLength,"AesKeyLengths?");
         this.keyLength = keyLength;
     }
 
@@ -97,7 +97,7 @@ public final class AesCryptography implements Cryptography, SymmetricCryptograph
      */
     @Override
     public void decrypt(final String key, final InputStream istream, final OutputStream ostream) {
-        Arguments.requireNonNull("Requires key, stream",key, istream,ostream);
+        Arguments.requireNonNull("Requires key, stream",key,istream,ostream);
         try {
             String k = normaliseKey(key);
             Cipher cipher = Cipher.getInstance(AES_ALGORITHM);

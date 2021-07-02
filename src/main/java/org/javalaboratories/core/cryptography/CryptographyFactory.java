@@ -59,7 +59,7 @@ public final class CryptographyFactory {
      * Encryption Standard.
      */
     public static Cryptography getAesCryptography(final AesKeyLengths keyLength) {
-        return new AesCryptography(keyLength);
+        return new AesSymmetricCryptography(keyLength);
     }
 
     /**
@@ -82,7 +82,7 @@ public final class CryptographyFactory {
      * Advance Encryption Standard.
      */
     public static SymmetricCryptography getAesSymmetricCryptography(final AesKeyLengths keyLength) {
-        return new AesCryptography(keyLength);
+        return new AesSymmetricCryptography(keyLength);
     }
 
     /**
