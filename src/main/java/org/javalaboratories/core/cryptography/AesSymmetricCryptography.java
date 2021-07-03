@@ -18,15 +18,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * AES Cryptography class to enable encryption and decryption of bytes and
  * streams.
  * <p>
- * The advanced encryption standard used as the basis of the encryption and
+ * The advanced encryption standard is used as the basis of the encryption and
  * decryption uses the cipher block chaining (CBC) with PKCS5 padding. It is
  * advisable to use the Cryptography Factory {@link CryptographyFactory} to
  * create an instance of this class. It provides a standard interface allowing
  * for alternative implementations.
  * <p>
- * The class supports encryption and decryption of byte arrays; as well as
- * decryption and decryption of Input/Output streams, which is useful files,
- * but it only supports symmetric keys.
+ * The class supports encryption and decryption of byte arrays as well as
+ * decryption and decryption of Input/Output streams, which is useful for
+ * files, but it only supports symmetric keys.
  *
  * Example below illustrates usage :-
  * <pre>
