@@ -23,7 +23,7 @@ public final class MdCryptography implements Cryptography {
 
     private MessageDigest messageDigest;
 
-    public MdCryptography(MdAlgorithms mdAlgorithm) {
+    MdCryptography(MdAlgorithms mdAlgorithm) {
         try {
             messageDigest = MessageDigest.getInstance(mdAlgorithm.getAlgorithm());
         } catch(NoSuchAlgorithmException e) {
