@@ -6,6 +6,10 @@ public class CryptographyException extends RuntimeException {
         super();
     }
 
+    public CryptographyException(String message) {
+        super(message);
+
+    }
     public CryptographyException(String message, Throwable e) {
         super(message,e);
     }

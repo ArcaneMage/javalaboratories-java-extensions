@@ -29,7 +29,7 @@ import java.io.OutputStream;
  * documentation and throw an {@link UnsupportedOperationException} exception.
  *
  * @see CryptographyFactory
- * @see AesSymmetricCryptography
+ * @see SunAesSymmetricCryptography
  */
 public interface SymmetricCryptography {
     /**

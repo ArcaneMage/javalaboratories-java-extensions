@@ -24,7 +24,7 @@ package org.javalaboratories.core.cryptography;
  * raise an {@link UnsupportedOperationException} where applicable.
  *
  * @see CryptographyFactory
- * @see AesSymmetricCryptography
+ * @see SunAesSymmetricCryptography
  */
 public interface Cryptography {
 

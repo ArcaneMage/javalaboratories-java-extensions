@@ -31,7 +31,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * Example below illustrates usage :-
  * <pre>
  *     {@code
- *          Cryptography cryptography = CryptographyFactory.getAesCryptography();
+ *          Cryptography cryptography = CryptographyFactory.getSunCryptography();
  *          byte[] result = cryptography.encrypt("Hello World".getBytes());
  *          ...
  *          System.out.println(Base64.encodeBase64String(result))
@@ -44,7 +44,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @see Cryptography
  * @see SymmetricCryptography
  */
-public final class AesSymmetricCryptography implements Cryptography, SymmetricCryptography {
+public final class SunAesSymmetricCryptography extends SunCryptography implements Cryptography, SymmetricCryptography {
 
     private static final String KEY = "0246810121416180";
 
@@ -54,7 +54,7 @@ public final class AesSymmetricCryptography implements Cryptography, SymmetricCr
 
     private final AesKeyLengths keyLength;
 
-    AesSymmetricCryptography(final AesKeyLengths keyLength) {
+    SunAesSymmetricCryptography(final AesKeyLengths keyLength) {
         Objects.requireNonNull(keyLength,"AesKeyLengths?");
         this.keyLength = keyLength;
     }
@@ -74,7 +74,7 @@ public final class AesSymmetricCryptography implements Cryptography, SymmetricCr
         Arguments.requireNonNull("Requires key, istream and ostream",key,istream,ostream);
         try {
             String k = normaliseKey(key);
-            Cipher cipher = Cipher.getInstance(AES_ALGORITHM);
+            Cipher cipher = getCipher(AES_ALGORITHM);
             IvParameterSpec iv = new IvParameterSpec(new byte[16]);
             cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(k.getBytes(UTF_8),"AES"),iv);
 
@@ -100,7 +100,7 @@ public final class AesSymmetricCryptography implements Cryptography, SymmetricCr
         Arguments.requireNonNull("Requires key, stream",key,istream,ostream);
         try {
             String k = normaliseKey(key);
-            Cipher cipher = Cipher.getInstance(AES_ALGORITHM);
+            Cipher cipher = getCipher(AES_ALGORITHM);
             IvParameterSpec iv = new IvParameterSpec(new byte[16]);
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(k.getBytes(UTF_8),"AES"),iv);
 
@@ -141,7 +141,7 @@ public final class AesSymmetricCryptography implements Cryptography, SymmetricCr
         byte[] result;
         try {
             String k = normaliseKey(key);
-            Cipher cipher = Cipher.getInstance(AES_ALGORITHM);
+            Cipher cipher = getCipher(AES_ALGORITHM);
             IvParameterSpec iv = new IvParameterSpec(new byte[16]);
             cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(k.getBytes(UTF_8), "AES"), iv);
             result = cipher.doFinal(data);
@@ -182,7 +182,7 @@ public final class AesSymmetricCryptography implements Cryptography, SymmetricCr
         byte[] result;
         try {
             String k = normaliseKey(key);
-            Cipher cipher = Cipher.getInstance(AES_ALGORITHM);
+            Cipher cipher = getCipher(AES_ALGORITHM);
             IvParameterSpec iv = new IvParameterSpec(new byte[16]);
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(k.getBytes(UTF_8), "AES"),iv);
             result = cipher.doFinal(data);

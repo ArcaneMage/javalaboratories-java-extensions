@@ -23,7 +23,7 @@ package org.javalaboratories.core.cryptography;
  * interfaces. For example:
  * <pre>
  *     {@code
- *          Cryptography cryptography = CryptographyFactory.getAesCryptography();
+ *          Cryptography cryptography = CryptographyFactory.getSunCryptography();
  *          byte[] result = cryptography.encrypt("Hello World".getBytes());
  *          ...
  *          System.out.println(Base64.encodeBase64String(result))
@@ -46,8 +46,8 @@ public final class CryptographyFactory {
      * @return Cryptography interface implementation that supports Advance
      * Encryption Standard.
      */
-    public static Cryptography getAesCryptography() {
-        return getAesCryptography(AesKeyLengths.BITS_128);
+    public static Cryptography getSunCryptography() {
+        return getSunCryptography(AesKeyLengths.BITS_128);
     }
 
     /**
@@ -58,8 +58,8 @@ public final class CryptographyFactory {
      * @return Cryptography interface implementation that supports Advance
      * Encryption Standard.
      */
-    public static Cryptography getAesCryptography(final AesKeyLengths keyLength) {
-        return new AesSymmetricCryptography(keyLength);
+    public static Cryptography getSunCryptography(final AesKeyLengths keyLength) {
+        return new SunAesSymmetricCryptography(keyLength);
     }
 
     /**
@@ -69,8 +69,8 @@ public final class CryptographyFactory {
      * @return SymmetricCryptography interface implementation that supports
      * Advance Encryption Standard.
      */
-    public static SymmetricCryptography getAesSymmetricCryptography() {
-        return getAesSymmetricCryptography(AesKeyLengths.BITS_128);
+    public static SymmetricCryptography getSunSymmetricCryptography() {
+        return getSunSymmetricCryptography(AesKeyLengths.BITS_128);
     }
 
     /**
@@ -81,8 +81,8 @@ public final class CryptographyFactory {
      * @return SymmetricCryptography interface implementation that supports
      * Advance Encryption Standard.
      */
-    public static SymmetricCryptography getAesSymmetricCryptography(final AesKeyLengths keyLength) {
-        return new AesSymmetricCryptography(keyLength);
+    public static SymmetricCryptography getSunSymmetricCryptography(final AesKeyLengths keyLength) {
+        return new SunAesSymmetricCryptography(keyLength);
     }
 
     /**
@@ -92,8 +92,8 @@ public final class CryptographyFactory {
      * @return Cryptography interface implementation that supports Message
      * Digest hashing.
      */
-    public static Cryptography getMdCryptography() {
-        return getMdCryptography(MdAlgorithms.MD5);
+    public static Cryptography getSunMdCryptography() {
+        return getSunMdCryptography(MdAlgorithms.MD5);
     }
 
     /**
@@ -104,7 +104,11 @@ public final class CryptographyFactory {
      * @return Cryptography interface implementation that supports Message
      * Digest hashing.
      */
-    public static Cryptography getMdCryptography(MdAlgorithms algorithm) {
+    public static Cryptography getSunMdCryptography(MdAlgorithms algorithm) {
         return new MdCryptography(algorithm);
+    }
+
+    public static AsymmetricCryptography getSunRsaAsymmetricCryptography() {
+        return new SunRsaAsymmetricCryptography();
     }
 }
