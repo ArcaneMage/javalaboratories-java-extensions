@@ -17,6 +17,9 @@ package org.javalaboratories.core.cryptography;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
@@ -25,6 +28,7 @@ import java.util.Objects;
  * class.
  */
 public abstract class SunCryptography {
+    private static final int MAX_BUFFER_SZ = 64;
 
     /**
      * Returns a {@link Cipher} class, but only if Sun Microsystems provided it.
@@ -42,6 +46,29 @@ public abstract class SunCryptography {
                 throw new CryptographyException("Not a Sun provider");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new CryptographyException("Bad algorithm encountered",e);
+        }
+        return result;
+    }
+
+    /**
+     * Writes from InputStream to OutputStream.
+     *
+     * @param source input stream source
+     * @param destination output stream source
+     * @return destination source.
+     * @throws IOException if any input/output errors
+     */
+    OutputStream write(final InputStream source, final OutputStream destination) throws IOException {
+        OutputStream result;
+        try (InputStream istream = source;
+             OutputStream ostream = destination
+        ) {
+            byte[] buffer = new byte[MAX_BUFFER_SZ];
+            int read;
+            while ((read = istream.read(buffer, 0, MAX_BUFFER_SZ)) > -1) {
+                ostream.write(buffer,0,read);
+            }
+            result = destination;
         }
         return result;
     }

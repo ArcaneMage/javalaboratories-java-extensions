@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CryptographyFactoryTest {
 
     private static final String AES_ENCRYPTED_FILE = "/aes-encrypted-file.enc";
+    private static final String RSA_ENCRYPTED_FILE = "/rsa-encrypted-file.enc";
 
     private static final String DATA = "The quick brown fox jumped over the fence";
     private static final String BASE64_MESSAGE_DIGEST_ENCRYPTED_DATA = "szXZywC4mbxlE+zbshhwhw==";
@@ -26,6 +27,7 @@ public class CryptographyFactoryTest {
             "P71Up4AAIigZrlc0caAGhBqsiGDXccquKOER3/NZEUUrZcL246x9Yx2nfVXgiLynQ4ba1W85g==";
     
     private static final String SECRET_KEY = "012345";
+    private static final String PRIVATE_KEY_PASSWORD = "65533714";
 
     private static final String PUBLIC_X509_CERTIFICATE = "/javalaboratories-org.cer";
     private static final String KEYSTORE_FILE = "/keystore.jks";
@@ -155,17 +157,53 @@ public class CryptographyFactoryTest {
     }
 
     @Test
+    public void testSunRsaCryptography_DecryptStream_Pass() throws CertificateException, KeyStoreException {
+        // Given
+        AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
+        InputStream istream = this.getClass().getResourceAsStream(RSA_ENCRYPTED_FILE);
+        ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+        PrivateKeyStore store = PrivateKeyStore.builder()
+            .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
+            .storePassword("changeit")
+            .keyAlias("javalaboratories-org")
+            .keyPassword(PRIVATE_KEY_PASSWORD)
+            .build();
+        PrivateKey key = store.getKey();
+
+        // When
+        cryptography.decrypt(key,istream,ostream);
+
+        // Then
+        assertEquals(DATA,ostream.toString());
+    }
+
+    @Test
+    public void testSunRsaCryptography_EncryptStream_Pass() throws CertificateException, KeyStoreException {
+        // Given
+        AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        Certificate certificate = factory.generateCertificate(this.getClass().getResourceAsStream(PUBLIC_X509_CERTIFICATE));
+        InputStream istream = new ByteArrayInputStream(DATA.getBytes());
+        ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+
+        // When
+        cryptography.encrypt(certificate,istream,ostream);
+
+        // Then
+        assertEquals(ostream.size(), 256);
+    }
+
+    @Test
     public void testSunRsaCryptography_DecryptString_Pass() throws KeyStoreException {
         // Given
         AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
-        KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
-        PrivateKey key;
-        try {
-            store.load(this.getClass().getResourceAsStream(KEYSTORE_FILE), "changeit".toCharArray());
-            key = (PrivateKey) store.getKey("javalaboratories-org","65533714".toCharArray());
-        } catch (IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException e) {
-            throw new IllegalStateException("Failed to read keystore",e);
-        }
+        PrivateKeyStore store = PrivateKeyStore.builder()
+            .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
+            .storePassword("changeit")
+            .keyAlias("javalaboratories-org")
+            .keyPassword(PRIVATE_KEY_PASSWORD)
+            .build();
+        PrivateKey key = store.getKey();
 
         // When
         byte[] result = cryptography.decrypt(key,Base64.decodeBase64(BASE64_ASYMMETRIC_ENCRYPTED_DATA.getBytes()));

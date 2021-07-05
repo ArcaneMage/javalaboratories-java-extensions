@@ -17,9 +17,8 @@ package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.util.Arguments;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.*;
+import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -107,9 +106,8 @@ public class SunRsaAsymmetricCryptography extends SunCryptography implements Asy
     public byte[] encrypt(Certificate certificate, byte[] data) {
         Arguments.requireNonNull("Requires certificate and data objects",certificate,data);
         byte[] result;
-
-        Cipher cipher = getCipher(RSA_ALGORITHM);
         try {
+            Cipher cipher = getCipher(RSA_ALGORITHM);
             PublicKey key = certificate.getPublicKey();
             cipher.init(Cipher.ENCRYPT_MODE, key);
             result = cipher.doFinal(data);
@@ -119,5 +117,42 @@ public class SunRsaAsymmetricCryptography extends SunCryptography implements Asy
             throw new CryptographyException("Padding or block size error",e);
         }
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void decrypt(PrivateKey key, InputStream istream, OutputStream ostream) {
+        Arguments.requireNonNull("Requires private key, istream and ostream parameters",key,istream,ostream);
+        try {
+            Cipher cipher = getCipher(RSA_ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            InputStream cstream = new CipherInputStream(istream,cipher);
+            write(cstream,ostream);
+        } catch (IOException e) {
+            throw new CryptographyException("Failed to read/write streams",e);
+        } catch (InvalidKeyException e) {
+            throw new CryptographyException("Invalid key",e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void encrypt(Certificate certificate, InputStream istream, OutputStream ostream) {
+        Arguments.requireNonNull("Requires certificate, istream and ostream parameters",certificate,istream,ostream);
+        try {
+            Cipher cipher = getCipher(RSA_ALGORITHM);
+            PublicKey key = certificate.getPublicKey();
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            OutputStream cstream = new CipherOutputStream(ostream,cipher);
+            write(istream,cstream);
+        } catch (IOException e) {
+            throw new CryptographyException("Failed to read/write streams",e);
+        } catch (InvalidKeyException e) {
+            throw new CryptographyException("Invalid key",e);
+        }
     }
 }

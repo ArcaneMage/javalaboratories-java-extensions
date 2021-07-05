@@ -15,8 +15,15 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 
 /**
  * This object has the ability to encrypt data with asymmetric keys
@@ -86,9 +93,36 @@ public interface AsymmetricCryptography {
      * other words, the {@link PrivateKey} and {@link Certificate} are related,
      * they form a private/public keypair respectively.
      *
-     * @param certificate private key with which to encrypt the {@code data}
+     * @param certificate public key with which to encrypt the {@code data}
      * @param data decrypted data to undergo encryption.
      * @return decrypted data bytes.
      */
     byte[] encrypt(final Certificate certificate, final byte[] data);
+
+
+    /**
+     * Decrypts {@code istream} and sends decrypted data to {@code ostream}.
+     *
+     * The {@code data} must be encrypted with related {@code certificate}. In
+     * other words, the {@link PrivateKey} and {@link Certificate} are related,
+     * they form a private/public keypair respectively.
+     *
+     * @param key private key with which to encrypt the {@code istream}
+     * @param istream input stream of data to be decrypted.
+     * @param ostream output stream of decrypted data.
+     */
+    void decrypt(final PrivateKey key, final InputStream istream, OutputStream ostream);
+
+    /**
+     * Encrypts {@code istream} and sends encrypted data to {@code ostream}.
+     *
+     * The {@code data} must be encrypted with related {@code certificate}. In
+     * other words, the {@link PrivateKey} and {@link Certificate} are related,
+     * they form a private/public keypair respectively.
+     *
+     * @param certificate public key with which to encrypt the {@code istream}
+     * @param istream input stream of data to be encrypted.
+     * @param ostream output stream of encrypted data.
+     */
+    void encrypt(final Certificate certificate, final InputStream istream, OutputStream ostream);
 }

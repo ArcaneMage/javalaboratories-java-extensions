@@ -23,6 +23,8 @@ import org.bouncycastle.operator.OutputEncryptor;
 import org.javalaboratories.core.util.Arguments;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
@@ -70,5 +72,15 @@ public class BcAsymmetricCryptography implements AsymmetricCryptography {
             throw new CryptographyException("Requires X509 certificate type", e);
         }
         return result;
+    }
+
+    @Override
+    public void decrypt(PrivateKey key, InputStream istream, OutputStream ostream) {
+
+    }
+
+    @Override
+    public void encrypt(Certificate certificate, InputStream istream, OutputStream ostream) {
+
     }
 }

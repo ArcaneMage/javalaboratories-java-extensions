@@ -50,7 +50,6 @@ public final class SunAesSymmetricCryptography extends SunCryptography implement
 
     // The algorithm name / Cipher Block Chaining (CBC)  / data filling method
     private static final String AES_ALGORITHM = "AES/CBC/PKCS5Padding";
-    private static final int MAX_BUFFER_SZ = 64;
 
     private final AesKeyLengths keyLength;
 
@@ -200,21 +199,6 @@ public final class SunAesSymmetricCryptography extends SunCryptography implement
             result = key.substring(0,length);
         } else {
             result = key + String.format("%" + (length - key.length()) + "s", "0").replace(" ", "0"); // Right Padding
-        }
-        return result;
-    }
-
-    private OutputStream write(final InputStream source, final OutputStream destination) throws IOException {
-        OutputStream result;
-        try (InputStream istream = source;
-            OutputStream ostream = destination
-        ) {
-            byte[] buffer = new byte[MAX_BUFFER_SZ];
-            int read;
-            while ((read = istream.read(buffer, 0, MAX_BUFFER_SZ)) > -1) {
-                ostream.write(buffer,0,read);
-            }
-            result = destination;
         }
         return result;
     }
