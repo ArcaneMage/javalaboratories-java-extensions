@@ -108,6 +108,13 @@ public final class CryptographyFactory {
         return new MdCryptography(algorithm);
     }
 
+    /**
+     * Returns {@link AsymmetricCryptography} object that require {@code
+     * keypairs} to enable encryption and decryption.
+     *
+     * @return Cryptography interface implementation that supports Message
+     * Digest hashing.
+     */
     public static AsymmetricCryptography getSunRsaAsymmetricCryptography() {
         return new SunRsaAsymmetricCryptography();
     }
