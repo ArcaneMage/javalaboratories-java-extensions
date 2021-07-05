@@ -85,8 +85,8 @@ public class SunRsaAsymmetricCryptography extends SunCryptography implements Asy
     public byte[] decrypt(PrivateKey key, byte[] data) {
         Arguments.requireNonNull("Requires private key and data objects",key,data);
         byte[] result;
-        Cipher cipher = getCipher(RSA_ALGORITHM);
         try {
+            Cipher cipher = getCipher(RSA_ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE,key);
             result = cipher.doFinal(data);
         } catch (InvalidKeyException e) {
@@ -106,11 +106,11 @@ public class SunRsaAsymmetricCryptography extends SunCryptography implements Asy
     @Override
     public byte[] encrypt(Certificate certificate, byte[] data) {
         Arguments.requireNonNull("Requires certificate and data objects",certificate,data);
-        PublicKey key = certificate.getPublicKey();
         byte[] result;
 
         Cipher cipher = getCipher(RSA_ALGORITHM);
         try {
+            PublicKey key = certificate.getPublicKey();
             cipher.init(Cipher.ENCRYPT_MODE, key);
             result = cipher.doFinal(data);
         } catch (InvalidKeyException e) {
