@@ -2,6 +2,7 @@ package org.javalaboratories.core.cryptography;
 
 import org.apache.commons.codec.binary.Base64;
 import org.javalaboratories.core.cryptography.keys.PrivateKeyStore;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -32,6 +33,18 @@ public class CryptographyFactoryTest {
 
     private static final String PUBLIC_X509_CERTIFICATE = "/javalaboratories-org.cer";
     private static final String KEYSTORE_FILE = "/keystore.jks";
+
+    private PrivateKeyStore keyStore;
+
+    @BeforeEach
+    public void setup() {
+        keyStore = PrivateKeyStore.builder()
+                .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
+                .storePassword("changeit")
+                .keyAlias("javalaboratories-org")
+                .keyPassword(PRIVATE_KEY_PASSWORD)
+                .build();
+    }
 
     @Test
     public void testMdCryptography_EncryptString_Pass() {
@@ -163,13 +176,7 @@ public class CryptographyFactoryTest {
         AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
         InputStream istream = this.getClass().getResourceAsStream(RSA_ENCRYPTED_FILE);
         ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-        PrivateKeyStore store = PrivateKeyStore.builder()
-            .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
-            .storePassword("changeit")
-            .keyAlias("javalaboratories-org")
-            .keyPassword(PRIVATE_KEY_PASSWORD)
-            .build();
-        PrivateKey key = store.getKey();
+        PrivateKey key = keyStore.getKey();
 
         // When
         cryptography.decrypt(key,istream,ostream);
@@ -198,13 +205,7 @@ public class CryptographyFactoryTest {
     public void testSunRsaCryptography_DecryptString_Pass() throws KeyStoreException {
         // Given
         AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
-        PrivateKeyStore store = PrivateKeyStore.builder()
-            .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
-            .storePassword("changeit")
-            .keyAlias("javalaboratories-org")
-            .keyPassword(PRIVATE_KEY_PASSWORD)
-            .build();
-        PrivateKey key = store.getKey();
+        PrivateKey key = keyStore.getKey();
 
         // When
         byte[] result = cryptography.decrypt(key,Base64.decodeBase64(BASE64_ASYMMETRIC_ENCRYPTED_DATA.getBytes()));
@@ -212,5 +213,56 @@ public class CryptographyFactoryTest {
 
         // Then
         assertEquals(DATA,data);
+    }
+
+    @Test
+    public void testSunRsaCryptography_PrivateKeyStore_StorePassword_Fail() {
+        // Given
+        PrivateKeyStore store = PrivateKeyStore.builder()
+                .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
+                .storePassword("wrong-password")
+                .keyAlias("javalaboratories-org")
+                .keyPassword(PRIVATE_KEY_PASSWORD)
+                .build();
+
+        assertThrows(IllegalArgumentException.class, store::getKey);
+    }
+
+    @Test
+    public void testSunRsaCryptography_PrivateKeyStore_UnrecoverableKey_Fail() {
+        // Given
+        PrivateKeyStore store = PrivateKeyStore.builder()
+                .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
+                .storePassword("changeit")
+                .keyAlias("javalaboratories-org")
+                .keyPassword("wrong-password")
+                .build();
+
+        assertThrows(IllegalArgumentException.class, store::getKey);
+    }
+
+    @Test
+    public void testSunRsaCryptography_PrivateKeyStore_KeyStoreFileCorrupted_Fail() {
+        // Given
+        PrivateKeyStore store = PrivateKeyStore.builder()
+                .keyStoreStream(this.getClass().getResourceAsStream(RSA_ENCRYPTED_FILE)) // <-- not a keystore file
+                .storePassword("changeit")
+                .keyAlias("javalaboratories-org")
+                .keyPassword(PRIVATE_KEY_PASSWORD)
+                .build();
+
+        assertThrows(IllegalArgumentException.class, store::getKey);
+    }
+
+    @Test
+    public void testSunRsaCryptography_PrivateKeyStore_Equality_Pass() {
+        PrivateKeyStore store = PrivateKeyStore.builder()
+                .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
+                .storePassword("changeit")
+                .keyAlias("javalaboratories-org")
+                .keyPassword(PRIVATE_KEY_PASSWORD)
+                .build();
+
+        assertEquals(keyStore,store);
     }
 }

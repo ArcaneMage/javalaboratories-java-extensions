@@ -51,11 +51,14 @@ public final class PrivateKeyStore implements Serializable {
 
     private static final long serialVersionUID = -6963222118809588655L;
 
-    private final InputStream keyStoreStream;
     private final String storePassword;
     private final String keyAlias;
     private final String keyPassword;
     private final String keyStoreType;
+
+    @EqualsAndHashCode.Exclude
+    private final InputStream keyStoreStream;
+    @EqualsAndHashCode.Exclude
     private final Eval<PrivateKey> lazyPrivateKey;
 
     /**
