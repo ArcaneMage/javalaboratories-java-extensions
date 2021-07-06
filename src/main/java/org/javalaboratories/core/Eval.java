@@ -495,7 +495,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          */
         @EqualsAndHashCode()
         private static final class EvalValue<E> implements Serializable {
-
             private static final long serialVersionUID = -797325625285441119L;
 
             private E element;
@@ -550,6 +549,8 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      */
     @EqualsAndHashCode(callSuper=true)
     public static class Later<T> extends Always<T> {
+        private static final long serialVersionUID = -8848701870767131627L;
+
         /**
          * Constructs implementation of {@link Eval} with the {@code Later}
          * strategy.
@@ -592,6 +593,8 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      */
     @EqualsAndHashCode(callSuper=true)
     public static final class Eager<T> extends Later<T> {
+        private static final long serialVersionUID = -4956876354953747651L;
+
         Eager(final T value) {
             super((Supplier<T>)() -> value);
             // Cache the value immediately

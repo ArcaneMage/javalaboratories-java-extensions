@@ -18,6 +18,7 @@ package org.javalaboratories.core.cryptography.keys;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Eval;
+import org.javalaboratories.core.util.Arguments;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,6 +78,8 @@ public final class PrivateKeyStore implements Serializable {
     @Builder
     public PrivateKeyStore(final InputStream keyStoreStream, final String keyStoreType, final String storePassword,
                            final String keyAlias, final String keyPassword) {
+        Arguments.requireNonNull("Parameters keyStoreStream, storePassword and keyAlias are mandatory",keyStoreStream,
+                storePassword,keyAlias);
         this.keyStoreStream = keyStoreStream;
         this.keyStoreType = keyStoreType == null ? KeyStore.getDefaultType() : keyStoreType;
         this.storePassword = storePassword;

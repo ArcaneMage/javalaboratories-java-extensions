@@ -255,6 +255,19 @@ public class CryptographyFactoryTest {
     }
 
     @Test
+    public void testSunRsaCryptography_PrivateKeyStore_KeyStoreException_Fail() {
+        // Given
+        PrivateKeyStore store = PrivateKeyStore.builder()
+                .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
+                .keyStoreType("jks2") // <-- no such type should cause KeyStoreException
+                .storePassword("changeit")
+                .keyAlias("javalaboratories-org")
+                .keyPassword(PRIVATE_KEY_PASSWORD)
+                .build();
+        assertThrows(IllegalArgumentException.class, store::getKey);
+    }
+
+    @Test
     public void testSunRsaCryptography_PrivateKeyStore_Equality_Pass() {
         PrivateKeyStore store = PrivateKeyStore.builder()
                 .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_FILE))
