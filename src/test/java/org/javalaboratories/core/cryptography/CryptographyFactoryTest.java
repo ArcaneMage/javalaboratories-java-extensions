@@ -1,6 +1,7 @@
 package org.javalaboratories.core.cryptography;
 
 import org.apache.commons.codec.binary.Base64;
+import org.javalaboratories.core.cryptography.keys.PrivateKeyStore;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;

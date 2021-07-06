@@ -69,6 +69,8 @@ import java.util.stream.Stream;
  */
 public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
 
+    private static final long serialVersionUID = -7806171225526615129L;
+
     private static final IllegalStateException FAILED_TO_RETRIEVE_EXCEPTION = new IllegalStateException("Failed to retrieve exception from Try object");
     private static final NoSuchElementException NO_SUCH_ELEMENT_EXCEPTION = new NoSuchElementException();
 

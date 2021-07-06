@@ -57,6 +57,8 @@ import java.util.function.Supplier;
 @EqualsAndHashCode
 public final class StopWatch implements Serializable, Comparable<StopWatch> {
 
+    private static final long serialVersionUID = 2397064136918983422L;
+
     private static final String DEFAULT_DATETIME_FORMAT ="HH:mm:ss.SSS";
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 

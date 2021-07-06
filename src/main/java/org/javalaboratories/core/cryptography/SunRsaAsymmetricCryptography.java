@@ -69,7 +69,7 @@ import java.security.cert.Certificate;
  * @see CryptographyFactory
  * @see AsymmetricCryptography
  */
-public class SunRsaAsymmetricCryptography extends SunCryptography implements AsymmetricCryptography{
+public final class SunRsaAsymmetricCryptography extends SunCryptography implements AsymmetricCryptography{
 
     // The algorithm name / Electronic Code Book (ECB)  / data filling method
     private static final String RSA_ALGORITHM = "RSA/ECB/PKCS1Padding";

@@ -87,6 +87,9 @@ public final class Holders {
     }
 
     private static class WritableHolder<T> implements Holder<T>, Serializable {
+
+        private static final long serialVersionUID = -3480539403374331932L;
+
         private T value;
 
         public WritableHolder(final T value) {

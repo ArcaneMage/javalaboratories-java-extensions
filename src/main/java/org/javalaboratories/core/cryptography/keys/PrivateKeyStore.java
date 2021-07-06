@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.cryptography;
+package org.javalaboratories.core.cryptography.keys;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -21,7 +21,12 @@ import org.javalaboratories.core.Eval;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.*;
+import java.io.Serializable;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 /**
@@ -42,45 +47,56 @@ import java.security.cert.CertificateException;
  * </pre>
  */
 @EqualsAndHashCode
-public final class PrivateKeyStore {
+public final class PrivateKeyStore implements Serializable {
+
+    private static final long serialVersionUID = -6963222118809588655L;
+
     private final InputStream keyStoreStream;
     private final String storePassword;
     private final String keyAlias;
     private final String keyPassword;
-    private final Eval<PrivateKey> privateKey;
+    private final String keyStoreType;
+    private final Eval<PrivateKey> lazyPrivateKey;
 
     /**
      * Constructs an instance this {@link PrivateKeyStore}.
      * <p>
      * It is preferable to use the {@code builder} object to construct this
-     * object.
+     * object. If {@code keyPassword} is null, then {@code storePassed} is
+     * assumed.
+     *
      * @param keyStoreStream input stream to keystore.
+     * @param keyStoreType keystore type, for example "jks" (optional).
      * @param storePassword keystore password.
      * @param keyAlias alias of private key.
-     * @param keyPassword password of private key.
+     * @param keyPassword password of private key (optional).
      */
     @Builder
-    public PrivateKeyStore(final InputStream keyStoreStream,final String storePassword,final String keyAlias,
-                           final String keyPassword) {
+    public PrivateKeyStore(final InputStream keyStoreStream, final String keyStoreType, final String storePassword,
+                           final String keyAlias, final String keyPassword) {
         this.keyStoreStream = keyStoreStream;
+        this.keyStoreType = keyStoreType == null ? KeyStore.getDefaultType() : keyStoreType;
         this.storePassword = storePassword;
         this.keyAlias = keyAlias;
         this.keyPassword = keyPassword == null ? storePassword : keyPassword;
-        this.privateKey = Eval.later(this::readKeyStore);
+        this.lazyPrivateKey = Eval.later(this::readKeyStore);
     }
 
     /**
      * @return lazily returns PrivateKey from keystore. Note: if key has already
-     * been retrieved, they cached key will be returned instead.
+     * been retrieved, the cached key will be returned instead.
+     *
+     * @throws IllegalArgumentException keystore processing errors (file i/o,
+     * algorithm errors), an issue with original arguments.
      */
     public PrivateKey getKey() {
-        return privateKey.get();
+        return lazyPrivateKey.get();
     }
 
     private PrivateKey readKeyStore() {
         PrivateKey key;
         try {
-            KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
+            KeyStore store = KeyStore.getInstance(keyStoreType);
             store.load(keyStoreStream, storePassword.toCharArray());
             key = (PrivateKey) store.getKey(keyAlias,keyPassword.toCharArray());
         } catch (KeyStoreException e) {
@@ -90,7 +106,7 @@ public final class PrivateKeyStore {
         } catch(IOException | CertificateException e) {
             throw new IllegalArgumentException("Input/output or certificate error",e);
         } catch(UnrecoverableKeyException e) {
-            throw new IllegalStateException("Unrecoverable key",e);
+            throw new IllegalArgumentException("Unrecoverable key",e);
         }
         return key;
     }
