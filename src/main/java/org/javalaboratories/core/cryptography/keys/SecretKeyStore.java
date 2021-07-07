@@ -22,7 +22,9 @@ import org.javalaboratories.core.cryptography.CryptographyException;
 import javax.crypto.SecretKey;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.security.*;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 
 /**
  * A utility object to process private keys stored in KeyStores.

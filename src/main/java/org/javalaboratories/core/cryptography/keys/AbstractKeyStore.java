@@ -35,11 +35,9 @@ import java.security.cert.CertificateException;
  *        PrivateKeyStore store = PrivateKeyStore.builder()
  *             .keyStoreStream(new FileInputStream(KEYSTORE_FILE))
  *             .storePassword("changeit")
- *             .keyAlias("javalaboratories-org")
- *             .keyPassword(PRIVATE_KEY_PASSWORD)
  *             .build();
  *
- *        PrivateKey key = store.getKey();
+ *        PrivateKey key = store.getKey("javalaboratories-org",PRIVATE_KEY_PASSWORD);
  *     }
  * </pre>
  */
@@ -48,12 +46,12 @@ public abstract class AbstractKeyStore implements Serializable {
 
     private static final long serialVersionUID = 1082789795503155768L;
 
-    private final String storePassword;
     private final String keyStoreType;
+    private final String storePassword;
 
     @EqualsAndHashCode.Exclude
     private final InputStream keyStoreStream;
-
+    @EqualsAndHashCode.Exclude
     private final Eval<KeyStore> lazyKeyStore;
 
     /**
@@ -76,6 +74,13 @@ public abstract class AbstractKeyStore implements Serializable {
         this.lazyKeyStore = Eval.later(this::initialise);
     }
 
+    /**
+     * Returns an initialised KeyStore, ready for use by derived classes.
+     * @return KeyStore instance that is ready for use.
+     *
+     * @throws CryptographyException for keystore read failures, no such algorithm
+     * or input/output failures.
+     */
     protected KeyStore getKeyStore() {
         return lazyKeyStore.get();
     }

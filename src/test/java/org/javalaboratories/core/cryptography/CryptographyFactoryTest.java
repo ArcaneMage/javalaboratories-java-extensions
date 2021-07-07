@@ -64,7 +64,7 @@ public class CryptographyFactoryTest {
         Cryptography cryptography = CryptographyFactory.getSunMdCryptography();
 
         // When
-        byte[] result = cryptography.encrypt(DATA.getBytes(UTF_8));
+        byte[] result = cryptography.encrypt(DATA.getBytes());
 
         // Then
         assertNotNull(result);
@@ -167,8 +167,6 @@ public class CryptographyFactoryTest {
         assertEquals(DATA,new String(result));
     }
 
-
-
     @Test
     public void testSunAesCryptography_EncryptString_Pass() {
         // Given
@@ -239,6 +237,7 @@ public class CryptographyFactoryTest {
                 .keyStoreType("jks2") // <-- no such type should cause KeyStoreException
                 .storePassword("changeit")
                 .build();
+
         assertThrows(CryptographyException.class, () -> store.getKey(SECRET_KEY_ALIAS,SECRET_KEY_PASSWORD));
     }
 
