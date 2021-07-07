@@ -15,16 +15,16 @@
  */
 package org.javalaboratories.core.cryptography.keys;
 
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import org.javalaboratories.core.Eval;
 import org.javalaboratories.core.cryptography.CryptographyException;
+import org.javalaboratories.core.util.Arguments;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
+import java.security.cert.CertificateException;
 
 /**
  * A utility object to process private keys stored in KeyStores.
@@ -35,19 +35,29 @@ import java.security.UnrecoverableKeyException;
  *        PrivateKeyStore store = PrivateKeyStore.builder()
  *             .keyStoreStream(new FileInputStream(KEYSTORE_FILE))
  *             .storePassword("changeit")
+ *             .keyAlias("javalaboratories-org")
+ *             .keyPassword(PRIVATE_KEY_PASSWORD)
  *             .build();
  *
- *        PrivateKey key = store.getKey("javalaboratories-org",PRIVATE_KEY_PASSWORD);
+ *        PrivateKey key = store.getKey();
  *     }
  * </pre>
  */
-@EqualsAndHashCode(callSuper = true)
-public final class PrivateKeyStore extends AbstractKeyStore implements Serializable {
+@EqualsAndHashCode
+public abstract class AbstractKeyStore implements Serializable {
 
-    private static final long serialVersionUID = -2784170191850769687L;
+    private static final long serialVersionUID = 1082789795503155768L;
+
+    private final String storePassword;
+    private final String keyStoreType;
+
+    @EqualsAndHashCode.Exclude
+    private final InputStream keyStoreStream;
+
+    private final Eval<KeyStore> lazyKeyStore;
 
     /**
-     * Constructs an instance this {@link PrivateKeyStore}.
+     * Constructs an instance this {@link AbstractKeyStore}.
      * <p>
      * It is preferable to use the {@code builder} object to construct this
      * object. If {@code keyPassword} is null, then {@code storePassed} is
@@ -57,30 +67,31 @@ public final class PrivateKeyStore extends AbstractKeyStore implements Serializa
      * @param keyStoreType keystore type, for example "jks" (optional).
      * @param storePassword keystore password.
      */
-    @Builder
-    public PrivateKeyStore(final InputStream keyStoreStream, final String keyStoreType, final String storePassword) {
-        super(keyStoreStream,keyStoreType,storePassword);
+    public AbstractKeyStore(final InputStream keyStoreStream, final String keyStoreType, final String storePassword) {
+        Arguments.requireNonNull("Parameters keyStoreStream and storePassword are mandatory",keyStoreStream,
+                storePassword);
+        this.keyStoreStream = keyStoreStream;
+        this.keyStoreType = keyStoreType == null ? KeyStore.getDefaultType() : keyStoreType;
+        this.storePassword = storePassword;
+        this.lazyKeyStore = Eval.later(this::initialise);
     }
 
-    /**
-     * @return returns PrivateKey from keystore.
-     *
-     * @throws CryptographyException keystore processing errors (file i/o,
-     * algorithm errors), an issue with original arguments.
-     */
-    public PrivateKey getKey(final String keyAlias, final String keyPassword) {
-        PrivateKey key;
+    protected KeyStore getKeyStore() {
+        return lazyKeyStore.get();
+    }
+
+    private KeyStore initialise() {
+        KeyStore result;
         try {
-            key = (PrivateKey) getKeyStore().getKey(keyAlias,keyPassword.toCharArray());
+            result = KeyStore.getInstance(keyStoreType);
+            result.load(keyStoreStream, storePassword.toCharArray());
         } catch (KeyStoreException e) {
             throw new CryptographyException("Failed to read keystore",e);
         } catch (NoSuchAlgorithmException e) {
             throw new CryptographyException("No such algorithm", e);
-        } catch(UnrecoverableKeyException e) {
-            throw new CryptographyException("Unrecoverable key",e);
-        } catch (ClassCastException e) {
-            throw new CryptographyException("Expected asymmetric private key",e);
+        } catch(IOException | CertificateException e) {
+            throw new CryptographyException("Input/output or certificate error", e);
         }
-        return key;
+        return result;
     }
 }

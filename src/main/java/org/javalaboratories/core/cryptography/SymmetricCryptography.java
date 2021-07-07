@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import javax.crypto.SecretKey;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -40,6 +41,7 @@ public interface SymmetricCryptography {
      * @param data an array of {@code byte[]} to be encrypted.
      * @param key encryption secret key
      * @return an array of decrypted bytes.
+     *
      * @throws NullPointerException if any of the parameters is null.
      * @throws CryptographyException encapsulates cryptographic error.
      */
@@ -52,6 +54,7 @@ public interface SymmetricCryptography {
      * @param istream stream to be encrypted
      * @param ostream stream of encrypted data.
      * @param key encryption secret key
+     *
      * @throws NullPointerException if any of the parameters is null.
      * @throws CryptographyException encapsulates cryptographic error.
      */
@@ -65,6 +68,7 @@ public interface SymmetricCryptography {
      * @param data an array of {@code byte[]} to be encrypted.
      * @param key encryption secret key
      * @return an array of encrypted bytes.
+     *
      * @throws NullPointerException if any of the parameters is null.
      * @throws CryptographyException encapsulates cryptographic error.
      */
@@ -77,8 +81,64 @@ public interface SymmetricCryptography {
      * @param istream stream to be encrypted
      * @param ostream stream of encrypted data.
      * @param key encryption secret key
+     *
      * @throws NullPointerException if any of the parameters is null.
      * @throws CryptographyException encapsulates cryptographic error.
      */
     void encrypt(final String key, final InputStream istream, final OutputStream ostream);
+
+    /**
+     * This method reads the {@code byte[]} array and returns an array of
+     * decrypted bytes in {@code byte[]} array, using the symmetric {@code
+     * key}.
+     *
+     * @param data an array of {@code byte[]} to be encrypted.
+     * @param key encryption secret key sourced from keystore.
+     * @return an array of decrypted bytes.
+     *
+     * @throws NullPointerException if any of the parameters is null.
+     * @throws CryptographyException encapsulates cryptographic error.
+     */
+    byte[] decrypt(final SecretKey key, final byte[] data);
+
+    /**
+     * Reads an {@link InputStream} decrypts and outputs the encrypted data to
+     * the {@link OutputStream}.
+     *
+     * @param istream stream to be encrypted
+     * @param ostream stream of encrypted data.
+     * @param key encryption secret key sourced from keystore.
+     *
+     * @throws NullPointerException if any of the parameters is null.
+     * @throws CryptographyException encapsulates cryptographic error.
+     */
+    void decrypt(final SecretKey key, final InputStream istream, final OutputStream ostream);
+
+    /**
+     * This method reads the {@code byte[]} array and returns an array of
+     * encrypted bytes in {@code byte[]} array, using the symmetric {@code
+     * key}.
+     *
+     * @param data an array of {@code byte[]} to be encrypted.
+     * @param key encryption secret key sourced from keystore.
+     * @return an array of encrypted bytes.
+     *
+     * @throws NullPointerException if any of the parameters is null.
+     * @throws CryptographyException encapsulates cryptographic error.
+     */
+    byte[] encrypt(final SecretKey key, final byte[] data);
+
+    /**
+     * Reads an {@link InputStream} encrypts and outputs the encrypted data to
+     * the {@link OutputStream}.
+     *
+     * @param istream stream to be encrypted
+     * @param ostream stream of encrypted data.
+     * @param key encryption secret key sourced from keystore.
+     *
+     * @throws NullPointerException if any of the parameters is null.
+     * @throws CryptographyException encapsulates cryptographic error.
+     */
+    void encrypt(final SecretKey key, final InputStream istream, final OutputStream ostream);
+
 }

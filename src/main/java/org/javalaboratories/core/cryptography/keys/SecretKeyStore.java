@@ -19,12 +19,10 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.cryptography.CryptographyException;
 
+import javax.crypto.SecretKey;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 
 /**
  * A utility object to process private keys stored in KeyStores.
@@ -32,22 +30,23 @@ import java.security.UnrecoverableKeyException;
  * Example usage is as follows:
  * <pre>
  *     {@code
- *        PrivateKeyStore store = PrivateKeyStore.builder()
+ *        SecretKeyStore store = SecretKeyStore.builder()
  *             .keyStoreStream(new FileInputStream(KEYSTORE_FILE))
  *             .storePassword("changeit")
  *             .build();
  *
- *        PrivateKey key = store.getKey("javalaboratories-org",PRIVATE_KEY_PASSWORD);
+ *        SecreteKey key = store.getKey("javalaboratories-org",SECRET_KEY_PASSWORD);
  *     }
  * </pre>
  */
 @EqualsAndHashCode(callSuper = true)
-public final class PrivateKeyStore extends AbstractKeyStore implements Serializable {
+public final class SecretKeyStore extends AbstractKeyStore implements Serializable {
 
-    private static final long serialVersionUID = -2784170191850769687L;
+    private static final long serialVersionUID = -6166501481797114545L;
+    private static final String DEFAULT_KEYSTORE_TYPE = "jceks";
 
     /**
-     * Constructs an instance this {@link PrivateKeyStore}.
+     * Constructs an instance this {@link SecretKeyStore}.
      * <p>
      * It is preferable to use the {@code builder} object to construct this
      * object. If {@code keyPassword} is null, then {@code storePassed} is
@@ -58,20 +57,20 @@ public final class PrivateKeyStore extends AbstractKeyStore implements Serializa
      * @param storePassword keystore password.
      */
     @Builder
-    public PrivateKeyStore(final InputStream keyStoreStream, final String keyStoreType, final String storePassword) {
-        super(keyStoreStream,keyStoreType,storePassword);
+    public SecretKeyStore(final InputStream keyStoreStream, final String keyStoreType, final String storePassword) {
+        super(keyStoreStream,keyStoreType == null ? DEFAULT_KEYSTORE_TYPE : keyStoreType,storePassword);
     }
 
     /**
-     * @return returns PrivateKey from keystore.
+     * @return returns SecretKey from keystore.
      *
      * @throws CryptographyException keystore processing errors (file i/o,
      * algorithm errors), an issue with original arguments.
      */
-    public PrivateKey getKey(final String keyAlias, final String keyPassword) {
-        PrivateKey key;
+    public SecretKey getKey(final String keyAlias, final String keyPassword) {
+        SecretKey key;
         try {
-            key = (PrivateKey) getKeyStore().getKey(keyAlias,keyPassword.toCharArray());
+            key = (SecretKey) getKeyStore().getKey(keyAlias,keyPassword.toCharArray());
         } catch (KeyStoreException e) {
             throw new CryptographyException("Failed to read keystore",e);
         } catch (NoSuchAlgorithmException e) {
@@ -79,7 +78,7 @@ public final class PrivateKeyStore extends AbstractKeyStore implements Serializa
         } catch(UnrecoverableKeyException e) {
             throw new CryptographyException("Unrecoverable key",e);
         } catch (ClassCastException e) {
-            throw new CryptographyException("Expected asymmetric private key",e);
+            throw new CryptographyException("Expected symmetric secret key",e);
         }
         return key;
     }

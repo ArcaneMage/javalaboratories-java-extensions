@@ -5,8 +5,11 @@ import org.javalaboratories.core.util.Arguments;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Objects;
@@ -58,14 +61,7 @@ public final class SunAesSymmetricCryptography extends SunCryptography implement
     }
 
     /**
-     * Reads an {@link InputStream} encrypts and outputs the encrypted data to
-     * the {@link OutputStream}.
-     *
-     * @param istream stream to be encrypted
-     * @param ostream stream of encrypted data.               
-     * @param key encryption secret key
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
+     * {@inheritDoc}
      */
     @Override
     public void encrypt(final String key, final InputStream istream, final OutputStream ostream) {
@@ -84,14 +80,7 @@ public final class SunAesSymmetricCryptography extends SunCryptography implement
     }
 
     /**
-     * Reads an {@link InputStream} decrypts and outputs the encrypted data to
-     * the {@link OutputStream}.
-     *
-     * @param istream stream to be encrypted
-     * @param ostream stream of encrypted data.
-     * @param key encryption secret key
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
+     * {@inheritDoc}
      */
     @Override
     public void decrypt(final String key, final InputStream istream, final OutputStream ostream) {
@@ -110,28 +99,15 @@ public final class SunAesSymmetricCryptography extends SunCryptography implement
     }
 
     /**
-     * This method reads the {@code byte[]} array and returns an array of
-     * encrypted bytes in {@code byte[]} array.
-     *
-     * @param data an array of {@code byte[]} to be encrypted.
-     * @return an array of encrypted bytes.
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
+     * {@inheritDoc}
      */
+    @Override
     public byte[] encrypt(final byte[] data) {
         return encrypt(KEY,data);
     }
 
     /**
-     * This method reads the {@code byte[]} array and returns an array of
-     * encrypted bytes in {@code byte[]} array, using the symmetric {@code
-     * key}.
-     *
-     * @param data an array of {@code byte[]} to be encrypted.
-     * @param key encryption secret key
-     * @return an array of encrypted bytes.
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
+     * {@inheritDoc}
      */
     @Override
     public byte[] encrypt(final String key, final byte[] data) {
@@ -150,13 +126,7 @@ public final class SunAesSymmetricCryptography extends SunCryptography implement
     }
 
     /**
-     * This method reads the {@code byte[]} array and returns an array of
-     * decrypted bytes in {@code byte[]} array.
-     *
-     * @param data an array of {@code byte[]} to be encrypted.
-     * @return an array of decrypted bytes.
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
+     * {@inheritDoc}
      */
     @Override
     public byte[] decrypt(final byte[] data)  {
@@ -164,15 +134,7 @@ public final class SunAesSymmetricCryptography extends SunCryptography implement
     }
 
     /**
-     * This method reads the {@code byte[]} array and returns an array of
-     * decrypted bytes in {@code byte[]} array, using the symmetric {@code
-     * key}.
-     *
-     * @param data an array of {@code byte[]} to be encrypted.
-     * @param key encryption secret key
-     * @return an array of decrypted bytes.
-     * @throws NullPointerException if any of the parameters is null.
-     * @throws CryptographyException encapsulates cryptographic error.
+     * {@inheritDoc}
      */
     @Override
     public byte[] decrypt(final String key, final byte[] data)  {
@@ -188,6 +150,64 @@ public final class SunAesSymmetricCryptography extends SunCryptography implement
             throw new CryptographyException("Failed to decrypt content",e);
         }
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] decrypt(final SecretKey key, final byte[] data) {
+        Arguments.requireNonNull("Requires key and data",key,data);
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        decrypt(key,new ByteArrayInputStream(data),result);
+        return result.toByteArray();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void decrypt(final SecretKey key, final InputStream istream, final OutputStream ostream) {
+        Arguments.requireNonNull("Requires key, istream and ostream",key,istream,ostream);
+        try {
+            Cipher cipher = getCipher(AES_ALGORITHM);
+            IvParameterSpec iv = new IvParameterSpec(new byte[16]);
+            cipher.init(Cipher.DECRYPT_MODE, key,iv);
+
+            InputStream cstream = new CipherInputStream(istream,cipher);
+            write(cstream,ostream);
+        } catch(Exception e) {
+            throw new CryptographyException("Failed to decrypt stream",e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] encrypt(final SecretKey key, final byte[] data) {
+        Arguments.requireNonNull("Requires key and data",key,data);
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        encrypt(key,new ByteArrayInputStream(data),result);
+        return result.toByteArray();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void encrypt(final SecretKey key, final InputStream istream, final OutputStream ostream) {
+        Arguments.requireNonNull("Requires key, istream and ostream",key,istream,ostream);
+        try {
+            Cipher cipher = getCipher(AES_ALGORITHM);
+            IvParameterSpec iv = new IvParameterSpec(new byte[16]);
+            cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+
+            OutputStream cstream = new CipherOutputStream(ostream,cipher);
+            write(istream,cstream);
+        } catch(Exception e) {
+            throw new CryptographyException("Failed to encrypt stream",e);
+        }
     }
 
     private String normaliseKey(final String key) {
