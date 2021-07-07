@@ -199,7 +199,7 @@ public class CryptographyFactoryTest {
     }
 
     @Test
-    public void testSunRsaCryptography_SecretKeyStore_StorePassword_Fail() {
+    public void testSunAesCryptography_SecretKeyStore_StorePassword_Fail() {
         // Given
         SecretKeyStore store = SecretKeyStore.builder()
                 .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_JCEKS_FILE))
@@ -210,7 +210,7 @@ public class CryptographyFactoryTest {
     }
 
     @Test
-    public void testSunRsaCryptography_SecretKeyStore_UnrecoverableKey_Fail() {
+    public void testSunAesCryptography_SecretKeyStore_UnrecoverableKey_Fail() {
         // Given
         SecretKeyStore store = SecretKeyStore.builder()
                 .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_JCEKS_FILE))
@@ -221,7 +221,7 @@ public class CryptographyFactoryTest {
     }
 
     @Test
-    public void testSunRsaCryptography_SecretKeyStore_KeyStoreFileCorrupted_Fail() {
+    public void testSunAesCryptography_SecretKeyStore_KeyStoreFileCorrupted_Fail() {
         // Given
         SecretKeyStore store = SecretKeyStore.builder()
                 .keyStoreStream(this.getClass().getResourceAsStream(RSA_ENCRYPTED_FILE)) // <-- not a keystore file
@@ -232,7 +232,7 @@ public class CryptographyFactoryTest {
     }
 
     @Test
-    public void testSunRsaCryptography_SecretKeyStore_KeyStoreException_Fail() {
+    public void testSunAesCryptography_SecretKeyStore_KeyStoreException_Fail() {
         // Given
         SecretKeyStore store = SecretKeyStore.builder()
                 .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_JCEKS_FILE))
@@ -243,7 +243,7 @@ public class CryptographyFactoryTest {
     }
 
     @Test
-    public void testSunRsaCryptography_SecretKeyStore_Equality_Pass() {
+    public void testSunAesCryptography_SecretKeyStore_Equality_Pass() {
         SecretKeyStore store = SecretKeyStore.builder()
                 .keyStoreStream(this.getClass().getResourceAsStream(KEYSTORE_JCEKS_FILE))
                 .storePassword("changeit")
