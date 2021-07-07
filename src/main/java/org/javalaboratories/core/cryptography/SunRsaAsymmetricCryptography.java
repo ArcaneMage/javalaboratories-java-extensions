@@ -37,7 +37,7 @@ import java.security.cert.Certificate;
  * <pre>
  *     {@code
  *         // Encryption example
- *         AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
+ *         AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
  *         CertificateFactory factory = CertificateFactory.getInstance("X.509");
  *         Certificate certificate = factory.generateCertificate(new FileInputStream(...));
  *
@@ -45,7 +45,7 @@ import java.security.cert.Certificate;
  *         ...
  *         ...
  *         // Decryption example
- *         AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
+ *         AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
  *         KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
  *         PrivateKey key;
  *         try {

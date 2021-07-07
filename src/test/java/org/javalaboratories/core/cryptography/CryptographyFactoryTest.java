@@ -259,7 +259,7 @@ public class CryptographyFactoryTest {
     @Test
     public void testSunRsaCryptography_EncryptString_Pass() throws CertificateException {
         // Given
-        AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
+        AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         Certificate certificate = factory.generateCertificate(this.getClass().getResourceAsStream(PUBLIC_X509_CERTIFICATE));
 
@@ -274,7 +274,7 @@ public class CryptographyFactoryTest {
     @Test
     public void testSunRsaCryptography_DecryptStream_Pass() throws CertificateException, KeyStoreException {
         // Given
-        AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
+        AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
         InputStream istream = this.getClass().getResourceAsStream(RSA_ENCRYPTED_FILE);
         ByteArrayOutputStream ostream = new ByteArrayOutputStream();
         PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD);
@@ -289,7 +289,7 @@ public class CryptographyFactoryTest {
     @Test
     public void testSunRsaCryptography_EncryptStream_Pass() throws CertificateException, KeyStoreException {
         // Given
-        AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
+        AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         Certificate certificate = factory.generateCertificate(this.getClass().getResourceAsStream(PUBLIC_X509_CERTIFICATE));
         InputStream istream = new ByteArrayInputStream(DATA.getBytes());
@@ -305,7 +305,7 @@ public class CryptographyFactoryTest {
     @Test
     public void testSunRsaCryptography_DecryptString_Pass() throws KeyStoreException {
         // Given
-        AsymmetricCryptography cryptography = CryptographyFactory.getSunRsaAsymmetricCryptography();
+        AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
         PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD);
 
         // When

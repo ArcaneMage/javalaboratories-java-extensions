@@ -115,7 +115,7 @@ public final class CryptographyFactory {
      * @return Cryptography interface implementation that supports Message
      * Digest hashing.
      */
-    public static AsymmetricCryptography getSunRsaAsymmetricCryptography() {
+    public static AsymmetricCryptography getSunAsymmetricCryptography() {
         return new SunRsaAsymmetricCryptography();
     }
 }
