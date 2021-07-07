@@ -79,11 +79,6 @@
             <version>${sun-xml-sercurity-version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.64</version>
-        </dependency>
-        <dependency>
             <groupId>io.github.hakky54</groupId>
             <artifactId>logcaptor</artifactId>
             <version>${logcaptor-version}</version>
