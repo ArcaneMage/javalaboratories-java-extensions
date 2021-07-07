@@ -23,6 +23,38 @@ Alternatively, for `Gradle` users, amend the `build.gradle` file with the follow
         // https://mvnrepository.com/artifact/org.javalaboratories/java-extensions
         compile group: 'org.javalaboratories', name: 'java-extensions', version: '1.1.1-RELEASE'
 ```
+### CryptographyFactory
+Use the `CryptographyFactory` class to gain access to both symmetric and asymmetric cryptographic objects. It provides
+a simple abstraction over the `Java Cryptography Extension (JCE)`. Moreover, an abstraction of the `KeyStore` has been 
+introduced to simplify `PublicKey` and `SecretKey` usage with the cryptographic objects.
+```
+        // Decrypt with a SecretKey sourced from a KeyStore. Note: the encrypted data must've been encrypted with the 
+        // same key.
+        secretKeyStore = SecretKeyStore.builder()
+                .keyStoreStream(new FileInputStream(KEYSTORE_JCEJKS_FILE)
+                .storePassword("changeit")
+                .build();
+                
+        SymmetricCryptography cryptography = CryptographyFactory.getSunSymmetricCryptography();
+        SecretKey key = secretKeyStore.getKey(SECRET_KEY_ALIAS,SECRET_KEY_PASSWORD);
+        
+        byte[] result = cryptography.decrypt(key, encryptedData);
+        
+        System.out.println(new String(result));
+        
+        ...
+        ...
+        
+        // ...Or decrypt with a String key. Note: the encrypted data must've been encrypted with the same key.
+        SymmetricCryptography cryptography = CryptographyFactory.getSunSymmetricCryptography();
+        
+        byte[] result = cryptography.decrypt("012345", encryptedData);
+        
+        String data = new String(result);
+        
+        System.out.println(new String(result));
+```
+Review the factory and other related classes for more information in the cryptography package.
 ### Either
 `Either` class is a container, similar to the `Maybe` and `Optional` classes, that represents one of two possible values
 (a disjoint union). Application and/or sub-routines often have one of two possible outcomes, a successful completion or
