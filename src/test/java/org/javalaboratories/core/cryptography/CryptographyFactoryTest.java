@@ -38,8 +38,6 @@ public class CryptographyFactoryTest {
     private static final String SECRET_KEY_ALIAS = "secret-key";
     private static final String SECRET_KEY_PASSWORD = "012345";
 
-
-
     private static final String PUBLIC_X509_CERTIFICATE = "/javalaboratories-org.cer";
     private static final String KEYSTORE_JKS_FILE = "/keystore.jks";
     private static final String KEYSTORE_JCEKS_FILE = "/keystore.jceks";
