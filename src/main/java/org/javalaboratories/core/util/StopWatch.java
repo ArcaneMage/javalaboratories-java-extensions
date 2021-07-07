@@ -18,12 +18,12 @@ package org.javalaboratories.core.util;
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Try;
 
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -57,6 +57,8 @@ import java.util.function.Supplier;
 @EqualsAndHashCode
 public final class StopWatch implements Serializable, Comparable<StopWatch> {
 
+    private static final long serialVersionUID = 2397064136918983422L;
+
     private static final String DEFAULT_DATETIME_FORMAT ="HH:mm:ss.SSS";
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 
@@ -65,18 +67,15 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
     private final String name;
 
     /**
-     * Factory method to provide an instance of a {@link StopWatch}.
+     * Clears the container of all {@link StopWatch} instances in the {@code
+     * watches} container.
      * <p>
-     * The {@code watch} is stored in a container of {@code watches} and can be
-     * accessed by this method or via the {@link StopWatch#forEach(BiConsumer)}
-     * method.
-     * @param name Unique name of the {@link StopWatch}. Consider a meaningful
-     *             name such as a method name.
-     * @return an instance of {@link StopWatch}.
+     * Container is considered empty after calling this method and no longer
+     * manages orphaned {@link StopWatch} objects.
      */
-    public static StopWatch watch(final String name) {
-        Objects.requireNonNull(name,"Name?");
-        return watches.computeIfAbsent(name,StopWatch::new);
+    public static void clear() {
+        forEach((n, s) -> s.reset());
+        watches.clear();
     }
 
     /**
@@ -91,15 +90,46 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
     }
 
     /**
-     * Clears the container of all {@link StopWatch} instances in the {@code
-     * watches} container.
-     * <p>
-     * Container is considered empty after calling this method and no longer
-     * manages orphaned {@link StopWatch} objects.
+     * @return Outputs all elapse timings in ascending order in String form.
      */
-    public static void clear() {
-        forEach((n, s) -> s.reset());
-        watches.clear();
+    public static String println() {
+        StringBuffer buffer = new StringBuffer();
+        if (watches.size() > 0) {
+            List<StopWatch> list = new ArrayList<>();
+            watches.forEach((n, s) -> list.add(s));
+            Collections.sort(list);
+            buffer.append("\nElapse Time      Name\n");
+            buffer.append("------------ --- --------------------------------\n");
+            list.forEach(s -> buffer.append(String.format("%s %03d %-32s%n", s.getTimeAsString(), s.getCycles(), s.getName())));
+            buffer.append("-------------------------------------------------\n");
+        }
+        return buffer.toString();
+    }
+
+    /**
+     * Outputs all elapse timings in ascending order to the provided {@link
+     * PrintStream}.
+     *
+     * @param stream PrintStream object.
+     */
+    public static void println(final PrintStream stream) {
+        Objects.requireNonNull(stream, "Stream?");
+        stream.println(println());
+    }
+
+    /**
+     * Factory method to provide an instance of a {@link StopWatch}.
+     * <p>
+     * The {@code watch} is stored in a container of {@code watches} and can be
+     * accessed by this method or via the {@link StopWatch#forEach(BiConsumer)}
+     * method.
+     * @param name Unique name of the {@link StopWatch}. Consider a meaningful
+     *             name such as a method name.
+     * @return an instance of {@link StopWatch}.
+     */
+    public static StopWatch watch(final String name) {
+        Objects.requireNonNull(name,"Name?");
+        return watches.computeIfAbsent(name,StopWatch::new);
     }
 
     /**
@@ -190,7 +220,7 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
     public long getTime() {
         return Try.of(() -> time / cycles)
                 .orElse(0L)
-                .fold(0L,n -> n);
+                .fold(0L, n -> n);
     }
 
     /**
@@ -220,6 +250,13 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
     }
 
     /**
+     * @return name of {@link StopWatch}
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
      * Zeroes the {@link StopWatch}.
      */
     public void reset() {
@@ -230,8 +267,9 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
     }
 
     /**
-     * This function is similar to {@link StopWatch#time(Runnable)} but designed
-     * to be used with {@code forEach} methods of collections or {@code Streams}.
+     * This function is similar to {@link StopWatch#time(Runnable)} but
+     * designed to be used with {@code forEach} methods of collections or
+     * {@code Streams}.
      * <p>
      * It will start the timings just before {@code accept} method is invoked;
      * and stop the timing {@code post-accept} method. This occurs on every

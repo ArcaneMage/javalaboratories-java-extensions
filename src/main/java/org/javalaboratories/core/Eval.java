@@ -47,6 +47,9 @@ import java.util.function.Supplier;
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
 public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
+
+    private static final long serialVersionUID = 1372673159914117700L;
+
     /**
      * Evaluate object for {@code FALSE} Boolean value
      */
@@ -371,6 +374,8 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
     @EqualsAndHashCode(callSuper=false,onlyExplicitlyIncluded=true)
     public static class Always<T> extends Eval<T> implements Serializable {
 
+        private static final long serialVersionUID = 518963023579340195L;
+
         transient final Object lock = new Object();
         private transient final Trampoline<T> evaluate;
 
@@ -490,6 +495,8 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          */
         @EqualsAndHashCode()
         private static final class EvalValue<E> implements Serializable {
+            private static final long serialVersionUID = -797325625285441119L;
+
             private E element;
             private final boolean caching;
 
@@ -542,6 +549,8 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      */
     @EqualsAndHashCode(callSuper=true)
     public static class Later<T> extends Always<T> {
+        private static final long serialVersionUID = -8848701870767131627L;
+
         /**
          * Constructs implementation of {@link Eval} with the {@code Later}
          * strategy.
@@ -584,6 +593,8 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      */
     @EqualsAndHashCode(callSuper=true)
     public static final class Eager<T> extends Later<T> {
+        private static final long serialVersionUID = -4956876354953747651L;
+
         Eager(final T value) {
             super((Supplier<T>)() -> value);
             // Cache the value immediately

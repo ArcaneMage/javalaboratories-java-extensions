@@ -1,5 +1,6 @@
 package org.javalaboratories.core.util;
 
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -83,6 +84,25 @@ public class StopWatchTest {
     @Test
     public void testHashCode_Pass() {
         assertEquals(StopWatch.watch("MethodOne").hashCode(),stopWatch1.hashCode());
+    }
+
+    @Test
+    void testPrintln_Pass() {
+        // Given
+        LogCaptor captor = LogCaptor.forClass(StopWatch.class);
+        stopWatch1.time(() -> doSomethingVoidMethod(300));
+        stopWatch2.time(() -> doSomethingVoidMethod(150));
+        stopWatch3.time(() -> doSomethingVoidMethod(75));
+
+        // When
+        logger.info(StopWatch.println());
+        StopWatch.println(System.out);
+
+        // Then
+        assertTrue(captor.getInfoLogs().stream()
+                    .allMatch(p -> p.contains("MethodOne") &&
+                                   p.contains("MethodTwo") &&
+                                   p.contains("MethodThree")));
     }
 
     @Test
