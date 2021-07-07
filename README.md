@@ -24,9 +24,10 @@ Alternatively, for `Gradle` users, amend the `build.gradle` file with the follow
         compile group: 'org.javalaboratories', name: 'java-extensions', version: '1.1.1-RELEASE'
 ```
 ### CryptographyFactory
-Use the `CryptographyFactory` class to gain access to both symmetric and asymmetric cryptographic objects. It provides
-a simple abstraction over the `Java Cryptography Extension (JCE)`. Moreover, an abstraction of the `KeyStore` has been 
-introduced to simplify `PublicKey` and `SecretKey` usage with the cryptographic objects.
+Use the `CryptographyFactory` class to gain access to both symmetric and asymmetric cryptography objects. It provides
+a simple abstraction over the `Java Cryptography Extension (JCE)`. Also, an abstraction of the `KeyStore` class has been 
+introduced to simplify `PublicKey` and `SecretKey` usage with the cryptography objects. Here are a couple of decryption
+examples that use symmetric keys -- it is assumed the encrypted data was encrypted with the same key:
 ```
         // Decrypt with a SecretKey sourced from a KeyStore. Note: the encrypted data must've been encrypted with the 
         // same key.
