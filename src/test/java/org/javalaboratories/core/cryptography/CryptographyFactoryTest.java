@@ -142,7 +142,8 @@ public class CryptographyFactoryTest {
     public void testSunAesCryptography_SecretKey_EncryptString_Pass() {
         // Given
         SymmetricCryptography cryptography = CryptographyFactory.getSunSymmetricCryptography();
-        SecretKey key = secretKeyStore.getKey(SECRET_KEY_ALIAS,SECRET_KEY_PASSWORD);
+        SecretKey key = secretKeyStore.getKey(SECRET_KEY_ALIAS,SECRET_KEY_PASSWORD)
+                .orElseThrow();
 
         // When
         byte[] result = cryptography.encrypt(key, DATA.getBytes());
@@ -156,7 +157,8 @@ public class CryptographyFactoryTest {
     public void testSunAesCryptography_SecretKey_DecryptString_Pass() {
         // Given
         SymmetricCryptography cryptography = CryptographyFactory.getSunSymmetricCryptography();
-        SecretKey key = secretKeyStore.getKey(SECRET_KEY_ALIAS,SECRET_KEY_PASSWORD);
+        SecretKey key = secretKeyStore.getKey(SECRET_KEY_ALIAS,SECRET_KEY_PASSWORD)
+                .orElseThrow();
 
         // When
         byte[] result = cryptography.decrypt(key, Base64.decodeBase64(BASE64_SYMMETRIC3_ENCRYPTED_DATA));
@@ -276,7 +278,8 @@ public class CryptographyFactoryTest {
         AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
         InputStream istream = this.getClass().getResourceAsStream(RSA_ENCRYPTED_FILE);
         ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-        PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD);
+        PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD)
+                .orElseThrow();
 
         // When
         cryptography.decrypt(key,istream,ostream);
@@ -305,7 +308,8 @@ public class CryptographyFactoryTest {
     public void testSunRsaCryptography_DecryptString_Pass() throws KeyStoreException {
         // Given
         AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
-        PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD);
+        PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD)
+                .orElseThrow();
 
         // When
         byte[] result = cryptography.decrypt(key,Base64.decodeBase64(BASE64_ASYMMETRIC_ENCRYPTED_DATA.getBytes()));
