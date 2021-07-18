@@ -189,6 +189,33 @@ public class TryTest {
     }
 
     @Test
+    public void testOnFailure_Pass() {
+        // Given
+        LogCaptor logCaptor = LogCaptor.forClass(TryTest.class);
+
+        // When
+        aTry2.onFailure(t -> logger.error("Error is: {}",t.getMessage()));
+
+        boolean errorMsg = logCaptor.getErrorLogs().stream()
+                .anyMatch(s -> s.contains("/ by zero"));
+        assertTrue(errorMsg);
+    }
+
+    @Test
+    public void testOnSuccess_Pass() {
+        // Given
+        LogCaptor logCaptor = LogCaptor.forClass(TryTest.class);
+
+        // When
+        aTry1.onSuccess(t -> logger.error("Message is: {}",t));
+
+        boolean message = logCaptor.getErrorLogs().stream()
+                .anyMatch(s -> s.contains("This is a test file with some text"));
+        assertTrue(message);
+    }
+
+
+    @Test
     public void testOrElse_Pass() {
         // When
         String string = aTry1.orElse("")
