@@ -46,17 +46,10 @@ import java.security.cert.Certificate;
  *         ...
  *         // Decryption example
  *         AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
- *         KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
- *         PrivateKey key;
- *         try {
- *             store.load(new FileInputStream(KEYSTORE_FILE), "changeit".toCharArray());
- *             key = (PrivateKey) store.getKey("javalaboratories-org","65533714".toCharArray());
- *         } catch (IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException e) {
- *             throw new IllegalStateException("Failed to read keystore",e);
- *         }
- *         byte[] result = cryptography.decrypt(key,Base64.decodeBase64(BASE64_ASYMMETRIC_ENCRYPTED_DATA.getBytes()));
- *         String data = new String(result);
+ *         PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD);
  *
+ *         byte[] result = cryptography.decrypt(key,encryptedData);
+ *         String data = new String(result);
  *         assertEquals("The quick brown fox jumped over the fence",data);
  *         ...
  *         ...
@@ -69,7 +62,7 @@ import java.security.cert.Certificate;
  * @see CryptographyFactory
  * @see AsymmetricCryptography
  */
-public final class SunRsaAsymmetricCryptography extends SunCryptography implements AsymmetricCryptography{
+public final class SunRsaAsymmetricCryptography extends SunCryptography implements AsymmetricCryptography {
 
     // The algorithm name / Electronic Code Book (ECB)  / data filling method
     private static final String RSA_ALGORITHM = "RSA/ECB/PKCS1Padding";

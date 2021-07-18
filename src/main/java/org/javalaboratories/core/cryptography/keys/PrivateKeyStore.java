@@ -17,6 +17,7 @@ package org.javalaboratories.core.cryptography.keys;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.cryptography.CryptographyException;
 
 import java.io.InputStream;
@@ -63,15 +64,17 @@ public final class PrivateKeyStore extends AbstractKeyStore implements Serializa
     }
 
     /**
-     * @return returns PrivateKey from keystore.
-     *
+     * @return returns PrivateKey from keystore encapsulated in {@link Maybe}
+     * object.
+     * <p>
+     * {@code Maybe} object will be empty if key is not found in keystore.
      * @throws CryptographyException keystore processing errors (file i/o,
      * algorithm errors), an issue with original arguments.
      */
-    public PrivateKey getKey(final String keyAlias, final String keyPassword) {
-        PrivateKey key;
+    public Maybe<PrivateKey> getKey(final String keyAlias, final String keyPassword) {
+        Maybe<PrivateKey> key;
         try {
-            key = (PrivateKey) getKeyStore().getKey(keyAlias,keyPassword.toCharArray());
+            key = Maybe.ofNullable((PrivateKey) getKeyStore().getKey(keyAlias,keyPassword.toCharArray()));
         } catch (KeyStoreException e) {
             throw new CryptographyException("Failed to read keystore",e);
         } catch (NoSuchAlgorithmException e) {

@@ -292,6 +292,39 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
     }
 
     /**
+     * In the event of a failure, call the {@code Consumer} function, passing
+     * the exception object.
+     *
+     * @param consumer function that accepts the exception object.
+     * @param <E> type of exception.
+     * @return this try object.
+     */
+    public <E extends Throwable> Try<T> onFailure(final Consumer<? super E> consumer) {
+        Objects.requireNonNull(consumer);
+        if(isFailure()) {
+            @SuppressWarnings("unchecked")
+            E t = (E) getThrowableValue().get();
+            consumer.accept(t);
+        }
+        return this;
+    }
+
+    /**
+     * In the event of success, call the {@code Consumer} function, passing
+     * the computed value.
+     *
+     * @param consumer function that accepts the computed value.
+     * @return this try object.
+     */
+    public Try<T> onSuccess(final Consumer<? super T> consumer) {
+        Objects.requireNonNull(consumer);
+        if(isSuccess()) {
+            consumer.accept(get());
+        }
+        return this;
+    }
+
+    /**
      * Returns this {@link Try} if it's a {@link Success} or {@code other} if
      * it's a {@link Failure}.
      *
