@@ -380,7 +380,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
         private transient final Trampoline<T> evaluate;
 
         @EqualsAndHashCode.Include
-        private final EvalValue<T> value;
+        protected final EvalValue<T> value;
 
         /**
          * Constructs implementation of {@link Eval} with the {@code Always}
@@ -485,58 +485,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
                 return value;
             }
         }
-
-        /**
-         * Encapsulates {@code value} yet to be evaluated by the {@link Eval}
-         * implementations.
-         * <p>
-         * This mutable object is thread-safe.
-         * @param <E> Type of {@code value}
-         */
-        @EqualsAndHashCode()
-        private static final class EvalValue<E> implements Serializable {
-            private static final long serialVersionUID = -797325625285441119L;
-
-            private E element;
-            private final boolean caching;
-
-            @EqualsAndHashCode.Exclude
-            private final List<Consumer<E>> modes =
-                    Arrays.asList(value -> {if (element == null) element = value;},
-                                  value -> element = value);
-            /**
-             * Constructs this {@code value}
-             * <p>
-             * @param caching set to {@code true} to enable "caching" (write once).
-             */
-            private EvalValue(boolean caching) {
-                element = null;
-                this.caching = caching;
-            }
-            /**
-             * Sets this {@code value}
-             */
-            public E setGet(final E e) {
-                synchronized(this) {
-                    modes.get(caching ? 0 : 1).accept(e);
-                    return element;
-                }
-            }
-            /**
-             * @return {@code true} if container is occupied.
-             */
-            public boolean isEmpty() {
-                synchronized (this) {
-                    return element == null;
-                }
-            }
-            @Override
-            public String toString() {
-                synchronized (this) {
-                    return isEmpty() ? "unset" : String.valueOf(this.element);
-                }
-            }
-        }
     }
 
     /**
@@ -582,6 +530,16 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
         protected <U> Later<U> pure(final U value) {
             return (Later<U>) Eval.later(() -> value);
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected T value() {
+            synchronized(this) {
+                return this.value.isEmpty() ? super.value() : this.value.get();
+            }
+        }
     }
 
     /**
@@ -608,6 +566,66 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
         @Override
         protected <U> Eager<U> pure(final U value) {
             return (Eager<U>) Eval.eager(value);
+        }
+    }
+}
+
+/**
+ * Encapsulates {@code value} yet to be evaluated by the {@link Eval}
+ * implementations.
+ * <p>
+ * This mutable object is thread-safe.
+ * @param <E> Type of {@code value}
+ */
+@EqualsAndHashCode()
+final class EvalValue<E> implements Serializable {
+    private static final long serialVersionUID = -797325625285441119L;
+
+    private E element;
+    private final boolean caching;
+
+    @EqualsAndHashCode.Exclude
+    private final List<Consumer<E>> modes =
+            Arrays.asList(value -> {if (element == null) element = value;},
+                    value -> element = value);
+    /**
+     * Constructs this {@code value}
+     * <p>
+     * @param caching set to {@code true} to enable "caching" (write once).
+     */
+    public EvalValue(boolean caching) {
+        element = null;
+        this.caching = caching;
+    }
+
+    /**
+     * Sets this {@code value}
+     */
+    public E setGet(final E e) {
+        synchronized(this) {
+            modes.get(caching ? 0 : 1).accept(e);
+            return element;
+        }
+    }
+
+    public E get() {
+        synchronized(this) {
+            return element;
+        }
+    }
+
+    /**
+     * @return {@code true} if container is occupied.
+     */
+    public boolean isEmpty() {
+        synchronized (this) {
+            return element == null;
+        }
+    }
+    @Override
+    public String toString() {
+        synchronized (this) {
+            return isEmpty() ? "unset" : String.valueOf(this.element);
         }
     }
 }
