@@ -68,7 +68,8 @@ public abstract class SunCryptography {
             while ((read = istream.read(buffer, 0, MAX_BUFFER_SZ)) > -1) {
                 ostream.write(buffer,0,read);
             }
-            result = destination;
+            ostream.flush();
+            result = ostream;
         }
         return result;
     }

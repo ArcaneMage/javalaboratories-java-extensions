@@ -27,10 +27,11 @@ public class CryptographyFactoryTest {
     private static final String BASE64_SYMMETRIC2_ENCRYPTED_DATA = "i8e4gBtwVfQiegX3oNQ/N4unpRPKPrIfa9NTg4Ghrlc4/xgnPQDJ5aqznx68Kn3r";
     private static final String BASE64_SYMMETRIC3_ENCRYPTED_DATA = "6R7uflFiLugzwIiyZW/kmt5ExUvgRFtunkA0wrIcsUyq8VDSRtxe4vkjb7WxnnXp"; // SecretKey
 
-    private static final String BASE64_ASYMMETRIC_ENCRYPTED_DATA = "VJz19362IovaDlyLgM01IShz6Z64a6X98kifQEiSACu+m6+rLG55G" +
-            "gX43yeD2NMIboWEqXuXNU9bwmKkEhRAzTVJKnP/wYW9abPJW5RXhZO4LMJBoB4HLYsv4XY6gXIzSS91gvCckaSzuha+xlW32Dx7B0C82/9on" +
-            "zMZt+uavFO/dwsTbCGtwRcsoMReml+0S5R+KRaTyUIRN7qyM8ohoLN5ao5Y7WheSyiN7SNOrYZs7u4VKI+uw8aBP5bS5NR0ZM3XbSBG6I+r9" +
-            "P71Up4AAIigZrlc0caAGhBqsiGDXccquKOER3/NZEUUrZcL246x9Yx2nfVXgiLynQ4ba1W85g==";
+    private static final String BASE64_ASYMMETRIC_ENCRYPTED_DATA = "xEaVNC58vPWDWD+tJ2ZrHL0EoP+F1ltUca9GcdXTVuITyyiqLNY2noqay100UGfj";
+    private static final String BASE64_ASYMMETRIC_ENCRYPTED_KEY  = "D3HvZI4OTiwUqymzBa6HPlTJCAYaezV7aJ3tvD1b1xnc05tf6h1Z0kskUqhjDCkN" +
+            "bo9lrD37yp6yBSgSdgu5l10T9bC9v4/3CPNlCIzEd/R4/5Lihtm831T4eDLcV0GiGoJ0HwryVCPVIb8+GesVKkhB6bcaFdCgjE8UJCKG2aa+Xf1ulwzHNOg" +
+            "2R2Q+i3uLyYr/29RCfvQtiD3VQ3hHzh4q3JwHF1L7uON0VaSTjRSp219CBoJG2qFcqFV5bsL025MeYapy3Gu28p7XJmwtd6KQlwXEpapEHk4ecDPq6pq2Q3" +
+            "a56IKpyVWoFSvGpvatpcnaZrH0S5MDEkJlC7kh2A==";
     
     private static final String SECRET_KEY = "012345";
     private static final String PRIVATE_KEY_ALIAS = "javalaboratories-org";
@@ -265,43 +266,13 @@ public class CryptographyFactoryTest {
         Certificate certificate = factory.generateCertificate(this.getClass().getResourceAsStream(PUBLIC_X509_CERTIFICATE));
 
         // When
-        byte[] result = cryptography.encrypt(certificate,DATA.getBytes());
+        CryptographyResult result = cryptography.encrypt(certificate,DATA.getBytes());
 
         // Then
         assertNotNull(result);
-        assertTrue(result.length > 0);
-    }
-
-    @Test
-    public void testSunRsaCryptography_DecryptStream_Pass() throws CertificateException, KeyStoreException {
-        // Given
-        AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
-        InputStream istream = this.getClass().getResourceAsStream(RSA_ENCRYPTED_FILE);
-        ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-        PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD)
-                .orElseThrow();
-
-        // When
-        cryptography.decrypt(key,istream,ostream);
-
-        // Then
-        assertEquals(DATA,ostream.toString());
-    }
-
-    @Test
-    public void testSunRsaCryptography_EncryptStream_Pass() throws CertificateException, KeyStoreException {
-        // Given
-        AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
-        CertificateFactory factory = CertificateFactory.getInstance("X.509");
-        Certificate certificate = factory.generateCertificate(this.getClass().getResourceAsStream(PUBLIC_X509_CERTIFICATE));
-        InputStream istream = new ByteArrayInputStream(DATA.getBytes());
-        ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-
-        // When
-        cryptography.encrypt(certificate,istream,ostream);
-
-        // Then
-        assertEquals(ostream.size(), 256);
+        assertTrue(result.getData().length > 0);
+        System.out.println("getData="+Base64.encodeBase64String(result.getData()));
+        System.out.println("getEncryptedKey="+Base64.encodeBase64String(result.getEncryptedKey().getEncoded()));
     }
 
     @Test
@@ -310,13 +281,48 @@ public class CryptographyFactoryTest {
         AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
         PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD)
                 .orElseThrow();
+        EncryptedAesKey encryptedKey = new EncryptedAesKey(Base64.decodeBase64(BASE64_ASYMMETRIC_ENCRYPTED_KEY));
 
         // When
-        byte[] result = cryptography.decrypt(key,Base64.decodeBase64(BASE64_ASYMMETRIC_ENCRYPTED_DATA.getBytes()));
-        String data = new String(result);
+        CryptographyResult result = cryptography.decrypt(key,encryptedKey,Base64.decodeBase64(BASE64_ASYMMETRIC_ENCRYPTED_DATA.getBytes()));
+        String data = new String(result.getData());
 
         // Then
         assertEquals(DATA,data);
+    }
+
+    @Test
+    public void testSunRsaCryptography_DecryptStream_Pass() throws CertificateException, KeyStoreException {
+        // Given
+        AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
+        InputStream istream = new ByteArrayInputStream(Base64.decodeBase64(BASE64_ASYMMETRIC_ENCRYPTED_DATA.getBytes()));
+        ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+        PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD)
+                .orElseThrow();
+        EncryptedAesKey encryptedKey = new EncryptedAesKey(Base64.decodeBase64(BASE64_ASYMMETRIC_ENCRYPTED_KEY));
+
+        // When
+        cryptography.decrypt(key,encryptedKey,istream,ostream);
+
+        // Then
+        assertEquals(DATA,ostream.toString());
+    }
+
+    @Test
+    public void testSunRsaCryptography_EncryptStream_Pass() throws CertificateException {
+        // Given
+        AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        Certificate certificate = factory.generateCertificate(this.getClass().getResourceAsStream(PUBLIC_X509_CERTIFICATE));
+        InputStream istream = new ByteArrayInputStream(DATA.getBytes());
+        ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+
+        // When
+        EncryptedAesKey aesKey = cryptography.encrypt(certificate,istream,ostream);
+
+        // Then
+        assertEquals(ostream.size(), 48);
+        assertEquals(256, aesKey.getEncoded().length);
     }
 
     @Test
