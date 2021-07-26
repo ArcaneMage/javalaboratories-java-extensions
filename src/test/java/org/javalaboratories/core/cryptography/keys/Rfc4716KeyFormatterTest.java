@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class Rfc4716KeyFormatTest {
+public class Rfc4716KeyFormatterTest {
 
     private static final String BASE64_ASYMMETRIC_ENCRYPTED_KEY  = "D3HvZI4OTiwUqymzBa6HPlTJCAYaezV7aJ3tvD1b1xnc05tf6h1Z0kskUqhjDCkN" +
             "bo9lrD37yp6yBSgSdgu5l10T9bC9v4/3CPNlCIzEd/R4/5Lihtm831T4eDLcV0GiGoJ0HwryVCPVIb8+GesVKkhB6bcaFdCgjE8UJCKG2aa+Xf1ulwzHNOg" +
@@ -30,7 +30,7 @@ public class Rfc4716KeyFormatTest {
     @Test
     public void testWrite_Pass() {
         // Given
-        Rfc4716KeyFormat format = new Rfc4716KeyFormat(BASE64_ASYMMETRIC_ENCRYPTED_KEY.getBytes(),true,
+        Rfc4716KeyFormatter format = new Rfc4716KeyFormatter(BASE64_ASYMMETRIC_ENCRYPTED_KEY.getBytes(),true,
                 "Begin RSA Encrypted Symmetric Key","End RSA Encrypted Symmetric Key");
 
         assertTrue(format.isBase64());

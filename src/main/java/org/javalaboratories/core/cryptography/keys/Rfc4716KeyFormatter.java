@@ -23,22 +23,22 @@ import java.io.*;
 import java.util.Objects;
 
 @Value
-public class Rfc4716KeyFormat {
+public class Rfc4716KeyFormatter {
     byte[] key;
     String header, footer;
     boolean base64;
 
     private static final int DEFAULT_BUFFER_SZ = 64;
 
-    public Rfc4716KeyFormat(final byte[] key) {
+    public Rfc4716KeyFormatter(final byte[] key) {
         this(key,false);
     }
 
-    public Rfc4716KeyFormat(final byte[] key, boolean base64) {
+    public Rfc4716KeyFormatter(final byte[] key, boolean base64) {
         this(key,base64,null,null);
     }
 
-    public Rfc4716KeyFormat(final byte[] key, boolean base64, String header, String footer) {
+    public Rfc4716KeyFormatter(final byte[] key, boolean base64, String header, String footer) {
         Objects.requireNonNull(key);
         this.key = key;
         this.base64 = base64;
