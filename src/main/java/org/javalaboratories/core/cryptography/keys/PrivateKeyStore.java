@@ -38,7 +38,7 @@ import java.security.UnrecoverableKeyException;
  *             .storePassword("changeit")
  *             .build();
  *
- *        PrivateKey key = store.getKey("javalaboratories-org",PRIVATE_KEY_PASSWORD);
+ *        PrivateKey key = store.getEncryptedKey("javalaboratories-org",PRIVATE_KEY_PASSWORD);
  *     }
  * </pre>
  */

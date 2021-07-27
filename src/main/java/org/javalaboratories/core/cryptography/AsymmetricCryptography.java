@@ -28,7 +28,12 @@ import java.security.cert.Certificate;
  * sourced from a file or {@link java.security.KeyStore}. However, to encrypt
  * the data, {@link Certificate} object, preferably X509, is required. The
  * {@link PrivateKey} and {@link Certificate} are related in that they form
- * a private/public keypair respectively. For more details on how to create
+ * a private/public keypair respectively. Moreover, encrypting the data will
+ * generate an encrypted symmetric key with which the data is encrypted.
+ * This key will require the {@link PrivateKey} to decrypt it to its original
+ * form, then the data is subsequently decrypted with the symmetric key.
+ *
+ * For more details on how to create
  * these keypairs, see https://lightbend.github.io/ssl-config/CertificateGeneration.html.
  * An example of usage helps to clarify the expectation of this interface:
  * <pre>
@@ -38,14 +43,14 @@ import java.security.cert.Certificate;
  *         CertificateFactory factory = CertificateFactory.getInstance("X.509");
  *         Certificate certificate = factory.generateCertificate(new FileInputStream(...));
  *
- *         byte[] result = cryptography.encrypt(certificate,DATA.getBytes());
+ *         CryptographyResult result = cryptography.encrypt(certificate,DATA.getBytes());
  *         ...
  *         ...
  *         // Decryption example
  *         AsymmetricCryptography cryptography = CryptographyFactory.getSunAsymmetricCryptography();
- *         PrivateKey key = privateKeyStore.getKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD);
+ *         PrivateKey key = privateKeyStore.getEncryptedKey(PRIVATE_KEY_ALIAS,PRIVATE_KEY_PASSWORD);
  *
- *         byte[] result = cryptography.decrypt(key,encryptedData);
+ *         CryptographyResult result = cryptography.decrypt(key,encryptedSecretKey,encryptedData);
  *         String data = new String(result);
  *         assertEquals("The quick brown fox jumped over the fence",data);
  *         ...
@@ -56,6 +61,7 @@ import java.security.cert.Certificate;
  * implementations of this interface. The reason being this library is likely
  * to provide different implementations to satisfy specific use cases.
  *
+ * @see CryptographyResult
  * @see CryptographyFactory
  * @see SunRsaAsymmetricCryptography
  */
@@ -69,10 +75,12 @@ public interface AsymmetricCryptography {
      * they form a private/public keypair respectively.
      *
      * @param key private key with which to decrypt the {@code data}
+     * @param encryptedAesKey the secret-key.
      * @param data encrypted data to undergo decryption.
-     * @return decrypted data bytes.
+     * @return CryptographyResult encapsulating decrypted data bytes and
+     * encrypted secret-key used.
      */
-    byte[] decrypt(final PrivateKey key, final byte[] data);
+    CryptographyResult decrypt(PrivateKey key, EncryptedAesKey encryptedAesKey, byte[] data);
 
     /**
      * Encrypts {@code data} with provided {@link PrivateKey}.
@@ -83,9 +91,10 @@ public interface AsymmetricCryptography {
      *
      * @param certificate public key with which to encrypt the {@code data}
      * @param data decrypted data to undergo encryption.
-     * @return decrypted data bytes.
+     * @return CryptographyResult encapsulating decrypted data bytes and new
+     * encrypted secret-key.
      */
-    byte[] encrypt(final Certificate certificate, final byte[] data);
+    CryptographyResult encrypt(Certificate certificate, byte[] data);
 
 
     /**
@@ -93,13 +102,15 @@ public interface AsymmetricCryptography {
      *
      * The {@code data} must be encrypted with related {@code certificate}. In
      * other words, the {@link PrivateKey} and {@link Certificate} are related,
-     * they form a private/public keypair respectively.
+     * they form a private/public keypair respectively. Additionally, the
+     * secret-key is required, generated from original encryption.
      *
      * @param key private key with which to encrypt the {@code istream}
+     * @param encryptedKey encrypted secret-key.
      * @param istream input stream of data to be decrypted.
      * @param ostream output stream of decrypted data.
      */
-    void decrypt(final PrivateKey key, final InputStream istream, OutputStream ostream);
+    void decrypt(PrivateKey key, EncryptedAesKey encryptedKey, InputStream istream, OutputStream ostream);
 
     /**
      * Encrypts {@code istream} and sends encrypted data to {@code ostream}.
@@ -111,6 +122,7 @@ public interface AsymmetricCryptography {
      * @param certificate public key with which to encrypt the {@code istream}
      * @param istream input stream of data to be encrypted.
      * @param ostream output stream of encrypted data.
+     * @return newly generated secret-key to be used by decryption process.
      */
-    void encrypt(final Certificate certificate, final InputStream istream, OutputStream ostream);
+    EncryptedAesKey encrypt(Certificate certificate, InputStream istream, OutputStream ostream);
 }
