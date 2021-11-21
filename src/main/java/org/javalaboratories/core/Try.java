@@ -168,6 +168,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * @param predicate function, {@code false} will result in a {@link Failure};
      *                  {@code true} returns {@code this}.
      * @return Try object.
+     * @throws NullPointerException if {@code predicate} function is {@code null}.
      */
     public Try<T> filter(final Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate, "Expected predicate function");
@@ -193,19 +194,11 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * @param predicate function, {@code true} will result in a {@link Failure};
      *                  {@code false} returns {@code this}.
      * @return Try object.
+     * @throws NullPointerException if {@code predicate} function is {@code null}.
      */
     public Try<T> filterNot(final Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate, "Expected predicate function");
-        Try<T> result;
-        if (isSuccess()) {
-            if (!predicate.test(get()))
-                result = this;
-            else
-                result = failure(NO_SUCH_ELEMENT_EXCEPTION);
-        } else {
-            result = this;
-        }
-        return result;
+        return filter(predicate.negate());
     }
 
     /**

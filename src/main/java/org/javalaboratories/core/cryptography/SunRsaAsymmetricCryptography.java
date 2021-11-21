@@ -159,7 +159,7 @@ public final class SunRsaAsymmetricCryptography extends SunCryptography implemen
     @Override
     public EncryptedAesKey encrypt(Certificate certificate, InputStream istream, OutputStream ostream) {
         Arguments.requireNonNull("Requires certificate, istream and ostream parameters",certificate,istream,ostream);
-        byte[] encryptedKey = null;
+        byte[] encryptedKey;
         try {
             // Generate symmetric key (AES with 128bits)
             KeyGenerator generator = KeyGenerator.getInstance("AES");
