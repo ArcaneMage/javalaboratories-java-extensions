@@ -23,7 +23,23 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 
-public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable  {
+/**
+ * This {@code linked list} implements the doubly linked-list approach. With
+ * this approach, it is possible to traverse the {@link Node} forwards or
+ * backwards as desired, it provides an {@link ReverseIterator} for this
+ * purpose.
+ * <p>
+ * It is considered "smart" in that the {@link SmartLinkedList#get(int)} method
+ * will automatically decide whether to sequentially search from the {@code head}
+ * or the {@code tail} depending on which "end" is the closest to the
+ * requested {@code index}.
+ * <p>
+ * Currently considering introducing a small LRU cache to speed up retrieval to
+ * minimise sequential searches.
+ *
+ * @param <T> type of elements in {@link SmartLinkedList}
+ */
+public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable  {
 
     private static final long serialVersionUID = 379872715184844475L;
 
@@ -47,18 +63,30 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
     private transient Node<T> head;
     private transient Node<T> tail;
 
+    /**
+     * Default constructor
+     */
     public SmartLinkedList() {
         depth = 0;
         head = null;
         tail = null;
     }
 
+    /**
+     * Initialises linked list with provided {@code elements}
+     *
+     * @param elements to populate linked-list.
+     */
     public SmartLinkedList(final T... elements) {
         this();
+        Objects.requireNonNull(elements,"No elements in parameter");
         for(T element: elements) 
             add(element);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object clone() {
         SmartLinkedList<T> clone = parentClone();
@@ -71,6 +99,12 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return clone;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Performs a shallow comparison with the {@code equals} method of each
+     * element in the list.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -89,6 +123,9 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         int result = 1;
@@ -98,16 +135,35 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return result;
     }
 
+    /**
+     * Adds an element to the linked-list.
+     * <p>
+     * The element is added to the end of the list.
+     *
+     * @param element to add to the list.
+     * @return this linked-list
+     */
     public final SmartLinkedList<T> add(final T element) {
         linkToLastNode(element);
         return this;
     }
 
+    /**
+     * Adds an element to the linked-list.
+     * <p>
+     * The element is added to the beginning o the list.
+     *
+     * @param element to add to the list.
+     * @return this linked-list
+     */
     public final SmartLinkedList<T> addFirst(final T element) {
         linkToFirstNode(element);
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {
@@ -129,6 +185,12 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         };
     }
 
+    /**
+     * Returns a {@link ReverseIterator} to allow traversal from the {@code }tail
+     * to the {@code head}.
+     *
+     * @return {@link ReverseIterator} instance.
+     */
     public ReverseIterator<T> reverseIterator() {
         return new ReverseIterator<T>() {
             Node<T> node = tail;
@@ -149,10 +211,19 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         };
     }
 
+    /**
+     * @return the number of elements in the list.
+     */
     public int depth() {
         return depth;
     }
 
+    /**
+     * Returns the first index of the element that equals {@code element}.
+     *
+     * @param element with which to search.
+     * @return index of element.
+     */
     public final int indexOf(final T element) {
         int result = 0;
         for (Node<T> node = head; node != null; node = node.next) {
@@ -164,10 +235,24 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return -1;
     }
 
+    /**
+     * @return {@code true} if list is empty.
+     */
     public boolean isEmpty() {
         return head == null && tail == null;
     }
 
+    /**
+     * Finds and returns element at {@code findex} location in the linked list.
+     * <p>
+     * A sequential search is performed but not always necessarily from the
+     * top of the list. This primarily depends on the {@code findex} value: if
+     * the value is nearest the top, the the sequential search shall start
+     * from there, otherwise the search is performed from the other end.
+     *
+     * @param findex index at which element resides in the list.
+     * @return element from the list.
+     */
     public final T get(int findex) {
         validateNodeIndex(findex);
         T result = null;
@@ -185,6 +270,11 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return result;
     }
 
+    /**
+     * Returns an array of elements that are in this linked-list.
+     *
+     * @return an array of elements.
+     */
     public T[] toArray() {
         Class<?> clazz = depth == 0 ? Object.class : get(0).getClass();
         @SuppressWarnings("unchecked")
@@ -195,6 +285,11 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return result;
     }
 
+    /**
+     * Returns a {@link List} of elements that compliments this linked-list.
+     *
+     * @return a {@link List} object.
+     */
     public List<T> toList() {
         List<T> result = new ArrayList<>();
         for (Node<T> node = head; node != null; node = node.next)
@@ -202,6 +297,16 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return result;
     }
 
+    /**
+     * Returns a {@link Map} of elements from this linked-list.
+     * <p>
+     * The {@code keys} are determined from the resultant calls to the {@code
+     * keyMapper} function.
+     *
+     * @param keyMapper function to calculate key values.
+     * @param <K> type of key
+     * @return a {@link Map} of elements, each with an associated key.
+     */
     public <K> Map<K,T> toMap(Function<? super Integer, ? extends K> keyMapper) {
         Map<K,T> result = new LinkedHashMap<>();
         int i = 0;
@@ -211,6 +316,9 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
          StringJoiner joiner = new StringJoiner(",");
