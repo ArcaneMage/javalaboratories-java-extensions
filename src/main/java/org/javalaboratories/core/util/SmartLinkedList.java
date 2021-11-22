@@ -53,7 +53,7 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         tail = null;
     }
 
-    public SmartLinkedList(T... elements) {
+    public SmartLinkedList(final T... elements) {
         this();
         for(T element: elements) 
             add(element);
@@ -98,13 +98,12 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return result;
     }
 
-    public final SmartLinkedList<T> add(T element) {
-        LinkedList<T> l;
+    public final SmartLinkedList<T> add(final T element) {
         linkToLastNode(element);
         return this;
     }
 
-    public final SmartLinkedList<T> addFirst(T element) {
+    public final SmartLinkedList<T> addFirst(final T element) {
         linkToFirstNode(element);
         return this;
     }
@@ -154,7 +153,7 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return depth;
     }
 
-    public final int indexOf(T element) {
+    public final int indexOf(final T element) {
         int result = 0;
         for (Node<T> node = head; node != null; node = node.next) {
             if ((element == null && node.element == null) ||
@@ -243,7 +242,7 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         }
     }
 
-    private Node<T> linkToFirstNode(T element) {
+    private Node<T> linkToFirstNode(final T element) {
         Node<T> link;
         if (isEmpty()) {
             link = new Node<>(element);
@@ -257,7 +256,7 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return head;
     }
 
-    private Node<T> linkToLastNode(T element) {
+    private Node<T> linkToLastNode(final T element) {
         Node<T> link;
         if (isEmpty()) {
             link = new Node<>(element);
@@ -271,7 +270,7 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
         return tail;
     }
 
-    private void validateNodeIndex(int index) {
+    private void validateNodeIndex(final int index) {
         if (index < 0 || index > depth -1)
             throw new IndexOutOfBoundsException();
     }
@@ -279,7 +278,7 @@ public class SmartLinkedList<T> implements  Iterable<T>, Cloneable, Serializable
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         out.writeInt(this.depth);
-        for (Node node = head; node != null; node = node.next)
+        for (Node<T> node = head; node != null; node = node.next)
             out.writeObject(node.element);
     }
 }
