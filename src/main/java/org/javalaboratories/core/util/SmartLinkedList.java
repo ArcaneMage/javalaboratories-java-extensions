@@ -20,7 +20,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -73,10 +82,13 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     }
 
     /**
+     * Constructor
+     * <p>
      * Initialises linked list with provided {@code elements}
      *
      * @param elements to populate linked-list.
      */
+    @SafeVarargs
     public SmartLinkedList(final T... elements) {
         this();
         Objects.requireNonNull(elements,"No elements in parameter");
@@ -87,6 +99,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Object clone() {
         SmartLinkedList<T> clone = parentClone();
@@ -191,7 +204,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      *
      * @return {@link ReverseIterator} instance.
      */
-    public ReverseIterator<T> reverseIterator() {
+    public ReverseIterator<T> reverse() {
         return new ReverseIterator<T>() {
             Node<T> node = tail;
 
@@ -263,7 +276,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
                 result = iter.next();
         } else {
             int index = depth - findex -1;
-            ReverseIterator<T> iter = this.reverseIterator();
+            ReverseIterator<T> iter = this.reverse();
             while (i++ <= index && iter.hasPrevious())
                 result = iter.previous();
         }
@@ -278,10 +291,9 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     public T[] toArray() {
         Class<?> clazz = depth == 0 ? Object.class : get(0).getClass();
         @SuppressWarnings("unchecked")
-        T[] result = (T[]) Array.newInstance(clazz,depth) ;
-        int i = 0;
-        for (Node<T> node = head; node != null; node = node.next)
-            result[i++] = node.element;
+        T[] result = (T[]) Array.newInstance(clazz,depth);
+        AtomicInteger index = new AtomicInteger(0);
+        forEach(e -> result[index.getAndIncrement()] = e);
         return result;
     }
 
@@ -292,8 +304,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      */
     public List<T> toList() {
         List<T> result = new ArrayList<>();
-        for (Node<T> node = head; node != null; node = node.next)
-            result.add(node.element);
+        forEach(result::add);
         return result;
     }
 
@@ -309,10 +320,8 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      */
     public <K> Map<K,T> toMap(Function<? super Integer, ? extends K> keyMapper) {
         Map<K,T> result = new LinkedHashMap<>();
-        int i = 0;
-        for (Node<T> node = head; node != null; node = node.next)
-            result.put(keyMapper.apply(i++),node.element);
-
+        AtomicInteger index = new AtomicInteger(0);
+        forEach(e -> result.put(keyMapper.apply(index.getAndIncrement()),e));
         return result;
     }
 
@@ -321,12 +330,12 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      */
     @Override
     public String toString() {
-         StringJoiner joiner = new StringJoiner(",");
+         StringJoiner sj = new StringJoiner(",");
         for (T element : this)
-            if (element == null) joiner.add("null");
-            else joiner.add(element.toString());
+            if (element == null) sj.add("null");
+            else sj.add(element.toString());
 
-        return String.format("[%s]",joiner.toString());
+        return String.format("[%s]", sj);
     }
 
     @SuppressWarnings("unchecked")
