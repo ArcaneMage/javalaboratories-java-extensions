@@ -15,6 +15,9 @@
  */
 package org.javalaboratories.core.util;
 
+import org.javalaboratories.core.tuple.Pair;
+import org.javalaboratories.core.tuple.Tuple2;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -29,7 +32,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -66,6 +68,14 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
             this.prev = prev;
             this.next = next;
         }
+
+        public boolean isHead() {
+            return prev == null;
+        }
+
+        public boolean isTail() {
+            return next == null;
+        }
     }
 
     private transient int depth;
@@ -94,6 +104,32 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
         Objects.requireNonNull(elements,"No elements in parameter");
         for(T element: elements) 
             add(element);
+    }
+
+    /**
+     * Adds an element to the linked-list.
+     * <p>
+     * The element is added to the end of the list.
+     *
+     * @param element to add to the list.
+     * @return this linked-list
+     */
+    public final SmartLinkedList<T> add(final T element) {
+        linkToLastNode(element);
+        return this;
+    }
+
+    /**
+     * Adds an element to the linked-list.
+     * <p>
+     * The element is added to the beginning o the list.
+     *
+     * @param element to add to the list.
+     * @return this linked-list
+     */
+    public final SmartLinkedList<T> addFirst(final T element) {
+        linkToFirstNode(element);
+        return this;
     }
 
     /**
@@ -149,32 +185,6 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     }
 
     /**
-     * Adds an element to the linked-list.
-     * <p>
-     * The element is added to the end of the list.
-     *
-     * @param element to add to the list.
-     * @return this linked-list
-     */
-    public final SmartLinkedList<T> add(final T element) {
-        linkToLastNode(element);
-        return this;
-    }
-
-    /**
-     * Adds an element to the linked-list.
-     * <p>
-     * The element is added to the beginning o the list.
-     *
-     * @param element to add to the list.
-     * @return this linked-list
-     */
-    public final SmartLinkedList<T> addFirst(final T element) {
-        linkToFirstNode(element);
-        return this;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -196,6 +206,16 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
                 return result;
             }
         };
+    }
+
+    /**
+     * Returns the first index of the element that equals {@code element}.
+     *
+     * @param element with which to search.
+     * @return index of element.
+     */
+    public final int indexOf(final T element) {
+        return findNode(element)._1();
     }
 
     /**
@@ -232,23 +252,6 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     }
 
     /**
-     * Returns the first index of the element that equals {@code element}.
-     *
-     * @param element with which to search.
-     * @return index of element.
-     */
-    public final int indexOf(final T element) {
-        int result = 0;
-        for (Node<T> node = head; node != null; node = node.next) {
-            if ((element == null && node.element == null) ||
-                    (element != null && element.equals(node.element)))
-                return result;
-            result++;
-        }
-        return -1;
-    }
-
-    /**
      * @return {@code true} if list is empty.
      */
     public boolean isEmpty() {
@@ -266,11 +269,11 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      * @param findex index at which element resides in the list.
      * @return element from the list.
      */
-    public final T get(int findex) {
+    public final T get(final int findex) {
         validateNodeIndex(findex);
         T result = null;
         int i = 0;
-        if ( findex < depth / 2 ) {
+        if (findex < depth / 2) {
             Iterator<T> iter = this.iterator();
             while (i++ <= findex && iter.hasNext())
                 result = iter.next();
@@ -281,6 +284,15 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
                 result = iter.previous();
         }
         return result;
+    }
+
+    public boolean remove(final T element) {
+        Pair<Integer,Node<T>> fnode = findNode(element);
+        if (fnode._1() != -1) {
+            unlinkNode(fnode._2());
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -338,6 +350,20 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
         return String.format("[%s]", sj);
     }
 
+    private Pair<Integer,Node<T>> findNode(final T element) {
+        int index = 0;
+        Node<T> node;
+        for (node = head; node != null; node = node.next) {
+            if ((element == null && node.element == null) ||
+                    (element != null && element.equals(node.element)))
+                break;
+            index++;
+        }
+
+        Tuple2<Integer,Node<T>> result = node == null ? new Tuple2<>(-1,null) : new Tuple2<>(index,node);
+        return result.asPair();
+    }
+
     @SuppressWarnings("unchecked")
     private SmartLinkedList<T> parentClone() {
         SmartLinkedList<T> result;
@@ -385,6 +411,34 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
         tail = link;
         depth++;
         return tail;
+    }
+
+    private void unlinkNode(final Node<T> node) {
+        Objects.requireNonNull(node,"Node required");
+        if (isEmpty())
+            return;
+        if (head == tail) { // last one?
+            head = tail = null;
+        } else {
+            Node<T> pNode = node.prev;
+            Node<T> nNode = node.next;
+            if (node.isHead()) {
+                nNode.prev = null;
+                head = nNode;
+            } else {
+                if (node.isTail()) {
+                    pNode.next = null;
+                    tail = pNode;
+                } else {
+                    pNode.next = nNode;
+                    nNode.prev = pNode;
+                }
+            }
+        }
+        node.prev = null;
+        node.next = null;
+        node.element = null;
+        depth--;
     }
 
     private void validateNodeIndex(final int index) {

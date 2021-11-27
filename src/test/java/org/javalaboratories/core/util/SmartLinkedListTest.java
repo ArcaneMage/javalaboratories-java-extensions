@@ -31,15 +31,19 @@ public class SmartLinkedListTest {
     @BeforeEach
     public void setup() {
         list1 = new SmartLinkedList<>(4,5,6);
-        list2 = new SmartLinkedList<>(4,5,6,7);
+        list2 = new SmartLinkedList<>(4,5,6,7,8);
         list3 = new SmartLinkedList<>();
     }
 
     @Test
     public void testAddFirst_Pass() {
+        SmartLinkedList<Integer> llist1 = new SmartLinkedList<>();
+        llist1.addFirst(3);
+
         list1.addFirst(3);
 
         assertEquals(3,list1.get(0));
+        assertEquals(3,llist1.get(0));
         assertEquals(4,list1.depth());
     }
 
@@ -108,6 +112,13 @@ public class SmartLinkedListTest {
     }
 
     @Test
+    public void testToString_Pass() {
+        assertEquals("[4,5,6]",list1.toString());
+        assertEquals("[4,5,6,7,8]",list2.toString());
+    }
+
+
+    @Test
     public void testToArray_Pass() {
         Integer[] integers = list1.toArray();
 
@@ -135,5 +146,40 @@ public class SmartLinkedListTest {
         assertEquals(4, map.get("0"));
         assertEquals(5, map.get("1"));
         assertEquals(6, map.get("2"));
+    }
+
+    @Test
+    public void testRemove_Pass() {
+        boolean result = list2.remove(99);
+        assertEquals("[4,5,6,7,8]",list2.toString());
+        assertFalse(result);
+
+        result = list2.remove(4);
+        assertEquals("[5,6,7,8]",list2.toString());
+        assertTrue(result);
+
+        result = list2.remove(7);
+        assertEquals("[5,6,8]",list2.toString());
+        assertTrue(result);
+
+        result = list2.remove(8);
+        assertEquals("[5,6]",list2.toString());
+        assertTrue(result);
+
+        result = list2.remove(6);
+        assertEquals("[5]",list2.toString());
+        assertTrue(result);
+
+        result = list2.remove(5);
+        assertEquals("[]",list2.toString());
+        assertTrue(result);
+
+        result = list2.remove(99);
+        assertEquals("[]",list2.toString());
+        assertFalse(result);
+
+        result = list2.remove(99);
+        assertEquals("[]",list2.toString());
+        assertFalse(result);
     }
 }
