@@ -18,6 +18,7 @@ package org.javalaboratories.core.util;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -100,6 +101,9 @@ public class SmartLinkedListTest {
 
     @Test
     public void testIndexOf_Pass() {
+
+        Iterator<Integer> iter = list1.iterator();
+
         assertEquals(1,list1.indexOf(5));
         assertEquals(2,list1.indexOf(6));
         assertEquals(-1,list1.indexOf(99));
@@ -150,36 +154,62 @@ public class SmartLinkedListTest {
 
     @Test
     public void testRemove_Pass() {
-        boolean result = list2.remove(99);
+        boolean result = list2.remove((Integer)99);
         assertEquals("[4,5,6,7,8]",list2.toString());
         assertFalse(result);
 
-        result = list2.remove(4);
+        result = list2.remove((Integer)4);
         assertEquals("[5,6,7,8]",list2.toString());
         assertTrue(result);
 
-        result = list2.remove(7);
+        result = list2.remove((Integer)7);
         assertEquals("[5,6,8]",list2.toString());
         assertTrue(result);
 
-        result = list2.remove(8);
+        result = list2.remove((Integer)8);
         assertEquals("[5,6]",list2.toString());
         assertTrue(result);
 
-        result = list2.remove(6);
+        result = list2.remove((Integer)6);
         assertEquals("[5]",list2.toString());
         assertTrue(result);
 
-        result = list2.remove(5);
+        result = list2.remove((Integer)5);
         assertEquals("[]",list2.toString());
         assertTrue(result);
 
-        result = list2.remove(99);
+        result = list2.remove((Integer)99);
         assertEquals("[]",list2.toString());
         assertFalse(result);
 
-        result = list2.remove(99);
+        result = list2.remove((Integer)99);
         assertEquals("[]",list2.toString());
         assertFalse(result);
+    }
+
+    @Test
+    public void testRemoveIndex_Pass() {
+        assertThrows(IndexOutOfBoundsException.class, () -> list2.remove(99));
+        assertEquals("[4,5,6,7,8]",list2.toString());
+
+        int element = list2.remove(4);
+        assertEquals(8, element);
+        assertEquals("[4,5,6,7]",list2.toString());
+
+        element = list2.remove(0);
+        assertEquals(4, element);
+        assertEquals("[5,6,7]",list2.toString());
+
+        element = list2.remove(1);
+        assertEquals(6, element);
+        assertEquals("[5,7]",list2.toString());
+
+        element = list2.remove(1);
+        assertEquals(7, element);
+        assertEquals("[5]",list2.toString());
+
+        element = list2.remove(0);
+        assertEquals(5, element);
+        assertEquals("[]",list2.toString());
     }
 }

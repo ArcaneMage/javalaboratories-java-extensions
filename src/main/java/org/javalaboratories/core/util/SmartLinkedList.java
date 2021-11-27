@@ -54,30 +54,6 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
 
     private static final long serialVersionUID = 379872715184844475L;
 
-    private static class Node<T> {
-        public T element;
-        public Node<T> prev;
-        public Node<T> next;
-
-        public Node(T element) {
-            this(null,element,null);
-        }
-
-        public Node(Node<T> prev, T element, Node<T> next) {
-            this.element = element;
-            this.prev = prev;
-            this.next = next;
-        }
-
-        public boolean isHead() {
-            return prev == null;
-        }
-
-        public boolean isTail() {
-            return next == null;
-        }
-    }
-
     private transient int depth;
     private transient Node<T> head;
     private transient Node<T> tail;
@@ -189,23 +165,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      */
     @Override
     public Iterator<T> iterator() {
-        return new Iterator<T>() {
-            Node<T> node = head;
-
-            @Override
-            public boolean hasNext() {
-                return !isEmpty() && node != null;
-            }
-
-            @Override
-            public T next() {
-                if (node == null)
-                    throw new NoSuchElementException();
-                T result = node.element;
-                node = node.next;
-                return result;
-            }
-        };
+        return new NodeIterator(head);
     }
 
     /**
@@ -225,23 +185,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      * @return {@link ReverseIterator} instance.
      */
     public ReverseIterator<T> reverse() {
-        return new ReverseIterator<T>() {
-            Node<T> node = tail;
-
-            @Override
-            public boolean hasPrevious() {
-                return !isEmpty() && node != null;
-            }
-
-            @Override
-            public T previous() {
-                if (node == null)
-                    throw new NoSuchElementException();
-                T result = node.element;
-                node = node.prev;
-                return result;
-            }
-        };
+        return new ReverseNodeIterator(tail);
     }
 
     /**
@@ -263,32 +207,52 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      * <p>
      * A sequential search is performed but not always necessarily from the
      * top of the list. This primarily depends on the {@code findex} value: if
-     * the value is nearest the top, the the sequential search shall start
-     * from there, otherwise the search is performed from the other end.
+     * the value is nearest the top, the sequential search shall start from
+     * there, otherwise the search is performed from the other end.
      *
      * @param findex index at which element resides in the list.
      * @return element from the list.
+     *
+     * @throws IndexOutOfBoundsException if findex is less than zero or exceeds depth.
      */
     public final T get(final int findex) {
-        validateNodeIndex(findex);
-        T result = null;
-        int i = 0;
-        if (findex < depth / 2) {
-            Iterator<T> iter = this.iterator();
-            while (i++ <= findex && iter.hasNext())
-                result = iter.next();
-        } else {
-            int index = depth - findex -1;
-            ReverseIterator<T> iter = this.reverse();
-            while (i++ <= index && iter.hasPrevious())
-                result = iter.previous();
-        }
+        Pair<Integer,Node<T>> fnode = findNode(findex);
+        return fnode._2().element;
+    }
+
+    /**
+     * Removes the element at position {@code findex}.
+     * <p>
+     * A sequential search is performed but not always necessarily from the
+     * top of the list. This primarily depends on the {@code findex} value: if
+     * the value is nearest the top, the sequential search shall start from
+     * there, otherwise the search is performed from the other end.
+     *
+     * @param findex index at which the element resides in the list.
+     * @return element that previously at the specified position.
+     *
+     * @throws IndexOutOfBoundsException if findex is less than zero or exceeds depth.
+     */
+    public T remove(final int findex) {
+        Pair<Integer,Node<T>> fnode = findNode(findex);
+        T result;
+        result = fnode._2().element;
+        unlinkNode(fnode._2());
         return result;
     }
 
+    /**
+     * Removes the first occurrence of the {@code element} from this {@link
+     * SmartLinkedList}.
+     * <p>
+     * Returns {@code true} if successful, otherwise {@code false}.
+     *
+     * @param element with which to search for the first occurrence.
+     * @return {@code true} if successful.
+     */
     public boolean remove(final T element) {
         Pair<Integer,Node<T>> fnode = findNode(element);
-        if (fnode._1() != -1) {
+        if (fnode._1() > -1) {
             unlinkNode(fnode._2());
             return true;
         }
@@ -361,6 +325,28 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
         }
 
         Tuple2<Integer,Node<T>> result = node == null ? new Tuple2<>(-1,null) : new Tuple2<>(index,node);
+        return result.asPair();
+    }
+
+    private Pair<Integer,Node<T>> findNode(final int findex) {
+        validateNodeIndex(findex);
+        Node<T> fnode = null;
+        int i = 0;
+        if (findex < depth / 2) {
+            NodeIterator iter = (NodeIterator) this.iterator();
+            while (i++ <= findex && iter.hasNext()) {
+                iter.next();
+                fnode = iter.elementAsNode();
+            }
+        } else {
+            int index = depth - findex -1;
+            ReverseNodeIterator iter = (ReverseNodeIterator) this.reverse();
+            while (i++ <= index && iter.hasPrevious()) {
+                iter.previous();
+                fnode = iter.elementAsNode();
+            }
+        }
+        Tuple2<Integer,Node<T>> result = new Tuple2<>(findex,fnode);
         return result.asPair();
     }
 
@@ -451,5 +437,133 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
         out.writeInt(this.depth);
         for (Node<T> node = head; node != null; node = node.next)
             out.writeObject(node.element);
+    }
+
+    /*************************** INTERNAL CLASSES *****************************/
+
+    /**
+     * Represents a node in the {@code LinkedList}.
+     * <p>
+     * Each element resides in a doubly linked {@code Node}. Collectively, they
+     * constitute a doubly linked list, a collection.
+     *
+     * @param <T> Type of element.
+     */
+    private static class Node<T> {
+        public T element;
+        public Node<T> prev;
+        public Node<T> next;
+        /**
+         * Constructs a singe node with no links.
+         *
+         * @param element to encapsulate in {@link Node}.
+         */
+        public Node(T element) {
+            this(null,element,null);
+        }
+        /**
+         * Constructs a node with {@code prev} and {@code next} links.
+         *
+         * @param prev previous node with which to link to this {@link Node}
+         * @param element to encapsulate in {@link Node}.
+         * @param next next node with which to link to this {@link Node}
+         */
+        public Node(Node<T> prev, T element, Node<T> next) {
+            this.element = element;
+            this.prev = prev;
+            this.next = next;
+        }
+        /**
+         * @return {@code true} if this {@link Node} is at the beginning, the
+         * head.
+         */
+        public boolean isHead() {
+            return prev == null;
+        }
+        /**
+         * @return {@code true} if this {@link Node} is at the end of the list,
+         * the tail.
+         */
+        public boolean isTail() {
+            return next == null;
+        }
+    }
+
+    /**
+     * A forward {@link Node} iterator.
+     * <p>
+     * This iterator has the ability to return the underlying {@link Node} of
+     * the element. Note: only the Iterator interface is publicly available
+     * from the {@link SmartLinkedList} class.
+     */
+    private class NodeIterator implements Iterator<T> {
+        private Node<T> node;
+
+        public NodeIterator(Node<T> node) {
+            this.node = node;
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean hasNext() {
+            return !isEmpty() && node != null;
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public T next() {
+            if (node == null)
+                throw new NoSuchElementException();
+            T result = node.element;
+            node = node.next;
+            return result;
+        }
+        /**
+         * @return the underlying {@link Node} object of the current {@code element}
+         */
+        public Node<T> elementAsNode() {
+            return node != null ? node.prev : tail;
+        }
+    }
+
+    /**
+     * A reverse {@link Node} iterator.
+     * <p>
+     * This iterator has the ability to return the underlying {@link Node} of
+     * the element. Note: only the ReverseIterator interface is publicly
+     * available in the class.
+     */
+    private class ReverseNodeIterator implements ReverseIterator<T> {
+        private Node<T> node;
+
+        public ReverseNodeIterator(Node<T> node) {
+            this.node = node;
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean hasPrevious() {
+            return !isEmpty() && node != null;
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public T previous() {
+            if (node == null)
+                throw new NoSuchElementException();
+            T result = node.element;
+            node = node.prev;
+            return result;
+        }
+        /**
+         * @return the underlying {@link Node} object of the current {@code element}
+         */
+        public Node<T> elementAsNode() {
+            return node != null ? node.next : head;
+        }
     }
 }
