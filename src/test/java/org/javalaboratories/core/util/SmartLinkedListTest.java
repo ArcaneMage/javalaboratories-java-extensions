@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,6 +49,13 @@ public class SmartLinkedListTest {
         assertEquals(4,list1.depth());
     }
 
+    @Test
+    public void testClear_Pass() {
+        list2.clear();
+
+        assertTrue(list2.isEmpty());
+        assertEquals(0,list2.depth());
+    }
 
     @Test
     public void testGet_Pass() {
@@ -211,5 +219,39 @@ public class SmartLinkedListTest {
         element = list2.remove(0);
         assertEquals(5, element);
         assertEquals("[]",list2.toString());
+    }
+
+    @Test
+    public void testRemoveFirst_Pass() {
+        int element = list1.removeFirst();
+        assertEquals(4, element);
+        assertEquals("[5,6]",list1.toString());
+
+        element = list1.removeFirst();
+        assertEquals(5, element);
+        assertEquals("[6]",list1.toString());
+
+        element = list1.removeFirst();
+        assertEquals(6, element);
+        assertEquals("[]",list1.toString());
+
+        assertThrows(NoSuchElementException.class,() -> list1.removeFirst());
+    }
+
+    @Test
+    public void testRemoveLast_Pass() {
+        int element = list1.removeLast();
+        assertEquals(6, element);
+        assertEquals("[4,5]",list1.toString());
+
+        element = list1.removeLast();
+        assertEquals(5, element);
+        assertEquals("[4]",list1.toString());
+
+        element = list1.removeLast();
+        assertEquals(4, element);
+        assertEquals("[]",list1.toString());
+
+        assertThrows(NoSuchElementException.class,() -> list1.removeFirst());
     }
 }

@@ -23,14 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -106,6 +99,21 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     public final SmartLinkedList<T> addFirst(final T element) {
         linkToFirstNode(element);
         return this;
+    }
+
+    /**
+     * Clear container of all nodes, releasing objects for GC.
+     */
+    public void clear() {
+        for (Node<T> node = head; node != null;) {
+           Node<T> nx = node.next;
+           node.next = null;
+           node.prev = null;
+           node.element = null;
+           node = nx;
+        }
+        head = tail = null;
+        depth = 0;
     }
 
     /**
@@ -242,6 +250,34 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     }
 
     /**
+     * Removes and returns the first element in the list.
+     *
+     * @return the first element in this list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public T removeFirst() {
+        if (isEmpty())
+            throw new NoSuchElementException();
+        T element = head.element;
+        unlinkNode(head);
+        return element;
+    }
+
+    /**
+     * Removes and returns the last element in the list.
+     *
+     * @return the last element in this list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public T removeLast() {
+        if (isEmpty())
+            throw new NoSuchElementException();
+        T element = tail.element;
+        unlinkNode(tail);
+        return element;
+    }
+
+    /**
      * Removes the first occurrence of the {@code element} from this {@link
      * SmartLinkedList}.
      * <p>
@@ -269,7 +305,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
         @SuppressWarnings("unchecked")
         T[] result = (T[]) Array.newInstance(clazz,depth);
         AtomicInteger index = new AtomicInteger(0);
-        forEach(e -> result[index.getAndIncrement()] = e);
+        forEach(element -> result[index.getAndIncrement()] = element);
         return result;
     }
 
@@ -297,7 +333,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     public <K> Map<K,T> toMap(Function<? super Integer, ? extends K> keyMapper) {
         Map<K,T> result = new LinkedHashMap<>();
         AtomicInteger index = new AtomicInteger(0);
-        forEach(e -> result.put(keyMapper.apply(index.getAndIncrement()),e));
+        forEach(element -> result.put(keyMapper.apply(index.getAndIncrement()),element));
         return result;
     }
 
