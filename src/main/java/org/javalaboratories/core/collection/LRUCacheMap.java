@@ -16,7 +16,14 @@
 package org.javalaboratories.core.collection;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * {@link LRUCacheMap} is a cache that implements the {@code Least Recently Used}
@@ -69,6 +76,20 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
      */
     public int capacity() {
         return this.capacity;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        LRUCacheMap<K,V> result = new LRUCacheMap<>(capacity);
+        result.clear();
+        result.set.addAll(set);
+        result.queue.addAll(queue);
+
+        return result;
     }
 
     /**

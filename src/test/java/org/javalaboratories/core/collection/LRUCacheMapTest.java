@@ -18,7 +18,10 @@ package org.javalaboratories.core.collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LRUCacheMapTest {
 
@@ -33,13 +36,25 @@ public class LRUCacheMapTest {
 
     @Test
     public void testConstructor_Pass() {
-        // Given: BeforeEach
+        // Given
+        LRUCacheMap<Integer,String> cache2 = new LRUCacheMap<>();
 
         // Then
         assertEquals(3, cache.capacity());
         assertEquals(2, cache.size());
         assertEquals("Brian",cache.peekAt(0));
         assertEquals("Alan",cache.peekAt(1));
+
+        assertEquals(16,cache2.capacity()); // Default Capacity
+
+        assertThrows(IllegalArgumentException.class, () -> new LRUCacheMap<>(-1));
+    }
+
+    @Test
+    public void testClone_Pass() throws CloneNotSupportedException{
+        LRUCacheMap<Integer,String> copy = (LRUCacheMap<Integer, String>) cache.clone(); // Shallow Copy
+
+        assertEquals(cache,copy);
     }
 
     @Test
@@ -65,6 +80,18 @@ public class LRUCacheMapTest {
         assertEquals("Andy",cache.peekAt(0));
         assertEquals("James",cache.peekAt(1));
         assertEquals("Brian",cache.peekAt(2));
+    }
+
+    @Test
+    public void testPut_Modify_Pass() {
+        // Given
+        String oldValue = cache.put(1,"Alania"); // Alan -> Alania
+
+        // Then
+        assertEquals("Alan", oldValue);
+        assertEquals(2, cache.size());
+        assertEquals("Alania",cache.peekAt(0));
+        assertEquals("Brian",cache.peekAt(1));
     }
 
     @Test
@@ -113,6 +140,34 @@ public class LRUCacheMapTest {
     }
 
     @Test
+    public void testPeekAt_Pass() {
+        // Given
+        String brian = cache.peekAt(0);
+        String alan = cache.peekAt(1);
+
+        // Then
+        assertEquals(2, cache.size());
+        assertEquals("Brian",brian);
+        assertEquals("Alan",alan);
+        assertThrows(IndexOutOfBoundsException.class,() -> cache.peekAt(-1));
+        assertThrows(IndexOutOfBoundsException.class,() -> cache.peekAt(9));
+    }
+
+
+    @Test
+    public void testRemove_Pass() {
+        // Given
+        String removed1 = cache.remove(2); // Remove Brian
+        String removed2 = cache.remove(99); // Doesn't exist
+
+        // Then
+        assertEquals(1,cache.size());
+        assertEquals(3,cache.capacity());
+        assertEquals("Brian",removed1);
+        assertNull(removed2);
+    }
+
+    @Test
     public void testEqualsHashCode_Pass() {
         // Given
         LRUCacheMap<Integer,String> cache2 = new LRUCacheMap<>(3);
@@ -122,12 +177,27 @@ public class LRUCacheMapTest {
         LRUCacheMap<Integer,Integer> cache3 = new LRUCacheMap<>(3);
         cache3.put(1,10);
         cache3.put(2,20);
+        cache3.put(3,30);
 
+        LRUCacheMap<Integer,String> cache4 = new LRUCacheMap<>(3);
+        cache4.put(1,"Alan");
+        cache4.put(2,null);
 
         // Then
         assertEquals(cache,cache2);
         assertEquals(cache.hashCode(),cache2.hashCode());
 
         assertNotEquals(cache,cache3);
+        assertNotEquals(cache,cache4);
+    }
+
+    @Test
+    public void testClear_Pass() {
+        // Given
+        cache.clear();
+
+        // Then
+        assertEquals(0,cache.size());
+        assertEquals(3,cache.capacity());
     }
 }
