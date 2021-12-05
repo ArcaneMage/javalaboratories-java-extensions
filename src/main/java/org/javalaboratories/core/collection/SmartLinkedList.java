@@ -13,10 +13,11 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.util;
+package org.javalaboratories.core.collection;
 
 import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple2;
+import org.javalaboratories.core.util.ReverseIterator;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

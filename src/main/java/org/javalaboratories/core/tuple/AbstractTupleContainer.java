@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.tuple;
 
-import org.javalaboratories.core.util.SmartLinkedList;
+import org.javalaboratories.core.collection.SmartLinkedList;
 
 import java.util.Comparator;
 import java.util.Iterator;
