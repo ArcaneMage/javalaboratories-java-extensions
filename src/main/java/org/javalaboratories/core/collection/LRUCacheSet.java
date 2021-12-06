@@ -60,26 +60,6 @@ public class LRUCacheSet<T> extends LinkedHashSet<T> implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        LRUCacheSet<?> that = (LRUCacheSet<?>) o;
-        return capacity == that.capacity;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), capacity);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean add(final T key) {
         if (!nudge(key)) {
             if (this.size() == this.capacity) {
@@ -90,6 +70,38 @@ public class LRUCacheSet<T> extends LinkedHashSet<T> implements Serializable {
         } else {
             return true;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        LRUCacheSet<?> that = (LRUCacheSet<?>) o;
+        return capacity == that.capacity;
+    }
+
+    /**
+     * Returns {@code key} if it exists in this {@code Set} and {@code nudges}
+     * it to the "front" of the list, thus making it most recently used.
+     *
+     * @param key element
+     * @return element, if {@code key} exists otherwise {@code null} is
+     * returned.
+     */
+    public T get(final T key) {
+        return nudge(key) ? key : null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), capacity);
     }
 
     /**
