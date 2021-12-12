@@ -111,6 +111,20 @@ public class LRUCacheSetTest {
     }
 
     @Test
+    public void testGet_Pass() {
+        // Given
+        cache.add("James");
+        String value = cache.get("Brian"); // Get and nudge Brian, promote to top.
+
+        // Then
+        assertEquals(3, cache.size());
+        assertEquals("Brian",cache.peekAt(0));
+        assertEquals("James",cache.peekAt(1));
+        assertEquals("Alan",cache.peekAt(2));
+        assertEquals("Brian",value);
+    }
+
+    @Test
     public void testPeekAt_Pass() {
         // Given: BeforeEach
 

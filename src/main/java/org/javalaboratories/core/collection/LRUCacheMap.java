@@ -214,23 +214,19 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(",","[","]");
-        queue.forEach(entry -> joiner.add(String.format("(%s -> %s)",entry.toString(),
-                super.get(entry).toString())));
+        queue.forEach(e -> joiner.add(String.format("(%s -> %s)",e.toString(),
+                super.get(e).toString())));
         return joiner.toString();
     }
 
     private V putValue(final K key, final V value) {
-        Entry<K,V> entry = set.stream()
-                .filter(k -> k.getKey().equals(key))
-                .findFirst()
-                .orElse(null);
-        V result = null;
-        if (entry == null) {
-            entry = new SimpleEntry<>(key,value);
-            set.add(entry);
-        } else {
-            result = entry.getValue();
-            entry.setValue(value);
+        V result = set.stream()
+            .filter(k -> k.getKey().equals(key))
+            .map(e -> e.setValue(value))
+            .findFirst()
+            .orElse(null);
+        if (result == null) {
+            set.add(new SimpleEntry<>(key,value));
         }
         return result;
     }
@@ -240,20 +236,16 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
         LRUCacheMap<K,V> m = (LRUCacheMap<K, V>) o;
         if (m.size() != size())
             return false;
-        try {
-            for (Entry<K, V> e : entrySet()) {
-                K key = e.getKey();
-                V value = e.getValue();
-                if (value == null) {
-                    if (!(m.peek(key) == null && m.containsKey(key)))
-                        return false;
-                } else {
-                    if (!value.equals(m.peek(key)))
-                        return false;
-                }
+        for (Entry<K, V> e : entrySet()) {
+            K key = e.getKey();
+            V value = e.getValue();
+            if (value == null) {
+                if (!(m.peek(key) == null && m.containsKey(key)))
+                    return false;
+            } else {
+                if (!value.equals(m.peek(key)))
+                    return false;
             }
-        } catch (ClassCastException | NullPointerException unused) {
-            return false;
         }
         return true;
     }

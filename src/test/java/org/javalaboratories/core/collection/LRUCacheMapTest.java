@@ -25,13 +25,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LRUCacheMapTest {
 
-    private LRUCacheMap<Integer,String> cache;
+    private LRUCacheMap<Integer,String> cache, cache2;
 
     @BeforeEach
     public void setup() {
         cache = new LRUCacheMap<>(3);
         cache.put(1,"Alan");
         cache.put(2,"Brian");
+
+        cache2 = new LRUCacheMap<>(3);
+        cache2.put(1,null);
+        cache2.put(2,"Ameca");
     }
 
     @Test
@@ -183,12 +187,21 @@ public class LRUCacheMapTest {
         cache4.put(1,"Alan");
         cache4.put(2,null);
 
+        LRUCacheMap<Integer,Integer> cache5 = new LRUCacheMap<>(3);
+        cache3.put(1,10);
+        cache3.put(2,20);
+
+        String cache6 = "This is not LRUCacheMao";
+
         // Then
         assertEquals(cache,cache2);
         assertEquals(cache.hashCode(),cache2.hashCode());
 
         assertNotEquals(cache,cache3);
         assertNotEquals(cache,cache4);
+        assertNotEquals(this.cache2,cache4);
+        assertNotEquals(cache,cache5);
+        assertNotEquals(cache,cache6);
     }
 
     @Test

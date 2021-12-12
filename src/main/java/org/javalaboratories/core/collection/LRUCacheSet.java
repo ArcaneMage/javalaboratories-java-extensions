@@ -86,7 +86,7 @@ public class LRUCacheSet<T> extends LinkedHashSet<T> implements Serializable {
 
     /**
      * Returns {@code key} if it exists in this {@code Set} and {@code nudges}
-     * it to the "front" of the list, thus making it most recently used.
+     * it to the "front" of the list, thus making it most recently used element.
      *
      * @param key element
      * @return element, if {@code key} exists otherwise {@code null} is
