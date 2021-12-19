@@ -219,18 +219,6 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
         return joiner.toString();
     }
 
-    private V putValue(final K key, final V value) {
-        V result = set.stream()
-            .filter(k -> k.getKey().equals(key))
-            .map(e -> e.setValue(value))
-            .findFirst()
-            .orElse(null);
-        if (result == null) {
-            set.add(new SimpleEntry<>(key,value));
-        }
-        return result;
-    }
-
     private boolean mapEquals(final Object o) {
         @SuppressWarnings("unchecked")
         LRUCacheMap<K,V> m = (LRUCacheMap<K, V>) o;
@@ -248,5 +236,17 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
             }
         }
         return true;
+    }
+
+    private V putValue(final K key, final V value) {
+        V result = set.stream()
+                .filter(k -> k.getKey().equals(key))
+                .map(e -> e.setValue(value))
+                .findAny()
+                .orElse(null);
+        if (result == null) {
+            set.add(new SimpleEntry<>(key,value));
+        }
+        return result;
     }
 }
