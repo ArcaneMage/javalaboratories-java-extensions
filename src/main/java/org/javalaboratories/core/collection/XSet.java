@@ -15,16 +15,31 @@
  */
 package org.javalaboratories.core.collection;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public interface SetX<T> extends Set<T> {
+/**
+ * {@link XSet} is a cache that implements the {@code Least Recently Used}
+ * policy. The least recently used cache {@code entry} will be evicted from
+ * the {@link XSet}. This {@code XSet} has a fixed {@code capacity} that is set
+ * in the constructor and cannot be altered.
+ *
+ * @param <T> type of element
+ */
+public interface XSet<T> extends Set<T> {
+
+    static <T> Set<T> copyOf(final Collection<? extends T> coll) {
+        return Collections.unmodifiableSet(Objects.requireNonNull(coll).stream()
+                .collect(HashSet::new,(a,b) -> a.add(Objects.requireNonNull(b)),(a, b) -> {}));
+    }
 
     @SafeVarargs
     static <T> Set<T> of(T... elements) {
-        return Collections.unmodifiableSet(Stream.of(elements)
-                .collect(HashSet::new,HashSet::add,(a, b) -> {}));
+        return Collections.unmodifiableSet(Stream.of(Objects.requireNonNull(elements))
+                .collect(HashSet::new, HashSet::add, (a, b) -> {}));
     }
 }

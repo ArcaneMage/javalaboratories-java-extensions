@@ -191,7 +191,7 @@ public class LRUCacheMapTest {
         cache3.put(1,10);
         cache3.put(2,20);
 
-        String cache6 = "This is not LRUCacheMao";
+        String cache6 = "This is not LRUCacheMap";
 
         // Then
         assertEquals(cache,cache2);

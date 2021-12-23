@@ -239,14 +239,10 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
     }
 
     private V putValue(final K key, final V value) {
-        V result = set.stream()
-                .filter(k -> k.getKey().equals(key))
-                .map(e -> e.setValue(value))
-                .findAny()
-                .orElse(null);
-        if (result == null) {
-            set.add(new SimpleEntry<>(key,value));
-        }
-        return result;
+        return set.stream()
+            .filter(k -> k.getKey().equals(key))
+            .map(e -> e.setValue(value))
+            .findAny()
+            .orElseGet(() -> {set.add(new SimpleEntry<>(key,value));return null;});
     }
 }

@@ -22,11 +22,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ListXTest {
+public class XListTest {
 
-    private final List<Integer> list1 = ListX.of(10,20,30);
-    private final List<Integer> list2 = ListX.of();
-    private final List<Integer> list3 = ListX.of(40);
+    private final List<Integer> list1 = XList.of(10,20,30);
+    private final List<Integer> list2 = XList.of();
+    private final List<Integer> list3 = XList.of(40);
 
     @Test
     public void testConstruction_Pass() {
@@ -42,5 +42,19 @@ public class ListXTest {
     @Test
     public void testImmutability_Pass() {
         assertThrows(UnsupportedOperationException.class,() -> list1.add(50));
+    }
+
+    @Test
+    public void testCopyOf_Pass() {
+        List<Integer> l0 = null;
+        List<Integer> l1 = XList.of(10,null);
+        List<Integer> l2 = XList.of(null,10);
+        List<Integer> copy = XList.copyOf(list1);
+
+        assertEquals(list1,copy);
+        assertThrows(NullPointerException.class,() -> XList.copyOf(l0));
+        assertThrows(NullPointerException.class,() -> XList.copyOf(l1));
+        assertThrows(NullPointerException.class,() -> XList.copyOf(l2));
+        assertThrows(UnsupportedOperationException.class,() -> copy.add(999));
     }
 }

@@ -23,10 +23,10 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SetXTest {
-    private final Set<Integer> set1 = SetX.of(10,20,30);
-    private final Set<Integer> set2 = SetX.of();
-    private final Set<Integer> set3 = SetX.of(40);
+public class XSetTest {
+    private final Set<Integer> set1 = XSet.of(10,20,30);
+    private final Set<Integer> set2 = XSet.of();
+    private final Set<Integer> set3 = XSet.of(40);
 
     @Test
     public void testConstruction_Pass() {
@@ -44,5 +44,19 @@ public class SetXTest {
     @Test
     public void testImmutability_Pass() {
         assertThrows(UnsupportedOperationException.class,() -> set1.add(50));
+    }
+
+    @Test
+    public void testCopyOf_Pass() {
+        Set<Integer> s0 = null;
+        Set<Integer> s1 = XSet.of(10,null);
+        Set<Integer> s2 = XSet.of(null,10);
+        Set<Integer> copy = XSet.copyOf(set1);
+
+        assertEquals(set1,copy);
+        assertThrows(NullPointerException.class,() -> XSet.copyOf(s0));
+        assertThrows(NullPointerException.class,() -> XSet.copyOf(s1));
+        assertThrows(NullPointerException.class,() -> XSet.copyOf(s2));
+        assertThrows(UnsupportedOperationException.class, () -> copy.add(999));
     }
 }

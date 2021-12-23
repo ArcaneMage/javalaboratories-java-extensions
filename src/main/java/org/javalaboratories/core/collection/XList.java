@@ -16,15 +16,30 @@
 package org.javalaboratories.core.collection;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
-public interface ListX<T> extends List<T> {
+/**
+ * {@link XList} is a cache that implements the {@code Least Recently Used}
+ * policy. The least recently used cache {@code entry} will be evicted from
+ * the {@link XList}. This {@code XList} has a fixed {@code capacity} that is set
+ * in the constructor and cannot be altered.
+ *
+ * @param <T> type of element
+ */
+public interface XList<T> extends List<T> {
+
+    static <T> List<T> copyOf(final Collection<? extends T> coll) {
+        return Collections.unmodifiableList(Objects.requireNonNull(coll).stream()
+                .collect(ArrayList::new,(a,b) -> a.add(Objects.requireNonNull(b)),(a,b) -> {}));
+    }
 
     @SafeVarargs
-    static <T> List<T> of(T... elements) {
+    static <T> List<T> of(final T... elements) {
         return Collections.unmodifiableList(Stream.of(elements)
-               .collect(ArrayList::new,ArrayList::add,(a,b) -> {}));
+                .collect(ArrayList::new,ArrayList::add,(a,b) -> {}));
     }
 }

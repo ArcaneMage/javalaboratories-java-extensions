@@ -15,30 +15,54 @@
  */
 package org.javalaboratories.core.collection;
 
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-public interface MapX<K,V> extends Map<K,V> {
+/**
+ * This interface introduces features that only found in Java 9 and above. It
+ * is a drop-in replacement and an extension to the {@link Map} interface
+ * found in Java 8.
+ * <p>
+ * All factory methods in this interface return an unmodifiable Maps.
+ *
+ * @param <K> type of Key
+ * @param <V> type of Value
+ */
+public interface XMap<K,V> extends Map<K,V> {
+
+    static <K,V> Map<K,V> copyOf(final Map<? extends K,? extends V> map) {
+        Objects.requireNonNull(map);
+        HashMap<K,V> result = new HashMap<>();
+        map.forEach((k,v) -> result.put(Objects.requireNonNull(k),Objects.requireNonNull(v)));
+        return Collections.unmodifiableMap(result);
+    }
+
+    static <K,V> Map.Entry<K,V> entry(final K k, final V v) {
+        return new AbstractMap.SimpleImmutableEntry<>(k,v);
+    }
 
     static <K,V> Map<K,V> of() {
         return Collections.emptyMap();
     }
 
-    static <K,V> Map<K,V> of(K k, V v) {
+    static <K,V> Map<K,V> of(final K k, final V v) {
         Map<K,V> m = new HashMap<>();
         m.put(k,v);
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -46,7 +70,7 @@ public interface MapX<K,V> extends Map<K,V> {
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -55,7 +79,7 @@ public interface MapX<K,V> extends Map<K,V> {
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -65,7 +89,7 @@ public interface MapX<K,V> extends Map<K,V> {
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5, final K k6, final V v6) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -76,7 +100,7 @@ public interface MapX<K,V> extends Map<K,V> {
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -88,7 +112,7 @@ public interface MapX<K,V> extends Map<K,V> {
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7, K k8, V v8) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -101,7 +125,7 @@ public interface MapX<K,V> extends Map<K,V> {
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -115,7 +139,7 @@ public interface MapX<K,V> extends Map<K,V> {
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9, K k10, V v10) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -130,7 +154,7 @@ public interface MapX<K,V> extends Map<K,V> {
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9, K k10, V v10, K k11, V v11) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10, final K k11, final V v11) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -146,7 +170,7 @@ public interface MapX<K,V> extends Map<K,V> {
         return Collections.unmodifiableMap(m);
     }
 
-    static <K,V> Map<K,V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9, K k10, V v10, K k11, V v11, K k12, V v12) {
+    static <K,V> Map<K,V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10, final K k11, final V v11, final K k12, final V v12) {
         Map<K,V> m = new HashMap<>();
         m.put(k1,v1);
         m.put(k2,v2);
@@ -161,5 +185,12 @@ public interface MapX<K,V> extends Map<K,V> {
         m.put(k11,v11);
         m.put(k12,v12);
         return Collections.unmodifiableMap(m);
+    }
+
+    @SafeVarargs
+    static <K,V> Map<K,V> ofEntries(final Map.Entry<? extends K,? extends V>... entries) {
+        Objects.requireNonNull(entries);
+        return Collections.unmodifiableMap(Stream.of(entries)
+                .collect(HashMap::new,(a,b) -> a.put(Objects.requireNonNull(b.getKey()),Objects.requireNonNull(b.getValue())), (a,b) -> {}));
     }
 }
