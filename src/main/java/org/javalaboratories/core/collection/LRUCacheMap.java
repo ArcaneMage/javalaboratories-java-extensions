@@ -116,7 +116,7 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!mapEquals(o)) return false;
+        if (!shallowEquals(o)) return false;
         LRUCacheMap<?, ?> that = (LRUCacheMap<?, ?>) o;
         return capacity == that.capacity && queue.equals(that.queue) && set.equals(that.set);
     }
@@ -219,7 +219,15 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
         return joiner.toString();
     }
 
-    private boolean mapEquals(final Object o) {
+    private V putValue(final K key, final V value) {
+        return set.stream()
+            .filter(k -> k.getKey().equals(key))
+            .map(e -> e.setValue(value))
+            .findAny()
+            .orElseGet(() -> {set.add(new SimpleEntry<>(key,value));return null;});
+    }
+
+    private boolean shallowEquals(final Object o) {
         @SuppressWarnings("unchecked")
         LRUCacheMap<K,V> m = (LRUCacheMap<K, V>) o;
         if (m.size() != size())
@@ -236,13 +244,5 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
             }
         }
         return true;
-    }
-
-    private V putValue(final K key, final V value) {
-        return set.stream()
-            .filter(k -> k.getKey().equals(key))
-            .map(e -> e.setValue(value))
-            .findAny()
-            .orElseGet(() -> {set.add(new SimpleEntry<>(key,value));return null;});
     }
 }

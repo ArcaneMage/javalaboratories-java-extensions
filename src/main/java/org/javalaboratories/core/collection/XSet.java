@@ -15,11 +15,7 @@
  */
 package org.javalaboratories.core.collection;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -40,6 +36,6 @@ public interface XSet<T> extends Set<T> {
     @SafeVarargs
     static <T> Set<T> of(T... elements) {
         return Collections.unmodifiableSet(Stream.of(Objects.requireNonNull(elements))
-                .collect(HashSet::new, HashSet::add, (a, b) -> {}));
+                .collect(HashSet::new,(a,b) -> a.add(Objects.requireNonNull(b)), (a, b) -> {}));
     }
 }

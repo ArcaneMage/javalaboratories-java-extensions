@@ -40,6 +40,6 @@ public interface XList<T> extends List<T> {
     @SafeVarargs
     static <T> List<T> of(final T... elements) {
         return Collections.unmodifiableList(Stream.of(elements)
-                .collect(ArrayList::new,ArrayList::add,(a,b) -> {}));
+                .collect(ArrayList::new,(a,b) -> a.add(Objects.requireNonNull(b)),(a,b) -> {}));
     }
 }

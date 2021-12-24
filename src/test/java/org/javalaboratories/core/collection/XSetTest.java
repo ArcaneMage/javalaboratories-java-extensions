@@ -49,14 +49,10 @@ public class XSetTest {
     @Test
     public void testCopyOf_Pass() {
         Set<Integer> s0 = null;
-        Set<Integer> s1 = XSet.of(10,null);
-        Set<Integer> s2 = XSet.of(null,10);
         Set<Integer> copy = XSet.copyOf(set1);
 
         assertEquals(set1,copy);
         assertThrows(NullPointerException.class,() -> XSet.copyOf(s0));
-        assertThrows(NullPointerException.class,() -> XSet.copyOf(s1));
-        assertThrows(NullPointerException.class,() -> XSet.copyOf(s2));
         assertThrows(UnsupportedOperationException.class, () -> copy.add(999));
     }
 }

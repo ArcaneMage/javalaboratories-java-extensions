@@ -47,14 +47,10 @@ public class XListTest {
     @Test
     public void testCopyOf_Pass() {
         List<Integer> l0 = null;
-        List<Integer> l1 = XList.of(10,null);
-        List<Integer> l2 = XList.of(null,10);
         List<Integer> copy = XList.copyOf(list1);
 
         assertEquals(list1,copy);
         assertThrows(NullPointerException.class,() -> XList.copyOf(l0));
-        assertThrows(NullPointerException.class,() -> XList.copyOf(l1));
-        assertThrows(NullPointerException.class,() -> XList.copyOf(l2));
         assertThrows(UnsupportedOperationException.class,() -> copy.add(999));
     }
 }
