@@ -35,10 +35,12 @@ public class LRUCacheSetTest {
     public void testConstructor_Pass() {
         // Given
         LRUCacheSet<String> cache2 = new LRUCacheSet<>();
+        LRUCacheSet<String> copy = new LRUCacheSet<>(cache);
 
         // Then
-        assertEquals(3, cache.capacity());
-        assertEquals(2, cache.size());
+        assertEquals(cache,copy);
+        assertEquals(3,cache.capacity());
+        assertEquals(2,cache.size());
         assertEquals("Brian",cache.peekAt(0));
         assertEquals("Alan",cache.peekAt(1));
 
@@ -54,10 +56,17 @@ public class LRUCacheSetTest {
         cache.add("Andy");
 
         // Then
-        assertEquals(3, cache.size());
+        assertEquals(3,cache.size());
         assertEquals("Andy",cache.peekAt(0));
         assertEquals("James",cache.peekAt(1));
         assertEquals("Brian",cache.peekAt(2));
+    }
+
+    @Test
+    public void testClone_Pass() {
+        LRUCacheSet<String> copy = (LRUCacheSet<String>) cache.clone(); // Shallow Copy
+
+        assertEquals(cache,copy);
     }
 
     @Test
@@ -67,7 +76,7 @@ public class LRUCacheSetTest {
         cache.add("Brian"); // "Nudge" Brian, promote to top.
 
         // Then
-        assertEquals(3, cache.size());
+        assertEquals(3,cache.size());
         assertEquals("Brian",cache.peekAt(0));
         assertEquals("James",cache.peekAt(1));
         assertEquals("Alan",cache.peekAt(2));

@@ -18,10 +18,7 @@ package org.javalaboratories.core.collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LRUCacheMapTest {
 
@@ -42,10 +39,12 @@ public class LRUCacheMapTest {
     public void testConstructor_Pass() {
         // Given
         LRUCacheMap<Integer,String> cache2 = new LRUCacheMap<>();
+        LRUCacheMap<Integer,String> cache3 = new LRUCacheMap<>(cache); // Shallow copy
 
         // Then
-        assertEquals(3, cache.capacity());
-        assertEquals(2, cache.size());
+        assertEquals(cache,cache3);
+        assertEquals(3,cache.capacity());
+        assertEquals(2,cache.size());
         assertEquals("Brian",cache.peekAt(0));
         assertEquals("Alan",cache.peekAt(1));
 
@@ -55,10 +54,11 @@ public class LRUCacheMapTest {
     }
 
     @Test
-    public void testClone_Pass() throws CloneNotSupportedException{
-        LRUCacheMap<Integer,String> copy = (LRUCacheMap<Integer, String>) cache.clone(); // Shallow Copy
+    public void testClone_Pass() {
+        @SuppressWarnings("unchecked")
+        LRUCacheMap<Integer,String> cache3 = (LRUCacheMap<Integer, String>) cache.clone(); // Shallow Copy
 
-        assertEquals(cache,copy);
+        assertEquals(cache,cache3);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class LRUCacheMapTest {
     public void testPut_Eviction_Pass() {
         // Given
         cache.put(3,"James");
-        cache.put(4,"Andy");
+        cache.put(4,"Andy"); // Alan is evicted
 
         // Then
         assertEquals(3, cache.size());
@@ -112,6 +112,20 @@ public class LRUCacheMapTest {
     }
 
     @Test
+    public void testNudge_Pass() {
+        // Given
+        cache.put(3,"James");
+        boolean nudge = cache.nudge(2); // Nudge Brian
+
+        // Then
+        assertTrue(nudge);
+        assertEquals(3, cache.size());
+        assertEquals("Brian",cache.peekAt(0));
+        assertEquals("James",cache.peekAt(1));
+        assertEquals("Alan",cache.peekAt(2));
+    }
+
+    @Test
     public void testGet_NoMapping_Pass() {
         // Given
         String value = cache.get(99); // None existent
@@ -127,7 +141,7 @@ public class LRUCacheMapTest {
         String s = cache.toString();
 
         // Then
-        assertEquals("[(2 -> Brian),(1 -> Alan)]",s);
+        assertEquals("[[2 -> Brian],[1 -> Alan]]",s);
     }
 
     @Test
@@ -156,7 +170,6 @@ public class LRUCacheMapTest {
         assertThrows(IndexOutOfBoundsException.class,() -> cache.peekAt(-1));
         assertThrows(IndexOutOfBoundsException.class,() -> cache.peekAt(9));
     }
-
 
     @Test
     public void testRemove_Pass() {

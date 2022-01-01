@@ -30,7 +30,7 @@ import java.util.StringJoiner;
  *
  * @param <T> type of Key
  */
-public class LRUCacheSet<T> extends LinkedHashSet<T> implements Serializable {
+public class LRUCacheSet<T> extends LinkedHashSet<T> implements Cloneable, Serializable {
 
     private static final long serialVersionUID = 449257218556904931L;
 
@@ -57,6 +57,18 @@ public class LRUCacheSet<T> extends LinkedHashSet<T> implements Serializable {
     }
 
     /**
+     * Constructs a copy of the {@code set} object.
+     * <p>
+     * Method will throw a {@link NullPointerException} if map is {@code null}.
+     * @param set LRUCacheSet object to copy.
+     * @throws NullPointerException if parameters is {@code null}
+     */
+    public LRUCacheSet(final LRUCacheSet<T> set) {
+        this(Objects.requireNonNull(set,"Requires set parameter").capacity);
+        this.addAll(set);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -70,6 +82,24 @@ public class LRUCacheSet<T> extends LinkedHashSet<T> implements Serializable {
         } else {
             return true;
         }
+    }
+
+    /**
+     * Returns current capacity of this {@link LRUCacheSet}.
+     *
+     * @return current capacity. This is always a non-zero, positive value.
+     */
+    public int capacity() {
+        return capacity;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public Object clone() {
+        return new LRUCacheSet<>(this);
     }
 
     /**
@@ -102,15 +132,6 @@ public class LRUCacheSet<T> extends LinkedHashSet<T> implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), capacity);
-    }
-
-    /**
-     * Returns current capacity of this {@link LRUCacheSet}.
-     *
-     * @return current capacity. This is always a non-zero, positive value.
-     */
-    public int capacity() {
-        return capacity;
     }
 
     /**
@@ -158,7 +179,11 @@ public class LRUCacheSet<T> extends LinkedHashSet<T> implements Serializable {
     public String toString() {
         StringJoiner joiner = new StringJoiner(",","[","]");
         Iterator<T> iter = new LinkedList<>(this).descendingIterator();
-        iter.forEachRemaining(key -> joiner.add(key.toString()));
+        iter.forEachRemaining(key -> joiner.add(toString(key)));
         return joiner.toString();
+    }
+
+    private String toString(final T element) {
+        return element == null ? "Null" : element.toString();
     }
 }

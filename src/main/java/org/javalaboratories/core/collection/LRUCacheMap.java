@@ -16,14 +16,7 @@
 package org.javalaboratories.core.collection;
 
 import java.io.Serializable;
-import java.util.AbstractMap;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
 
 /**
  * {@link LRUCacheMap} is a cache that implements the {@code Least Recently Used}
@@ -70,6 +63,19 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
     }
 
     /**
+     * Constructs a copy of the {@code map} object.
+     * <p>
+     * Method will throw a {@link NullPointerException} if map is {@code null}.
+     * @param map LRUCacheMap object to copy.
+     * @throws NullPointerException if parameters is {@code null}
+     */
+    public LRUCacheMap(final LRUCacheMap<K,V> map) {
+        this(Objects.requireNonNull(map,"Requires map parameter").capacity);
+        this.set.addAll(map.set);
+        this.queue.addAll(map.queue);
+    }
+
+    /**
      * Returns current capacity of this {@link LRUCacheMap}.
      *
      * @return current capacity. This is always a non-zero, positive value.
@@ -78,19 +84,6 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
         return this.capacity;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        LRUCacheMap<K,V> result = new LRUCacheMap<>(capacity);
-        result.clear();
-        result.set.addAll(set);
-        result.queue.addAll(queue);
-
-        return result;
-    }
 
     /**
      * {@inheritDoc}
@@ -104,8 +97,17 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
-    public Set<Entry<K, V>> entrySet() {
+    public Object clone() {
+        return new LRUCacheMap<>(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<Entry<K,V>> entrySet() {
         return set;
     }
 
@@ -125,22 +127,39 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
      * {@inheritDoc}
      */
     @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), queue, set, capacity);
+    public V get(final Object key) {
+        if (this.containsKey(key)) {
+            @SuppressWarnings("unchecked")
+            K k = (K) key;
+            V result = super.get(k);
+            queue.remove(k);
+            queue.addFirst(k);
+            return result;
+        }
+        return null;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public V get(final Object key) {
-        if (this.containsKey(key)) {
-            V result = super.get(key);
-            queue.remove(key);
-            queue.addFirst((K)key);
-            return result;
-        }
-        return null;
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), queue, set, capacity);
+    }
+
+
+    /**
+     * Moves the key to the "front", thus making it the most recently used
+     * {@code key}.
+     * <p>
+     * Returns {@code true} of the {@code key} is successfully moved to the
+     * "front" of the list, otherwise {@code false} is returned.
+     *
+     * @param key to nudge
+     * @return true if successfully nudged.
+     */
+    public boolean nudge(final K key) {
+        return get(key) != null;
     }
 
     /**
@@ -186,8 +205,8 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
             queue.remove(key);
         } else {
             if (queue.size() == capacity) {
-                K k = queue.removeLast();
-                this.remove(k);
+                K lastKey = queue.removeLast();
+                this.remove(lastKey);
             }
         }
         V result = putValue(key,value);
@@ -201,8 +220,10 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
     @Override
     public V remove(final Object key) {
         if (this.containsKey(key)) {
-            V result = super.remove(key);
-            queue.remove(key);
+            @SuppressWarnings("unchecked")
+            K k = (K) key;
+            V result = super.remove(k);
+            queue.remove(k);
             return result;
         }
         return null;
@@ -214,8 +235,8 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(",","[","]");
-        queue.forEach(e -> joiner.add(String.format("(%s -> %s)",e.toString(),
-                super.get(e).toString())));
+        queue.forEach(e -> joiner.add(String.format("[%s -> %s]",e.toString(),
+                toString(super.get(e)))));
         return joiner.toString();
     }
 
@@ -229,10 +250,10 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
 
     private boolean shallowEquals(final Object o) {
         @SuppressWarnings("unchecked")
-        LRUCacheMap<K,V> m = (LRUCacheMap<K, V>) o;
+        LRUCacheMap<K,V> m = (LRUCacheMap<K,V>) o;
         if (m.size() != size())
             return false;
-        for (Entry<K, V> e : entrySet()) {
+        for (Entry<K,V> e : entrySet()) {
             K key = e.getKey();
             V value = e.getValue();
             if (value == null) {
@@ -244,5 +265,9 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
             }
         }
         return true;
+    }
+
+    private String toString(final V value) {
+        return value == null ? "Null" : value.toString();
     }
 }
