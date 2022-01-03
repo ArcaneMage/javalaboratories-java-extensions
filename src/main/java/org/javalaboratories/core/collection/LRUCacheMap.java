@@ -17,6 +17,7 @@ package org.javalaboratories.core.collection;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.BiFunction;
 
 /**
  * {@link LRUCacheMap} is a cache that implements the {@code Least Recently Used}
@@ -201,17 +202,7 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
      */
     @Override
     public V put(final K key, final V value) {
-        if (this.containsKey(key)) {
-            queue.remove(key);
-        } else {
-            if (queue.size() == capacity) {
-                K lastKey = queue.removeLast();
-                this.remove(lastKey);
-            }
-        }
-        V result = putValue(key,value);
-        queue.addFirst(key);
-        return result;
+        return put(key, value, true);
     }
 
     /**
@@ -230,6 +221,29 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
     }
 
     /**
+     * This method returns a new {@link LRUCacheMap} with each entry supplied
+     * with a new {@code key}.
+     * <p>
+     * The {@code function} parameter calculates the new {@code key} to be
+     * assigned to the current {@code value}. It is important that the
+     * calculated key is unique, otherwise data would be lost in the resultant
+     * {@link LRUCacheMap}.
+     *
+     * @param function the {@code key mapping} function.
+     * @param <R> the resultant {@code key}.
+     * @return a new {@link LRUCacheMap} with new keys for each value.
+     */
+    public <R extends K> LRUCacheMap<K,V> resetKeys(final BiFunction<? super K,? super V,? extends R> function) {
+        BiFunction<? super K,? super V,? extends R> f = Objects.requireNonNull(function,"Expected function");
+        LRUCacheMap<K,V> result = new LRUCacheMap<>(capacity);
+        for (Entry<K,V> e : entrySet()) {
+            R key = f.apply(e.getKey(),e.getValue());
+            result.put(key,e.getValue(),false);
+        }
+        return result;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -238,6 +252,21 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
         queue.forEach(e -> joiner.add(String.format("[%s -> %s]",e.toString(),
                 toString(super.get(e)))));
         return joiner.toString();
+    }
+
+    private V put(final K key, final V value, boolean lru) {
+        if (this.containsKey(key)) {
+            queue.remove(key);
+        } else {
+            if (queue.size() == capacity) {
+                K lastKey = queue.removeLast();
+                this.remove(lastKey);
+            }
+        }
+        V result = putValue(key,value);
+        if (lru) queue.addFirst(key);
+        else queue.addLast(key);
+        return result;
     }
 
     private V putValue(final K key, final V value) {

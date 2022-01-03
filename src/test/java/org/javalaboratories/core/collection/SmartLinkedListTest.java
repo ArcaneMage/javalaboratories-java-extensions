@@ -18,6 +18,7 @@ package org.javalaboratories.core.collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -253,5 +254,29 @@ public class SmartLinkedListTest {
         assertEquals("[]",list1.toString());
 
         assertThrows(NoSuchElementException.class,() -> list1.removeFirst());
+    }
+
+    @Test
+    public void testSerialization_Pass() throws IOException, ClassNotFoundException  {
+        // Serialize
+        ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+        ObjectOutputStream out = new ObjectOutputStream(ostream);
+
+        out.writeObject(list1);
+        out.close();
+        ostream.close();
+
+        // Deserialization
+        byte[] bytes = ostream.toByteArray();
+
+        ByteArrayInputStream istream = new ByteArrayInputStream(bytes);
+        ObjectInputStream in = new ObjectInputStream(istream);
+        SmartLinkedList<Integer> list = (SmartLinkedList<Integer>) in.readObject();
+
+        assertEquals(3,list.depth());
+        assertEquals("[4,5,6]",list.toString());
+
+        in.close();
+        istream.close();
     }
 }

@@ -17,7 +17,6 @@ package org.javalaboratories.core.collection;
 
 import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple2;
-import org.javalaboratories.core.util.ReverseIterator;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -38,7 +37,7 @@ import java.util.function.Function;
 /**
  * This {@code linked list} implements the doubly linked-list approach. With
  * this approach, it is possible to traverse the {@link Node} forwards or
- * backwards as desired, it provides an {@link ReverseIterator} for this
+ * backwards as desired, it provides an {@link ReverseNodeIterator} for this
  * purpose.
  * <p>
  * It is considered "smart" in that the {@link SmartLinkedList#get(int)} method
@@ -195,12 +194,12 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     }
 
     /**
-     * Returns a {@link ReverseIterator} to allow traversal from the {@code }tail
+     * Returns a {@link Iterator} to allow traversal from the {@code} tail
      * to the {@code head}.
      *
-     * @return {@link ReverseIterator} instance.
+     * @return {@link Iterator} instance.
      */
-    public ReverseIterator<T> reverse() {
+    public Iterator<T> reverse() {
         return new ReverseNodeIterator(tail);
     }
 
@@ -383,10 +382,10 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
                 fnode = iter.elementAsNode();
             }
         } else {
-            int index = depth - findex -1;
+            int index = depth - findex - 1;
             ReverseNodeIterator iter = (ReverseNodeIterator) this.reverse();
-            while (i++ <= index && iter.hasPrevious()) {
-                iter.previous();
+            while (i++ <= index && iter.hasNext()) {
+                iter.next();
                 fnode = iter.elementAsNode();
             }
         }
@@ -579,7 +578,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      * the element. Note: only the ReverseIterator interface is publicly
      * available in the class.
      */
-    private class ReverseNodeIterator implements ReverseIterator<T> {
+    private class ReverseNodeIterator implements Iterator<T> {
         private Node<T> node;
 
         public ReverseNodeIterator(Node<T> node) {
@@ -589,14 +588,14 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
          * {@inheritDoc}
          */
         @Override
-        public boolean hasPrevious() {
+        public boolean hasNext() {
             return !isEmpty() && node != null;
         }
         /**
          * {@inheritDoc}
          */
         @Override
-        public T previous() {
+        public T next() {
             if (node == null)
                 throw new NoSuchElementException();
             T result = node.element;

@@ -185,6 +185,16 @@ public class LRUCacheMapTest {
     }
 
     @Test
+    public void testResetKeys_Pass() {
+        // Given
+        LRUCacheMap<Integer,String> cache2 = cache.resetKeys((k,v) -> k + 1);
+
+        // Then
+        assertEquals("[[2 -> Brian],[1 -> Alan]]",cache.toString());
+        assertEquals("[[3 -> Brian],[2 -> Alan]]",cache2.toString());
+    }
+
+    @Test
     public void testEqualsHashCode_Pass() {
         // Given
         LRUCacheMap<Integer,String> cache2 = new LRUCacheMap<>(3);
