@@ -17,7 +17,7 @@ package org.javalaboratories.core.tuple;
 
 /**
  * All tuples implement this interface
- * <p>
+ *
  * @see Tuple
  * @see Matcher
  */
@@ -30,6 +30,7 @@ public interface TupleBase {
      * The depth refers to the maximum number of objects/elements that can be
      * accommodated in the tuple container. It can be referred to as the size
      * of the tuple.
+     *
      * @return depth of this tuple.
      */
     int depth();

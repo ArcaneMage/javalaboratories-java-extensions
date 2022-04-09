@@ -79,6 +79,9 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
      * <p>
      * @param task main transmute task handler that will be executed
      *             asynchronously.
+     * @param <T> type of object to be transmuted.
+     * @param <R> type of object that has undergone transmutation.
+     * @return an instance of the {@code TransmuteAction}.
      * @throws NullPointerException if task parameter is null.
      */
     public static <T,R> TransmuteAction<T,R> of(final Function<? super T,? extends R> task) {
@@ -91,6 +94,9 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
      * @param task main transmute task handler that will be executed
      *             asynchronously.
      * @param completionHandler to handle task completion -- this is optional.
+     * @param <T> type of object to be transmuted.
+     * @param <R> type of object that has undergone transmutation.
+     * @return an instance of the {@code TransmuteAction}.
      * @throws NullPointerException if task parameter is null.
      */
     public static <T,R> TransmuteAction<T,R> of(final Function<? super T,? extends R> task,

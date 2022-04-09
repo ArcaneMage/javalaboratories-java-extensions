@@ -83,7 +83,7 @@ public interface ManagedPoolService extends Executor {
      * @param timeout value in milliseconds.
      * @param retry if {@code true} indefinitely attempts to terminate threads
      *             after shutdown (use with caution).
-     * @throws IllegalArgumentException if timeout value <
+     * @throws IllegalArgumentException if timeout value &lt;
      *                  {@link ManagedPoolService#MIN_WAIT_TIMEOUT}
      */
     void stop(final long timeout, final boolean retry);

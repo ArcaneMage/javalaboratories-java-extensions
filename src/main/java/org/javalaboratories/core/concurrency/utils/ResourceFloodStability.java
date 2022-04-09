@@ -42,12 +42,11 @@ public interface ResourceFloodStability<T> {
      * object.
      * <p>
      * Below illustrates the state machine of this object:
-     * <p>
-     * <prep>
+     * <pre>
      *     {@code
      *          CLOSED --> open() --> OPENED --> flood() --> CLOSED --> FLOODED
      *     }
-     * </prep>
+     * </pre>
      * Initially, {@link ResourceFloodStability} objects starts with the
      * {@code CLOSED} state.
      */
@@ -101,12 +100,11 @@ public interface ResourceFloodStability<T> {
      * These are several states that represents the current status of this object.
      * <p>
      * Below illustrates the state of machine of this object:
-     * <p>
-     * <prep>
+     * <pre>
      *     {@code
      *          CLOSED --> open() --> OPENED --> flood() --> CLOSED --> FLOODED
      *     }
-     * </prep>
+     * </pre>
      * Initially, {@link ResourceFloodStability} objects starts with the
      * {@code CLOSED} state.
      * <p>
@@ -153,7 +151,7 @@ public interface ResourceFloodStability<T> {
      * by one and will repeat, but it is unique by class name.
      * <p>
      * This object is thread-safe.
-     * <p>
+     *
      * @see AbstractResourceFloodStability
      */
     @Getter
@@ -235,8 +233,9 @@ public interface ResourceFloodStability<T> {
         }
 
         /**
-         * Use to indicate the {@link Target} of the {@link ResourceFloodStability} is
+         * Used to indicate the {@link Target} of the {@link ResourceFloodStability} is
          * not determinable.
+         * @return an instance of {@link Target} which is indeterminate.
          */
         public static Target getIndeterminateTarget() {
             return new Target(IndeterminateTarget.class);

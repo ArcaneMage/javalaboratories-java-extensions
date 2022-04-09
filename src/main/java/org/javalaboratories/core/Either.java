@@ -436,11 +436,12 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * Default implementation is to validate existence of {@link Supplier}
      * function. Implementations should call this method first to enable
      * validation.
-     *
      * @param supplier function executed by {@link Left} implementation to derive
      *                 the {@code exception} object to throw.
+     * @param <E> type of exception.
      * @return this {@code Right} or derives it from the {@code supplier}
      * @throws NullPointerException if no {@code predicate} is null.
+     * @throws E type of exception.
      */
     public <E extends Throwable> Either<A,B> orElseThrow(final Supplier<? extends E> supplier) throws E {
         Objects.requireNonNull(supplier);

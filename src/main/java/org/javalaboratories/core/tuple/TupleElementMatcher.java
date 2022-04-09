@@ -33,7 +33,7 @@ public interface TupleElementMatcher {
     /**
      * Match {@code element} at logical {@code position} with {@link MatchableTuple}
      * element.
-     * <p><
+     *
      * @param element element to match, ultimately came from {@link Tuple}
      * @return {@code True} for a match; {@code False} for a non-match.
      */

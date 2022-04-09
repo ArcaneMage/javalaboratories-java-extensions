@@ -15,8 +15,7 @@
  */
 package org.javalaboratories.core.collection;
 
-import org.javalaboratories.core.tuple.Pair;
-import org.javalaboratories.core.tuple.Tuple2;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -190,7 +189,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      * @return index of element.
      */
     public final int indexOf(final T element) {
-        return findNode(element)._1();
+        return findNode(element).getKey();
     }
 
     /**
@@ -232,7 +231,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      */
     public final T get(final int findex) {
         Pair<Integer,Node<T>> fnode = findNode(findex);
-        return fnode._2().element;
+        return fnode.getValue().element;
     }
 
     /**
@@ -251,8 +250,8 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
     public T remove(final int findex) {
         Pair<Integer,Node<T>> fnode = findNode(findex);
         T result;
-        result = fnode._2().element;
-        unlinkNode(fnode._2());
+        result = fnode.getValue().element;
+        unlinkNode(fnode.getValue());
         return result;
     }
 
@@ -295,8 +294,8 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
      */
     public boolean remove(final T element) {
         Pair<Integer,Node<T>> fnode = findNode(element);
-        if (fnode._1() > -1) {
-            unlinkNode(fnode._2());
+        if (fnode.getKey() > -1) {
+            unlinkNode(fnode.getValue());
             return true;
         }
         return false;
@@ -367,8 +366,8 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
             index++;
         }
 
-        Tuple2<Integer,Node<T>> result = node == null ? new Tuple2<>(-1,null) : new Tuple2<>(index,node);
-        return result.asPair();
+        Pair<Integer,Node<T>> result = node == null ? Pair.of(-1,null) : Pair.of(index,node);
+        return result;
     }
 
     private Pair<Integer,Node<T>> findNode(final int findex) {
@@ -389,8 +388,7 @@ public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable 
                 fnode = iter.elementAsNode();
             }
         }
-        Tuple2<Integer,Node<T>> result = new Tuple2<>(findex,fnode);
-        return result.asPair();
+        return Pair.of(findex,fnode);
     }
 
     @SuppressWarnings("unchecked")

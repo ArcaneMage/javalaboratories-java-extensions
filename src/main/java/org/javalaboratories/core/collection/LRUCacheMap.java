@@ -237,7 +237,7 @@ public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Ser
         BiFunction<? super K,? super V,? extends R> f = Objects.requireNonNull(function,"Expected function");
         LRUCacheMap<K,V> result = new LRUCacheMap<>(capacity);
         for (Entry<K,V> e : entrySet()) {
-            R key = f.apply(e.getKey(),e.getValue());
+            R key = Objects.requireNonNull(f.apply(e.getKey(),e.getValue()));
             result.put(key,e.getValue(),false);
         }
         return result;

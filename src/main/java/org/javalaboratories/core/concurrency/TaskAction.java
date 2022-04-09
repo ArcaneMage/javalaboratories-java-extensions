@@ -77,6 +77,8 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * Factory method to construct this {@link TaskAction} object,
      * <p>
      * @param task main task handler that will be executed asynchronously.
+     * @param <T> Type of the object to be processed by the task.
+     * @return an instance of {@link TaskAction}
      * @throws NullPointerException if task parameter is null.
      */
     public static <T> TaskAction<T> of(Consumer<? super T> task) {
@@ -91,6 +93,8 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * <p>
      * @param task main task handler that will be executed asynchronously.
      * @param completionHandler to handle task completion -- this is optional.
+     * @param <T> Type of the object to be processed by the task.
+     * @return an instance of {@link TaskAction}
      * @throws NullPointerException if task parameter is null.
      */
     public static <T> TaskAction<T> of(Consumer<? super T> task, BiConsumer<? super T,Throwable> completionHandler) {

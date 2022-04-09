@@ -32,11 +32,9 @@ import java.util.function.Supplier;
  * <ol>
  *     <li>Eager - the evaluation is immediate and the {@code value} is available
  *     for processing</li>
- *     <p>
  *     <li>Later - the evaluation of the {@code value} deferred until it is
  *     required for use. The evaluation of the {@code value} is performed once
  *     and cached.</li>
- *     <p>
  *     <li>Always - the {@code value} is always evaluated just before use and
  *     never cached.</li>
  * </ol>

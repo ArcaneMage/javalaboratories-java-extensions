@@ -81,7 +81,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * on computation behaviour.
      *
      * @param supplier function encapsulating computation/operation.
-     * @param <T>      resultant type of computation.
+     * @param <T> resultant type of computation.
+     * @param <E> type of exception.
      * @return Try object.
      */
     public static <T, E extends Throwable> Try<T> of(final ThrowableSupplier<T, E> supplier) {

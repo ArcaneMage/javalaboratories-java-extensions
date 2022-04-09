@@ -43,7 +43,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
     private final Supplier<? extends T> task;
 
     /**
-     * Constructor to setup internal handlers.
+     * Constructor to set up internal handlers.
      * <p>
      * Recommended to use factory methods for creation.
      * @param task main task handler that will be executed asynchronously.
@@ -54,7 +54,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
     }
 
     /**
-     * Constructor to setup internal handlers.
+     * Constructor to set up internal handlers.
      * <p>
      * Recommended to use factory methods for creation.
      * @param task main task handler that will be executed asynchronously.
@@ -67,9 +67,11 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
     }
 
     /**
-     * Factory method to construct this {@link PrimaryAction} object,
+     * Factory method to construct this {@link PrimaryAction} object.
      * <p>
      * @param task main task handler that will be executed asynchronously.
+     * @param <T> type of object return from the task.
+     * @return new instance of {@link PrimaryAction}
      * @throws NullPointerException if task parameter is null.
      */
     public static <T> PrimaryAction<T> of(Supplier<? extends T> task) {
@@ -81,6 +83,8 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
      * <p>
      * @param task main task handler that will be executed asynchronously.
      * @param completionHandler to handle task completion -- this is optional.
+     * @param <T> type of object return from the task.
+     * @return new instance of {@link PrimaryAction}
      * @throws NullPointerException if task parameter is null.
      */
     public static <T> PrimaryAction<T> of(Supplier<? extends T> task, BiConsumer<? super T,Throwable> completionHandler) {
