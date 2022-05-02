@@ -110,7 +110,7 @@ public class StopWatchTest {
         assertEquals(0L,stopWatch1.getTime());
 
         stopWatch1.time(() -> doSomethingVoidMethod(500));
-        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 508);
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 600);
 
         stopWatch2.time(() -> doSomethingVoidMethod(1000));
         assertEquals(1, stopWatch2.getTime(TimeUnit.SECONDS));
@@ -176,7 +176,7 @@ public class StopWatchTest {
     @Test
     public void testTimeMillis_Pass() {
         stopWatch1.time(() -> doSomethingVoidMethod(500));
-        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 510);
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 600);
     }
 
 
@@ -186,7 +186,7 @@ public class StopWatchTest {
         stopWatch1.reset();
 
         stopWatch1.time(() -> doSomethingVoidMethod(500));
-        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 510);
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 600);
 
         stopWatch1.reset();
         assertEquals(0,stopWatch1.getTime());

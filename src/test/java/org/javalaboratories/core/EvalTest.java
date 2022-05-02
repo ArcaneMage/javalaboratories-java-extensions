@@ -402,7 +402,7 @@ public class EvalTest extends AbstractConcurrencyTest {
         // Given (setup)
 
         // When
-        int result = assertTimeout(Duration.ofMillis(1280),() -> asyncEval.map(value -> value * 2)
+        int result = assertTimeout(Duration.ofMillis(2048),() -> asyncEval.map(value -> value * 2)
                     .get());
 
         // Then
