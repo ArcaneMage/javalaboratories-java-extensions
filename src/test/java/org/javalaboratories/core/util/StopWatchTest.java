@@ -110,7 +110,7 @@ public class StopWatchTest {
         assertEquals(0L,stopWatch1.getTime());
 
         stopWatch1.time(() -> doSomethingVoidMethod(500));
-        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 600);
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 1024);
 
         stopWatch2.time(() -> doSomethingVoidMethod(1000));
         assertEquals(1, stopWatch2.getTime(TimeUnit.SECONDS));
