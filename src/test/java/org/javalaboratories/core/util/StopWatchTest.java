@@ -69,7 +69,7 @@ public class StopWatchTest {
         // Given
         stopWatch1.time(() -> doSomethingVoidMethod(300));
         stopWatch2.time(() -> doSomethingVoidMethod(150));
-        stopWatch3.time(() -> doSomethingVoidMethod(80));
+        stopWatch3.time(() -> doSomethingVoidMethod(75));
 
         List<StopWatch> list = Arrays.asList(stopWatch1,stopWatch2,stopWatch3);
 
