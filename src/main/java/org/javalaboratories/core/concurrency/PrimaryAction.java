@@ -87,7 +87,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
      * @return new instance of {@link PrimaryAction}
      * @throws NullPointerException if task parameter is null.
      */
-    public static <T> PrimaryAction<T> of(Supplier<? extends T> task, BiConsumer<? super T,Throwable> completionHandler) {
+    public static <T> PrimaryAction<T> of(Supplier<? extends T> task, BiConsumer<T,Throwable> completionHandler) {
         return new PrimaryAction<>(task, completionHandler);
     }
 

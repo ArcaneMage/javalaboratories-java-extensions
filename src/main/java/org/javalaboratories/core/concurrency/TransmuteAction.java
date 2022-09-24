@@ -100,7 +100,7 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
      * @throws NullPointerException if task parameter is null.
      */
     public static <T,R> TransmuteAction<T,R> of(final Function<? super T,? extends R> task,
-                                                final BiConsumer<? super R,Throwable> completionHandler) {
+                                                final BiConsumer<R,Throwable> completionHandler) {
         return new TransmuteAction<>(task,completionHandler);
     }
 

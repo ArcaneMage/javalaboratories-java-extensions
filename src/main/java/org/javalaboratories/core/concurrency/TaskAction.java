@@ -97,7 +97,7 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * @return an instance of {@link TaskAction}
      * @throws NullPointerException if task parameter is null.
      */
-    public static <T> TaskAction<T> of(Consumer<? super T> task, BiConsumer<? super T,Throwable> completionHandler) {
+    public static <T> TaskAction<T> of(Consumer<? super T> task, BiConsumer<T,Throwable> completionHandler) {
         return new TaskAction<>(task, completionHandler);
     }
 

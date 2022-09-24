@@ -19,7 +19,6 @@ import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple;
 import org.javalaboratories.core.util.Arguments;
-import org.javalaboratories.core.util.Generics;
 
 import java.io.Serializable;
 import java.util.*;
@@ -385,11 +384,9 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      *
      * @throws NoSuchElementException if {@code value} is unavailable.
      */
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public T get() {
-        if (delegate.isPresent())
-           return delegate.get();
-        else
-            throw new NoSuchElementException();
+        return delegate.get();
     }
 
     /**
@@ -447,9 +444,10 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     @Override
     public <R> Maybe<R> map(final Function<? super T, ? extends R> mapper) {
         Objects.requireNonNull(mapper);
-
-        Optional<R> result = delegate.map(mapper);
-        return result.map(Maybe::of).orElseGet(Maybe::empty);
+        return delegate
+            .map(mapper)
+            .<Maybe<R>>map(Maybe::of)
+            .orElseGet(Maybe::empty);
     }
 
     /**
@@ -466,7 +464,13 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     public Maybe<T> or(final Supplier<? extends Maybe<? super T>> supplier) {
         Objects.requireNonNull(supplier);
         T value = value();
-        return value != null ? this : Objects.requireNonNull(Generics.unchecked(supplier.get()));
+        if (value != null) {
+            return this;
+        } else {
+            @SuppressWarnings("unchecked")
+            Maybe<T> result = (Maybe<T>) Objects.requireNonNull(supplier.get());
+            return result;
+        }
     }
 
     /**
@@ -635,7 +639,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      * it will be {@code unzipped}, essentially flattened and the {@link Pair}
      * returned.
      * <p>
-     * If {@code this} does not contain a {@link Pair} of {@code maybe} objects,
+     * If {@code thils} does not contain a {@link Pair} of {@code maybe} objects,
      * then a {@code pair} of {@code Maybe} objects is returned.
      *
      * @param <U> Type of value in first {@code Maybe} object.
@@ -645,7 +649,8 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     public <U,V> Pair<Maybe<U>,Maybe<V>> unzip() {
         T value = value();
         if (isZipped()) {
-            Pair<Maybe<U>, Maybe<V>> pair = Generics.unchecked(value);
+            @SuppressWarnings("unchecked")
+            Pair<Maybe<U>, Maybe<V>> pair = (Pair<Maybe<U>, Maybe<V>>) value;
             return Tuple.of(pair._1(),pair._2()).asPair();
         } else {
             return Tuple.<Maybe<U>,Maybe<V>>of(Maybe.empty(),Maybe.empty()).asPair();

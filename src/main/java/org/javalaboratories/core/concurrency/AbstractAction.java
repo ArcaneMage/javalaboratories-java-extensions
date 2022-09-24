@@ -15,9 +15,7 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import lombok.AllArgsConstructor;
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.util.Generics;
 
 import java.util.function.BiConsumer;
 
@@ -37,12 +35,17 @@ import java.util.function.BiConsumer;
  * @see TaskAction
  * @see TransmuteAction
  */
-@AllArgsConstructor()
 public abstract class AbstractAction<T> implements Action<T>  {
-    private final BiConsumer<? super T,Throwable> completionHandler;
+    private final BiConsumer<T,Throwable> completionHandler;
+
+    public AbstractAction(BiConsumer<? super T, Throwable> completionHandler) {
+        @SuppressWarnings("unchecked")
+        BiConsumer<T,Throwable> handler = (BiConsumer<T,Throwable>) completionHandler;
+        this.completionHandler = handler;
+    }
 
     @Override
     public Maybe<BiConsumer<T,Throwable>> getCompletionHandler() {
-        return Generics.unchecked(Maybe.ofNullable(completionHandler));
+        return Maybe.ofNullable(completionHandler);
     }
 }
