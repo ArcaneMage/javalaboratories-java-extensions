@@ -20,9 +20,13 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.javalaboratories.core.util.Arguments;
-import org.javalaboratories.core.util.Generics;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -158,30 +162,6 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
     public abstract boolean isRight();
 
     /**
-     * Creates an instance of an Either with a {@code left} value.
-     * <p>
-     * The {@code right} value will be null.
-     *
-     * @param value to be contained in the {@code Either} container.
-     * @param <C> Type of left value.
-     * @param <D> Type of right value.
-     * @return an instance of an {@code Either} implementation.
-     */
-    abstract <C,D> Either<C,D> newLeft(final C value);
-
-    /**
-     * Creates an instance of an Either with a {@code right} value.
-     * <p>
-     * The {@code left} value will be null.
-     *
-     * @param value to be contained in the {@code Either} container.
-     * @param <C> Type of left value.
-     * @param <D> Type of right value.
-     * @return an instance of an {@code Either} implementation.
-     */
-    abstract <C,D> Either<C,D> newRight(final D value);
-
-    /**
      * Provides the ability to perform a sequence functorial computations on
      * the {@code applicable functor} container.
      *
@@ -269,7 +249,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      */
     public Either<A,B> filterOrElse(final Predicate<? super B> predicate, A other) {
         Arguments.requireNonNull(predicate, other);
-        return isLeft() ? this : filter(predicate).isPresent() ? this : newLeft(other);
+        return isLeft() ? this : filter(predicate).isPresent() ? this : Either.left(other);
     }
 
     /**
@@ -290,7 +270,8 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      */
     @Override
     public <D> Either<A,D> flatMap(final Function<? super B,? extends Monad<D>> mapper) {
-        Either<A,D> self = Generics.unchecked(this);
+        @SuppressWarnings("unchecked")
+        Either<A,D> self = (Either<A,D>) this;
         return isLeft() ? self : (Either<A,D>) Monad.super.flatMap(mapper);
     }
 
@@ -311,7 +292,8 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      */
     @Override
     public <D> Either<A,D> flatten() {
-        Either<A,D> self = Generics.unchecked(this);
+        @SuppressWarnings("unchecked")
+        Either<A,D> self = (Either<A,D>) this;
         return isLeft() ? self : (Either<A,D>) Monad.super.flatten();
     }
 
@@ -409,7 +391,13 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * @return current value of right-biased implementations.
      */
     public Either<A,B> orElse(final Either<? super A,? super B> other) {
-        return isLeft() ? Generics.unchecked(other) : this;
+        if (isLeft()) {
+            @SuppressWarnings("unchecked")
+            Either<A,B> result = (Either<A,B>) other;
+            return result;
+        } else {
+            return this;
+        }
     }
 
     /**
@@ -425,7 +413,13 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      */
     public Either<A,B> orElseGet(final Supplier<? extends Either<? super A,? super B>> supplier) {
         Objects.requireNonNull(supplier);
-        return isLeft() ? Generics.unchecked(supplier.get()) : this;
+        if (isLeft()) {
+            @SuppressWarnings("unchecked")
+            Either<A,B> result = (Either<A,B>) supplier.get();
+            return result;
+        } else {
+            return this;
+        }
     }
 
     /**
@@ -436,11 +430,12 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * Default implementation is to validate existence of {@link Supplier}
      * function. Implementations should call this method first to enable
      * validation.
-     *
      * @param supplier function executed by {@link Left} implementation to derive
      *                 the {@code exception} object to throw.
+     * @param <E> type of exception.
      * @return this {@code Right} or derives it from the {@code supplier}
      * @throws NullPointerException if no {@code predicate} is null.
+     * @throws E type of exception.
      */
     public <E extends Throwable> Either<A,B> orElseThrow(final Supplier<? extends E> supplier) throws E {
         Objects.requireNonNull(supplier);
@@ -466,7 +461,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * @return new swapped {@link Either} object.
      */
     public Either<B,A> swap() {
-        return isLeft() ? newRight(getLeft()) : newLeft(getRight());
+        return isLeft() ? Either.right(getLeft()) : Either.left(getRight());
     }
 
     /**
@@ -557,22 +552,6 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
          * {@inheritDoc}
          */
         @Override
-        <C,D> Either<C,D> newLeft(C value) {
-            return new Left<>(value);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        <C,D> Either<C,D> newRight(D value) {
-            return new Right<>(value);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
         public boolean isRight() {
             return true;
         }
@@ -623,22 +602,6 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
          * {@inheritDoc}
          */
         @Override
-        <C,D> Either<C,D> newLeft(C value) {
-            return new Left<>(value);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        <C,D> Either<C,D> newRight(D value) {
-            return new Right<>(value);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
         public boolean isRight() {
             return false;
         }
@@ -656,7 +619,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
          */
         @Override
         protected <C> Left<A,C> pure(final C value) {
-            return Generics.unchecked(this);
+            return new Left<>(getLeft());
         }
     }
 }

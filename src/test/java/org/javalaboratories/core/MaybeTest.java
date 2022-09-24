@@ -241,6 +241,7 @@ public class MaybeTest {
     @Test
     public void testMap_Pass() {
         assertEquals(11, (int) maybe.map(String::length).get());
+        assertEquals(Maybe.empty(),maybe.map(m -> null));
     }
 
     @Test

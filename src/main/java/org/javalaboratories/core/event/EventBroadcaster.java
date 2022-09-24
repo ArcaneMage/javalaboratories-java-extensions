@@ -109,6 +109,7 @@ public class EventBroadcaster<T extends EventSource,V> implements EventPublisher
      * object.
      * <p>
      * Create an instance of this object with {@link EventSource} set to this.
+     * @param source the object that publishes the events.
      */
     public EventBroadcaster(final T source) {
         this.source = source;

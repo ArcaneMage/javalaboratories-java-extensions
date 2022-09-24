@@ -1,4 +1,3 @@
-package org.javalaboratories.core.tuple;
 /*
  * Copyright 2020 Kevin Henry
  *
@@ -14,6 +13,7 @@ package org.javalaboratories.core.tuple;
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package org.javalaboratories.core.tuple;
 
 /**
  * Matches an element of a tuple or elements within a tuple against a
@@ -33,7 +33,7 @@ public interface TupleElementMatcher {
     /**
      * Match {@code element} at logical {@code position} with {@link MatchableTuple}
      * element.
-     * <p><
+     *
      * @param element element to match, ultimately came from {@link Tuple}
      * @return {@code True} for a match; {@code False} for a non-match.
      */

@@ -19,7 +19,6 @@ import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple;
 import org.javalaboratories.core.util.Arguments;
-import org.javalaboratories.core.util.Generics;
 
 import java.io.Serializable;
 import java.util.*;
@@ -40,7 +39,6 @@ import java.util.stream.Stream;
  * of this class. For Java 8 developers, this object offers a wealth of
  * methods that only users of Java 9 and above enjoy, for example {@code
  * IfPresentOrElse}, {@code stream()} and much more.
- * <p>
  * <pre>
  *   {@code
  *    Maybe<String> maybeHelloWorld = Maybe.of("Hello World");
@@ -72,41 +70,41 @@ import java.util.stream.Stream;
  * <ul>
  *     <li>contains(element) -- Determines whether <i>this</i> contains the
  *     element</li>
- *     <p>
+ *
  *     <li>exists(Predicate) -- Returns true when <i>this</i> is nonempty and
  *     the predicate function applied returns true</li>
- *     <p>
+ *
  *     <li>filterNot(Predicate) -- Returns <i>this</i> Maybe object if the
  *     value is nonempty and does NOT satisfy the predicate function</li>
- *     <p>
+ *
  *     <li>flatten() -- Flatten and return internal Maybe value, if possible</li>
- *     <p>
+ *
  *     <li>forAll(Predicate) -- Returns true when <i>this</i> is empty or the
  *     {@code predicate} function returns true</li>
- *     <p>
+ *
  *     <li>fold(default,Function) -- Returns result of {@code function} when
  *     <i>this</i> is nonempty, otherwise {@code default} is returned if the
  *     {@code value} is {@code empty}.</li>
- *     <p>
- *     <li>fold(Iterable,identity,BiFunction<) -- Returns the {@code accumulated}
+ *
+ *     <li>fold(Iterable,identity,BiFunction) -- Returns the {@code accumulated}
  *     result of all the {@code Maybe} nonempty values</li>
- *     <p>
+ *
  *     <li>forEach(Consumer) -- For each iteration in <i>this</i> object.</li>
- *     <p>
+ *
  *     <li>groupBy(Iterable,Function) -- Returns a {@link Map} of key to {@link
  *     List} collections of partitioned {@code values}</li>
- *     <p>
+ *
  *     <li>iterator() -- Returns an iterator implementation for <i>this</i>.</li>
- *     <p>
+ *
  *     <li>toList() -- Returns an immutable list of containing <i>this</i>
  *     nonempty, {@code value}.</li>
- *     <p>
+ *
  *     <li>toMap() -- Returns a {@code Map} containing <i>this</i> value if
  *     nonempty.</li>
- *     <p>
- *     <il>unzip() -- Converts <i>this</i> Maybe of {@link Pair} to a {@link
- *     Pair} of Maybe objects, opposite of {@code zip}, if possible</il>
- *     <p>
+ *
+ *     <li>unzip() -- Converts <i>this</i> Maybe of {@link Pair} to a {@link
+ *     Pair} of Maybe objects, opposite of {@code zip}, if possible</li>
+ *
  *     <li>zip() -- Returns a {@code Maybe} object of both <i>this</i> and
  *     {@code that} as a pair, an {@link Pair} object</li>
  * </ul>
@@ -185,7 +183,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     /**
      * Factory method to return an instance of {@link Maybe} object with an
      * {@code empty} value.
-     * <p><
+     *
      * @param <T> Type of value.
      * @return an {@code empty} {@link Maybe} object.
      */
@@ -386,11 +384,9 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      *
      * @throws NoSuchElementException if {@code value} is unavailable.
      */
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public T get() {
-        if (delegate.isPresent())
-           return delegate.get();
-        else
-            throw new NoSuchElementException();
+        return delegate.get();
     }
 
     /**
@@ -448,9 +444,10 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     @Override
     public <R> Maybe<R> map(final Function<? super T, ? extends R> mapper) {
         Objects.requireNonNull(mapper);
-
-        Optional<R> result = delegate.map(mapper);
-        return result.map(Maybe::of).orElseGet(Maybe::empty);
+        return delegate
+            .map(mapper)
+            .<Maybe<R>>map(Maybe::of)
+            .orElseGet(Maybe::empty);
     }
 
     /**
@@ -467,7 +464,13 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     public Maybe<T> or(final Supplier<? extends Maybe<? super T>> supplier) {
         Objects.requireNonNull(supplier);
         T value = value();
-        return value != null ? this : Objects.requireNonNull(Generics.unchecked(supplier.get()));
+        if (value != null) {
+            return this;
+        } else {
+            @SuppressWarnings("unchecked")
+            Maybe<T> result = (Maybe<T>) Objects.requireNonNull(supplier.get());
+            return result;
+        }
     }
 
     /**
@@ -513,6 +516,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      *
      * @return value of {@code this} if nonempty, otherwise an {@code exception}
      * is thrown supplied from the {@code exSupplier} function.
+     * @param exSupplier exception supplier function.
      * @param <E> Type of exception thrown in the event of {@code this} being
      *           empty.
      * @throws E is thrown when {@code this} is empty.
@@ -635,7 +639,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      * it will be {@code unzipped}, essentially flattened and the {@link Pair}
      * returned.
      * <p>
-     * If {@code this} does not contain a {@link Pair} of {@code maybe} objects,
+     * If {@code thils} does not contain a {@link Pair} of {@code maybe} objects,
      * then a {@code pair} of {@code Maybe} objects is returned.
      *
      * @param <U> Type of value in first {@code Maybe} object.
@@ -645,7 +649,8 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     public <U,V> Pair<Maybe<U>,Maybe<V>> unzip() {
         T value = value();
         if (isZipped()) {
-            Pair<Maybe<U>, Maybe<V>> pair = Generics.unchecked(value);
+            @SuppressWarnings("unchecked")
+            Pair<Maybe<U>, Maybe<V>> pair = (Pair<Maybe<U>, Maybe<V>>) value;
             return Tuple.of(pair._1(),pair._2()).asPair();
         } else {
             return Tuple.<Maybe<U>,Maybe<V>>of(Maybe.empty(),Maybe.empty()).asPair();
@@ -658,7 +663,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      * <p>
      * If either {@code this} or {@code that} {@link Maybe} is empty, an empty
      * {@code Maybe} is returned.
-     * <p><
+     *
      * @param that the maybe object which is to be {@code zipped} with @code
      *             this.
      * @param <U> Type of value contained within {@code that} object.

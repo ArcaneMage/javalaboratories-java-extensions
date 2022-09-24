@@ -563,9 +563,10 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
          * factory method.
          * <p>
          * {@code Tag} not required for the {@link Floodgate} object.
-         * <p>
+         *
          * @param resource a {@link Supplier} {@code resource} with which to
          * {@code target}.
+         * @param <U> the target object to undergo tests.
          * @return this {@link TorrentBuilder}.
          */
         public <U> TorrentBuilder<T> withFloodgate(Supplier<U> resource) {
@@ -604,6 +605,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
          * @param iterations  override {@code iterations} parameter default.
          * @param resource a {@link Supplier} {@code resource} with which to
          * {@code target}.
+         * @param <U> the target object to undergo tests.
          * @return this {@link TorrentBuilder}.
          */
         public <U> TorrentBuilder<T> withFloodgate(int threads, int iterations, Supplier<U> resource) {
@@ -642,6 +644,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
          *            reporting purposes.
          * @param resource a {@link Supplier} {@code resource} with which to
          * {@code target}.
+         * @param <U> the target object to undergo tests.
          * @return this {@link TorrentBuilder}.
          */
         public <U> TorrentBuilder<T> withFloodgate(String tag, Supplier<U> resource) {
@@ -686,6 +689,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
          * @param iterations  override {@code iterations} parameter default.
          * @param resource a {@link Supplier} {@code resource} with which to
          * {@code target}.
+         * @param <U> the target object to undergo tests.
          * @return this {@link TorrentBuilder}.
          */
         public <U> TorrentBuilder<T> withFloodgate(String tag, int threads, int iterations, Supplier<U> resource) {
@@ -763,8 +767,10 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
      * override these values.
      *
      * @param clazz the class type of the {@code target} under test.
-     * @param <T> Type of {@code target} object currently being subjected to
-     *           tests.
+     * @param threads number of threads.
+     * @param iterations  number of iterations each thread must carry out.
+     * @param <T> Type of {@code target} object currently undergoing tests.
+     *
      * @return TorrentBuilder object.
      * @see TorrentBuilder#withFloodgate(Runnable)
      * @see TorrentBuilder#withFloodgate(Supplier)

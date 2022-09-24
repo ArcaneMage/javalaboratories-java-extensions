@@ -1,4 +1,3 @@
-package org.javalaboratories.core.tuple;
 /*
  * Copyright 2020 Kevin Henry
  *
@@ -14,11 +13,16 @@ package org.javalaboratories.core.tuple;
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package org.javalaboratories.core.tuple;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.*;
+import org.javalaboratories.core.collection.SmartLinkedList;
+
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -48,36 +52,16 @@ public abstract class AbstractTupleContainer implements TupleContainer {
 
     public static final long serialVersionUID = -8849025043951429993L;
 
-    private static class Node {
-        public Object element;
-        public Node prev;
-        public Node next;
-
-        public Node(Object element) {
-            this(null,element,null);
-        }
-
-        public Node(Node prev, Object element, Node next) {
-            this.element = element;
-            this.prev = prev;
-            this.next = next;
-        }
-    }
-
-    private transient int depth;
-    private transient Node head;
-    private transient Node tail;
+    private final SmartLinkedList<Object> adaptee;
 
     AbstractTupleContainer() {
-        depth = 0;
-        head = null;
-        tail = null;
+        adaptee = new SmartLinkedList<>();
     }
 
     AbstractTupleContainer(Object... elements) {
         this();
         for (Object element : elements)
-            add(element);
+            adaptee.add(element);
     }
 
     /**
@@ -118,7 +102,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     }
 
     public boolean isEmpty() {
-        return head == null && tail == null;
+        return adaptee.isEmpty();
     }
 
     /**
@@ -126,21 +110,20 @@ public abstract class AbstractTupleContainer implements TupleContainer {
      */
     @Override
     public Iterator<TupleElement> iterator() {
+
         return new Iterator<TupleElement>() {
-            Node node = head;
+            final Iterator<Object> iter = adaptee.iterator();
             int index = 0;
             @Override
             public boolean hasNext() {
-                return !isEmpty() && node != null;
+                return iter.hasNext();
             }
 
             @Override
             public TupleElement next() {
-                if (node == null)
-                    throw new NoSuchElementException();
+                Object element = iter.next();
                 TupleElement result = new TupleElement() {
-                    private Object element = node.element;
-                    private int position = index + 1;
+                    private final int position = index + 1;
                     @Override
                     public <T> T value() {
                         @SuppressWarnings("unchecked")
@@ -150,7 +133,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
 
                     @Override
                     public boolean isString() {
-                        return element != null && element instanceof String;
+                        return element instanceof String;
                     }
 
                     @Override
@@ -165,7 +148,6 @@ public abstract class AbstractTupleContainer implements TupleContainer {
                         return position;
                     }
                 };
-                node = node.next;
                 index++;
                 return result;
             }
@@ -211,7 +193,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
      * {@inheritDoc}
      */
     @Override
-    public int depth() { return depth; }
+    public int depth() { return adaptee.depth(); }
 
     /**
      * {@inheritDoc}
@@ -226,12 +208,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
      */
     @Override
     public <K> Map<K,?> toMap(Function<? super Integer, ? extends K> keyMapper) {
-        Map<K,Object> result = new LinkedHashMap<>();
-        int i = 0;
-        for (Node node = head; node != null; node = node.next)
-            result.put(keyMapper.apply(i++),node.element);
-
-        return result;
+        return adaptee.toMap(keyMapper);
     }
 
     /**
@@ -239,11 +216,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
      */
     @Override
     public Object[] toArray() {
-        Object[] result = new Object[depth];
-        int i = 0;
-        for (Node node = head; node != null; node = node.next)
-            result[i++] = node.element;
-        return result;
+        return adaptee.toArray();
     }
 
     /**
@@ -251,10 +224,7 @@ public abstract class AbstractTupleContainer implements TupleContainer {
      */
     @Override
     public List<?> toList() {
-        List<Object> result = new ArrayList<>();
-        for (Node node = head; node != null; node = node.next)
-            result.add(node.element);
-        return result;
+        return adaptee.toList();
     }
 
     /**
@@ -262,12 +232,8 @@ public abstract class AbstractTupleContainer implements TupleContainer {
      */
     @Override
     public String toString() {
-        StringJoiner joiner = new StringJoiner(",");
-        for (TupleElement element : this)
-            if (element.value() == null) joiner.add("null");
-            else joiner.add(element.value().toString());
-
-        return String.format("%s=[%s]",this.getClass().getSimpleName(),joiner.toString());
+        String s = adaptee.toString();
+        return String.format("%s=%s",this.getClass().getSimpleName(),s);
     }
 
     /**
@@ -287,87 +253,21 @@ public abstract class AbstractTupleContainer implements TupleContainer {
     }
 
     final AbstractTupleContainer add(Object element) {
-        linkToLastNode(element);
+        adaptee.add(element);
         return this;
     }
 
     final AbstractTupleContainer addFirst(Object element) {
-        linkToFirstNode(element);
+        adaptee.addFirst(element);
         return this;
     }
 
     final int indexOf(Object element) {
-        int result = 0;
-        for (Node node = head; node != null; node = node.next) {
-            if ((element == null && node.element == null) ||
-                    (element != null && element.equals(node.element)))
-                return result;
-            result++;
-        }
-        return -1;
+        return adaptee.indexOf(element);
     }
 
     final Object get(int index) {
-        validateNodeIndex(index);
-        Object result = null;
-        int i = 0;
-        for (Node node = head; node != null; node = node.next) {
-            if (index == i) {
-                result = node.element;
-                break;
-            }
-            else i++;
-        }
-        return result;
-    }
-
-    private Node linkToFirstNode(Object element) {
-        Node link;
-        if (isEmpty()) {
-            link = new Node(element);
-            tail = link;
-        } else {
-            link = new Node(null,element, head);
-            head.prev = link;
-        }
-        head = link;
-        depth++;
-        return head;
-    }
-
-    private Node linkToLastNode(Object element) {
-        Node link;
-        if (isEmpty()) {
-            link = new Node(element);
-            head = link;
-        } else {
-            link = new Node(tail,element,null);
-            tail.next = link;
-        }
-        tail = link;
-        depth++;
-        return tail;
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        int size = in.readInt();
-        for (int i = 0; i < size; i++) {
-            Object element = in.readObject();
-            linkToLastNode(element);
-        }
-    }
-
-    private void validateNodeIndex(int index) {
-        if (index < 0 || index > depth -1)
-            throw new IndexOutOfBoundsException();
-    }
-
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        out.writeInt(this.depth);
-        for (Node node = head; node != null; node = node.next)
-            out.writeObject(node.element);
+        return adaptee.get(index);
     }
 }
 

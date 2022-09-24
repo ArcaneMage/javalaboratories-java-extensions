@@ -210,7 +210,6 @@ public final class Tuple1<T1> extends AbstractTuple {
     /**
      * Tests whether given {@code tuple} is equal to this {@code tuple}, and if
      * true, the {@code consumer} function is executed.
-     * <p>
      * <pre>
      * {@code
      *      tuple

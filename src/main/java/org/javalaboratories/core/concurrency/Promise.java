@@ -32,7 +32,7 @@ import java.util.function.Function;
  * For example, the following promises to execute the {@code doLongRunningTask()}
  * task asynchronously immediately after the construction of the
  * {@link PrimaryAction} object:
- * <pre
+ * <pre>
  * {@code
  *      Promise<Integer> promise = Promises
  *          .newPromise(PrimaryAction.of(() -> doLongRunningTask("Hello World")));
@@ -53,7 +53,7 @@ import java.util.function.Function;
  * lambda must always return a value. After task completion, this value will
  * then be available for retrieval or optionally forwarded to the next action.
  * For example:
- * <pre
+ * <pre>
  * {@code
  *      Promise<Integer> promise = Promises
  *          .newPromise(PrimaryAction.of(() -> doLongRunningTask("Hello World")))
@@ -74,7 +74,7 @@ import java.util.function.Function;
  * the value is required for a calculation resulting in a new value.
  * This is the role of the {@link TransmuteAction} action object. Example of
  * usage is shown below:
- * <pre
+ * <pre>
  * {@code
  *      Promise<String> promise = Promises
  *          .newPromise(PrimaryAction.of(() -> doLongRunningTask("Reading integer value from database")))
@@ -145,7 +145,7 @@ public interface Promise<T> {
      * <p>
      * The transition of states is as follows:
      * <pre>
-     *     PENDING --> FULFILLED | REJECTED
+     *     PENDING --&gt; FULFILLED | REJECTED
      * </pre>
      * Promise objects always start with {@link States#PENDING}. Essentially
      * means no action has been undertaken by this object yet, but the moment an
@@ -184,6 +184,7 @@ public interface Promise<T> {
      * asynchronous task and the underlying {@link CompletableFuture} future.
      *
      * @param function the action being processed asynchronously.
+     * @param <R> resultant type of applying the {@code function}
      * @return a new {@link Promise} object to manage the {@link TaskAction} action
      * object.
      */
@@ -210,6 +211,7 @@ public interface Promise<T> {
      * future.
      *
      * @param action the action being processed asynchronously.
+     * @param <R> resultant type of transmute action.
      * @return a new {@link Promise} object to manage the {@link TransmuteAction}
      * action object.
      */
@@ -226,7 +228,7 @@ public interface Promise<T> {
      * <p>
      * The transition of states is as follows:
      * <pre>
-     *     PENDING -> FULFILLED | REJECTED
+     *     PENDING -&gt; FULFILLED | REJECTED
      * </pre>
      * Promise objects always start with {@link States#PENDING}. Essentially, no
      * action has been undertaken by this object yet, but the moment an action

@@ -46,6 +46,7 @@ public final class Handlers {
      *
      * @param consumer function that throws a checked exception
      * @param <T> type of input into the operation.
+     * @param <E> type of exception.
      * @return consumer object that handles the exception.
      */
     public static <T,E extends Throwable> Consumer<T> consumer(final ThrowableConsumer<T,E> consumer) {
@@ -66,6 +67,7 @@ public final class Handlers {
      * @param biConsumer function that throws a checked exception.
      * @param <T> type of input into the operation.
      * @param <U> type of input into the operation.
+     * @param <E> type of exception.
      * @return consumer object that handles the exception.
      */
     public static <T,U,E extends Throwable> BiConsumer<T,U> biConsumer(final ThrowableBiConsumer<T,U,E> biConsumer) {
@@ -86,6 +88,7 @@ public final class Handlers {
      * @param function function that throws a checked exception.
      * @param <T> type of input into the operation
      * @param <R> type of result from the operation
+     * @param <E> type of exception.
      * @return function object that handles the exception
      */
     public static <T,R,E extends Throwable> Function<T,R> function(final ThrowableFunction<T,R,E> function) {
@@ -109,6 +112,7 @@ public final class Handlers {
      * @param <T> type of input into the operation
      * @param <U> type of second input into the operation
      * @param <R> type of result from the operation
+     * @param <E> type of exception.
      * @return function object that handles the exception
      */
     public static <T,U,R,E extends Throwable> BiFunction<T,U,R> biFunction(final ThrowableBiFunction<T,U,R,E> function) {
@@ -130,6 +134,7 @@ public final class Handlers {
      *
      * @param predicate function that throws a checked exception.
      * @param <T> type of input into the operation
+     * @param <E> type of exception.
      * @return predicate object that handles the exception
      */
     public static <T,E extends Throwable> Predicate<T> predicate(final ThrowablePredicate<T,E> predicate) {
@@ -152,6 +157,7 @@ public final class Handlers {
      * @param predicate function that throws a checked exception.
      * @param <T> type of input into the operation
      * @param <U> type of second inout into the operation
+     * @param <E> type of exception.
      * @return predicate object that handles the exception
      */
     public static <T,U,E extends Throwable> BiPredicate<T,U> biPredicate(final ThrowableBiPredicate<T,U,E> predicate) {
@@ -173,6 +179,7 @@ public final class Handlers {
      *
      * @param unaryOperator function that throws a checked exception.
      * @param <T> type of input into the operation.
+     * @param <E> type of exception.
      * @return unary operator object that handles the exception.
      */
     public static <T,E extends Throwable> UnaryOperator<T> unaryOperator(final ThrowableUnaryOperator<T,E> unaryOperator) {
@@ -194,6 +201,7 @@ public final class Handlers {
      *
      * @param binaryOperator function that throws a checked exception.
      * @param <T> type of input into the operation.
+     * @param <E> type of exception.
      * @return unary operator object that handles the exception.
      */
     public static <T,E extends Throwable> BinaryOperator<T> binaryOperator(final ThrowableBinaryOperator<T,E> binaryOperator) {
@@ -215,6 +223,7 @@ public final class Handlers {
      *
      * @param callable function that throws a checked exception.
      * @param <T> type of input into the operation.
+     * @param <E> type of exception.
      * @return callable object that handles the exception.
      */
     public static <T, E extends Throwable> Callable<T> callable(final ThrowableCallable<T,E> callable) {
@@ -233,6 +242,7 @@ public final class Handlers {
     /**
      * Wraps runnable {@link ThrowableRunnable} into a {@link Runnable} function,
      * which handles the checked exceptions.
+     * @param <E> type of exception.
      *
      * @param runnable function that throws a checked exception.
      * @return runnable object that handles the exception.

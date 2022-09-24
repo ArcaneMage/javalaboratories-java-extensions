@@ -124,7 +124,7 @@ public class FloodThreadPoolExecutor extends ThreadPoolExecutor implements Flood
      * {@inheritDoc}
      * <p>
      * This thread pool does not support {@link Runnable} objects.
-     * @throws UnsupportedOperationException
+     * @throws UnsupportedOperationException is the default implementation.
      */
     public Future<?> submit(Runnable task) {
         throw new UnsupportedOperationException();
@@ -134,7 +134,7 @@ public class FloodThreadPoolExecutor extends ThreadPoolExecutor implements Flood
      * {@inheritDoc}
      * <p>
      * This thread pool does not support {@link Runnable} objects.
-     * @throws UnsupportedOperationException
+     * @throws UnsupportedOperationException is the default implementation.
      */
     public <T> Future<T> submit(Runnable task, T result) {
         throw new UnsupportedOperationException();

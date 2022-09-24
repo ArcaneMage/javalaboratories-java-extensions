@@ -69,6 +69,8 @@ public final class SecretKeyStore extends AbstractKeyStore implements Serializab
      * object.
      * <p>
      * {@code Maybe} object will be empty if key is not found in keystore.
+     * @param keyAlias alias of key
+     * @param keyPassword password of key
      * @throws CryptographyException keystore processing errors (file i/o,
      * algorithm errors), an issue with original arguments.
      */
