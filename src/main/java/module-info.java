@@ -17,7 +17,7 @@ module javalaboratories.java.extensions {
   requires lombok;
   requires org.apache.commons.codec;
   requires org.apache.commons.lang3;
-  requires slf4j.api;
+  requires org.slf4j;
 
   exports org.javalaboratories.core;
   exports org.javalaboratories.core.collection;
