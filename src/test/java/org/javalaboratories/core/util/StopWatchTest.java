@@ -87,7 +87,7 @@ public class StopWatchTest {
     }
 
     @Test
-    void testPrintln_Pass() {
+    public void testPrintln_Pass() {
         // Given
         LogCaptor captor = LogCaptor.forClass(StopWatch.class);
         stopWatch1.time(() -> doSomethingVoidMethod(300));
