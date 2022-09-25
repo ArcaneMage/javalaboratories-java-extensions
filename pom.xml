@@ -6,7 +6,7 @@
 
     <groupId>org.javalaboratories</groupId>
     <artifactId>java-extensions</artifactId>
-    <version>1.1.10.0-RELEASE</version>
+    <version>1.1.10.1-RELEASE</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>This is a library of utilities to encourage functional
