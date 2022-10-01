@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
  * <p>
  * To complete the observer design pattern, implement the {@link EventSubscriber}
  * interface and introduce {@code event} types by subclassing {@link AbstractEvent}
- * class and/or use the out-of-the-box {@link Event} objects defined in the
- * {@link CommonEvents} class.
+ * class.
  * <p>
  * The implementation is considered thread-safe, and so subscribing and/or
  * unsubscribing is permitted during {@code subscriber} notification. However
@@ -59,14 +58,12 @@ import java.util.stream.Collectors;
  * and maintain reasonable concurrency in an multi-threaded context.
  *
  * @param <T> Type of source in which the event originated.
- * @param <V> Type of value and/or state forwarded to the {@code subscribers}
  *
  * @see Event
  * @see AbstractEvent
- * @see CommonEvents
  * @see EventSubscriber
  */
-public class EventBroadcaster<T extends EventSource,V> implements EventPublisher<V>, EventSource {
+public class EventBroadcaster<T extends EventSource,E extends Event> implements EventPublisher<E>, EventSource {
 
     private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
@@ -75,19 +72,18 @@ public class EventBroadcaster<T extends EventSource,V> implements EventPublisher
     private static int uniqueIdentity = 0;
 
     private final Object mainLock;
-    private final Map<String,Subscription> subscriptions;
+    private final Map<String,Subscription<E>> subscriptions;
     private final T source;
 
     @Getter
     @AllArgsConstructor
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-    private class Subscription {
+    private static class Subscription<E extends Event> {
         private final Object lock = new Object();
         @EqualsAndHashCode.Include
         private final String identity;
 
-        private final EventSubscriber<V> subscriber;
-        private final Set<Event> captureEvents;
+        private final EventSubscriber<E> subscriber;
         private boolean canceled;
     }
 
@@ -118,38 +114,34 @@ public class EventBroadcaster<T extends EventSource,V> implements EventPublisher
     }
 
     @Override
-    public void publish(final Event event, final V value) {
-        Event anEvent = Objects.requireNonNull(event,"No event?")
+    public void publish(final E event) {
+        @SuppressWarnings("unchecked")
+        E anEvent = (E) Objects.requireNonNull(event,"No event?")
                 .assign(source);
 
-        Set<Subscription> observers;
+        Set<Subscription<E>> observers;
         synchronized(mainLock) {
             observers = new HashSet<>(subscriptions.values());
         }
 
         observers.forEach(subscription -> {
-            if (subscription.getCaptureEvents().contains(anEvent)) {
-                EventSubscriber<V> subscriber = subscription.getSubscriber();
-                synchronized (subscription.lock) {
-                    try {
-                        if (!subscription.canceled)
-                            subscriber.notify(anEvent, value);
-                    } catch (Throwable e) {
-                        logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
-                        subscription.canceled = true;
-                        unsubscribe(subscriber);
-                    }
+            EventSubscriber<E> subscriber = subscription.getSubscriber();
+            synchronized (subscription.lock) {
+                try {
+                    if (!subscription.canceled)
+                        subscriber.notify(anEvent);
+                } catch (Throwable e) {
+                    logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
+                    subscription.canceled = true;
+                    unsubscribe(subscriber);
                 }
             }
         });
     }
 
     @Override
-    public void subscribe(final EventSubscriber<V> subscriber, final Event... captureEvents) {
-        EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
-
-        if ( captureEvents == null || captureEvents.length < 1 )
-            throw new IllegalArgumentException("No events to capture");
+    public void subscribe(final EventSubscriber<E> subscriber) {
+        EventSubscriber<E> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
 
         synchronized(mainLock) {
             subscriptions.values().stream()
@@ -159,16 +151,15 @@ public class EventBroadcaster<T extends EventSource,V> implements EventPublisher
                     throw new EventException("Subscriber exists -- unsubscribe first");
                 });
 
-            Subscription subscription = new Subscription(getUniqueIdentity(), aSubscriber,
-                    Collections.unmodifiableSet(new HashSet<>(Arrays.asList(captureEvents))),false);
+            Subscription<E> subscription = new Subscription<>(getUniqueIdentity(), aSubscriber,false);
 
             subscriptions.put(subscription.getIdentity(), subscription);
         }
     }
 
     @Override
-    public boolean unsubscribe(final EventSubscriber<V> subscriber) {
-        EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
+    public boolean unsubscribe(final EventSubscriber<E> subscriber) {
+        EventSubscriber<E> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
 
         synchronized(mainLock) {
             // Derive subscription identity

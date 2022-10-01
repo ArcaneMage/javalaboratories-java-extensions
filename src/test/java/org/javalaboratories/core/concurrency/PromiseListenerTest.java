@@ -1,7 +1,6 @@
 package org.javalaboratories.core.concurrency;
 
 import nl.altindag.log.LogCaptor;
-import org.javalaboratories.core.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -15,7 +14,7 @@ import java.util.function.BiConsumer;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
 import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
-import static org.javalaboratories.core.concurrency.PromiseEvents.*;
+import static org.javalaboratories.core.concurrency.PromiseEvent.Actions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
@@ -180,6 +179,7 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         // When
         wait("testThen_TaskActionCompleteHandlerException_Pass");
         assertEquals(3,listeners.size());
+        promise.await();
         awaitListeners(1,DEFAULT_LISTENER_TIMEOUT);
 
         // Then
@@ -380,9 +380,9 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
             this.name = name;
         }
         @Override
-        public void notify(Event event, EventState<?> value) {
-            if (event.isAny(PRIMARY_ACTION_EVENT,TASK_ACTION_EVENT,TRANSMUTE_ACTION_EVENT)) {
-                logger.info("Listener {} received event={}, state={}",name,event.getEventId(),value.getValue());
+        public void notify(final PromiseEvent<?> event) {
+            if (event.isAny(PRIMARY_ACTION,TASK_ACTION,TRANSMUTE_ACTION)) {
+                logger.info("Listener {} received event={}, state={}",name,event.getEventId(),event.getValue());
                 events++;
             }
         }

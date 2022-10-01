@@ -35,6 +35,7 @@ public abstract class AbstractConcurrencyTest {
     public void sleep(long millis) {
         try {
             Thread.sleep(millis);
+            Thread.yield();
         } catch (InterruptedException e) {
             // Do nothing
         }

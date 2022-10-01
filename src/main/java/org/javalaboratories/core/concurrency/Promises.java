@@ -58,10 +58,12 @@ import java.util.function.Supplier;
  *          public static class PromiseEventListener implements PromiseEventSubscriber {
  *              ...
  *              ...
- *              public void notify (Event event, EventState<?> value {
- *                   if (event.isAny(PRIMARY_ACTION_EVENT,TASK_ACTION_EVENT,TRANSMUTE_ACTION_EVENT)) {
- *                      logger.info("Received event {}, state {}",event.getEventId(),value.getValue());
- *                   }
+ *              @Override
+ *              public void notify(final PromiseEvent<?> event) {
+ *                  if (event.isAny(PRIMARY_ACTION,TASK_ACTION,TRANSMUTE_ACTION)) {
+ *                      logger.info("Listener {} received event={}, state={}",name,event.getEventId(),event.getValue());
+ *                      events++;
+ *                  }
  *              }
  *          }
  *          ...
@@ -76,7 +78,7 @@ import java.util.function.Supplier;
  * </pre>
  * The above example illustrates the ability to not only define your {@link
  * Action} handlers but also notify {@code listeners/subscribers} of {@link
- * PromiseEvents} -- there is no limit to the number of listeners, and to avoid
+ * PromiseEvent} -- there is no limit to the number of listeners, and to avoid
  * blocking, they are notified asynchronously.
  */
 @SuppressWarnings("WeakerAccess")
@@ -206,13 +208,8 @@ public final class Promises {
      * returned to the client.
      * <p>
      * This implementation of a {@link Promise} object has the ability to publish
-     * events to its {@code subscribers}. There are three types of events all
-     * subscribers are notified on:
-     * <ol>
-     *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
-     *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
-     *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
-     * </ol>
+     * events to its {@code subscribers}.
+     *
      * There is no limit to the number of {@code subscribers}, but if a
      * {@code subscriber} is considered "toxic" (unhandled exception raised),
      * the {@code subscriber} will be banned from event notification.
@@ -242,13 +239,8 @@ public final class Promises {
      * {@link Promise} returned to the client.
      * <p>
      * This implementation of a {@link Promise} object has the ability to publish
-     * events to its {@code subscribers}. There are three types of events all
-     * subscribers are notified on:
-     * <ol>
-     *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
-     *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
-     *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
-     * </ol>
+     * events to its {@code subscribers}.
+     *
      * There is no limit to the number of {@code subscribers}, but if a
      * {@code subscriber} is considered "toxic" (unhandled exception raised),
      * the {@code subscriber} will be banned from event notification.

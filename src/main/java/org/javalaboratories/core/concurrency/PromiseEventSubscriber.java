@@ -20,13 +20,7 @@ import org.javalaboratories.core.event.EventSubscriber;
 
 /**
  * Implement this interface to receive events from the {@link Promise} object.
- * <p>
- * There are three types of events all subscribers are notified on:
- * <ol>
- *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
- *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
- *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
- * </ol>
+ *
  * {@link Promise} object asynchronously notifies events to registered
  * {@code listeners/subscribers} immediately after the {@link Promise}
  * transitions to the {@link Promise.States#FULFILLED} state.
@@ -45,4 +39,4 @@ import org.javalaboratories.core.event.EventSubscriber;
  * @see Promises
  * @see AsyncPromiseTaskPublisher
  */
-public interface PromiseEventSubscriber extends EventSubscriber<EventState<?>> {}
+public interface PromiseEventSubscriber extends EventSubscriber<PromiseEvent<?>> {}

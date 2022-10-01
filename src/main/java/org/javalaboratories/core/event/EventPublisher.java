@@ -29,17 +29,17 @@ package org.javalaboratories.core.event;
  * exactly which {@code events} to which the {@code subscriber} wants to
  * listen.
  * <p>
- * Use the {@link EventPublisher#subscribe(EventSubscriber, Event...)} method
- * to register an {@link EventSubscriber} object, indicating the events of
- * interest. The {@link EventPublisher#unsubscribe(EventSubscriber)} method
+ * Use the {@link EventPublisher#subscribe(EventSubscriber)} method
+ * to register an {@link EventSubscriber} object. The
+ * {@link EventPublisher#unsubscribe(EventSubscriber)} method
  * unregisters the {@link EventSubscriber} object from the {@link EventPublisher}.
  *
- * @param <V> Type of value and/or state forwarded to the {@code subscribers}
+ * @param <T> type of event
  * @see Event
  * @see EventBroadcaster
  * @see EventSubscriber
  */
-public interface EventPublisher<V> {
+public interface EventPublisher<T extends Event> {
     /**
      * Publish an {@link Event} to interested {@link EventSubscriber} objects
      * when {@link EventPublisher} or the owning component which encapsulates
@@ -55,12 +55,9 @@ public interface EventPublisher<V> {
      * continue notifying outstanding {@code subscribers}.
      *
      * @param event the {@link Event} object with which to publish to recipients.
-     * @param value the state value when {@link EventPublisher} or the owning
-     *              component which encapsulates the {@code EventPublisher}
-     *              state changes.
      * @throws NullPointerException if {@code event} is null.
      */
-    void publish(final Event event, final V value);
+    void publish(final T event);
 
     /**
      * Registers the {@link EventSubscriber} with this {@link EventPublisher}.
@@ -73,13 +70,11 @@ public interface EventPublisher<V> {
      * Note: It is not possible to subscribe the same subscriber multiple times.
      *
      * @param subscriber the {@link EventSubscriber} object to register.
-     * @param captureEvents varargs of {@link Event} objects the
-     *                      {@link EventSubscriber} is interested in.
      * @throws NullPointerException if {@code subscriber} is null.
      * @throws IllegalArgumentException if {@code captureEvents} is null or less
      * than 1. Multiple subscription of the same subscriber is not possible.
      */
-    void subscribe(final EventSubscriber<V> subscriber, final Event... captureEvents);
+    void subscribe(final EventSubscriber<T> subscriber);
 
     /**
      * Unregisters the {@link EventSubscriber} from this {@link EventPublisher}.
@@ -92,7 +87,7 @@ public interface EventPublisher<V> {
      *         or unknown {@code subscriber}
      * @throws NullPointerException if {@code subscriber} is null.
      */
-    boolean unsubscribe(final EventSubscriber<V> subscriber);
+    boolean unsubscribe(final EventSubscriber<T> subscriber);
 
     /**
      * @return number of subscribers registered with this {@code publisher}

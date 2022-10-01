@@ -30,6 +30,8 @@ import static org.javalaboratories.core.event.EventSource.EVENT_SOURCE_UNKNOWN;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public abstract class AbstractEvent extends EventObject implements Event {
 
+    private static final long serialVersionUID = -3388972209267427324L;
+
     @EqualsAndHashCode.Include
     private final String eventId;
 
@@ -50,7 +52,8 @@ public abstract class AbstractEvent extends EventObject implements Event {
 
     @Override
     public AbstractEvent clone() throws CloneNotSupportedException {
-        return (AbstractEvent) super.clone();
+        AbstractEvent clone = (AbstractEvent) super.clone();
+        return clone;
     }
 
     @Override

@@ -15,31 +15,28 @@
  */
 package org.javalaboratories.core.concurrency;
 
+import lombok.Getter;
 import org.javalaboratories.core.event.AbstractEvent;
 
-public final class PromiseEvents {
+import java.util.Arrays;
+import java.util.Objects;
 
-    public static final PrimaryActionEvent PRIMARY_ACTION_EVENT = new PrimaryActionEvent();
-    public static final TaskActionEvent TASK_ACTION_EVENT = new TaskActionEvent();
-    public static final TransmuteActionEvent TRANSMUTE_ACTION_EVENT = new TransmuteActionEvent();
+@Getter
+public class PromiseEvent<T> extends AbstractEvent {
+    private static final long serialVersionUID = 8029123351197793513L;
 
+    public enum Actions {PRIMARY_ACTION,TASK_ACTION,TRANSMUTE_ACTION}
 
-    private static class TaskActionEvent extends AbstractEvent {
-        public TaskActionEvent() {
-            super();
-        }
+    private final Actions action;
+    private final T value;
+
+    public PromiseEvent(Actions action, T value) {
+      this.action = action;
+      this.value = value;
     }
 
-    private static class TransmuteActionEvent extends AbstractEvent {
-        public TransmuteActionEvent() {
-            super();
-        }
+    public boolean isAny(Actions... actions) {
+        Objects.requireNonNull(actions);
+        return Arrays.asList(actions).contains(this.action);
     }
-
-    private static class PrimaryActionEvent extends AbstractEvent {
-        public PrimaryActionEvent() {
-            super();
-        }
-    }
-
 }
