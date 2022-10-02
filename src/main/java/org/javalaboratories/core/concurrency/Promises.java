@@ -58,8 +58,7 @@ import java.util.function.Supplier;
  *          public static class PromiseEventListener implements PromiseEventSubscriber {
  *              ...
  *              ...
- *              @Override
- *              public void notify(final PromiseEvent<?> event) {
+ *              public void notify(final PromiseEvent<T> event) {
  *                  if (event.isAny(PRIMARY_ACTION,TASK_ACTION,TRANSMUTE_ACTION)) {
  *                      logger.info("Listener {} received event={}, state={}",name,event.getEventId(),event.getValue());
  *                      events++;
