@@ -226,7 +226,7 @@ public final class Promises {
      * @see AsyncPromiseTaskPublisher
      */
     public static <T> Promise<T> newPromise(final Supplier<? extends T> supplier,
-                                            final List<? extends PromiseEventSubscriber> subscribers) {
+                                            final List<? extends PromiseEventSubscriber<T>> subscribers) {
         return newPromise(PrimaryAction.of(supplier),subscribers);
     }
 
@@ -257,7 +257,7 @@ public final class Promises {
      * @see AsyncPromiseTaskPublisher
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
-                                            final List<? extends PromiseEventSubscriber> subscribers) {
+                                            final List<? extends PromiseEventSubscriber<T>> subscribers) {
         return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedPoolService,action,subscribers));
     }
 

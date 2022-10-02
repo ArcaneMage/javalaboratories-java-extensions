@@ -20,10 +20,11 @@ import org.javalaboratories.core.event.EventSubscriber;
 
 /**
  * Implement this interface to receive events from the {@link Promise} object.
- *
+ * <p>
  * {@link Promise} object asynchronously notifies events to registered
  * {@code listeners/subscribers} immediately after the {@link Promise}
  * transitions to the {@link Promise.States#FULFILLED} state.
+ * <p>
  * Notification of {@code subscribers} is performed asynchronously to avoid
  * blocking the main/current thread. This is also means it is possible to
  * retrieve the result of the asynchronous computation <b>before all</b> the
@@ -33,10 +34,10 @@ import org.javalaboratories.core.event.EventSubscriber;
  * {@link Promise#getResult()} methods until all {@link PromiseEventSubscriber}
  * have been notified. It is not the role of {@link Promise} object to be
  * dependent on {@code subscribers}, but it does guarantee to eventually
- * inform all {@code subscribers} of the {@link Event}.
+ * inform all {@code subscribers} of the {@link PromiseEvent}.
  *
  * @see Promise
  * @see Promises
  * @see AsyncPromiseTaskPublisher
  */
-public interface PromiseEventSubscriber extends EventSubscriber<PromiseEvent<?>> {}
+public interface PromiseEventSubscriber<T> extends EventSubscriber<PromiseEvent<T>> {}

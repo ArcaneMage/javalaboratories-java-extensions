@@ -328,8 +328,8 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     @Test
     public void testGetAction_Pass() {
         // Given
-        PrimaryAction<Void> action = PrimaryAction.of(() -> null);
-        Promise<Void> promise = Promises.newPromise(action,listeners);
+        PrimaryAction<Integer> action = PrimaryAction.of(() -> null);
+        Promise<Integer> promise = Promises.newPromise(action,listeners);
         assertEquals(action,promise.getAction());
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
 
@@ -346,8 +346,8 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     @Test
     public void testToString_Pass() {
         // Given
-        PrimaryAction<Void> action = PrimaryAction.of(() -> null);
-        Promise<Void> promise = Promises.newPromise(action,listeners);
+        PrimaryAction<Integer> action = PrimaryAction.of(() -> null);
+        Promise<Integer> promise = Promises.newPromise(action,listeners);
 
         // When
         assertEquals(3,listeners.size());
@@ -371,7 +371,7 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         logger.debug("awaitListeners elapsed time={}",elapsed);
     }
 
-    public static class PromiseEventListener implements PromiseEventSubscriber {
+    public static class PromiseEventListener implements PromiseEventSubscriber<Integer> {
         private final String name;
         private int events;
 
@@ -380,7 +380,7 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
             this.name = name;
         }
         @Override
-        public void notify(final PromiseEvent<?> event) {
+        public void notify(final PromiseEvent<Integer> event) {
             if (event.isAny(PRIMARY_ACTION,TASK_ACTION,TRANSMUTE_ACTION)) {
                 logger.info("Listener {} received event={}, state={}",name,event.getEventId(),event.getValue());
                 events++;
