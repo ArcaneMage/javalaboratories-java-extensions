@@ -212,6 +212,28 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    public void testThen_TransmuteActionTypeTest_Pass() {
+        // Given
+        AtomicInteger received = new AtomicInteger(0);
+        Promise<String> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testThen_TransmuteAction_Pass")),listeners)
+                .then(TransmuteAction.of(value -> getValue(received, () -> value + 1)))
+                .then(TransmuteAction.of(value -> value+""));
+
+        // When
+        wait("testThen_TransmuteActionTypeTest_Pass");
+        assertEquals(3,listeners.size());
+        String result = promise.getResult().get();
+        awaitListeners(3,DEFAULT_LISTENER_TIMEOUT);
+
+        // Then
+        assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 3));
+        assertEquals(FULFILLED,promise.getState());
+        int value = received.get();
+        assertEquals(128,value);
+        assertEquals("128",result);
+    }
+
+    @Test
     public void testThen_TransmuteActionCompleteHandlerException_Fail() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
