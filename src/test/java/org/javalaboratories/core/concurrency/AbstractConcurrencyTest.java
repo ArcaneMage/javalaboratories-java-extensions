@@ -16,7 +16,7 @@ public abstract class AbstractConcurrencyTest {
         return value;
     }
 
-    void wait(String testcase, Object... params) {
+    void waitMessage(String testcase, Object... params) {
         String logMessage = testcase+": Waiting for kept promises";
         logger.info(logMessage,params);
     }
