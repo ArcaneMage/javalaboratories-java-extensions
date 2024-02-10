@@ -261,7 +261,6 @@ public class MaybeTest {
     public void testOrElse_Pass() {
         assertEquals("Hello World", maybe.orElse("Hello Mars"));
         assertEquals("Hello Mars", empty.orElse("Hello Mars"));
-
     }
 
     @Test

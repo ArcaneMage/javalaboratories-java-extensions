@@ -68,6 +68,7 @@ import java.security.cert.Certificate;
  * @see CryptographyFactory
  * @see SunRsaAsymmetricCryptography
  */
+@Deprecated
 public final class SunRsaAsymmetricCryptography extends SunCryptography implements AsymmetricCryptography {
 
     private static final String AES_ALGORITHM = "AES";
@@ -99,7 +100,7 @@ public final class SunRsaAsymmetricCryptography extends SunCryptography implemen
         };
     }
 
-    /**
+    /**.
      * {@inheritDoc}
      *
      * @throws NullPointerException for null parameters.

@@ -214,7 +214,6 @@ public class TryTest {
         assertTrue(message);
     }
 
-
     @Test
     public void testOrElse_Pass() {
         // When

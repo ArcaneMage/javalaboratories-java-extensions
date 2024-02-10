@@ -294,7 +294,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
     public <D> Either<A,D> flatten() {
         @SuppressWarnings("unchecked")
         Either<A,D> self = (Either<A,D>) this;
-        return isLeft() ? self : (Either<A,D>) Monad.super.flatten();
+        return isLeft() ? self : (Either<A,D>) Monad.super.<D>flatten();
     }
 
     /**

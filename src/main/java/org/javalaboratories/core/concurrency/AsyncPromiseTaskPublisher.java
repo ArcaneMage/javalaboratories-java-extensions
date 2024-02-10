@@ -94,7 +94,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      *                    objects.
      * @throws NullPointerException if service or action is null.
      */
-    AsyncPromiseTaskPublisher(final ManagedPoolService service, final PrimaryAction<T> action,
+    AsyncPromiseTaskPublisher(final ManagedPromiseService service, final PrimaryAction<T> action,
                               final List<? extends PromiseEventSubscriber<T>> subscribers) {
         super(service,action);
         Arguments.requireNonNull(() -> new IllegalArgumentException("Arguments null?"),service,action,subscribers);
@@ -107,7 +107,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * {@link Promise} object to represent encapsulated {@code CompletableFuture}
      * and {@code publisher}.
      * <p>
-     * Preferably use {@link AsyncPromiseTaskPublisher(ManagedPoolService,
+     * Preferably use {@link AsyncPromiseTaskPublisher( ManagedPromiseService ,
      * PrimaryAction, List)} constructor or the {@link Promises} factory method.
      *
      * @param service the thread pool service.
@@ -118,8 +118,8 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @param publisher underlying event publisher.
      * @throws NullPointerException if service or action or future or promise is null.
      */
-     AsyncPromiseTaskPublisher(final ManagedPoolService service, final Action<T> action,
-                              final CompletableFuture<T> future, final EventPublisher<PromiseEvent<T>> publisher) {
+     AsyncPromiseTaskPublisher(final ManagedPromiseService service, final Action<T> action,
+                               final CompletableFuture<T> future, final EventPublisher<PromiseEvent<T>> publisher) {
         super(service,action,future);
         Objects.requireNonNull(publisher);
         this.publisher = publisher;
@@ -130,7 +130,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * {@link Promise} object to represent encapsulated {@code CompletableFuture}
      * and {@code publisher}.
      * <p>
-     * Preferably use {@link AsyncPromiseTaskPublisher(ManagedPoolService,
+     * Preferably use {@link AsyncPromiseTaskPublisher( ManagedPromiseService ,
      * PrimaryAction, List)} constructor or the {@link Promises} factory method.
      *
      * @param service the thread pool service.
@@ -142,7 +142,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @throws NullPointerException if service or action or future or promise is null.
      */
     @SuppressWarnings("unchecked")
-    public <R> AsyncPromiseTaskPublisher(final ManagedPoolService service, final TransmuteAction<T,R> action,
+    public <R> AsyncPromiseTaskPublisher(final ManagedPromiseService service, final TransmuteAction<T,R> action,
                                          final CompletableFuture<R> future, final EventPublisher<PromiseEvent<T>> publisher) {
         super(service, (Action<T>) action, (CompletableFuture<T>) future);
         Objects.requireNonNull(publisher);

@@ -223,7 +223,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      */
     @Override
     public <U> Try<U> flatten() {
-        return (Try<U>) Monad.super.flatten();
+        return (Try<U>) Monad.super.<U>flatten();
     }
 
     /**
@@ -484,6 +484,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
     @EqualsAndHashCode(callSuper = false)
     public final static class Failure<T> extends Try<T> {
 
+        private static final long serialVersionUID = 5548678031175929338L;
         private final Throwable throwable;
 
         private Failure(Throwable throwable) {
@@ -533,6 +534,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      */
     @EqualsAndHashCode(callSuper = false)
     public final static class Success<T> extends Try<T> {
+        private static final long serialVersionUID = -5291261458950855254L;
         private final T value;
 
         private Success(T value) {

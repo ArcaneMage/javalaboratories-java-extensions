@@ -21,14 +21,15 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Factory to create an instance of a {@link ManagedPoolService} pool service to
+ * Factory to create an instance of a {@link ManagedPromiseService} pool service to
  * process {@link Promise} objects asynchronously.
  * <p>
  * {@link PromiseConfiguration} informs the factory the implementation of the
- * {@link ManagedPoolService} thread pool. Failure to create an instance of the
+ * {@link ManagedPromiseService} thread pool. Failure to create an instance of the
  * the {@code pool} will render promise objects inoperable. If there is a need
  * to provide a custom implementation, it is recommended to inherit from the
  * {@link ManagedPromisePoolExecutor} class and configure the
@@ -39,11 +40,11 @@ import java.util.Objects;
  * @see PromiseConfiguration
  */
 @SuppressWarnings("WeakerAccess")
-public final class PromisePoolServiceFactory<T extends ManagedPoolService> {
+public final class PromisePoolServiceFactory<T extends ManagedPromiseService> {
 
-    private Logger logger = LoggerFactory.getLogger(PromisePoolServiceFactory.class);
+    private final Logger logger = LoggerFactory.getLogger(PromisePoolServiceFactory.class);
 
-    private static volatile ManagedPoolService instance;
+    private static volatile ManagedPromiseService instance;
 
     private final PromiseConfiguration configuration;
 
@@ -52,26 +53,26 @@ public final class PromisePoolServiceFactory<T extends ManagedPoolService> {
     }
 
     /**
-     * Creates and returns an implementation of {@link ManagedPoolService}
+     * Creates and returns an implementation of {@link ManagedPromiseService}
      * <p>
      * This is essentially a managed pool of threads, managed in the sense that
      * the pool will automatically clean up resources including outstanding running
      * threads at application termination.
      *
-     * @return an implementation of {@link ManagedPoolService}
-     * @see ManagedPoolService
+     * @return an implementation of {@link ManagedPromiseService}
+     * @see ManagedPromiseService
      * @see ManagedPromisePoolExecutor
      * @see PromiseConfiguration
      */
-    public T newPoolService() {
+    public T newManagedPromiseService() {
         if (instance == null) {
             synchronized (PromisePoolServiceFactory.class) {
                 String clazzname = configuration.getPoolServiceClassName();
                 try {
                     int capacity = configuration.getPoolServiceCapacity();
                     Class<?> clazz = Class.forName(clazzname);
-                    if (clazz != ManagedPromisePoolExecutor.class) {
-                        // Attempt to instantiate custom promise pool service
+                    if (isManagedPromiseServiceType(clazz)) {
+                        // Attempt to instantiate custom managed promise service
                         Constructor<?> constructor = clazz.getConstructor(int.class);
                         instance = Generics.unchecked(constructor.newInstance(capacity));
                     } else {
@@ -96,4 +97,11 @@ public final class PromisePoolServiceFactory<T extends ManagedPoolService> {
         }
         return Generics.unchecked(instance);
     }
+
+    private boolean isManagedPromiseServiceType(final Class<?> clazz) {
+        Class<?>[] interfaces = clazz.getInterfaces();
+        return Arrays.stream(interfaces)
+                .anyMatch(s -> s.getName().equals(ManagedPromiseService.class.getName()));
+    }
+
 }

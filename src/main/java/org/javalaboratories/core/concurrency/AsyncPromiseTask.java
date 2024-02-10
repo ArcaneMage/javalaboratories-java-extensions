@@ -50,7 +50,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);
 
     private final Action<T> action;
-    private final ManagedPoolService service;
+    private final ManagedPromiseService service;
     @EqualsAndHashCode.Include
     private final String identity;
     private CompletableFuture<T> future;
@@ -68,7 +68,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      *               asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    AsyncPromiseTask(final ManagedPoolService service, final PrimaryAction<T> action) {
+    AsyncPromiseTask(final ManagedPromiseService service, final PrimaryAction<T> action) {
         this(service,action,null);
     }
 
@@ -87,7 +87,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      *               action asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    AsyncPromiseTask(final ManagedPoolService service, final Action<T> action, final CompletableFuture<T> future) {
+    AsyncPromiseTask(final ManagedPromiseService service, final Action<T> action, final CompletableFuture<T> future) {
         this.service = Objects.requireNonNull(service,"No service?");
         this.action = Objects.requireNonNull(action,"No action object?");
         this.future = future;
@@ -208,7 +208,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
     /**
      * @return main thread pool service for all promises.
      */
-    ManagedPoolService getService() {
+    ManagedPromiseService getService() {
         return service;
     }
 

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.javalaboratories.core.concurrency.ManagedPoolService.ServiceStates.CLOSING;
-import static org.javalaboratories.core.concurrency.ManagedPoolService.ServiceStates.INACTIVE;
+import static org.javalaboratories.core.concurrency.ManagedPromiseService.ServiceStates.CLOSING;
+import static org.javalaboratories.core.concurrency.ManagedPromiseService.ServiceStates.INACTIVE;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
@@ -30,7 +30,7 @@ public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
     @Test
     public void testStop_Timeout_Pass () {
         // Given
-        LogCaptor logCaptor = LogCaptor.forClass(ManagedPoolService.class);
+        LogCaptor logCaptor = LogCaptor.forClass(ManagedPromiseService.class);
         pool.submit(() -> doLongRunningTask("testStop_Timeout_Pass"));
 
         // When
@@ -43,7 +43,7 @@ public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
     @Test
     public void testStop_TimeoutRetries_Pass () {
         // Given
-        LogCaptor logCaptor = LogCaptor.forClass(ManagedPoolService.class);
+        LogCaptor logCaptor = LogCaptor.forClass(ManagedPromiseService.class);
         pool.submit(() -> doLongRunningTask("testStop_Timeout_Pass"));
 
         // When
@@ -58,7 +58,7 @@ public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
     @Test
     public void testStop_Interruption_Pass () {
         // Given
-        LogCaptor logCaptor = LogCaptor.forClass(ManagedPoolService.class);
+        LogCaptor logCaptor = LogCaptor.forClass(ManagedPromiseService.class);
         Thread main = Thread.currentThread();
         pool.submit(() -> doLongRunningTask("testStop_Interruption_Pass"));
         pool.execute(() -> { sleep(350); main.interrupt();});

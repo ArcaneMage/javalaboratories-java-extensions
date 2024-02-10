@@ -65,6 +65,7 @@ import java.security.cert.Certificate;
  * @see CryptographyFactory
  * @see SunRsaAsymmetricCryptography
  */
+@Deprecated
 public interface AsymmetricCryptography {
 
     /**

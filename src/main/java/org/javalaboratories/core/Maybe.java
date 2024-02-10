@@ -238,10 +238,10 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     public static <K,V> Map<K,List<V>> groupBy(final Iterable<Maybe<V>> maybes,final Function<? super V,? extends K> partition) {
         Arguments.requireNonNull("Requires maybes,partition",maybes,partition);
 
-        HashMap<K,List<V>> result = fold(maybes,new HashMap<>(),(map,value) -> {
+        Map<K,List<V>> result = fold(maybes,new HashMap<>(),(m,value) -> {
             K key = partition.apply(value);
-            map.computeIfAbsent(key,k -> new ArrayList<>()).add(value);
-            return map;
+            m.computeIfAbsent(key,k -> new ArrayList<>()).add(value);
+            return m;
         });
         // Seal all partitions, then return map.
         result.replaceAll((k,v) -> Collections.unmodifiableList(v));
@@ -359,7 +359,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      */
     @Override
     public <U> Maybe<U> flatten() {
-        return (Maybe<U>) Monad.super.flatten();
+        return  (Maybe<U>) Monad.super.<U>flatten();
     }
 
     /**
@@ -461,15 +461,13 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      * @throws NullPointerException if {@code supplier} is {@code null} or resultant
      * {@link Maybe} returned from {@code supplier} function.
      */
-    public Maybe<T> or(final Supplier<? extends Maybe<? super T>> supplier) {
+    public Maybe<T> or(final Supplier<? extends Maybe<T>> supplier) {
         Objects.requireNonNull(supplier);
         T value = value();
         if (value != null) {
             return this;
         } else {
-            @SuppressWarnings("unchecked")
-            Maybe<T> result = (Maybe<T>) Objects.requireNonNull(supplier.get());
-            return result;
+            return Objects.requireNonNull(supplier.get());
         }
     }
 
@@ -599,7 +597,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      * @return true if {@code this} {@code value} is null.
      */
     public boolean isEmpty() {
-        return !delegate.isPresent();
+        return delegate.isEmpty();
     }
 
     /**

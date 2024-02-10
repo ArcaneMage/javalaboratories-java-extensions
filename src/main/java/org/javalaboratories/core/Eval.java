@@ -243,7 +243,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      */
     @Override
     public<U> Eval<U> flatten() {
-        return (Eval<U>) Monad.super.flatten();
+        return (Eval<U>) Monad.super.<U>flatten();
     }
 
     /**
