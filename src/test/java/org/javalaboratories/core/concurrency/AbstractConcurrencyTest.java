@@ -41,4 +41,12 @@ public abstract class AbstractConcurrencyTest {
         }
     }
 
+    void fireSigTerm(ManagedPromiseService service) {
+        // Intentionally fire simulated SIGTERM from the thread that is outside the "Promises Group"
+        Thread t = new Thread(() -> {
+            service.signalTerm(); logger.debug("Issued SIGTERM signal");});
+        t.start();
+        sleep(16); // Current thread sleeps to allow other threads to run
+    }
+
 }

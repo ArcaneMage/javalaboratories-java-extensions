@@ -37,14 +37,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * {@code Promise} threads to terminate before concluding. Therefore, it is
  * important that {@code Promise} objects reach to a natural conclusion. It is not
  * advisable for threads to run infinitely. If this is a possibility then it
- * would to be prudent to to force shutdown the pool service with the
+ * would to be prudent to force shutdown the pool service with the
  * {@link ManagedPromisePoolExecutor#stop(long, boolean)} specifying a timeout
  * without retries ahead of program termination.
  * <p>
  * Currently, various strategies are under consideration to improve shutdown
  * behaviour.
  *
- * @see ManagedVirtualPromiseExecutor
+ * @see ManagedThreadPerTaskPromiseExecutor
  * @see ManagedPromiseService
  */
 public class ManagedPromisePoolExecutor extends AbstractManagedPromiseService {
@@ -109,7 +109,7 @@ public class ManagedPromisePoolExecutor extends AbstractManagedPromiseService {
         int i = 0;
         delegate.shutdown();
         while (!delegate.awaitTermination(timeout, TimeUnit.MILLISECONDS) && retry) {
-            logger.info("Awaiting termination of some promises  -- elapsed {} seconds", (++i * timeout) / 1000.0);
+            logger.info("Awaiting termination of some promises -- elapsed {} seconds", (++i * timeout) / 1000.0);
         }
         if (!delegate.isTerminated()) {
             delegate.shutdownNow();

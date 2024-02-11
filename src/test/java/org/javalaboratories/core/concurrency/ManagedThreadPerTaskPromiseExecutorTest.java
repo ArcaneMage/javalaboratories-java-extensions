@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 Kevin Henry
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package org.javalaboratories.core.concurrency;
 
 import nl.altindag.log.LogCaptor;
@@ -10,16 +25,17 @@ import org.slf4j.LoggerFactory;
 import static org.javalaboratories.core.concurrency.ManagedPromiseService.ServiceStates.CLOSING;
 import static org.javalaboratories.core.concurrency.ManagedPromiseService.ServiceStates.INACTIVE;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
+public class ManagedThreadPerTaskPromiseExecutorTest extends AbstractConcurrencyTest {
 
-    private ManagedPromisePoolExecutor service;
+    private ManagedThreadPerTaskPromiseExecutor service;
 
-    private static final Logger logger = LoggerFactory.getLogger(ManagedPromisePoolExecutorTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(ManagedThreadPerTaskPromiseExecutorTest.class);
 
     @BeforeEach
     public void setup() {
-        service = new ManagedPromisePoolExecutor(4, false);
+        service = new ManagedThreadPerTaskPromiseExecutor(4, false);
     }
 
     @AfterEach
@@ -30,20 +46,20 @@ public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
     @Test
     public void testStop_Timeout_Pass () {
         // Given
-        LogCaptor logCaptor = LogCaptor.forClass(ManagedPromisePoolExecutor.class);
+        LogCaptor logCaptor = LogCaptor.forClass(ManagedThreadPerTaskPromiseExecutor.class);
         service.execute(() -> doLongRunningTask("testStop_Timeout_Pass"));
 
         // When
         service.stop(250,false);
 
         // Then
-        assertTrue(logCaptor.getInfoLogs().contains("Not all promises kept following shutdown -- forced shutdown"));
+        assertTrue(logCaptor.getInfoLogs().contains("Not all virtual promises kept following shutdown -- forced shutdown"));
     }
 
     @Test
     public void testStop_TimeoutRetries_Pass () {
         // Given
-        LogCaptor logCaptor = LogCaptor.forClass(ManagedPromisePoolExecutor.class);
+        LogCaptor logCaptor = LogCaptor.forClass(ManagedThreadPerTaskPromiseExecutor.class);
         service.execute(() -> doLongRunningTask("testStop_Timeout_Pass"));
 
         // When
@@ -52,7 +68,7 @@ public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
         // Then
         assertTrue(logCaptor.getInfoLogs()
                 .stream()
-                .anyMatch(s -> s.contains("Awaiting termination of some promises")));
+                .anyMatch(s -> s.contains("Awaiting termination of some virtual promises")));
     }
 
     @Test

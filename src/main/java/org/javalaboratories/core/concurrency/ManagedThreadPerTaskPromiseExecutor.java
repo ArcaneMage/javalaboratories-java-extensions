@@ -45,9 +45,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * {@code Promise} virtual threads to terminate before concluding. Therefore, it is
  * important that {@code Promise} objects reach to a natural conclusion. It is not
  * advisable for virtual threads to run infinitely. If this is a possibility then
- * it would to be prudent to to force shutdown the pool service with the
- * {@link ManagedVirtualPromiseExecutor#stop(long, boolean)} specifying a timeout
- * without retries ahead of program termination.
+ * it would to be prudent to force shutdown the pool service with the
+ * {@link ManagedThreadPerTaskPromiseExecutor#stop(long, boolean)} specifying a
+ * timeout without retries ahead of program termination.
  * <p>
  * Currently, various strategies are under consideration to improve shutdown
  * behaviour.
@@ -55,9 +55,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @see ManagedPromisePoolExecutor
  * @see ManagedPromiseService
  */
-public class ManagedVirtualPromiseExecutor extends AbstractManagedPromiseService {
+public class ManagedThreadPerTaskPromiseExecutor extends AbstractManagedPromiseService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ManagedVirtualPromiseExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(ManagedThreadPerTaskPromiseExecutor.class);
 
     public static final int DEFAULT_VIRTUAL_THREADS = 2048;
     private static final AtomicInteger workerIndex = new AtomicInteger(0);
@@ -82,7 +82,7 @@ public class ManagedVirtualPromiseExecutor extends AbstractManagedPromiseService
      * @param capacity Number of maximum virtual thread workers to carryout
      *                 promises.
      */
-    public ManagedVirtualPromiseExecutor(final int capacity) {
+    public ManagedThreadPerTaskPromiseExecutor(final int capacity) {
         this(capacity,true);
     }
 
@@ -104,9 +104,9 @@ public class ManagedVirtualPromiseExecutor extends AbstractManagedPromiseService
      * @param autoShutdown {@code true} manage automatic shutdown when VM
      *                                 receives SIGTERM.
      */
-    ManagedVirtualPromiseExecutor(final int capacity, final boolean autoShutdown) {
+    ManagedThreadPerTaskPromiseExecutor(final int capacity, final boolean autoShutdown) {
         super(autoShutdown);
-        delegate = Executors.newThreadPerTaskExecutor(ManagedVirtualPromiseExecutor::newVirtualPromiseWorker);
+        delegate = Executors.newThreadPerTaskExecutor(ManagedThreadPerTaskPromiseExecutor::newVirtualPromiseWorker);
         semaphore = new Semaphore(capacity < 1 ? DEFAULT_VIRTUAL_THREADS : capacity);
     }
 

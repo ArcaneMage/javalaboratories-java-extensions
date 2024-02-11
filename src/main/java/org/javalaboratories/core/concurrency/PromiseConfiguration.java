@@ -57,8 +57,9 @@ public class PromiseConfiguration {
     static final String PROMISE_POOL_SERVICE_CAPACITY_PROPERTY="promise.pool.service.capacity";
     static final String PROMISE_POOL_SERVICE_CLASS_PROPERTY ="promise.pool.service.class";
 
+    public static final String DEFAULT_MANAGED_SERVICE_CLASSNAME ="org.javalaboratories.core.concurrency.ManagedPromisePoolExecutor";
+
     private static final String PROMISE_CONFIGURATION_FILE= "promise-configuration.properties";
-    private static final String DEFAULT_POOL_SERVICE_CLASSNAME ="org.javalaboratories.core.concurrency.ManagedPromisePoolExecutor";
     private static final int MINIMUM_CAPACITY = 1;
 
     @ToString.Exclude
@@ -109,7 +110,7 @@ public class PromiseConfiguration {
      */
     PromiseConfiguration(final String filename) {
         properties = load(filename);
-        poolServiceClassName = getValue(PROMISE_POOL_SERVICE_CLASS_PROPERTY, DEFAULT_POOL_SERVICE_CLASSNAME);
+        poolServiceClassName = getValue(PROMISE_POOL_SERVICE_CLASS_PROPERTY, DEFAULT_MANAGED_SERVICE_CLASSNAME);
         int capacity = getValue(PROMISE_POOL_SERVICE_CAPACITY_PROPERTY,-1);
         poolServiceCapacity = capacity < MINIMUM_CAPACITY ? Runtime.getRuntime().availableProcessors() : capacity;
     }

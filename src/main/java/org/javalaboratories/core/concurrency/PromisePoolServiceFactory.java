@@ -15,13 +15,11 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import org.javalaboratories.core.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -45,7 +43,6 @@ public final class PromisePoolServiceFactory<T extends ManagedPromiseService> {
     private final Logger logger = LoggerFactory.getLogger(PromisePoolServiceFactory.class);
 
     private static volatile ManagedPromiseService instance;
-
     private final PromiseConfiguration configuration;
 
     public PromisePoolServiceFactory(final PromiseConfiguration configuration) {
@@ -67,41 +64,34 @@ public final class PromisePoolServiceFactory<T extends ManagedPromiseService> {
     public T newManagedPromiseService() {
         if (instance == null) {
             synchronized (PromisePoolServiceFactory.class) {
-                String clazzname = configuration.getPoolServiceClassName();
+                String className = configuration.getPoolServiceClassName();
                 try {
                     int capacity = configuration.getPoolServiceCapacity();
-                    Class<?> clazz = Class.forName(clazzname);
-                    if (isManagedPromiseServiceType(clazz)) {
-                        // Attempt to instantiate custom managed promise service
-                        Constructor<?> constructor = clazz.getConstructor(int.class);
-                        instance = Generics.unchecked(constructor.newInstance(capacity));
-                    } else {
-                        // Resort to default implementation
-                        instance = Generics.unchecked(new ManagedPromisePoolExecutor(capacity));
-                    }
-                    logger.debug("Promise pool service {} created and initialised with capacity {} successfully", clazz, capacity);
+                    Class<?> clazz = Class.forName(className);
+                    if (!ManagedPromiseService.class.isAssignableFrom(clazz))
+                        clazz = Class.forName(PromiseConfiguration.DEFAULT_MANAGED_SERVICE_CLASSNAME);
+                    // Attempt to instantiate custom managed promise service
+                    @SuppressWarnings("unchecked")
+                    Constructor<T> constructor = (Constructor<T>) clazz.getConstructor(int.class);
+                    instance = constructor.newInstance(capacity);
+                    logger.debug("Promise service {} created and initialised with capacity {} successfully", clazz, capacity);
                 } catch (ClassCastException e) {
-                    logger.error("Promise pool service {} class needs to inherit from {} class", clazzname, ManagedPromisePoolExecutor.class);
+                    logger.error("Promise service {} class needs to inherit from {} class", className, ManagedPromisePoolExecutor.class);
                 } catch (NoSuchMethodException e) {
-                    logger.error("Promise pool service {} class needs to have a constructor with a single int parameter", clazzname);
+                    logger.error("Promise service {} class needs to have a constructor with a single int parameter", className);
                 } catch (InvocationTargetException e) {
-                    logger.error("Promise pool service {} class constructor could not be invoked", clazzname);
+                    logger.error("Promise service {} class constructor could not be invoked", className);
                 } catch (ClassNotFoundException e) {
-                    logger.error("Class not found: {}", clazzname);
+                    logger.error("Class not found: {}", className);
                 } catch (IllegalAccessException e) {
-                    logger.error("Illegal access to method/constructor, class {}", clazzname, e);
+                    logger.error("Illegal access to method/constructor, class {}", className, e);
                 } catch (InstantiationException e) {
-                    logger.error("Instantiation exception for {} class", clazzname, e);
+                    logger.error("Instantiation exception for {} class", className, e);
                 }
             }
         }
-        return Generics.unchecked(instance);
+        @SuppressWarnings("unchecked")
+        T result = (T) instance;
+        return result;
     }
-
-    private boolean isManagedPromiseServiceType(final Class<?> clazz) {
-        Class<?>[] interfaces = clazz.getInterfaces();
-        return Arrays.stream(interfaces)
-                .anyMatch(s -> s.getName().equals(ManagedPromiseService.class.getName()));
-    }
-
 }

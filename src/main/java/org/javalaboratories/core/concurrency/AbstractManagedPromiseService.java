@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * They implement the {@link ManagedPromiseService} interface, which manage
  * instances of {@link Promise} objects.
  *
- * @see ManagedVirtualPromiseExecutor
+ * @see ManagedThreadPerTaskPromiseExecutor
  * @see ManagedPromisePoolExecutor
  */
 public abstract class AbstractManagedPromiseService implements ManagedPromiseService {
