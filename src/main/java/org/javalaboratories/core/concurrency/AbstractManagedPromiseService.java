@@ -29,15 +29,16 @@ import java.util.concurrent.atomic.AtomicReference;
  * instances of {@link Promise} objects.
  *
  * @see ManagedThreadPerTaskPromiseExecutor
- * @see ManagedPromisePoolExecutor
+ * @see ManagedThreadPoolPromiseExecutor
  */
 public abstract class AbstractManagedPromiseService implements ManagedPromiseService {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractManagedPromiseService.class);
     private final Thread shutdownHook;
     private final AtomicReference<ServiceStates> state;
+    private final int capacity;
 
-    public AbstractManagedPromiseService(final boolean autoShutdown) {
+    public AbstractManagedPromiseService(final int capacity, final boolean autoShutdown) {
         if ( autoShutdown ) {
             this.shutdownHook = new Thread(Handlers.runnable(() -> signalTerm(this::logShutdownState)));
             Runtime.getRuntime().addShutdownHook(this.shutdownHook);
@@ -45,13 +46,18 @@ public abstract class AbstractManagedPromiseService implements ManagedPromiseSer
             this.shutdownHook = null;
         }
         this.state = new AtomicReference<>(ServiceStates.ACTIVE);
+        this.capacity = capacity;
+    }
+
+    public final int getCapacity() {
+        return capacity;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ServiceStates getState() {
+    public final ServiceStates getState() {
         return state.get();
     }
 
@@ -83,6 +89,16 @@ public abstract class AbstractManagedPromiseService implements ManagedPromiseSer
     }
 
     protected abstract void terminate(final long timeout, final boolean retry) throws InterruptedException;
+
+    /**
+     * @return a {@code String} representation of this
+     * {@link ManagedPromiseService} thread pool.
+     */
+    @Override
+    public String toString() {
+        return String.format("[capacity=%d,state=%s,shutdownHook=%s]", capacity, getState(),
+                isShutdownEnabled() ? "enabled" : "disabled");
+    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     private void changeState(ServiceStates from, ServiceStates to) {

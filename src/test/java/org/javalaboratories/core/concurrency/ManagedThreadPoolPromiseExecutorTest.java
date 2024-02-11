@@ -11,15 +11,15 @@ import static org.javalaboratories.core.concurrency.ManagedPromiseService.Servic
 import static org.javalaboratories.core.concurrency.ManagedPromiseService.ServiceStates.INACTIVE;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
+public class ManagedThreadPoolPromiseExecutorTest extends AbstractConcurrencyTest {
 
-    private ManagedPromisePoolExecutor service;
+    private ManagedThreadPoolPromiseExecutor service;
 
-    private static final Logger logger = LoggerFactory.getLogger(ManagedPromisePoolExecutorTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(ManagedThreadPoolPromiseExecutorTest.class);
 
     @BeforeEach
     public void setup() {
-        service = new ManagedPromisePoolExecutor(4, false);
+        service = new ManagedThreadPoolPromiseExecutor(4, false);
     }
 
     @AfterEach
@@ -30,7 +30,7 @@ public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
     @Test
     public void testStop_Timeout_Pass () {
         // Given
-        LogCaptor logCaptor = LogCaptor.forClass(ManagedPromisePoolExecutor.class);
+        LogCaptor logCaptor = LogCaptor.forClass(ManagedThreadPoolPromiseExecutor.class);
         service.execute(() -> doLongRunningTask("testStop_Timeout_Pass"));
 
         // When
@@ -43,7 +43,7 @@ public class ManagedPromisePoolExecutorTest extends AbstractConcurrencyTest {
     @Test
     public void testStop_TimeoutRetries_Pass () {
         // Given
-        LogCaptor logCaptor = LogCaptor.forClass(ManagedPromisePoolExecutor.class);
+        LogCaptor logCaptor = LogCaptor.forClass(ManagedThreadPoolPromiseExecutor.class);
         service.execute(() -> doLongRunningTask("testStop_Timeout_Pass"));
 
         // When

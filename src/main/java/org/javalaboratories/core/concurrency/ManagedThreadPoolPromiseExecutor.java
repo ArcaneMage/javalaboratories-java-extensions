@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * important that {@code Promise} objects reach to a natural conclusion. It is not
  * advisable for threads to run infinitely. If this is a possibility then it
  * would to be prudent to force shutdown the pool service with the
- * {@link ManagedPromisePoolExecutor#stop(long, boolean)} specifying a timeout
+ * {@link ManagedThreadPoolPromiseExecutor#stop(long, boolean)} specifying a timeout
  * without retries ahead of program termination.
  * <p>
  * Currently, various strategies are under consideration to improve shutdown
@@ -47,29 +47,28 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @see ManagedThreadPerTaskPromiseExecutor
  * @see ManagedPromiseService
  */
-public class ManagedPromisePoolExecutor extends AbstractManagedPromiseService {
+public class ManagedThreadPoolPromiseExecutor extends AbstractManagedPromiseService {
 
     protected static final String PROMISES_THREAD_GROUP = "Promises-Group";
 
-    private static final Logger logger = LoggerFactory.getLogger(ManagedPromisePoolExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(ManagedThreadPoolPromiseExecutor.class);
 
     private static final AtomicInteger workerIndex = new AtomicInteger(0);
     private static final String WORKER_THREAD_NAME="Promise-Worker-%d";
     private static final ThreadGroup THREAD_GROUP = new ThreadGroup(PROMISES_THREAD_GROUP);
 
     private final ThreadPoolExecutor delegate;
-    private final int capacity;
 
     /**
      * Constructs an instance of this thread pool.
      * <p>
-     * Constructor called from the {@link PromisePoolServiceFactory}, if
+     * Constructor called from the {@link ManagedPromiseServiceFactory}, if
      * configured to create an instance of this object. Automatic shutdown
      * management is enabled by default.
      *
      * @param capacity Number maximum thread workers to carryout promises.
      */
-    public ManagedPromisePoolExecutor(final int capacity) {
+    public ManagedThreadPoolPromiseExecutor(final int capacity) {
         this(capacity,true);
     }
 
@@ -79,31 +78,23 @@ public class ManagedPromisePoolExecutor extends AbstractManagedPromiseService {
      * <p>
      * Constructor is package level access only for unit testing purposes. It
      * is recommended to use
-     * {@link ManagedPromisePoolExecutor#ManagedPromisePoolExecutor(int)}
-     * or the {@link PromisePoolServiceFactory} to create an instance of this
+     * {@link ManagedThreadPoolPromiseExecutor#ManagedThreadPoolPromiseExecutor(int)}
+     * or the {@link ManagedPromiseServiceFactory} to create an instance of this
      * thread pool.
      *
      * @param capacity Number maximum thread workers to carryout promises.
      * @param autoShutdown {@code true} manage automatic shutdown when VM
      *                                 receives SIGTERM.
      */
-    ManagedPromisePoolExecutor(final int capacity, final boolean autoShutdown) {
-        super(autoShutdown);
+    ManagedThreadPoolPromiseExecutor(final int capacity, final boolean autoShutdown) {
+        super(capacity,autoShutdown);
         delegate = new ThreadPoolExecutor(capacity, capacity, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>(),
-                ManagedPromisePoolExecutor::newPromiseWorker);
-        this.capacity = capacity;
+                ManagedThreadPoolPromiseExecutor::newPromiseWorker);
     }
 
     /**
-     * @return a {@code String} representation of this
-     * {@link ManagedPromisePoolExecutor} thread pool.
+     * {@inheritDoc}
      */
-    @Override
-    public String toString() {
-        return String.format("[capacity=%d,state=%s,shutdownHook=%s]", capacity, getState(),
-                isShutdownEnabled() ? "enabled" : "disabled");
-    }
-
     @Override
     protected void terminate(long timeout, boolean retry) throws InterruptedException {
         int i = 0;

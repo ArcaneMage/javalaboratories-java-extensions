@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 /**
  * This is a factory for creating {@link Promise} objects.
  * <p>
- * Its role is to ensure {@link PromisePoolServiceFactory},
+ * Its role is to ensure {@link ManagedPromiseServiceFactory},
  * {@link ManagedPromiseService} and other objects are properly initialised and
  * ready for the production of {@link Promise} objects. For flexibility, the
  * thread pool service can be swapped out for an alternative executor -- configure
@@ -89,8 +89,8 @@ public final class Promises {
      * Instantiate and configure ManagedPromisePool object for Promise objects.
      */
     static {
-        PromisePoolServiceFactory<ManagedPromiseService> factory = new PromisePoolServiceFactory<>(new PromiseConfiguration());
-        managedPoolService = factory.newManagedPromiseService();
+        ManagedPromiseServiceFactory<ManagedPromiseService> factory = new ManagedPromiseServiceFactory<>(new PromiseConfiguration());
+        managedPoolService = factory.newService();
     }
 
     /**
@@ -266,7 +266,7 @@ public final class Promises {
      * <p>
      * Internal worker threads process all {@link PrimaryAction} objects, the
      * number of simultaneous tasks could reach total {@code capacity}
-     * of the worker threads in {@link ManagedPromisePoolExecutor}. If this is the
+     * of the worker threads in {@link ManagedThreadPoolPromiseExecutor}. If this is the
      * case, an {@code action} object will remain in the queue until a worker
      * becomes available.
      * <p>

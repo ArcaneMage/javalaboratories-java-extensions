@@ -60,7 +60,7 @@ public interface ManagedPromiseService extends Executor {
 
     /**
      * Calling this method starts the shutting down process of the
-     * {@link ManagedPromisePoolExecutor} thread pool.
+     * {@link ManagedThreadPoolPromiseExecutor} thread pool.
      * <p>
      * It will patiently wait for tasks of {@link Action} objects to conclude
      * indefinitely, retrying every {@link ManagedPromiseService#WAIT_TIMEOUT}.

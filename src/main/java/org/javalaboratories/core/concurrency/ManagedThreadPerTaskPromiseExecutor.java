@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Currently, various strategies are under consideration to improve shutdown
  * behaviour.
  *
- * @see ManagedPromisePoolExecutor
+ * @see ManagedThreadPoolPromiseExecutor
  * @see ManagedPromiseService
  */
 public class ManagedThreadPerTaskPromiseExecutor extends AbstractManagedPromiseService {
@@ -75,7 +75,7 @@ public class ManagedThreadPerTaskPromiseExecutor extends AbstractManagedPromiseS
      * therefore scalable. The capacity is really used to control and protect
      * backend services, such as database connections or file handles.
      * <p>
-     * Constructor called from the {@link PromisePoolServiceFactory}, if
+     * Constructor called from the {@link ManagedPromiseServiceFactory}, if
      * configured to create an instance of this object. Automatic shutdown
      * management is enabled by default.
      *
@@ -95,7 +95,7 @@ public class ManagedThreadPerTaskPromiseExecutor extends AbstractManagedPromiseS
      * therefore scalable. The capacity is really used to control and protect
      * backend services, such as database connections or file handles.
      * <p>
-     * Constructor called from the {@link PromisePoolServiceFactory}, if
+     * Constructor called from the {@link ManagedPromiseServiceFactory}, if
      * configured to create an instance of this object. Automatic shutdown
      * management is enabled by default.
      *
@@ -105,9 +105,9 @@ public class ManagedThreadPerTaskPromiseExecutor extends AbstractManagedPromiseS
      *                                 receives SIGTERM.
      */
     ManagedThreadPerTaskPromiseExecutor(final int capacity, final boolean autoShutdown) {
-        super(autoShutdown);
+        super(capacity,autoShutdown);
         delegate = Executors.newThreadPerTaskExecutor(ManagedThreadPerTaskPromiseExecutor::newVirtualPromiseWorker);
-        semaphore = new Semaphore(capacity < 1 ? DEFAULT_VIRTUAL_THREADS : capacity);
+        semaphore = new Semaphore(getCapacity() < 1 ? DEFAULT_VIRTUAL_THREADS : capacity);
     }
 
     /**

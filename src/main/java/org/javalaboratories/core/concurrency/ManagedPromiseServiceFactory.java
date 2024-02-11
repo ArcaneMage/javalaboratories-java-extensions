@@ -30,7 +30,7 @@ import java.util.Objects;
  * {@link ManagedPromiseService} thread pool. Failure to create an instance of the
  * the {@code pool} will render promise objects inoperable. If there is a need
  * to provide a custom implementation, it is recommended to inherit from the
- * {@link ManagedPromisePoolExecutor} class and configure the
+ * {@link ManagedThreadPoolPromiseExecutor} class and configure the
  * "{@code promise-configuration.properties}" file or alternatively provide
  * configuration with system property values as VM arguments (-D property values).
  *
@@ -38,14 +38,14 @@ import java.util.Objects;
  * @see PromiseConfiguration
  */
 @SuppressWarnings("WeakerAccess")
-public final class PromisePoolServiceFactory<T extends ManagedPromiseService> {
+public final class ManagedPromiseServiceFactory<T extends ManagedPromiseService> {
 
-    private final Logger logger = LoggerFactory.getLogger(PromisePoolServiceFactory.class);
+    private final Logger logger = LoggerFactory.getLogger(ManagedPromiseServiceFactory.class);
 
     private static volatile ManagedPromiseService instance;
     private final PromiseConfiguration configuration;
 
-    public PromisePoolServiceFactory(final PromiseConfiguration configuration) {
+    public ManagedPromiseServiceFactory(final PromiseConfiguration configuration) {
         this.configuration = Objects.requireNonNull(configuration,"No configuration?");
     }
 
@@ -58,15 +58,15 @@ public final class PromisePoolServiceFactory<T extends ManagedPromiseService> {
      *
      * @return an implementation of {@link ManagedPromiseService}
      * @see ManagedPromiseService
-     * @see ManagedPromisePoolExecutor
+     * @see ManagedThreadPoolPromiseExecutor
      * @see PromiseConfiguration
      */
-    public T newManagedPromiseService() {
+    public T newService() {
         if (instance == null) {
-            synchronized (PromisePoolServiceFactory.class) {
-                String className = configuration.getPoolServiceClassName();
+            synchronized (ManagedPromiseServiceFactory.class) {
+                String className = configuration.getServiceClassName();
+                int capacity = configuration.getServiceCapacity();
                 try {
-                    int capacity = configuration.getPoolServiceCapacity();
                     Class<?> clazz = Class.forName(className);
                     if (!ManagedPromiseService.class.isAssignableFrom(clazz))
                         clazz = Class.forName(PromiseConfiguration.DEFAULT_MANAGED_SERVICE_CLASSNAME);
@@ -76,7 +76,7 @@ public final class PromisePoolServiceFactory<T extends ManagedPromiseService> {
                     instance = constructor.newInstance(capacity);
                     logger.debug("Promise service {} created and initialised with capacity {} successfully", clazz, capacity);
                 } catch (ClassCastException e) {
-                    logger.error("Promise service {} class needs to inherit from {} class", className, ManagedPromisePoolExecutor.class);
+                    logger.error("Promise service {} class needs to inherit from {} class", className, ManagedThreadPoolPromiseExecutor.class);
                 } catch (NoSuchMethodException e) {
                     logger.error("Promise service {} class needs to have a constructor with a single int parameter", className);
                 } catch (InvocationTargetException e) {
