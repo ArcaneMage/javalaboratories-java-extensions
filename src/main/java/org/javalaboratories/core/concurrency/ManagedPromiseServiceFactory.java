@@ -42,10 +42,10 @@ public final class ManagedPromiseServiceFactory<T extends ManagedPromiseService>
 
     private final Logger logger = LoggerFactory.getLogger(ManagedPromiseServiceFactory.class);
 
-    private static volatile ManagedPromiseService instance;
+    private volatile ManagedPromiseService instance;
     private final PromiseConfiguration configuration;
 
-    public ManagedPromiseServiceFactory(final PromiseConfiguration configuration) {
+    ManagedPromiseServiceFactory(final PromiseConfiguration configuration) {
         this.configuration = Objects.requireNonNull(configuration,"No configuration?");
     }
 
@@ -61,9 +61,9 @@ public final class ManagedPromiseServiceFactory<T extends ManagedPromiseService>
      * @see ManagedThreadPoolPromiseExecutor
      * @see PromiseConfiguration
      */
-    public T newService() {
+     T newService() {
         if (instance == null) {
-            synchronized (ManagedPromiseServiceFactory.class) {
+            synchronized (this) {
                 String className = configuration.getServiceClassName();
                 int capacity = configuration.getServiceCapacity();
                 try {

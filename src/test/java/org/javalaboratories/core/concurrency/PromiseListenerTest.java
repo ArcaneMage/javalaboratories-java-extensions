@@ -375,7 +375,7 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
         // Then
         assertEquals(3,listeners.size());
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
-        assertTrue(promise.toString().contains("state=ACTIVE,shutdownHook=NEW"));
+        assertTrue(promise.toString().contains("state=ACTIVE,shutdownHook=enabled"));
         assertTrue(listeners.stream().allMatch(listener -> listener.getEvents() == 1));
         assertEquals(FULFILLED,promise.getState());
     }

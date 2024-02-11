@@ -16,7 +16,6 @@
 package org.javalaboratories.core.concurrency;
 
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.util.Generics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,14 +82,14 @@ import java.util.function.Supplier;
 @SuppressWarnings("WeakerAccess")
 public final class Promises {
 
-    private final static ManagedPromiseService managedPoolService;
+    static ManagedPromiseService managedService;
 
     /*
-     * Instantiate and configure ManagedPromisePool object for Promise objects.
+     * Instantiate and configure ManagedPromiseService object for Promise objects.
      */
     static {
         ManagedPromiseServiceFactory<ManagedPromiseService> factory = new ManagedPromiseServiceFactory<>(new PromiseConfiguration());
-        managedPoolService = factory.newService();
+        managedService = factory.newService();
     }
 
     /**
@@ -148,7 +147,7 @@ public final class Promises {
      */
     public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions, boolean settle) {
 
-        List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncPromiseTask<>(managedPoolService,action));
+        List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncPromiseTask<>(managedService,action));
 
         // Start new thread process that will wait on aforementioned asynchronous
         // processes
@@ -160,7 +159,7 @@ public final class Promises {
             return promises;
         });
 
-        return newPromise(action,() -> new AsyncPromiseTask<>(managedPoolService,action));
+        return newPromise(action,() -> new AsyncPromiseTask<>(managedService,action));
     }
 
     /**
@@ -196,7 +195,7 @@ public final class Promises {
      * @see AsyncPromiseTask
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
-        return newPromise(action, () -> new AsyncPromiseTask<>(managedPoolService,action));
+        return newPromise(action, () -> new AsyncPromiseTask<>(managedService,action));
     }
     /**
      * Factory method to create instances of event-driven {@link Promise}
@@ -208,7 +207,7 @@ public final class Promises {
      * <p>
      * This implementation of a {@link Promise} object has the ability to publish
      * events to its {@code subscribers}.
-     *
+     * <p>
      * There is no limit to the number of {@code subscribers}, but if a
      * {@code subscriber} is considered "toxic" (unhandled exception raised),
      * the {@code subscriber} will be banned from event notification.
@@ -239,7 +238,7 @@ public final class Promises {
      * <p>
      * This implementation of a {@link Promise} object has the ability to publish
      * events to its {@code subscribers}.
-     *
+     * <p>
      * There is no limit to the number of {@code subscribers}, but if a
      * {@code subscriber} is considered "toxic" (unhandled exception raised),
      * the {@code subscriber} will be banned from event notification.
@@ -257,7 +256,7 @@ public final class Promises {
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
                                             final List<? extends PromiseEventSubscriber<T>> subscribers) {
-        return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedPoolService,action,subscribers));
+        return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedService,action,subscribers));
     }
 
     /**
@@ -342,10 +341,13 @@ public final class Promises {
      *           task.
      * @return {@link Maybe} encapsulates {@link Invocable} implementation.
      */
+    // TODO: Revisit this code?
     private static <T> Maybe<Invocable<T>> asInvocable(final Promise<T> promise) {
         Maybe<Invocable<T>> result;
         try {
-            result = Generics.unchecked(Maybe.of(Objects.requireNonNull(promise)));
+            @SuppressWarnings("unchecked")
+            Invocable<T> invocable = (Invocable<T>) Objects.requireNonNull(promise);
+            result = Maybe.of(invocable);
         } catch (ClassCastException e) {
             result = Maybe.empty();
         }

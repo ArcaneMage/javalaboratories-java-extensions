@@ -39,7 +39,7 @@ public class PromiseConfigurationTest {
         PromiseConfiguration configuration = new PromiseConfiguration();
 
         // Then
-        assertEquals("org.javalaboratories.core.concurrency.ManagedPromisePoolExecutor",configuration.getServiceClassName());
+        assertEquals("org.javalaboratories.core.concurrency.ManagedThreadPoolPromiseExecutor",configuration.getServiceClassName());
         assertTrue(configuration.getServiceCapacity() > 0);
     }
 
@@ -50,7 +50,7 @@ public class PromiseConfigurationTest {
         PromiseConfiguration configuration = new PromiseConfiguration(MALFORMED_PROMISE_CONFIGURATION_FILE);
 
         // Then
-        assertEquals("org.javalaboratories.core.concurrency.ManagedPromisePoolExecutor",configuration.getServiceClassName());
+        assertEquals("org.javalaboratories.core.concurrency.ManagedThreadPoolPromiseExecutor",configuration.getServiceClassName());
         assertTrue(configuration.getServiceCapacity() > 0);
     }
 }

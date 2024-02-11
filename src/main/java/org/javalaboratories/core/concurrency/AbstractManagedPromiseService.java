@@ -88,6 +88,17 @@ public abstract class AbstractManagedPromiseService implements ManagedPromiseSer
         }
     }
 
+    /**
+     * Terminates for the managed service.
+     * <p>
+     * This method is called indirectly from the
+     * {@link AbstractManagedPromiseService#stop(long, boolean)} method.
+     *
+     * @param timeout value in milliseconds.
+     * @param retry if {@code true} indefinitely attempts to terminate threads
+     *             after shutdown (use with caution).
+     * @throws InterruptedException termination is interruptible.
+     */
     protected abstract void terminate(final long timeout, final boolean retry) throws InterruptedException;
 
     /**
