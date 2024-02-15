@@ -15,14 +15,14 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import lombok.ToString;
-import lombok.Value;
+import lombok.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 /**
@@ -62,6 +62,9 @@ public class PromiseConfiguration {
 
     private static final String PROMISE_CONFIGURATION_FILE= "promise-configuration.properties";
     private static final int MINIMUM_CAPACITY = 1;
+
+    @Getter(AccessLevel.NONE)
+    ReentrantLock lock;
 
     @ToString.Exclude
     Map<String,Object> properties;
@@ -110,6 +113,7 @@ public class PromiseConfiguration {
      *                 account.
      */
     PromiseConfiguration(final String filename) {
+        lock = new ReentrantLock();
         properties = load(filename);
         serviceClassName = getValue(PROMISE_MANAGED_SERVICE_CLASS_PROPERTY, DEFAULT_MANAGED_SERVICE_CLASSNAME);
         int capacity = getValue(PROMISE_MANAGED_SERVICE_CAPACITY_PROPERTY,-1);
@@ -135,24 +139,24 @@ public class PromiseConfiguration {
     private <T> Map<String,T> load(final String filename) {
         Map<String,T> result = new HashMap<>();
         if (properties == null) {
-            synchronized (this) {
-                try {
-                    if (filename != null) {
-                        Properties fileProperties = new Properties();
-                        InputStream stream = PromiseConfiguration.class.getClassLoader()
-                                .getResourceAsStream(filename);
-                        // Load file if it exists
-                        if (stream != null)
-                            fileProperties.load(stream);
-                        load(fileProperties, result, null);
-                    }
-                } catch (IOException e) {
-                    // Do-nothing, file I/O error will result in system overrides being applied, if any.
-                } finally {
-                    // Load potential overrides from system properties
-                    Properties sysProperties = System.getProperties();
-                    load(sysProperties,result,k -> k.startsWith("promise."));
+            lock.lock();
+            try {
+                if (filename != null) {
+                    Properties fileProperties = new Properties();
+                    InputStream stream = PromiseConfiguration.class.getClassLoader()
+                            .getResourceAsStream(filename);
+                    // Load file if it exists
+                    if (stream != null)
+                        fileProperties.load(stream);
+                    load(fileProperties, result, null);
                 }
+            } catch (IOException e) {
+                // Do-nothing, file I/O error will result in system overrides being applied, if any.
+            } finally {
+                // Load potential overrides from system properties
+                Properties sysProperties = System.getProperties();
+                load(sysProperties,result,k -> k.startsWith("promise."));
+                lock.unlock();
             }
         }
         return result;

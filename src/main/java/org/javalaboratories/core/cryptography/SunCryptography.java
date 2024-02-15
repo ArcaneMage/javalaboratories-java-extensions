@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * All Sun Microsystems based cryptographic classes inherit from this base
@@ -29,6 +31,8 @@ import java.util.Objects;
  */
 public abstract class SunCryptography {
     private static final int MAX_BUFFER_SZ = 64;
+
+    private final ReentrantLock lock = new ReentrantLock();
 
     /**
      * Returns a {@link Cipher} class, but only if Sun Microsystems provided it.
@@ -39,13 +43,18 @@ public abstract class SunCryptography {
     Cipher getCipher(final String algorithm) {
         Objects.requireNonNull(algorithm);
         Cipher result;
+        lock.lock();
         try {
-            result = Cipher.getInstance(algorithm);
+            result = Cipher.getInstance(algorithm,"SunJCE");
             String name = result.getProvider().getName();
             if (!name.contains("Sun"))
                 throw new CryptographyException("Not a Sun provider");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new CryptographyException("Bad algorithm encountered",e);
+            throw new CryptographyException("Bad algorithm encountered", e);
+        } catch (NoSuchProviderException e) {
+            throw new CryptographyException("No such provider", e);
+        } finally {
+            lock.unlock();
         }
         return result;
     }

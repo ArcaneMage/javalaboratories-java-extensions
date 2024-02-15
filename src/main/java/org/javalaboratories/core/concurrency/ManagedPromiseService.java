@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 public interface ManagedPromiseService extends Executor {
     enum ServiceStates {ACTIVE, CLOSING, INACTIVE}
 
-    long MIN_WAIT_TIMEOUT = 250L;
+    long MIN_WAIT_TIMEOUT = 32L;
     long WAIT_TIMEOUT = 5000L;
 
     /**

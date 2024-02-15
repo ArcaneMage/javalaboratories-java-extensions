@@ -1,10 +1,12 @@
 package org.javalaboratories.core.concurrency;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+
 import java.util.Properties;
 
 @SuppressWarnings("WeakerAccess")
-public class PromisePerTaskTest extends PromiseTest {
+public class PromisePerTaskTest  extends PromiseTest {
 
     @BeforeAll
     public static void setupAll() throws Exception {
@@ -15,15 +17,16 @@ public class PromisePerTaskTest extends PromiseTest {
                 "1024");
         System.setProperties(properties);
         ManagedPromiseServiceFactory<ManagedPromiseService> factory = new ManagedPromiseServiceFactory<>(new PromiseConfiguration());
-        Promises.managedService = factory.newService();
+        Promises.setManagedService(factory.newService());
     }
 
     @AfterAll
-    public static void teardown() {
+    public static void teardownAll() {
         System.clearProperty(PromiseConfiguration.PROMISE_MANAGED_SERVICE_CLASS_PROPERTY);
         System.clearProperty(PromiseConfiguration.PROMISE_MANAGED_SERVICE_CAPACITY_PROPERTY);
 
         ManagedPromiseServiceFactory<ManagedPromiseService> factory = new ManagedPromiseServiceFactory<>(new PromiseConfiguration());
-        Promises.managedService = factory.newService();
+        Promises.setManagedService(factory.newService());
     }
+
 }

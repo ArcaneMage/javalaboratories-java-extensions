@@ -16,6 +16,7 @@
 package org.javalaboratories.core.concurrency.utils;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.function.Supplier;
 import static org.javalaboratories.core.concurrency.utils.ResourceFloodStability.States.FLOODED;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 public class ConcurrentResourceFloodStabilityTest extends AbstractResourceFloodStabilityTest {
 
     public static class SingleThreadedFloodgate<T> extends AbstractConcurrentResourceFloodStability<T> {

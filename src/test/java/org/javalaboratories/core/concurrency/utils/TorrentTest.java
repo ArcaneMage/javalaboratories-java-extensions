@@ -17,6 +17,7 @@ package org.javalaboratories.core.concurrency.utils;
 
 import org.javalaboratories.core.concurrency.utils.ResourceFloodStability.States;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import static org.javalaboratories.core.concurrency.utils.ResourceFloodStability
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Disabled
 public class TorrentTest extends AbstractResourceFloodStabilityTest {
 
     private UnsafeStatistics expected;

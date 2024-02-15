@@ -21,6 +21,7 @@ import org.javalaboratories.core.util.Holder;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -374,7 +375,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
 
         private static final long serialVersionUID = 518963023579340195L;
 
-        transient final Object lock = new Object();
+        transient final ReentrantLock lock = new ReentrantLock();
         private transient final Trampoline<T> evaluate;
 
         @EqualsAndHashCode.Include
@@ -474,13 +475,16 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          * conclude}.
          */
         protected T value() {
-            synchronized(lock) {
+            lock.lock();
+            try {
                 T value = this.value.setGet(evaluate.result());
                 if (value instanceof Trampoline) {
                     throw new IllegalStateException("Trampoline unresolvable -- " +
                             "review recursion logic");
                 }
                 return value;
+            } finally {
+                lock.unlock();
             }
         }
     }
@@ -496,6 +500,8 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
     @EqualsAndHashCode(callSuper=true)
     public static class Later<T> extends Always<T> {
         private static final long serialVersionUID = -8848701870767131627L;
+
+        transient private final ReentrantLock lock = new ReentrantLock();
 
         /**
          * Constructs implementation of {@link Eval} with the {@code Later}
@@ -534,8 +540,11 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          */
         @Override
         protected T value() {
-            synchronized(this) {
+            lock.lock();
+            try {
                 return this.value.isEmpty() ? super.value() : this.value.get();
+            } finally {
+                lock.unlock();
             }
         }
     }
@@ -583,6 +592,9 @@ final class EvalValue<E> implements Serializable {
     private final boolean caching;
 
     @EqualsAndHashCode.Exclude
+    transient private final ReentrantLock lock;
+
+    @EqualsAndHashCode.Exclude
     private final List<Consumer<E>> modes =
             Arrays.asList(value -> {if (element == null) element = value;},
                     value -> element = value);
@@ -594,21 +606,28 @@ final class EvalValue<E> implements Serializable {
     public EvalValue(boolean caching) {
         element = null;
         this.caching = caching;
+        this.lock = new ReentrantLock();
     }
 
     /**
      * Sets this {@code value}
      */
     public E setGet(final E e) {
-        synchronized(this) {
+        lock.lock();
+        try {
             modes.get(caching ? 0 : 1).accept(e);
             return element;
+        } finally {
+            lock.unlock();
         }
     }
 
     public E get() {
-        synchronized(this) {
+        lock.lock();
+        try {
             return element;
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -616,14 +635,20 @@ final class EvalValue<E> implements Serializable {
      * @return {@code true} if container is occupied.
      */
     public boolean isEmpty() {
-        synchronized (this) {
+        lock.lock();
+        try {
             return element == null;
+        } finally {
+            lock.unlock();
         }
     }
     @Override
     public String toString() {
-        synchronized (this) {
+        lock.lock();
+        try {
             return isEmpty() ? "unset" : String.valueOf(this.element);
+        } finally {
+            lock.unlock();
         }
     }
 }

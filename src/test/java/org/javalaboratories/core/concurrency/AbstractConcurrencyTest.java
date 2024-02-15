@@ -1,8 +1,10 @@
 package org.javalaboratories.core.concurrency;
 
+import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -27,19 +29,17 @@ public abstract class AbstractConcurrencyTest {
     }
 
     public int doLongRunningTask(String narrative) {
-        sleep(1000);
+        sleep(128);
         logger.info("doLongRunningTask: {} asynchronously", narrative);
         return 127;
     }
 
     public void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-            Thread.yield();
-        } catch (InterruptedException e) {
-            // Do nothing
-        }
-    }
+        Awaitility
+            .await()
+            .pollDelay(millis, TimeUnit.MILLISECONDS)
+            .until(() -> true);
+   }
 
     void fireSigTerm(ManagedPromiseService service) {
         // Intentionally fire simulated SIGTERM from the thread that is outside the "Promises Group"

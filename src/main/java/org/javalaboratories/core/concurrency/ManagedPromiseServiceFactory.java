@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Factory to create an instance of a {@link ManagedPromiseService} pool service to
@@ -44,9 +45,11 @@ public final class ManagedPromiseServiceFactory<T extends ManagedPromiseService>
 
     private volatile ManagedPromiseService instance;
     private final PromiseConfiguration configuration;
+    private final ReentrantLock lock;
 
     ManagedPromiseServiceFactory(final PromiseConfiguration configuration) {
         this.configuration = Objects.requireNonNull(configuration,"No configuration?");
+        lock = new ReentrantLock();
     }
 
     /**
@@ -63,7 +66,8 @@ public final class ManagedPromiseServiceFactory<T extends ManagedPromiseService>
      */
      T newService() {
         if (instance == null) {
-            synchronized (this) {
+            lock.lock();
+            try {
                 String className = configuration.getServiceClassName();
                 int capacity = configuration.getServiceCapacity();
                 try {
@@ -88,6 +92,8 @@ public final class ManagedPromiseServiceFactory<T extends ManagedPromiseService>
                 } catch (InstantiationException e) {
                     logger.error("Instantiation exception for {} class", className, e);
                 }
+            } finally {
+                lock.unlock();
             }
         }
         @SuppressWarnings("unchecked")

@@ -114,22 +114,6 @@ public class ManagedThreadPerTaskPromiseExecutor extends AbstractManagedPromiseS
      * {@inheritDoc}
      */
     @Override
-    protected void terminate(long timeout, boolean retry) throws InterruptedException {
-        int i = 0;
-        delegate.shutdown();
-        while (!delegate.awaitTermination(timeout, TimeUnit.MILLISECONDS) && retry) {
-            logger.info("Awaiting termination of some virtual promises  -- elapsed {} seconds", (++i * timeout) / 1000.0);
-        }
-        if (!delegate.isTerminated()) {
-            delegate.shutdownNow();
-            logger.info("Not all virtual promises kept following shutdown -- forced shutdown");
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void execute(final Runnable command) {
         Runnable r = Objects.requireNonNull(command);
         delegate.execute(() -> {
@@ -142,6 +126,22 @@ public class ManagedThreadPerTaskPromiseExecutor extends AbstractManagedPromiseS
                 semaphore.release();
             }
         });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void terminate(long timeout, boolean retry) throws InterruptedException {
+        int i = 0;
+        delegate.shutdown();
+        while (!delegate.awaitTermination(timeout, TimeUnit.MILLISECONDS) && retry) {
+            logger.info("Awaiting termination of some virtual promises  -- elapsed {} seconds", (++i * timeout) / 1000.0);
+        }
+        if (!delegate.isTerminated()) {
+            delegate.shutdownNow();
+            logger.info("Not all virtual promises kept following shutdown -- forced shutdown");
+        }
     }
 
     private static Thread newVirtualPromiseWorker(final Runnable command) {

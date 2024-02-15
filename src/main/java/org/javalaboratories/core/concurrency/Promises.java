@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -82,14 +83,15 @@ import java.util.function.Supplier;
 @SuppressWarnings("WeakerAccess")
 public final class Promises {
 
-    static ManagedPromiseService managedService;
+    private static ManagedPromiseService managedService;
+    private final static ReentrantLock lock = new ReentrantLock();
 
     /*
      * Instantiate and configure ManagedPromiseService object for Promise objects.
      */
     static {
         ManagedPromiseServiceFactory<ManagedPromiseService> factory = new ManagedPromiseServiceFactory<>(new PromiseConfiguration());
-        managedService = factory.newService();
+        Promises.setManagedService(factory.newService());
     }
 
     /**
@@ -352,6 +354,16 @@ public final class Promises {
             result = Maybe.empty();
         }
         return result;
+    }
+
+    static void setManagedService(final ManagedPromiseService managedService) {
+        ManagedPromiseService service = Objects.requireNonNull(managedService);
+        try {
+            lock.lock();
+            Promises.managedService = service;
+        } finally {
+            lock.unlock();
+        }
     }
 
     private Promises() {}

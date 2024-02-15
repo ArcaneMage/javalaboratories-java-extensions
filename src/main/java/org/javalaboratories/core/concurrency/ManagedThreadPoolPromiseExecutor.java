@@ -96,6 +96,14 @@ public class ManagedThreadPoolPromiseExecutor extends AbstractManagedPromiseServ
      * {@inheritDoc}
      */
     @Override
+    public void execute(Runnable command) {
+        delegate.execute(command);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected void terminate(long timeout, boolean retry) throws InterruptedException {
         int i = 0;
         delegate.shutdown();
@@ -113,10 +121,5 @@ public class ManagedThreadPoolPromiseExecutor extends AbstractManagedPromiseServ
         Thread result = new Thread(THREAD_GROUP,runnable);
         result.setName(name);
         return result;
-    }
-
-    @Override
-    public void execute(Runnable command) {
-        delegate.execute(command);
     }
 }

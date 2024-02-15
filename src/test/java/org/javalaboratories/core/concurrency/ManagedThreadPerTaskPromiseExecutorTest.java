@@ -50,7 +50,7 @@ public class ManagedThreadPerTaskPromiseExecutorTest extends AbstractConcurrency
         service.execute(() -> doLongRunningTask("testStop_Timeout_Pass"));
 
         // When
-        service.stop(250,false);
+        service.stop(64,false);
 
         // Then
         assertTrue(logCaptor.getInfoLogs().contains("Not all virtual promises kept following shutdown -- forced shutdown"));
@@ -63,7 +63,7 @@ public class ManagedThreadPerTaskPromiseExecutorTest extends AbstractConcurrency
         service.execute(() -> doLongRunningTask("testStop_Timeout_Pass"));
 
         // When
-        service.stop(250,true);
+        service.stop(64,true);
 
         // Then
         assertTrue(logCaptor.getInfoLogs()
@@ -88,7 +88,7 @@ public class ManagedThreadPerTaskPromiseExecutorTest extends AbstractConcurrency
 
     @Test
     public void testStop_InvalidTimeout_Pass () {
-        assertThrows(IllegalArgumentException.class, () -> service.stop(50,false));
+        assertThrows(IllegalArgumentException.class, () -> service.stop(24,false));
     }
 
     @Test
