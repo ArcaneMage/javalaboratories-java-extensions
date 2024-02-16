@@ -20,7 +20,6 @@ import org.javalaboratories.core.concurrency.AbstractConcurrencyTest;
 import org.javalaboratories.core.concurrency.AsyncEval;
 import org.junit.jupiter.api.BeforeEach;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 public class EvalTest extends AbstractConcurrencyTest {
 
     private static final Logger logger = LoggerFactory.getLogger(EvalTest.class);

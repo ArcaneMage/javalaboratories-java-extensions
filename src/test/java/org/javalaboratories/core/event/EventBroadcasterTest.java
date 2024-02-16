@@ -4,14 +4,12 @@ import lombok.Getter;
 import nl.altindag.log.LogCaptor;
 import org.javalaboratories.core.concurrency.utils.Torrent;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 public class EventBroadcasterTest implements EventSubscriber<EventBroadcasterTest.TestEventB>, EventSource  {
 
     private static final Logger logger = LoggerFactory.getLogger(EventBroadcasterTest.class);

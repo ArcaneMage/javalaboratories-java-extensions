@@ -12,7 +12,6 @@ import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
 import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 @SuppressWarnings("WeakerAccess")
 public class PromisesTest extends AbstractConcurrencyTest {
 

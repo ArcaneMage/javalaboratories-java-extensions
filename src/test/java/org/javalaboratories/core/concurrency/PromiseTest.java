@@ -1,7 +1,6 @@
 package org.javalaboratories.core.concurrency;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
 import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 @SuppressWarnings("WeakerAccess")
 public class PromiseTest extends AbstractConcurrencyTest {
 
