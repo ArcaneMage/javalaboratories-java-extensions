@@ -19,8 +19,6 @@ import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.javalaboratories.core.concurrency.ManagedPromiseService.ServiceStates.CLOSING;
 import static org.javalaboratories.core.concurrency.ManagedPromiseService.ServiceStates.INACTIVE;
@@ -31,11 +29,9 @@ public class ManagedThreadPerTaskPromiseExecutorTest extends AbstractConcurrency
 
     private ManagedThreadPerTaskPromiseExecutor service;
 
-    private static final Logger logger = LoggerFactory.getLogger(ManagedThreadPerTaskPromiseExecutorTest.class);
-
     @BeforeEach
     public void setup() {
-        service = new ManagedThreadPerTaskPromiseExecutor(4, false);
+        service = new ManagedThreadPerTaskPromiseExecutor(4);
     }
 
     @AfterEach

@@ -456,7 +456,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          */
         @Override
         protected <U> Always<U> pure(final U value) {
-            return (Always<U>) Eval.always(() -> value);
+            return (Always<U>) Eval.always(() -> value).resolve();
         }
 
         /**
@@ -532,7 +532,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          */
         @Override
         protected <U> Later<U> pure(final U value) {
-            return (Later<U>) Eval.later(() -> value);
+            return (Later<U>) Eval.later(() -> value).resolve();
         }
 
         /**
@@ -596,8 +596,10 @@ final class EvalValue<E> implements Serializable {
 
     @EqualsAndHashCode.Exclude
     private final List<Consumer<E>> modes =
-            Arrays.asList(value -> {if (element == null) element = value;},
-                    value -> element = value);
+            Arrays.asList(
+                    value -> {if (element == null) element = value;},
+                    value -> element = value
+            );
     /**
      * Constructs this {@code value}
      * <p>

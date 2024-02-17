@@ -18,6 +18,7 @@ package org.javalaboratories.core;
 import nl.altindag.log.LogCaptor;
 import org.javalaboratories.core.concurrency.AbstractConcurrencyTest;
 import org.javalaboratories.core.concurrency.AsyncEval;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,12 @@ public class EvalTest extends AbstractConcurrencyTest {
         asyncFailure = AsyncEval.asyncLater(() -> 100 / 0);
     }
 
+    @AfterEach
+    public void teardown() {
+        asyncEval.resolve();
+        //asyncFailure.resolve();
+    }
+
     @Test
     public void testNew_Pass() {
         // Given (setup)
@@ -63,13 +70,13 @@ public class EvalTest extends AbstractConcurrencyTest {
         assertTrue(eager instanceof Eval.Eager);
         assertTrue(later instanceof Eval.Later);
         assertTrue(always instanceof Eval.Always);
-        //assertNotNull(asyncEval);
+        assertNotNull(asyncEval);
 
         assertEquals("Always[unset]",always.toString());
         assertEquals("Always[unset]", alwaysR.toString());
         assertEquals("Eager[12]",eager.toString());
         assertEquals("Later[unset]",later.toString());
-        //assertEquals("AsyncEval[unset]", asyncEval.toString());
+        assertEquals("AsyncEval[unset]", asyncEval.toString());
     }
 
     @Test
@@ -382,8 +389,8 @@ public class EvalTest extends AbstractConcurrencyTest {
 
         // Then
         assertTrue(verifyFunctorLaws(eagerEval));
-       // TODO:  assertTrue(verifyFunctorLaws(laterEval.resolve()));
-       // ToDO:  assertTrue(verifyFunctorLaws(alwaysEval.resolve()));
+        assertTrue(verifyFunctorLaws(laterEval));
+        assertTrue(verifyFunctorLaws(alwaysEval));
     }
 
     @Test
@@ -471,7 +478,7 @@ public class EvalTest extends AbstractConcurrencyTest {
                 && value.map(x -> (x + 1) * 2).equals(value.map(x -> x + 1).map(x -> x * 2));
     }
 
-    private Trampoline<Integer> fibonacci(int count) {
+    private Trampoline<Integer>  fibonacci(int count) {
         return fibonacci(count,0,1);
     }
 

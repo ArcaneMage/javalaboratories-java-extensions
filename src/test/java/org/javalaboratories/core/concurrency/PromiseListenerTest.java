@@ -39,8 +39,11 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
             }
         };
 
-        listeners = Arrays.asList(new PromiseEventListener("Listener-A"),new PromiseEventListener("Listener-B"),
-                      new PromiseEventListener("Listener-C"));
+        listeners = Arrays.asList(
+                new PromiseEventListener("Listener-A"),
+                new PromiseEventListener("Listener-B"),
+                new PromiseEventListener("Listener-C")
+        );
         logCaptor = LogCaptor.forClass(PromiseListenerTest.class);
 
     }
