@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.javalaboratories.core.concurrency.ManagedPromiseService.ServiceStates.CLOSING;
 import static org.javalaboratories.core.concurrency.ManagedPromiseService.ServiceStates.INACTIVE;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ManagedThreadPoolPromiseExecutorTest extends AbstractConcurrencyTest {
 
