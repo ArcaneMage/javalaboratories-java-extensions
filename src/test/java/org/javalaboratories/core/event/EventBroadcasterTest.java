@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serial;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EventBroadcasterTest implements EventSubscriber<EventBroadcasterTest.TestEventB>, EventSource  {
@@ -29,6 +31,7 @@ public class EventBroadcasterTest implements EventSubscriber<EventBroadcasterTes
 
     @Getter
     static class TestEventA extends AbstractEvent {
+        @Serial
         private static final long serialVersionUID = -2400612074279477143L;
         private final String state;
 
@@ -40,6 +43,7 @@ public class EventBroadcasterTest implements EventSubscriber<EventBroadcasterTes
 
     @Getter
     static class TestEventB extends AbstractEvent {
+        @Serial
         private static final long serialVersionUID = 5051020250921053195L;
         private final String state;
 
@@ -51,6 +55,7 @@ public class EventBroadcasterTest implements EventSubscriber<EventBroadcasterTes
 
     @Getter
     static class TestEventC extends AbstractEvent {
+        @Serial
         private static final long serialVersionUID = -9116076407163983269L;
         private final String state;
 
@@ -256,6 +261,4 @@ public class EventBroadcasterTest implements EventSubscriber<EventBroadcasterTes
     public void notify(TestEventB event) {
         logger.debug("(Subscriber - B) received value \"{}\" from event {}",event.getState(), event.getEventId());
     }
-
-
 }

@@ -15,12 +15,20 @@
  */
 package org.javalaboratories.core.event;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.javalaboratories.core.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Observable;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -71,7 +79,7 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
     // should not be obstructed by the main Lock object.
     private static int uniqueIdentity = 0;
 
-    private final Object mainLock;
+    private final ReentrantLock mainLock;
     private final Map<String,Subscription<U>> subscriptions;
     private final T source;
 
@@ -79,7 +87,7 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
     @AllArgsConstructor
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     private static class Subscription<E extends Event> {
-        private final Object lock = new Object();
+        private final ReentrantLock lock = new ReentrantLock();
         @EqualsAndHashCode.Include
         private final String identity;
 
@@ -110,7 +118,7 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
     public EventBroadcaster(final T source) {
         this.source = source;
         this.subscriptions = new LinkedHashMap<>();
-        this.mainLock = new Object();
+        this.mainLock = new ReentrantLock();
     }
 
     @Override
@@ -120,21 +128,27 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
                 .assign(source);
 
         Set<Subscription<U>> observers;
-        synchronized(mainLock) {
+        mainLock.lock();
+        try {
             observers = new HashSet<>(subscriptions.values());
+        } finally {
+            mainLock.unlock();
         }
 
         observers.forEach(subscription -> {
             EventSubscriber<U> subscriber = subscription.getSubscriber();
-            synchronized (subscription.lock) {
-                try {
-                    if (!subscription.canceled)
-                        subscriber.notify(anEvent);
-                } catch (Throwable e) {
-                    logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
-                    subscription.canceled = true;
-                    unsubscribe(subscriber);
-                }
+            subscription.getLock().lock();
+            try {
+                    try {
+                        if (!subscription.canceled)
+                            subscriber.notify(anEvent);
+                    } catch (Throwable e) {
+                        logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
+                        subscription.canceled = true;
+                        unsubscribe(subscriber);
+                    }
+            } finally {
+                subscription.getLock().unlock();
             }
         });
     }
@@ -142,26 +156,28 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
     @Override
     public void subscribe(final EventSubscriber<U> subscriber) {
         EventSubscriber<U> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
-
-        synchronized(mainLock) {
+        mainLock.lock();
+        try {
             subscriptions.values().stream()
-                .filter(s -> s.getSubscriber().equals(subscriber))
-                .findAny()
-                .ifPresent(s -> {
-                    throw new EventException("Subscriber exists -- unsubscribe first");
-                });
+                    .filter(s -> s.getSubscriber().equals(subscriber))
+                    .findAny()
+                    .ifPresent(s -> {
+                        throw new EventException("Subscriber exists -- unsubscribe first");
+                    });
 
             Subscription<U> subscription = new Subscription<>(getUniqueIdentity(), aSubscriber,false);
 
             subscriptions.put(subscription.getIdentity(), subscription);
+        } finally {
+            mainLock.unlock();
         }
     }
 
     @Override
     public boolean unsubscribe(final EventSubscriber<U> subscriber) {
         EventSubscriber<U> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
-
-        synchronized(mainLock) {
+        mainLock.lock();
+        try {
             // Derive subscription identity
             String identity = subscriptions.values().stream()
                     .filter(s -> s.getSubscriber().equals(aSubscriber))
@@ -170,6 +186,8 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
 
             // Remove subscription
             return subscriptions.remove(identity) != null;
+        } finally {
+            mainLock.unlock();
         }
     }
 
@@ -177,20 +195,27 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
     public String toString() {
         String source = this.source.getClass().getSimpleName();
         source = source.isEmpty() ? "UNKNOWN" : source;
-        synchronized (mainLock) {
+        mainLock.lock();
+        try {
             return String.format("[subscribers=%s,source=%s]", subscriptions.size(), source);
+        } finally {
+            mainLock.unlock();
         }
     }
 
     @Override
     public int subscribers() {
-        synchronized(mainLock) {
+        mainLock.lock();
+        try {
             return subscriptions.size();
+        } finally {
+            mainLock.unlock();
         }
     }
 
     private String getUniqueIdentity() {
-         Observable j;
+        // This intrinsic lock is okay: cannot imagine it causing issues with
+        // virtual threads.
         synchronized (EventBroadcaster.class) {
             return String.format("{subscription-%s}",uniqueIdentity++);
         }
