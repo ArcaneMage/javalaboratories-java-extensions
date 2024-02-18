@@ -11,7 +11,10 @@ import java.util.function.BiConsumer;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
 import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("WeakerAccess")
 public class PromiseTest extends AbstractConcurrencyTest {
