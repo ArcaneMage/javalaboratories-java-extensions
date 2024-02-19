@@ -17,10 +17,7 @@ package org.javalaboratories.core.collection;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,7 +47,7 @@ import java.util.function.Function;
  * @param <T> type of elements in {@link SmartLinkedList}
  */
 public class SmartLinkedList<T> implements Iterable<T>, Cloneable, Serializable  {
-
+    @Serial
     private static final long serialVersionUID = 379872715184844475L;
 
     private transient int depth;

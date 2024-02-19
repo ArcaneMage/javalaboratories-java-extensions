@@ -21,6 +21,7 @@ import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.cryptography.CryptographyException;
 
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -44,7 +45,7 @@ import java.security.UnrecoverableKeyException;
  */
 @EqualsAndHashCode(callSuper = true)
 public final class PrivateKeyStore extends AbstractKeyStore implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = -2784170191850769687L;
 
     /**

@@ -20,6 +20,7 @@ import lombok.Value;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.SecretKey;
+import java.io.Serial;
 
 /**
  * Represents the secret-key generated with asymmetric cryptography.
@@ -27,6 +28,7 @@ import javax.crypto.SecretKey;
 @Value
 @AllArgsConstructor
 public class EncryptedAesKey implements SecretKey {
+    @Serial
     private static final long serialVersionUID = 3551816644582994789L;
 
     byte[] key;

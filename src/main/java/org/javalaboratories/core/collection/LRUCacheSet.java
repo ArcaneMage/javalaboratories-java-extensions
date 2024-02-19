@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core.collection;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -31,7 +32,7 @@ import java.util.StringJoiner;
  * @param <T> type of Key
  */
 public class LRUCacheSet<T> extends LinkedHashSet<T> implements Cloneable, Serializable {
-
+    @Serial
     private static final long serialVersionUID = 449257218556904931L;
 
     public static final int DEFAULT_CAPACITY = 16;

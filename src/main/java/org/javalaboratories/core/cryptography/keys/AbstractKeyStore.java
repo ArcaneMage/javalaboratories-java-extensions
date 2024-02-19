@@ -22,6 +22,7 @@ import org.javalaboratories.core.util.Arguments;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -43,7 +44,7 @@ import java.security.cert.CertificateException;
  */
 @EqualsAndHashCode
 public abstract class AbstractKeyStore implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = 1082789795503155768L;
 
     private final String keyStoreType;

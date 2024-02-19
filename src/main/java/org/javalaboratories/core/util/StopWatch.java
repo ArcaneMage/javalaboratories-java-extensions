@@ -19,6 +19,7 @@ import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Try;
 
 import java.io.PrintStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -56,7 +57,7 @@ import java.util.function.Supplier;
  */
 @EqualsAndHashCode
 public final class StopWatch implements Serializable, Comparable<StopWatch> {
-
+    @Serial
     private static final long serialVersionUID = 2397064136918983422L;
 
     private static final String DEFAULT_DATETIME_FORMAT ="HH:mm:ss.SSS";

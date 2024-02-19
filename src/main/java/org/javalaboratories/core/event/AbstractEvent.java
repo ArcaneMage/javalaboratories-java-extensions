@@ -19,6 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.EventObject;
 import java.util.Objects;
@@ -30,6 +31,7 @@ import static org.javalaboratories.core.event.EventSource.EVENT_SOURCE_UNKNOWN;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public abstract class AbstractEvent extends EventObject implements Event {
 
+    @Serial
     private static final long serialVersionUID = -3388972209267427324L;
 
     @EqualsAndHashCode.Include
@@ -52,8 +54,7 @@ public abstract class AbstractEvent extends EventObject implements Event {
 
     @Override
     public AbstractEvent clone() throws CloneNotSupportedException {
-        AbstractEvent clone = (AbstractEvent) super.clone();
-        return clone;
+        return (AbstractEvent) super.clone();
     }
 
     @Override

@@ -22,6 +22,7 @@ import org.javalaboratories.core.cryptography.CryptographyException;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -44,7 +45,7 @@ import java.security.UnrecoverableKeyException;
  */
 @EqualsAndHashCode(callSuper = true)
 public final class SecretKeyStore extends AbstractKeyStore implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = -6166501481797114545L;
     private static final String DEFAULT_KEYSTORE_TYPE = "jceks";
 

@@ -1,5 +1,6 @@
 package org.javalaboratories.core.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -87,7 +88,7 @@ public final class Holders {
     }
 
     private static class WritableHolder<T> implements Holder<T>, Serializable {
-
+        @Serial
         private static final long serialVersionUID = -3480539403374331932L;
 
         private T value;
@@ -126,6 +127,9 @@ public final class Holders {
     }
 
     private final static class ReadableHolder<T> extends WritableHolder<T> {
+        @Serial
+        private static final long serialVersionUID = 3906482600158622341L;
+
         public ReadableHolder(final T value) {
             super(value);
         }
@@ -136,6 +140,8 @@ public final class Holders {
     }
 
     private final static class SynchronizedHolder<T> extends WritableHolder<T> {
+        @Serial
+        private static final long serialVersionUID = 7172407096739536828L;
 
         public SynchronizedHolder(final Holder<? extends T> holder) {
             super(holder.get());
