@@ -16,6 +16,7 @@
 package org.javalaboratories.core.util;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.javalaboratories.core.Try;
 
 import java.io.PrintStream;
@@ -56,6 +57,7 @@ import java.util.function.Supplier;
  * @author Kevin Henry, Java Laboratories
  */
 @EqualsAndHashCode
+@Getter
 public final class StopWatch implements Serializable, Comparable<StopWatch> {
     @Serial
     private static final long serialVersionUID = 2397064136918983422L;
@@ -63,8 +65,29 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
     private static final String DEFAULT_DATETIME_FORMAT ="HH:mm:ss.SSS";
     private static final Map<String,StopWatch> watches = new ConcurrentHashMap<>();
 
+    /**
+     * Returns number of cycles/iterations. This represents the number of times
+     * the {@link StopWatch#time} is called.
+     * <p>
+     * Therefore {@code getTime} maintains a running total. If the value
+     * returned is divided by the number of {@code cycles}, this would yield
+     * the average time.
+     */
     private volatile long cycles;
+
+    /**
+     * If there are multiple cycles/iterations (number of times the method
+     * {@link StopWatch#time(Runnable)} is called, an average of time elapsed
+     * is returned.
+     *
+     * Returns current running total of {@code StopWatch} time. If zero, the
+     * process may not have started yet or is incomplete.
+     */
     private volatile long time;
+
+    /**
+     * Returns name of {@link StopWatch}
+     */
     private final String name;
 
     /**
@@ -95,7 +118,7 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
      */
     public static String println() {
         StringBuffer buffer = new StringBuffer();
-        if (watches.size() > 0) {
+        if (!watches.isEmpty()) {
             List<StopWatch> list = new ArrayList<>();
             watches.forEach((n, s) -> list.add(s));
             Collections.sort(list);
@@ -175,20 +198,6 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
     }
 
     /**
-     * Returns number of cycles/iterations. This represents the number of times
-     * the {@link StopWatch#time} is called.
-     * <p>
-     * Therefore {@code getTime} maintains a running total. If the value
-     * returned is divided by the number of {@code cycles}, this would yield
-     * the average time.
-     *
-     * @return number of cycles/iterations.
-     */
-    public long getCycles() {
-        return cycles;
-    }
-
-    /**
      * This is the current time, as opposed to the average time as {@link
      * StopWatch#getTime()} returns.
      *
@@ -216,7 +225,7 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
      * is returned.
      *
      * @return current running total of {@code StopWatch} time. If zero, the
-     * process may not started yet or is incomplete.
+     * process may not have started yet or is incomplete.
      */
     public long getTime() {
         return Try.of(() -> time / cycles)
@@ -248,13 +257,6 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
      */
     public String getTimeAsString() {
         return format(DateTimeFormatter.ofPattern(DEFAULT_DATETIME_FORMAT));
-    }
-
-    /**
-     * @return name of {@link StopWatch}
-     */
-    public String getName() {
-        return name;
     }
 
     /**
