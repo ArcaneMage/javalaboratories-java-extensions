@@ -328,10 +328,9 @@ public final class Promises {
                                                                    final Supplier<U> supplier) {
         PrimaryAction<T> a = Objects.requireNonNull(action,"Cannot keep promise -- no action?");
         U result = Objects.requireNonNull(supplier).get();
-
         Invocable<T> invocable = asInvocable(result)
                 .orElseThrow(() -> new IllegalArgumentException("Promise object is not invocable -- promise unkept"));
-        invocable.invokeAction(a);
+        invocable.invoke(a);
         return result;
     }
 
@@ -343,15 +342,16 @@ public final class Promises {
      *           task.
      * @return {@link Maybe} encapsulates {@link Invocable} implementation.
      */
-    // TODO: Revisit this code?
     private static <T> Maybe<Invocable<T>> asInvocable(final Promise<T> promise) {
-        Maybe<Invocable<T>> result;
+        Maybe<Invocable<T>> result = Maybe.empty();
         try {
+            // This is okay. In the event of a failed cast, an empty
+            // Maybe is returned
             @SuppressWarnings("unchecked")
             Invocable<T> invocable = (Invocable<T>) Objects.requireNonNull(promise);
             result = Maybe.of(invocable);
         } catch (ClassCastException e) {
-            result = Maybe.empty();
+            // Handled
         }
         return result;
     }

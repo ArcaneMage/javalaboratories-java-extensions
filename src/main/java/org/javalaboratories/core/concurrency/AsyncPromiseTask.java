@@ -185,8 +185,8 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      * {@inheritDoc}
      */
     @Override
-    public final boolean invokeAction(final PrimaryAction<T> action) {
-        future = invokePrimaryActionAsync(Objects.requireNonNull(action,"No action?"));
+    public final boolean invoke(final PrimaryAction<T> action) {
+        future = invokeAsync(Objects.requireNonNull(action,"No action?"));
         logger.debug("Promise [{}] invoked action asynchronously successfully",getIdentity());
         return true;
     }
@@ -224,7 +224,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      * @return the underlying future that executes the primary action.
      * @throws NullPointerException if action is null
      */
-    CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
+    protected CompletableFuture<T> invokeAsync(final PrimaryAction<T> action) {
         Supplier<T> actionable = doMakePrimaryActionable(action);
         return CompletableFuture.supplyAsync(actionable,service)
                 .whenComplete((value,exception) -> action.getCompletionHandler()

@@ -19,7 +19,7 @@ package org.javalaboratories.core.concurrency;
  * An object that implements this interface is said to be invocable by the
  * {@link Promises} factory.
  * <p>
- * {@link Invocable#invokeAction(PrimaryAction)} method is called after the
+ * {@link Invocable#invoke(PrimaryAction)} method is called after the
  * {@link Promise} object is created and therefore plays a role in the the
  * life cycle of a {@code Promise} object.
  * <p>
@@ -40,5 +40,5 @@ public interface Invocable<T> {
      * @param action the primary action to run asynchronously.
      * @return true for successful invocation.
      */
-    boolean invokeAction(PrimaryAction<T> action);
+    boolean invoke(PrimaryAction<T> action);
 }

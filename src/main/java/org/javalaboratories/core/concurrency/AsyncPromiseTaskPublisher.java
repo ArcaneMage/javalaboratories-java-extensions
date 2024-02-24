@@ -119,8 +119,8 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @param publisher underlying event publisher.
      * @throws NullPointerException if service or action or future or promise is null.
      */
-     AsyncPromiseTaskPublisher(final ManagedPromiseService service, final Action<T> action,
-                               final CompletableFuture<T> future, final EventPublisher<PromiseEvent<T>,PromiseEventSubscriber<T>> publisher) {
+     AsyncPromiseTaskPublisher(final ManagedPromiseService service, final Action<T> action, final CompletableFuture<T> future,
+                               final EventPublisher<PromiseEvent<T>,PromiseEventSubscriber<T>> publisher) {
         super(service,action,future);
         Objects.requireNonNull(publisher);
         this.publisher = publisher;
@@ -160,8 +160,8 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      *
      * @throws NullPointerException if action is null
      */
-    CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
-        CompletableFuture<T> future = super.invokePrimaryActionAsync(action);
+    protected CompletableFuture<T> invokeAsync(final PrimaryAction<T> action) {
+        CompletableFuture<T> future = super.invokeAsync(action);
         async(() -> notifyEvent(future, Actions.PRIMARY_ACTION));
         return future;
     }
@@ -177,9 +177,9 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      */
     @SuppressWarnings("UnusedReturnValue")
     private CompletableFuture<Void> async(final Runnable runnable) {
-        Objects.requireNonNull(publisher,"Expected publisher?");
+        Runnable r = Objects.requireNonNull(runnable,"Expected runnable?");
         CompletableFuture<Void> result = CompletableFuture
-                .runAsync(runnable,getService())
+                .runAsync(r,getService())
                 .whenComplete(this::handleNotifyComplete);
         logger.debug("Promise [{}] notifying subscribers",getIdentity());
         return result;
