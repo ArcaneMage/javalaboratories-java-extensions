@@ -17,11 +17,9 @@ package org.javalaboratories.core.concurrency;
 
 import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.concurrency.PromiseEvent.Actions;
-import org.javalaboratories.core.event.Event;
-import org.javalaboratories.core.event.EventBroadcaster;
-import org.javalaboratories.core.event.EventPublisher;
-import org.javalaboratories.core.event.EventSource;
+import org.javalaboratories.core.event.*;
 import org.javalaboratories.core.util.Arguments;
+import org.javalaboratories.core.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
 
@@ -80,7 +79,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
 
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);
 
-    private final EventPublisher<PromiseEvent<T>> publisher;
+    private final EventPublisher<PromiseEvent<?>> publisher;
 
     /**
      * Constructs this event-driven {@link Promise} object
@@ -95,11 +94,16 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @throws NullPointerException if service or action is null.
      */
     AsyncPromiseTaskPublisher(final ManagedPromiseService service, final PrimaryAction<T> action,
-                              final List<? extends PromiseEventSubscriber<T>> subscribers) {
+                              final List<? extends PromiseEventSubscriber<?>> subscribers) {
         super(service,action);
         Arguments.requireNonNull(() -> new IllegalArgumentException("Arguments null?"),service,action,subscribers);
-        this.publisher = new EventBroadcaster<>(this);
-        subscribers.forEach(publisher::subscribe);
+        this.publisher =  new EventBroadcaster<>(this);
+
+        subscribers.forEach(s ->
+            // This is fine because this is really a collection of
+            // EventSubscriber types.
+            publisher.subscribe(Generics.unchecked(s))
+        );
     }
 
     /**
@@ -119,32 +123,8 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @throws NullPointerException if service or action or future or promise is null.
      */
      AsyncPromiseTaskPublisher(final ManagedPromiseService service, final Action<T> action,
-                               final CompletableFuture<T> future, final EventPublisher<PromiseEvent<T>> publisher) {
+                               final CompletableFuture<T> future, final EventPublisher<PromiseEvent<?>> publisher) {
         super(service,action,future);
-        Objects.requireNonNull(publisher);
-        this.publisher = publisher;
-    }
-
-    /**
-     * This constructor is only used internally by this object to create a new
-     * {@link Promise} object to represent encapsulated {@code CompletableFuture}
-     * and {@code publisher}.
-     * <p>
-     * Preferably use {@link AsyncPromiseTaskPublisher( ManagedPromiseService ,
-     * PrimaryAction, List)} constructor or the {@link Promises} factory method.
-     *
-     * @param service the thread pool service.
-     * @param action the transform action of this object to be processed asynchronously.
-     * @param future underlying {@link CompletableFuture} object, initially
-     *               set to {@code null} until this object is ready to perform the
-     *               action asynchronously.
-     * @param publisher underlying event publisher.
-     * @throws NullPointerException if service or action or future or promise is null.
-     */
-    @SuppressWarnings("unchecked")
-    public <R> AsyncPromiseTaskPublisher(final ManagedPromiseService service, final TransmuteAction<T,R> action,
-                                         final CompletableFuture<R> future, final EventPublisher<PromiseEvent<T>> publisher) {
-        super(service, (Action<T>) action, (CompletableFuture<T>) future);
         Objects.requireNonNull(publisher);
         this.publisher = publisher;
     }
@@ -185,9 +165,8 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
         Promise<R> promise = super.then(action);
         notify(() -> notifyTransmuteEvent(promise));
         CompletableFuture<R> future = ((AsyncPromiseTask<R>) promise).getFuture();
-        @SuppressWarnings("unchecked")
-        Promise<R> result = (Promise<R>) new AsyncPromiseTaskPublisher<>(getService(),action,future,publisher);
-        return result;
+
+        return new AsyncPromiseTaskPublisher<>(getService(),action,future,publisher);
     }
 
     /**
@@ -238,10 +217,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
         Arguments.requireNonNull(promise);
         Maybe<T> value = promise.getResult();
         if (promise.getState() == FULFILLED) {
-            if (value.isEmpty()) {
-                publisher.publish(new PromiseEvent<>(action,null));
-            }
-            value.ifPresent(v -> publisher.publish(new PromiseEvent<>(action,v)));
+            publisher.publish(new PromiseEvent<>(action,value.orElse(null)));
         }
     }
 
@@ -249,14 +225,8 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
         Arguments.requireNonNull(promise);
         Maybe<R> value = promise.getResult();
         if (promise.getState() == FULFILLED) {
-            if (value.isEmpty()) {
-                publisher.publish(new PromiseEvent<>(Actions.TRANSMUTE_ACTION,null));
-            }
-            value.ifPresent(v -> {
-                @SuppressWarnings("unchecked")
-                PromiseEvent<T> event = (PromiseEvent<T>)new PromiseEvent<>(Actions.TRANSMUTE_ACTION,v);
-                publisher.publish(event);
-            });
+            PromiseEvent<R> event = new PromiseEvent<>(Actions.TRANSMUTE_ACTION,value.orElse(null));
+            publisher.publish(event);
         }
     }
 }

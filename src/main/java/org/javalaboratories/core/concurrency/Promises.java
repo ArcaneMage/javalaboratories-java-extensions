@@ -178,7 +178,7 @@ public final class Promises {
      * @throws NullPointerException if {@code action} is null
      * @see AsyncPromiseTask
      */
-    public static <T> Promise<T> newPromise(final Supplier<? extends T> supplier) {
+    public static <T> Promise<T> newPromise(final Supplier<T> supplier) {
         return newPromise(PrimaryAction.of(Objects.requireNonNull(supplier,"No supplier")));
     }
 
@@ -225,8 +225,8 @@ public final class Promises {
      * @throws NullPointerException if {@code action} is null
      * @see AsyncPromiseTaskPublisher
      */
-    public static <T> Promise<T> newPromise(final Supplier<? extends T> supplier,
-                                            final List<? extends PromiseEventSubscriber<T>> subscribers) {
+    public static <T> Promise<T> newPromise(final Supplier<T> supplier,
+                                            final List<? extends PromiseEventSubscriber<?>> subscribers) {
         return newPromise(PrimaryAction.of(supplier),subscribers);
     }
 
@@ -257,7 +257,7 @@ public final class Promises {
      * @see AsyncPromiseTaskPublisher
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
-                                            final List<? extends PromiseEventSubscriber<T>> subscribers) {
+                                            final List<? extends PromiseEventSubscriber<?>> subscribers) {
         return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedService,action,subscribers));
     }
 

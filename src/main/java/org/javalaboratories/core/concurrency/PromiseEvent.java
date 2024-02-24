@@ -18,11 +18,13 @@ package org.javalaboratories.core.concurrency;
 import lombok.Getter;
 import org.javalaboratories.core.event.AbstractEvent;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.Objects;
 
 @Getter
 public class PromiseEvent<T> extends AbstractEvent {
+    @Serial
     private static final long serialVersionUID = 8029123351197793513L;
 
     public enum Actions {PRIMARY_ACTION,TASK_ACTION,TRANSMUTE_ACTION}

@@ -17,7 +17,6 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,15 +110,17 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
         CompletableFuture<Void> future = this.future.thenAcceptAsync(actionable,service)
                 .whenComplete((value,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(null, exception)));
-
-        return new AsyncPromiseTask<>(service,action,Generics.unchecked(future));
+        // This is okay for now, need to revisit.
+        @SuppressWarnings("unchecked")
+        CompletableFuture<T> f = (CompletableFuture<T>) future;
+        return new AsyncPromiseTask<>(service,action,f);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public  <R> Promise<R> then(final TransmuteAction<T,R> action) {
+    public <R> Promise<R> then(final TransmuteAction<T,R> action) {
         Function<T,R> transmutable = doMakeTransmutable(action);
         CompletableFuture<R> future = this.future.thenApplyAsync(transmutable,service)
                 .whenComplete((newValue,exception) -> action.getCompletionHandler()
@@ -247,10 +248,10 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
         };
     }
 
-    private Consumer<T> doMakeActionable(final TaskAction<T> action) {
+    private Consumer<T> doMakeActionable(final TaskAction<? super T> action) {
         Objects.requireNonNull(action);
         return (value) -> {
-            Consumer<T> result = action.getTask().orElseThrow();
+            Consumer<? super T> result = action.getTask().orElseThrow();
             try {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Promise [{}] starting task of TaskAction object",getIdentity());
@@ -264,10 +265,10 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
         };
     }
 
-    private <R> Function<T,R> doMakeTransmutable(final TransmuteAction<T,R> action) {
+    private <R> Function<T,R> doMakeTransmutable(final TransmuteAction<? super T,? extends R> action) {
         Objects.requireNonNull(action);
         return (value) -> {
-            Function<T,R> result = action.getTask().orElseThrow();
+            Function<? super T,? extends R> result = action.getTask().orElseThrow();
             try {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Promise [{}] starting transmutation task of TransmuteAction object",getIdentity());
