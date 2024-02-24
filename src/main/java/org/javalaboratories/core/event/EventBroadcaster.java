@@ -65,12 +65,15 @@ import java.util.stream.Collectors;
  * and maintain reasonable concurrency in an multi-threaded context.
  *
  * @param <T> Type of source in which the event originated.
+ * @param <U> Type of event
+ * @param <V> Type of event subscriber
  *
  * @see Event
  * @see AbstractEvent
  * @see EventSubscriber
  */
-public class EventBroadcaster<T extends EventSource,U extends Event> implements EventPublisher<U>, EventSource {
+public class EventBroadcaster<T extends EventSource,U extends Event, V extends EventSubscriber<U>>
+        implements EventPublisher<U,V>, EventSource {
 
     private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
@@ -79,18 +82,18 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
     private static int uniqueIdentity = 0;
 
     private final ReentrantLock mainLock;
-    private final Map<String,Subscription<U>> subscriptions;
+    private final Map<String,Subscription<U,V>> subscriptions;
     private final T source;
 
     @Getter
     @AllArgsConstructor
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-    private static class Subscription<E extends Event> {
+    private static class Subscription<E extends Event, F extends EventSubscriber<E>> {
         private final ReentrantLock lock = new ReentrantLock();
         @EqualsAndHashCode.Include
         private final String identity;
 
-        private final EventSubscriber<E> subscriber;
+        private final F subscriber;
         private boolean canceled;
     }
 
@@ -126,7 +129,7 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
         U anEvent = (U) Objects.requireNonNull(event,"No event?")
                 .assign(source);
 
-        Set<Subscription<U>> observers;
+        Set<Subscription<U,V>> observers;
         mainLock.lock();
         try {
             observers = new HashSet<>(subscriptions.values());
@@ -135,7 +138,7 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
         }
 
         observers.forEach(subscription -> {
-            EventSubscriber<U> subscriber = subscription.getSubscriber();
+            V subscriber = subscription.getSubscriber();
             subscription.getLock().lock();
             try {
                     try {
@@ -153,8 +156,8 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
     }
 
     @Override
-    public void subscribe(final EventSubscriber<U> subscriber) {
-        EventSubscriber<U> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
+    public void subscribe(final V subscriber) {
+        V aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
         mainLock.lock();
         try {
             subscriptions.values().stream()
@@ -164,7 +167,7 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
                         throw new EventException("Subscriber exists -- unsubscribe first");
                     });
 
-            Subscription<U> subscription = new Subscription<>(getUniqueIdentity(), aSubscriber,false);
+            Subscription<U,V> subscription = new Subscription<>(getUniqueIdentity(), aSubscriber,false);
 
             subscriptions.put(subscription.getIdentity(), subscription);
         } finally {
@@ -173,8 +176,8 @@ public class EventBroadcaster<T extends EventSource,U extends Event> implements 
     }
 
     @Override
-    public boolean unsubscribe(final EventSubscriber<U> subscriber) {
-        EventSubscriber<U> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
+    public boolean unsubscribe(final V subscriber) {
+        V aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
         mainLock.lock();
         try {
             // Derive subscription identity

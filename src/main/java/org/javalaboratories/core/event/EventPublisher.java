@@ -39,7 +39,7 @@ package org.javalaboratories.core.event;
  * @see EventBroadcaster
  * @see EventSubscriber
  */
-public interface EventPublisher<T extends Event> {
+public interface EventPublisher<T extends Event, U extends EventSubscriber<T>> {
     /**
      * Publish an {@link Event} to interested {@link EventSubscriber} objects
      * when {@link EventPublisher} or the owning component which encapsulates
@@ -74,7 +74,7 @@ public interface EventPublisher<T extends Event> {
      * @throws IllegalArgumentException if {@code captureEvents} is null or less
      * than 1. Multiple subscription of the same subscriber is not possible.
      */
-    void subscribe(final EventSubscriber<T> subscriber);
+    void subscribe(final U subscriber);
 
     /**
      * Unregisters the {@link EventSubscriber} from this {@link EventPublisher}.
@@ -87,7 +87,7 @@ public interface EventPublisher<T extends Event> {
      *         or unknown {@code subscriber}
      * @throws NullPointerException if {@code subscriber} is null.
      */
-    boolean unsubscribe(final EventSubscriber<T> subscriber);
+    boolean unsubscribe(final U subscriber);
 
     /**
      * @return number of subscribers registered with this {@code publisher}

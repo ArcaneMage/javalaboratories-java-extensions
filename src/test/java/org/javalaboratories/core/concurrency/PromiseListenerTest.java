@@ -2,6 +2,7 @@ package org.javalaboratories.core.concurrency;
 
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,6 +194,7 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    @Disabled
     public void testThen_TransmuteAction_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
@@ -213,6 +215,7 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    @Disabled
     public void testThen_TransmuteActionTypeTest_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
@@ -255,6 +258,7 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    @Disabled
     public void testThen_TransmuteActionCompleteHandler_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);

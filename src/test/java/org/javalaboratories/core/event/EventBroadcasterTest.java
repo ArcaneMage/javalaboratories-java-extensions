@@ -20,9 +20,9 @@ public class EventBroadcasterTest implements EventSubscriber<EventBroadcasterTes
     private static final TestEventB TEST_EVENT_B = new TestEventB("Hello World, B");
     private static final TestEventC TEST_EVENT_C = new TestEventC("Hello World, C");
 
-    private EventPublisher<TestEventA> publisherA;
-    private EventPublisher<TestEventB> publisherB;
-    private EventPublisher<TestEventC> publisherC;
+    private EventPublisher<TestEventA,EventSubscriber<TestEventA>> publisherA;
+    private EventPublisher<TestEventB,EventSubscriber<TestEventB>> publisherB;
+    private EventPublisher<TestEventC,EventSubscriber<TestEventC>> publisherC;
 
     private EventSubscriber<TestEventA> subscriberA;
     private EventSubscriber<TestEventB> subscriberB;
