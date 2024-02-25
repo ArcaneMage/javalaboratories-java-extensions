@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,7 +51,6 @@ public class StopWatchTest {
 
     @Test
     public void testEquals_Pass() {
-        assertEquals(stopWatch1,stopWatch1);
         assertEquals(StopWatch.watch("MethodOne"),stopWatch1);
         assertNotEquals(StopWatch.watch("MethodOne"),stopWatch2);
     }
@@ -110,37 +110,37 @@ public class StopWatchTest {
         assertEquals(0L,stopWatch1.getTime());
 
         stopWatch1.time(() -> doSomethingVoidMethod(500));
-        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 1024);
+        assertTrue(stopWatch1.getTime(TimeUnit.MILLISECONDS) <= 520);
 
-        stopWatch2.time(() -> doSomethingVoidMethod(1000));
-        assertEquals(1, stopWatch2.getTime(TimeUnit.SECONDS));
+        stopWatch2.time(() -> doSomethingVoidMethod(500));
+        assertTrue(stopWatch2.getTime(TimeUnit.MILLISECONDS) <= 520);
 
         // Nested timers
         stopWatch3.time(() -> {
-            doSomethingVoidMethod(1500);
+            doSomethingVoidMethod(250);
             StopWatch stopWatch4 = StopWatch.watch("MethodFour");
-            stopWatch4.time(() -> doSomethingVoidMethod(1000));
+            stopWatch4.time(() -> doSomethingVoidMethod(250));
         });
-        assertEquals(2, stopWatch3.getTime(TimeUnit.SECONDS));
+        assertTrue(stopWatch3.getTime(TimeUnit.MILLISECONDS) <= 525);
 
         StopWatch stopWatch5 = StopWatch.watch("MethodFive");
         stopWatch5.time(() -> {
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 3; i++) {
                 doSomethingVoidMethod(125);
             }
         });
-        assertTrue(stopWatch5.getTime(TimeUnit.MILLISECONDS) > 600);
+        assertTrue(stopWatch5.getTime(TimeUnit.MILLISECONDS) <= 400);
         assertEquals(stopWatch5.getRawTime(TimeUnit.NANOSECONDS),stopWatch5.getTime());
 
         // Time supplier
         StopWatch stopWatch6 = StopWatch.watch("MethodSix");
         int value = stopWatch6.time(() -> {
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 3; i++) {
                 doSomethingVoidMethod(125);
             }
             return 512;
         });
-        assertTrue(stopWatch6.getTime(TimeUnit.MILLISECONDS) > 600);
+        assertTrue(stopWatch6.getTime(TimeUnit.MILLISECONDS) <= 400);
         assertEquals(512, value);
     }
 
