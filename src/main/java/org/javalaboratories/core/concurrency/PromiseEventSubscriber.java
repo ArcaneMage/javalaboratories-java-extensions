@@ -35,9 +35,15 @@ import org.javalaboratories.core.event.EventSubscriber;
  * have been notified. It is not the role of {@link Promise} object to be
  * dependent on {@code subscribers}, but it does guarantee to eventually
  * inform all {@code subscribers} of the {@link PromiseEvent}.
+ * <p>
+ * It is challenging to enforce the type-safety of the event {@code value}
+ * for any given transformation that may have occurred, and so it is for this
+ * reason the type is a wildcard. This design is likely to change to enforce
+ * type-safety for all {@link PromiseEvent} action types.
  *
  * @see Promise
  * @see Promises
+ * @see PromiseEvent
  * @see AsyncPromiseTaskPublisher
  */
-public interface PromiseEventSubscriber<T> extends EventSubscriber<PromiseEvent<T>> {}
+public interface PromiseEventSubscriber<T> extends EventSubscriber<PromiseEvent<?>> {}

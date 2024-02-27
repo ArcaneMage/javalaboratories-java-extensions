@@ -46,7 +46,7 @@ public final class TaskAction<T> extends AbstractAction<T> {
     private final Consumer<T> task;
 
     /**
-     * Constructor to setup internal handlers.
+     * Constructor to set up internal handlers.
      * <p>
      * Recommended to use factory methods for creation.
      * @param task main task handler that will be executed asynchronously.

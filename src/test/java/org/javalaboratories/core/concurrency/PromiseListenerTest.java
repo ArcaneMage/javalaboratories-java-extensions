@@ -194,7 +194,6 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    @Disabled
     public void testThen_TransmuteAction_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
@@ -215,7 +214,6 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    @Disabled
     public void testThen_TransmuteActionTypeTest_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
@@ -258,7 +256,6 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
     }
 
     @Test
-    @Disabled
     public void testThen_TransmuteActionCompleteHandler_Pass() {
         // Given
         AtomicInteger received = new AtomicInteger(0);
@@ -406,9 +403,10 @@ public class PromiseListenerTest extends AbstractConcurrencyTest {
             this.name = name;
         }
         @Override
-        public void notify(final PromiseEvent<Integer> event) {
+        public void notify(final PromiseEvent<?> event) {
             if (event.isAny(PRIMARY_ACTION,TASK_ACTION,TRANSMUTE_ACTION)) {
-                logger.info("Listener {} received event={}, state={}",name,event.getEventId(),event.getValue());
+                logger.info("Listener {} received event={}, action={}, state={}",name,event.getEventId(),event.getAction(),
+                        event.getValue());
                 events++;
             }
         }

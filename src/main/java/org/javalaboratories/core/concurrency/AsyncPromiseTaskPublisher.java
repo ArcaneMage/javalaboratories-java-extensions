@@ -17,7 +17,10 @@ package org.javalaboratories.core.concurrency;
 
 import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.concurrency.PromiseEvent.Actions;
-import org.javalaboratories.core.event.*;
+import org.javalaboratories.core.event.Event;
+import org.javalaboratories.core.event.EventBroadcaster;
+import org.javalaboratories.core.event.EventPublisher;
+import org.javalaboratories.core.event.EventSource;
 import org.javalaboratories.core.util.Arguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,9 +71,11 @@ import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
  * {@code subscribers}, but it does guarantee to eventually inform all the
  * {@code subscribers} of the current {@link Event}.
  * <p>
- * At this time, {@code transmute actions} are not supported in that they will
- * not trigger any notifications. This is because it is challenging to come up
- * with a strategy to reliably enforce type-safety of a transformed object.
+ * It is challenging to enforce the type-safety of the event {@code value type}
+ * for any given transformation that may have occurred, and so it is for this
+ * reason the {@code value type} of the event is a wildcard. This design is
+ * likely to change to enforce type-safety for all {@link PromiseEvent} action
+ * types.
  * <p>
  * Constructor in this class is package-access only, use the factory methods
  * provided in the {@link Promises} class.
@@ -81,7 +86,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
 
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);
 
-    private final EventPublisher<PromiseEvent<T>,PromiseEventSubscriber<T>> publisher;
+    private final EventPublisher<PromiseEvent<?>,PromiseEventSubscriber<?>> publisher;
 
     /**
      * Constructs this event-driven {@link Promise} object
@@ -89,14 +94,13 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * Use the {@link Promises} factory method to construct this object.
      *
      * @param service the thread pool service
-     * @param action the action of this object to processed
-     *               asynchronously.
+     * @param action the action of this object to be processed asynchronously.
      * @param subscribers collection of subscribers/listeners of promise
      *                    objects.
      * @throws NullPointerException if service or action is null.
      */
     AsyncPromiseTaskPublisher(final ManagedPromiseService service, final PrimaryAction<T> action,
-                              final List<? extends PromiseEventSubscriber<T>> subscribers) {
+                              final List<? extends PromiseEventSubscriber<? super T>> subscribers) {
         super(service,action);
         Arguments.requireNonNull(() -> new IllegalArgumentException("Arguments null?"),service,action,subscribers);
         this.publisher =  new EventBroadcaster<>(this);
@@ -120,7 +124,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @throws NullPointerException if service or action or future or promise is null.
      */
      AsyncPromiseTaskPublisher(final ManagedPromiseService service, final Action<T> action, final CompletableFuture<T> future,
-                               final EventPublisher<PromiseEvent<T>,PromiseEventSubscriber<T>> publisher) {
+                               final EventPublisher<PromiseEvent<?>,PromiseEventSubscriber<?>> publisher) {
         super(service,action,future);
         Objects.requireNonNull(publisher);
         this.publisher = publisher;
@@ -149,6 +153,20 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
         Promise<T> promise = super.then(action);
         async(() -> notifyEvent(promise,Actions.TASK_ACTION));
         CompletableFuture<T> future = ((AsyncPromiseTask<T>) promise).getFuture();
+        return new AsyncPromiseTaskPublisher<>(getService(),action,future,publisher);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Asynchronously notifies {@link PromiseEventSubscriber} subscribers of
+     * the {@link PromiseEvent} when the promise is
+     * complete.
+     */
+    public final <R> Promise<R> then(final TransmuteAction<T,R> action) {
+        Promise<R> result = super.then(action);
+        async(() -> notifyEvent(result,Actions.TRANSMUTE_ACTION));
+        CompletableFuture<R> future = ((AsyncPromiseTask<R>) result).getFuture();
         return new AsyncPromiseTaskPublisher<>(getService(),action,future,publisher);
     }
 
@@ -196,9 +214,9 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
         }
     }
 
-    private void notifyEvent(final Promise<T> promise, final Actions action) {
+    private <U> void notifyEvent(final Promise<U> promise, final Actions action) {
         Arguments.requireNonNull(promise);
-        Maybe<T> value = promise.getResult();
+        Maybe<U> value = promise.getResult();
         if (promise.getState() == FULFILLED) {
             publisher.publish(new PromiseEvent<>(action,value.orElse(null)));
         }

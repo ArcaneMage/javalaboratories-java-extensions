@@ -112,7 +112,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
                         .ifPresent(result -> result.accept(null, exception)));
         // This is okay for now, need to revisit.
         @SuppressWarnings("unchecked")
-        CompletableFuture<T> f = (CompletableFuture<T>) future;
+        CompletableFuture<T> f =  (CompletableFuture<T>) future;
         return new AsyncPromiseTask<>(service,action,f);
     }
 
@@ -125,7 +125,6 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
         CompletableFuture<R> future = this.future.thenApplyAsync(transmutable,service)
                 .whenComplete((newValue,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(newValue, exception)));
-
         return new AsyncPromiseTask<>(service,action,future);
     }
 
