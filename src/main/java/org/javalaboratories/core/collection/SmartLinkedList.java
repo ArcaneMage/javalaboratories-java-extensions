@@ -17,7 +17,11 @@ package org.javalaboratories.core.collection;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,7 +45,7 @@ import java.util.function.Function;
  * or the {@code tail} depending on which "end" is the closest to the
  * requested {@code index}.
  * <p>
- * Currently considering introducing a small LRU cache to speed up retrieval to
+ * Currently, considering introducing a small LRU cache to speed up retrieval to
  * minimise sequential searches.
  *
  * @param <T> type of elements in {@link SmartLinkedList}
