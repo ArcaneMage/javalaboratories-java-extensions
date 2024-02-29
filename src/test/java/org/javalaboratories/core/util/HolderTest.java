@@ -137,8 +137,11 @@ public class HolderTest {
 
     @Test
     public void testForEach_Pass() {
-        // TODO: Improve For-Each test
+        Holder<Boolean> looped = Holders.mutable(false);
+        mutableHolder.forEach(s -> looped.set(true));
+
         assertInstanceOf(Iterable.class, mutableHolder);
+        assertTrue(looped.get());
     }
 
     @Test
