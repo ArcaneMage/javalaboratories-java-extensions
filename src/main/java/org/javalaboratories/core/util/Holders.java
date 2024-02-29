@@ -39,9 +39,8 @@ public final class Holders {
      * @deprecated Factory method replaced by {@code safeHolder}
      */
     @Deprecated
-    public static <T> Holder<T> synchronizedHolder(final Holder<? extends T> holder)  {
-        Objects.requireNonNull(holder);
-        return new SynchronizedHolder<>(holder);
+    public static <T> Holder<T> synchronizedHolder(final Holder<T> holder)  {
+        return mutable(holder);
     }
 
     /**
@@ -151,10 +150,6 @@ public final class Holders {
             this.lock = new ReentrantLock();
         }
 
-        public Holder<T> assign(final Holder<T> holder) {
-            return new MutableHolder<>(Objects.requireNonNull(holder).get());
-        }
-
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -225,55 +220,8 @@ public final class Holders {
             super(value);
         }
 
-        public Holder<T> assign (final Holder<T> holder) {
-            return new ReadOnlyHolder<>(Objects.requireNonNull(holder).get());
-        }
-
         public void set(T value) {
             throw new UnsupportedOperationException();
-        }
-    }
-
-    @Deprecated
-    private final static class SynchronizedHolder<T> extends MutableHolder<T> {
-        @Serial
-        private static final long serialVersionUID = 7172407096739536828L;
-
-        public SynchronizedHolder(final Holder<? extends T> holder) {
-            super(holder.get());
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            synchronized (this) {
-                return super.equals(o);
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            synchronized(this) {
-                return super.hashCode();
-            }
-        }
-
-        public T get() {
-            synchronized(this) {
-                return super.get();
-            }
-        }
-
-        public void set(T value) {
-            synchronized(this) {
-                super.set(value);
-            }
-        }
-
-        @Override
-        public String toString() {
-            synchronized(this) {
-                return super.toString();
-            }
         }
     }
 
