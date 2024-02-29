@@ -20,7 +20,7 @@ package org.javalaboratories.core.concurrency;
  * {@link Promises} factory.
  * <p>
  * {@link Invocable#invoke(PrimaryAction)} method is called after the
- * {@link Promise} object is created and therefore plays a role in the the
+ * {@link Promise} object is created and therefore plays a role in the
  * life cycle of a {@code Promise} object.
  * <p>
  * A {@code Promise} object's task will not be invoked unless this interface
@@ -30,15 +30,16 @@ package org.javalaboratories.core.concurrency;
  * @see AsyncPromiseTask
  * @see Promises
  */
+@FunctionalInterface
 public interface Invocable<T> {
     /**
      * This is the initial action of the {@code Promise} object. The contract
      * is to execute the action asynchronously and to return {@code true} for
      * successful invocation. The method is called immediately after the
-     * construction of the the {@link Promise} object.
+     * construction of the {@link Promise} object.
      *
      * @param action the primary action to run asynchronously.
      * @return true for successful invocation.
      */
-    boolean invoke(PrimaryAction<T> action);
+    boolean invoke(final PrimaryAction<T> action);
 }

@@ -15,8 +15,6 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import org.javalaboratories.core.Maybe;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -161,7 +159,7 @@ public final class Promises {
             return promises;
         });
 
-        return newPromise(action,() -> new AsyncPromiseTask<>(managedService,action));
+        return (Promise<List<Promise<T>>>) newInvocable(action,() -> new AsyncPromiseTask<>(managedService,action));
     }
 
     /**
@@ -178,7 +176,7 @@ public final class Promises {
      * @throws NullPointerException if {@code action} is null
      * @see AsyncPromiseTask
      */
-    public static <T> Promise<T> newPromise(final Supplier<T> supplier) {
+    public static <T> Promise<T> newPromise(final Supplier<? extends T> supplier) {
         return newPromise(PrimaryAction.of(Objects.requireNonNull(supplier,"No supplier")));
     }
 
@@ -197,7 +195,7 @@ public final class Promises {
      * @see AsyncPromiseTask
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
-        return newPromise(action, () -> new AsyncPromiseTask<>(managedService,action));
+        return (Promise<T>) newInvocable(action, () -> new AsyncPromiseTask<>(managedService,action));
     }
     /**
      * Factory method to create instances of event-driven {@link Promise}
@@ -258,7 +256,7 @@ public final class Promises {
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
                                             final List<? extends PromiseEventSubscriber<T>> subscribers) {
-        return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedService,action,subscribers));
+        return (Promise<T>) newInvocable(action, () -> new AsyncPromiseTaskPublisher<>(managedService,action,subscribers));
     }
 
     /**
@@ -297,62 +295,38 @@ public final class Promises {
         // Start asynchronous processes with custom promise implementation
         List<Promise<T>> promises = new ArrayList<>();
         list.forEach(action -> {
-            Promise<T> promise = newPromise(action,factory.apply(action));
+            Promise<T> promise = (Promise<T>) newInvocable(action,factory.apply(action));
             promises.add(promise);
         });
         return Collections.unmodifiableList(promises);
     }
 
     /**
-     * Factory method to create instances of {@link Promise} objects with
-     * a specified implementation of {@link Promise}.
+     * Factory method to create instances of {@link Invocable} objects with
+     * a specified implementation of {@link Invocable}.
      * <p>
-     * Not only is the {@link Promise} object created, but post creation, the
+     * Not only is the {@link Invocable} object created, but post creation,
      * the {@link PrimaryAction} task is executed asynchronously and the
      * {@link Promise} returned to the client.
      * <p>
      * This factory method is really provided for further development purposes,
-     * a mechanism to create an alternative implementation of {@link Promise}
+     * a mechanism to create an alternative implementation of {@link Invocable}
      * objects. Therefore, it is recommended to use
      * {@link Promises#newPromise(PrimaryAction)} instead, as this method
      * provides the default implementation.
      *
      * @param action a {@link PrimaryAction} encapsulating the task to be
      *        executed asynchronously.
-     * @param supplier supplies an implementation of {@link Promise}
+     * @param supplier supplies an implementation of {@link Invocable}
      * @param <T> Type of value returned from asynchronous task.
-     * @return a new {@link Promise} object.
+     * @return a new {@link Invocable} object.
      * @throws NullPointerException if {@code action} is null
      */
-    private static <T, U extends Promise<T>> Promise<T> newPromise(final PrimaryAction<T> action,
-                                                                   final Supplier<U> supplier) {
+    private static <T,U extends Invocable<T>> Invocable<T> newInvocable(final PrimaryAction<T> action,
+                                                                        final Supplier<? extends U> supplier) {
         PrimaryAction<T> a = Objects.requireNonNull(action,"Cannot keep promise -- no action?");
         U result = Objects.requireNonNull(supplier).get();
-        Invocable<T> invocable = asInvocable(result)
-                .orElseThrow(() -> new IllegalArgumentException("Promise object is not invocable -- promise unkept"));
-        invocable.invoke(a);
-        return result;
-    }
-
-    /**
-     * Returns the {@link Promise} object as an {@link Invocable}, if possible.
-     * <p>
-     * @param promise the {@link Promise} object that implements {@link Invocable}
-     * @param <T> The type of the resultant value returned from the asynchronous
-     *           task.
-     * @return {@link Maybe} encapsulates {@link Invocable} implementation.
-     */
-    private static <T> Maybe<Invocable<T>> asInvocable(final Promise<T> promise) {
-        Maybe<Invocable<T>> result = Maybe.empty();
-        try {
-            // This is okay. In the event of a failed cast, an empty
-            // Maybe is returned
-            @SuppressWarnings("unchecked")
-            Invocable<T> invocable = (Invocable<T>) Objects.requireNonNull(promise);
-            result = Maybe.of(invocable);
-        } catch (ClassCastException e) {
-            // Handled
-        }
+        result.invoke(a);
         return result;
     }
 

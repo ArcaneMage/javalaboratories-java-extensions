@@ -43,7 +43,7 @@ import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
  * @see Promise for full contract details and usage.
  */
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
+class AsyncPromiseTask<T> implements Promise<T> {
 
     private static final Consumer<Throwable> INERT_HANDLER = e -> {};
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);

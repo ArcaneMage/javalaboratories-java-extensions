@@ -136,7 +136,7 @@ import java.util.function.Function;
  * @see TransmuteAction
  * @see Promise#getState()
  */
-public interface Promise<T> {
+public interface Promise<T> extends Invocable<T> {
 
     Consumer<Throwable> DEFAULT_EXCEPTION_HANDLER = e -> {throw new RuntimeException(e);};
 
