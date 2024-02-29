@@ -5,11 +5,9 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.javalaboratories.core.Eval;
-import org.javalaboratories.core.Functor;
 
 /**
  * Holder utility class
@@ -17,9 +15,9 @@ import org.javalaboratories.core.Functor;
  * Generally used in lambda expressions to mutate objects declared as
  * effectively final.
  * <p>
- * Use this class to create a variety of {@code Holder} objects, which can be
+ * Use this class to create a variety of {@code Holder} objects, which are
  * thread-safe, immutable as well as mutable. Each factory method describes
- * the type writableHolder implementation it creates.
+ * the type {@code Holder} implementation it creates.
  * <p>
  * Class is replaced with a pure alternative, namely {@link Eval},
  * which does not have to rely on side effects. Refer to the {@link Eval
