@@ -142,6 +142,9 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
+                <configuration>
+                    <argLine>--enable-preview</argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
@@ -173,6 +176,8 @@
                 <version>3.3.2</version>
                 <configuration>
                     <doclint>all,-missing</doclint>
+                    <release>21</release>
+                    <additionalOptions>--enable-preview</additionalOptions>
                 </configuration>
                 <executions>
                     <execution>
