@@ -23,6 +23,8 @@ import org.javalaboratories.core.Eval;
  * which does not have to rely on side effects. Refer to the {@link Eval
  * #cpeek(Consumer)} and {@link Eval#cpeek(Predicate, Consumer)} methods for
  * details.
+ *
+ * @see Holder
  */
 @SuppressWarnings("WeakerAccess")
 public final class Holders {

@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
 public class HolderTest {
@@ -76,7 +75,7 @@ public class HolderTest {
     }
 
     @Test
-    public void testCopyConstructors_Pass() {
+    public void testReadOnlyCopyConstructor_Pass() {
         Holder<String> mholder = Holders.mutable(mutableHolder);
         Holder<String> rholder = Holders.readOnly(mholder);
 
@@ -85,16 +84,13 @@ public class HolderTest {
     }
 
     @Test
-    public void testAssign_Pass() {
-        Holder<String> johnDoe = Holders.readOnly("John Doe");
+    public void testMutableCopyConstructor_Pass() {
+        Holder<String> rholder = Holders.readOnly(mutableHolder);
+        Holder<String> mholder = Holders.mutable(rholder);
 
-        Holder<String> mutableJohn = mutableHolder.assign(johnDoe);
-        mutableJohn.set("John Smith");
-        Holder<String> readOnlyJohn = Holders.<String>readOnly().assign(mutableJohn);
-
-        assertEquals("John Smith", mutableJohn.get());
-        assertEquals("John Smith",readOnlyJohn.get());
-        assertThrows(UnsupportedOperationException.class, () -> readOnlyJohn.set("John Bishop"));
+        assertEquals("Hello World", mholder.get());
+        mholder.set("Hello Galaxy");
+        assertEquals("Hello Galaxy",mholder.get());
     }
 
     @Test
@@ -137,6 +133,12 @@ public class HolderTest {
         assertEquals(Holders.mutable("Hello World").hashCode(), mutableHolder.hashCode());
         assertEquals(Holders.readOnly(new Person("John Doe",26)).hashCode(), readOnlyHolder.hashCode());
         assertEquals(Holders.synchronizedHolder(mutableHolder).hashCode(), synchronizedHolder.hashCode());
+    }
+
+    @Test
+    public void testForEach_Pass() {
+        // TODO: Improve For-Each test
+        assertInstanceOf(Iterable.class, mutableHolder);
     }
 
     @Test
