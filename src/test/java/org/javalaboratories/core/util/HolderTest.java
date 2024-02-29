@@ -11,8 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("WeakerAccess")
 public class HolderTest {
-    private Holder<String> writableHolder;
-    private Holder<Person> readableHolder;
+    private Holder<String> mutableHolder;
+    private Holder<Person> readOnlyHolder;
     private Holder<String> synchronizedHolder;
 
     private class Person {
@@ -70,46 +70,79 @@ public class HolderTest {
     public void setup() {
         Person person = new Person("John Doe",26);
 
-        writableHolder = Holders.writableHolder("Hello World");
-        readableHolder = Holders.readableHolder(() -> new Person(person));
-        synchronizedHolder = Holders.synchronizedHolder(writableHolder);
+        mutableHolder = Holders.mutable("Hello World");
+        readOnlyHolder = Holders.readOnly(new Person(person));
+        synchronizedHolder = Holders.synchronizedHolder(mutableHolder);
+    }
+
+    @Test
+    public void testCopyConstructors_Pass() {
+        Holder<String> mholder = Holders.mutable(mutableHolder);
+        Holder<String> rholder = Holders.readOnly(mholder);
+
+        assertEquals("Hello World", rholder.get());
+        assertThrows(UnsupportedOperationException.class, () -> rholder.set("John Bishop"));
+    }
+
+    @Test
+    public void testAssign_Pass() {
+        Holder<String> johnDoe = Holders.readOnly("John Doe");
+
+        Holder<String> mutableJohn = mutableHolder.assign(johnDoe);
+        mutableJohn.set("John Smith");
+        Holder<String> readOnlyJohn = Holders.<String>readOnly().assign(mutableJohn);
+
+        assertEquals("John Smith", mutableJohn.get());
+        assertEquals("John Smith",readOnlyJohn.get());
+        assertThrows(UnsupportedOperationException.class, () -> readOnlyJohn.set("John Bishop"));
     }
 
     @Test
     public void testSet_Pass() {
-        writableHolder.set("Hello Galaxy");
+        mutableHolder.set("Hello Galaxy");
         synchronizedHolder.set("Hello Galaxy");
-        assertThrows(UnsupportedOperationException.class, () -> readableHolder.set(new Person("John Smith",26)));
-        assertEquals("Hello Galaxy", writableHolder.get());
+        assertThrows(UnsupportedOperationException.class, () -> readOnlyHolder.set(new Person("John Smith",26)));
+        assertEquals("Hello Galaxy", mutableHolder.get());
         assertEquals("Hello Galaxy", synchronizedHolder.get());
+    }
 
+    @Test
+    public void testFunctor_Pass() {
+        Holder<Integer> holder = mutableHolder
+                .map(String::length);
+
+        int length = holder
+                .fold(0,n -> n);
+
+        assertEquals(length, 11);
+        assertThrows(UnsupportedOperationException.class, () -> holder.set(12));
     }
 
     @Test
     public void testGet_Pass() {
-        assertEquals("Hello World", writableHolder.get());
-        assertEquals("John Doe", readableHolder.get().getName());
+        assertEquals("Hello World", mutableHolder.get());
+        assertEquals("John Doe", readOnlyHolder.get().getName());
         assertEquals("Hello World", synchronizedHolder.get());
     }
 
     @Test
     public void testEquals_Pass() {
-        assertEquals(Holders.writableHolder("Hello World"), writableHolder);
-        assertEquals(Holders.readableHolder(() -> new Person("John Doe",26)), readableHolder);
-        assertEquals(Holders.synchronizedHolder(writableHolder), synchronizedHolder);
+        assertEquals(Holders.mutable("Hello World"), mutableHolder);
+        assertEquals(Holders.readOnly(new Person("John Doe",26)), readOnlyHolder);
+        assertEquals(Holders.synchronizedHolder(mutableHolder), synchronizedHolder);
     }
 
     @Test
     public void testHashCode_Pass() {
-        assertEquals(Holders.writableHolder("Hello World").hashCode(), writableHolder.hashCode());
-        assertEquals(Holders.readableHolder(() -> new Person("John Doe",26)).hashCode(), readableHolder.hashCode());
-        assertEquals(Holders.synchronizedHolder(writableHolder).hashCode(), synchronizedHolder.hashCode());
+        assertEquals(Holders.mutable("Hello World").hashCode(), mutableHolder.hashCode());
+        assertEquals(Holders.readOnly(new Person("John Doe",26)).hashCode(), readOnlyHolder.hashCode());
+        assertEquals(Holders.synchronizedHolder(mutableHolder).hashCode(), synchronizedHolder.hashCode());
     }
 
     @Test
     public void testToString_Pass() {
-        assertEquals("Holder[value=Hello World]", writableHolder.toString());
-        assertEquals("Holder[value=Person[name='John Doe']]", readableHolder.toString());
+        assertEquals("Holder[value=Hello World]", mutableHolder.toString());
+        assertEquals("Holder[value=Person[name='John Doe']]", readOnlyHolder.toString());
         assertEquals("Holder[value=Hello World]", synchronizedHolder.toString());
     }
 }

@@ -71,7 +71,7 @@ public class Tuple2Test {
 
     @Test
     public void testMatch_Pass() {
-        Holder<Integer> found = Holders.writableHolder();
+        Holder<Integer> found = Holders.mutable();
         found.set(0);
         tuple
             .match(Matcher.allOf("Adrian","Wall"), (a, b) -> {
