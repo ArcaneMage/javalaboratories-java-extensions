@@ -2,13 +2,19 @@ package org.javalaboratories.core.util.Holders;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("WeakerAccess")
 public class HolderTest {
+    private static final Logger logger = LoggerFactory.getLogger(HolderTest.class);
+
     private Holder<String> readWriteHolder;
     private Holder<Person> readOnlyHolder;
     private Holder<String> synchronizedHolder;
@@ -58,9 +64,7 @@ public class HolderTest {
 
         @Override
         public String toString() {
-            return "Person[" +
-                    "name='" + name + '\'' +
-                    ']';
+            return STR."Person[name='\{name}\{'\''}\{']'}";
         }
     }
 
@@ -100,6 +104,15 @@ public class HolderTest {
         assertThrows(UnsupportedOperationException.class, () -> readOnlyHolder.set(new Person("John Smith",26)));
         assertEquals("Hello Galaxy", readWriteHolder.get());
         assertEquals("Hello Galaxy", synchronizedHolder.get());
+    }
+
+    @Test
+    public void testExists_Pass() {
+        Holder<Integer> empty = Holder.empty();
+
+        assertFalse(empty.exists(e -> Integer.valueOf(0).equals(e)));
+        assertTrue(readWriteHolder.exists(e -> e.equals("Hello World")));
+        assertFalse(readWriteHolder.exists(e -> e.equals("Hello Galaxy")));
     }
 
     @Test
@@ -182,6 +195,33 @@ public class HolderTest {
 
         assertInstanceOf(Iterable.class, readWriteHolder);
         assertTrue(looped.get());
+    }
+
+    @Test
+    public void testUseCases_Pass() {
+        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
+        String result = numbers.stream()
+                .filter(n -> n % 2 == 0)
+                .collect(() -> Holder.of(0.0),(a,b) -> a.set(b + a.get()),(a,b) -> {})
+                .map(n -> n / 2)
+                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+
+        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        logger.info(result);
+    }
+
+    @Test
+    public void testUseCasesNoHolders_Pass() {
+        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
+        double meanEven = numbers.stream()
+                .filter(n -> n % 2 == 0)
+                .mapToDouble(Double::valueOf)
+                .reduce(0.0, Double::sum) / 2;
+
+        String result = STR."Mean of even numbers (2,4,6,8,10) / 2 = \{meanEven}";
+
+        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        logger.info(result);
     }
 
     @Test

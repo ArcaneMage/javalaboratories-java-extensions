@@ -165,6 +165,23 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
     }
 
     /**
+     * Returns {@code true} when this value is not empty and predicate returns
+     * {@code true} when applied to this {@code Holder}
+     *
+     * @param predicate function to be applied to this {@code Holder} object
+     * @return {@code true} when this value is not empty and predicate returns
+     * {@code true}.
+     */
+    public boolean exists(Predicate<? super T> predicate) {
+        lock.lock();
+        try {
+            return this.value != null && Objects.requireNonNull(predicate).test(value);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -216,7 +233,7 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      * @throws NullPointerException if {@code predicate} function is {@code null}.
      */
     public Holder<T> filter(final Predicate<? super T> predicate) {
-        Objects.requireNonNull(predicate,"Expect predicate function");
+        Objects.requireNonNull(predicate,"Expected predicate function");
         return predicate.test(get()) ? this : Holder.empty();
     }
 

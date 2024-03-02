@@ -70,7 +70,7 @@ public class Tuple2Test {
 
     @Test
     public void testMatch_Pass() {
-        Holder<Integer> found = Holder.empty();
+        Holder<Integer> found = Holder.of(0);
         found.set(0);
         tuple
             .match(Matcher.allOf("Adrian","Wall"), (a, b) -> {
