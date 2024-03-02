@@ -221,8 +221,8 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
     }
 
     /**
-     * Returns {@code this} {@link Holder} object that satisfies the {@code
-     * predicate} function.
+     * Returns {@code this} {@link Holder} object that satisfies the negative
+     * {@code predicate} function.
      *
      * @param predicate function to apply the negative test.
      * @return {@code Holder} object that agrees/or meets the {@code predicate's}
