@@ -1,5 +1,6 @@
 package org.javalaboratories.core.util.Holders;
 
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -137,6 +138,20 @@ public class HolderTest {
     }
 
     @Test
+    public void testFlatten_Pass() {
+        // Given (setup)
+        Holder<Holder<Integer>> value = Holder.of(Holder.of(105));
+
+        // When
+        String result = value
+                .<Integer>flatten()
+                .fold("", Object::toString);
+
+        // Then
+        assertEquals("105",result);
+    }
+
+    @Test
     public void testFilter_Pass() {
         String string = readWriteHolder
                 .filter(s -> s.equals("Hello World"))
@@ -175,6 +190,14 @@ public class HolderTest {
     }
 
     @Test
+    public void testGetOrElse_Pass() {
+        Holder<String> holder = Holder.empty();
+
+        assertEquals("Empty",holder.getOrElse("Empty"));
+        assertEquals("Hello World",readWriteHolder.getOrElse("Empty"));
+    }
+
+    @Test
     public void testEquals_Pass() {
         assertEquals(Holder.of("Hello World"), readWriteHolder);
         assertNotEquals(Holder.of(new Person("John Doe",26)), readOnlyHolder);
@@ -197,6 +220,21 @@ public class HolderTest {
         assertTrue(looped.get());
     }
 
+    @Test
+    public void testPeek_Pass() {
+        // Given (setup)
+        LogCaptor logCaptor = LogCaptor.forClass(HolderTest.class);
+
+        // When
+        readWriteHolder
+                .map(v -> STR."\{v}, Galaxy")
+                .peek(v -> logger.info("Peek value as \"{}\"",v))
+                .get();
+
+        // Then
+        assertTrue(logCaptor.getInfoLogs().stream()
+                .anyMatch(s -> s.equals("Peek value as \"Hello World, Galaxy\"")));
+    }
     @Test
     public void testUseCases_Pass() {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);

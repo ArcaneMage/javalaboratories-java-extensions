@@ -201,7 +201,7 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
     public T getOrElse(T other) {
         lock.lock();
         try {
-            return value == null ? get() : other;
+            return value == null ? other : get();
         } finally {
             lock.unlock();
         }
