@@ -187,7 +187,7 @@ public class HolderTest {
     @Test
     public void testToString_Pass() {
         assertEquals("Holder[value=Hello World]", readWriteHolder.toString());
-        assertEquals("Holder[value=Person[name='John Doe']]", readOnlyHolder.toString());
+        assertEquals("Holder[value=Person[name='John Doe']] (Read-Only)", readOnlyHolder.toString());
         assertEquals("Holder[value=Hello World]", synchronizedHolder.toString());
     }
 }
