@@ -207,6 +207,20 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
     }
 
     /**
+     * Returns {@code this} {@link Holder} object that satisfies the {@code
+     * predicate} function.
+     *
+     * @param predicate function to apply test.
+     * @return {@code Holder} object that agrees/or meets the {@code predicate's}
+     * test.
+     * @throws NullPointerException if {@code predicate} function is {@code null}.
+     */
+    public Holder<T> filter(final Predicate<? super T> predicate) {
+        Objects.requireNonNull(predicate,"Expect predicate function");
+        return predicate.test(get()) ? this : Holder.empty();
+    }
+
+    /**
      * Returns value in this {@code Holder} container.
      */
     public T get() {
@@ -275,9 +289,5 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      */
     protected ReentrantLock getLock() {
         return lock;
-    }
-
-    private Holder() {
-        this(null);
     }
 }
