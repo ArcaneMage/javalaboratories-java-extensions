@@ -129,7 +129,7 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      * it contains.
      * <p>
      * @param holder holder object.
-     * @param <T> type writableHolder the {@code value} encapsulated in the container.
+     * @param <T> type of the {@code value} encapsulated in the container.
      * @return an immutable implementation.
      * @throws NullPointerException when holder is a null reference.
      */
@@ -146,6 +146,34 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
     public Holder(final T value) {
         this.value = value;
         this.lock = new ReentrantLock();
+    }
+
+    /**
+     * Returns an immutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that cannot
+     * be overwritten with the {@code set} method. If the value to be held is mutable,
+     * it is recommended to provide a copy of it with the {@code Supplier}.
+     * Note that immutability refers to the holder object, not necessarily the value
+     * it contains.
+     * <p>
+     * @return an immutable implementation.
+     */
+    public Holder<T> readOnly() {
+        return readOnly(this);
+    }
+
+    /**
+     * Returns a mutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that can
+     * be overwritten with the {@code set} method.
+     * <p>
+     * This {@code Holder} is thread-safe.
+     * @return an mutable implementation.
+     */
+    public Holder<T> readWrite() {
+        return readWrite(this);
     }
 
     /**

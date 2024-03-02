@@ -75,8 +75,7 @@ public class HolderTest {
 
         readWriteHolder = Holder.of("Hello World");
 
-        readOnlyHolder = Holder.of(new Person(person));
-        readOnlyHolder = Holder.readOnly(readOnlyHolder);
+        readOnlyHolder = Holder.of(new Person(person)).readOnly();
 
         synchronizedHolder = Holder.synchronizedHolder(readWriteHolder);
     }
@@ -87,6 +86,16 @@ public class HolderTest {
 
         assertEquals("Hello World", rholder.get());
         assertThrows(UnsupportedOperationException.class, () -> rholder.set("John Bishop"));
+    }
+
+    @Test
+    public void testMutableCopyConstructorReset_Pass() {
+        Holder<String> rholder = Holder.readOnly(readWriteHolder);
+        Holder<String> mholder = rholder.readWrite();
+
+        assertEquals("Hello World", mholder.get());
+        mholder.set("John Bishop");
+        assertEquals("John Bishop", mholder.get());
     }
 
     @Test
