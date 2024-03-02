@@ -31,4 +31,5 @@ module javalaboratories.java.extensions {
   exports org.javalaboratories.core.statistics;
   exports org.javalaboratories.core.tuple;
   exports org.javalaboratories.core.util;
+  exports org.javalaboratories.core.util.Holders;
 }

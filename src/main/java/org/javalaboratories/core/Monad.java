@@ -48,6 +48,8 @@ public interface Monad<T> extends Functor<T> {
      * @param mapper function to perform transformation.
      * @param <U> Type of transformed value.
      * @return new monad containing transformed value.
+     * @throws ClassCastException when the resultant {@code Monad} is not
+     * castable to this {@code Monad}
      */
     default <U> Monad<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
         Objects.requireNonNull(mapper,"Expected mapper function");

@@ -17,7 +17,7 @@ package org.javalaboratories.core;
 
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.util.Arguments;
-import org.javalaboratories.core.util.Holder;
+import org.javalaboratories.core.util.Holders.Holder;
 
 import java.io.Serial;
 import java.io.Serializable;

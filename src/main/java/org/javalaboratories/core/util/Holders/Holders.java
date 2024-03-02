@@ -1,9 +1,21 @@
-package org.javalaboratories.core.util;
+/*
+ * Copyright 2020 Kevin Henry
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+package org.javalaboratories.core.util.Holders;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.Objects;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -40,7 +52,7 @@ public final class Holders {
      */
     @Deprecated
     public static <T> Holder<T> synchronizedHolder(final Holder<T> holder)  {
-        return mutable(holder);
+        return readWrite(holder);
     }
 
     /**
@@ -53,8 +65,8 @@ public final class Holders {
      * @param <T> type encapsulated in the container.
      * @return an mutable implementation.
      */
-    public static <T> Holder<T> mutable() {
-        return mutable((T)null);
+    public static <T> Holder<T> readWrite() {
+        return readWrite((T)null);
     }
 
     /**
@@ -67,8 +79,8 @@ public final class Holders {
      * @param <T> type of {@code value} encapsulated in the container.
      * @return an mutable implementation.
      */
-    public static <T> Holder<T> mutable(final T value) {
-        return new MutableHolder<>(value);
+    public static <T> Holder<T> readWrite(final T value) {
+        return new ReadWriteHolder<>(value);
     }
 
     /**
@@ -83,24 +95,8 @@ public final class Holders {
      * @return an mutable implementation.
      * @throws NullPointerException when holder object is null
      */
-    public static <T> Holder<T> mutable(final Holder<T> holder) {
-        return Holders.mutable(Objects.requireNonNull(holder).get());
-    }
-
-    /**
-     * Returns an immutable {@code Holder} implementation.
-     * <p>
-     * The holder container contains a reference to the {@code value} that cannot
-     * be overwritten with the {@code set} method. If the value to be held is mutable,
-     * it is recommended to provide a copy of it with the {@code Supplier}.
-     * Note that immutability refers to the holder object, not necessarily the value
-     * it contains.
-     * <p>
-     * @param <T> type writableHolder the {@code value} encapsulated in the container.
-     * @return an immutable implementation.
-     */
-    public static <T> Holder<T> readOnly() {
-        return readOnly((T)null);
+    public static <T> Holder<T> readWrite(final Holder<T> holder) {
+        return Holders.readWrite(Objects.requireNonNull(holder).get());
     }
 
     /**
@@ -136,93 +132,6 @@ public final class Holders {
      */
     public static <T> Holder<T> readOnly(final T value) {
         return new ReadOnlyHolder<>(value);
-    }
-
-    private static class MutableHolder<T> implements Holder<T>, Serializable {
-        @Serial
-        private static final long serialVersionUID = -3480539403374331932L;
-
-        private T value;
-        private final ReentrantLock lock;
-
-        public MutableHolder(final T value) {
-            this.value = value;
-            this.lock = new ReentrantLock();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Holder<?> holder = (Holder<?>) o;
-            lock.lock();
-            try {
-                return Objects.equals(value, holder.get());
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            lock.lock();
-            try {
-                return Objects.hash(value);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public T getOrElse(T other) {
-            lock.lock();
-            try {
-                return value == null ? get() : other;
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        public T get() {
-            lock.lock();
-            try {
-                return value;
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        public void set(T value) {
-            lock.lock();
-            try {
-                this.value = value;
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public String toString() {
-            lock.lock();
-            try {
-                return STR."Holder[value=\{value}\{']'}";
-            } finally {
-                lock.unlock();
-            }
-        }
-    }
-
-    private final static class ReadOnlyHolder<T> extends MutableHolder<T> {
-        @Serial
-        private static final long serialVersionUID = 3906482600158622341L;
-
-        public ReadOnlyHolder(final T value) {
-            super(value);
-        }
-
-        public void set(T value) {
-            throw new UnsupportedOperationException();
-        }
     }
 
     private Holders() {}
