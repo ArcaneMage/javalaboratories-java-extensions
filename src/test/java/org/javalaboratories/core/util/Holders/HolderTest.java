@@ -154,8 +154,6 @@ public class HolderTest {
         assertThrows(UnsupportedOperationException.class, () -> holder.set(10));
     }
 
-
-
     @Test
     public void testGet_Pass() {
         assertEquals("Hello World", readWriteHolder.get());

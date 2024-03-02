@@ -43,4 +43,10 @@ final class ReadOnlyHolder<T> extends Holder<T> {
         return new ReadOnlyHolder<>(value);
     }
 
+    @Override
+    public String toString() {
+        String s = super.toString();
+        return STR."\{s} (Read-Only)";
+    }
+
 }
