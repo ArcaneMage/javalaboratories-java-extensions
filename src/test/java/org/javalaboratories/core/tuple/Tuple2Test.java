@@ -2,7 +2,6 @@ package org.javalaboratories.core.tuple;
 
 import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.util.Holders.Holder;
-import org.javalaboratories.core.util.Holders.Holders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,7 +70,7 @@ public class Tuple2Test {
 
     @Test
     public void testMatch_Pass() {
-        Holder<Integer> found = Holders.readWrite();
+        Holder<Integer> found = Holder.empty();
         found.set(0);
         tuple
             .match(Matcher.allOf("Adrian","Wall"), (a, b) -> {

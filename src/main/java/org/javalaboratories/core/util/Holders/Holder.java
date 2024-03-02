@@ -50,12 +50,92 @@ import java.util.function.Predicate;
  * @see ReadWriteHolder
  * @see ReadOnlyHolder
  */
-public abstract class Holder<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable {
+public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable
+        permits ReadOnlyHolder, ReadWriteHolder {
     @Serial
     private static final long serialVersionUID = -3480539403374331932L;
 
     protected T value;
     private final ReentrantLock lock;
+
+    /**
+     * Returns a mutable, thread-safe {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference that can be overwritten with the
+     * {@code set} method.
+     * @param <T> type encapsulated in the container.
+     * @return an mutable, thread-safe implementation.
+     * @deprecated Factory method replaced by {@code safeHolder}
+     */
+    @Deprecated
+    public static <T> Holder<T> synchronizedHolder(final Holder<T> holder)  {
+        return readWrite(holder);
+    }
+
+    /**
+     * Returns a mutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that can
+     * be overwritten with the {@code set} method.
+     * <p>
+     * This {@code Holder} is thread-safe.
+     * @param value holder object to be assigned to this {@code holder}
+     * @param <T> type of {@code value} encapsulated in the container.
+     * @return an mutable implementation.
+     * @throws NullPointerException when holder object is null
+     */
+    public static <T> Holder<T> of(final T value) {
+        return new ReadWriteHolder<>(value);
+    }
+
+    /**
+     * Returns a mutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that can
+     * be overwritten with the {@code set} method.
+     * <p>
+     * This {@code Holder} is thread-safe.
+     * @param <T> type of {@code value} encapsulated in the container.
+     * @return an mutable implementation.
+     * @throws NullPointerException when holder object is null
+     */
+    public static <T> Holder<T> empty() {
+        return new ReadWriteHolder<>(null);
+    }
+
+    /**
+     * Returns a mutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that can
+     * be overwritten with the {@code set} method.
+     * <p>
+     * This {@code Holder} is thread-safe.
+     * @param holder holder object to be assigned to this {@code holder}
+     * @param <T> type of {@code value} encapsulated in the container.
+     * @return an mutable implementation.
+     * @throws NullPointerException when holder object is null
+     */
+    public static <T> Holder<T> readWrite(final Holder<T> holder) {
+        return Holder.of(Objects.requireNonNull(holder).get());
+    }
+
+    /**
+     * Returns an immutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that cannot
+     * be overwritten with the {@code set} method. If the value to be held is mutable,
+     * it is recommended to provide a copy of it with the {@code Supplier}.
+     * Note that immutability refers to the holder object, not necessarily the value
+     * it contains.
+     * <p>
+     * @param holder holder object.
+     * @param <T> type writableHolder the {@code value} encapsulated in the container.
+     * @return an immutable implementation.
+     * @throws NullPointerException when holder is a null reference.
+     */
+    public static <T> Holder<T> readOnly(final Holder<T> holder) {
+        return new ReadOnlyHolder<>(Objects.requireNonNull(holder).get());
+    }
 
     /**
      * Constructs the {@code Holder} container, encapsulating
@@ -178,6 +258,14 @@ public abstract class Holder<T> extends Applicative<T> implements Monad<T>, Iter
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Iterator<T> iterator() {
+        return Collections.singletonList(get()).iterator();
+    }
+
+    /**
      * Returns this {@code Reentrant} lock.
      * <p>
      * To be used by derived classes to read or write current value with thread
@@ -189,11 +277,7 @@ public abstract class Holder<T> extends Applicative<T> implements Monad<T>, Iter
         return lock;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterator<T> iterator() {
-        return Collections.singletonList(get()).iterator();
+    private Holder() {
+        this(null);
     }
 }

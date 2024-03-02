@@ -16,7 +16,6 @@
 package org.javalaboratories.core;
 
 import org.javalaboratories.core.util.Holders.Holder;
-import org.javalaboratories.core.util.Holders.Holders;
 import org.javalaboratories.core.statistics.DoubleStatisticalCalculators;
 import org.javalaboratories.core.statistics.IntStatisticalCalculators;
 import org.javalaboratories.core.statistics.LongStatisticalCalculators;
@@ -316,7 +315,7 @@ public final class Reducers {
 
     private static <T> Reducer<T, Holder<T>, Maybe<T>> reduce(BinaryOperator<T> operator) {
         return new ReducerImpl<>(
-                Holders::readWrite,
+                Holder::empty,
                 (a,v) -> a.set(operator.apply(a.get() != null ? a.get() : v,v)),
                 (l,r) -> { l.set(operator.apply((l.get()),r.get())); return l; },
                 (result) -> Maybe.ofNullable(result.get()),

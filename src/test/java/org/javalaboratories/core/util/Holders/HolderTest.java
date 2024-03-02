@@ -1,7 +1,5 @@
-package org.javalaboratories.core.util;
+package org.javalaboratories.core.util.Holders;
 
-import org.javalaboratories.core.util.Holders.Holder;
-import org.javalaboratories.core.util.Holders.Holders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -70,15 +68,17 @@ public class HolderTest {
     public void setup() {
         Person person = new Person("John Doe",26);
 
-        readWriteHolder = Holders.readWrite("Hello World");
-        readOnlyHolder = Holders.readOnly(new Person(person));
-        synchronizedHolder = Holders.synchronizedHolder(readWriteHolder);
+        readWriteHolder = Holder.of("Hello World");
+
+        readOnlyHolder = Holder.of(new Person(person));
+        readOnlyHolder = Holder.readOnly(readOnlyHolder);
+
+        synchronizedHolder = Holder.synchronizedHolder(readWriteHolder);
     }
 
     @Test
     public void testReadOnlyCopyConstructor_Pass() {
-        Holder<String> mholder = Holders.readWrite(readWriteHolder);
-        Holder<String> rholder = Holders.readOnly(mholder);
+        Holder<String> rholder = Holder.readOnly(readWriteHolder);
 
         assertEquals("Hello World", rholder.get());
         assertThrows(UnsupportedOperationException.class, () -> rholder.set("John Bishop"));
@@ -86,12 +86,11 @@ public class HolderTest {
 
     @Test
     public void testMutableCopyConstructor_Pass() {
-        Holder<String> rholder = Holders.readOnly(readWriteHolder);
-        Holder<String> mholder = Holders.readWrite(rholder);
+        Holder<Person> mholder = Holder.readWrite(readOnlyHolder);
 
-        assertEquals("Hello World", mholder.get());
-        mholder.set("Hello Galaxy");
-        assertEquals("Hello Galaxy",mholder.get());
+        assertEquals("John Doe", mholder.get().getName());
+        mholder.set(new Person("James Smith",30));
+        assertEquals("James Smith",mholder.get().getName());
     }
 
     @Test
@@ -112,6 +111,16 @@ public class HolderTest {
                 .fold(0,n -> n);
 
         assertEquals(length, 11);
+    }
+
+    @Test
+    public void testFlatMap_Pass() {
+        Holder<Integer> nested = Holder.of(5);
+        int value = nested
+                .flatMap(n -> Holder.of(n +2))
+                .fold(0,n -> n);
+
+        assertEquals(value,7);
     }
 
     @Test
@@ -137,21 +146,21 @@ public class HolderTest {
 
     @Test
     public void testEquals_Pass() {
-        assertEquals(Holders.readWrite("Hello World"), readWriteHolder);
-        assertEquals(Holders.readOnly(new Person("John Doe",26)), readOnlyHolder);
-        assertEquals(Holders.synchronizedHolder(readWriteHolder), synchronizedHolder);
+        assertEquals(Holder.of("Hello World"), readWriteHolder);
+        assertNotEquals(Holder.of(new Person("John Doe",26)), readOnlyHolder);
+        assertEquals(Holder.synchronizedHolder(readWriteHolder), synchronizedHolder);
     }
 
     @Test
     public void testHashCode_Pass() {
-        assertEquals(Holders.readWrite("Hello World").hashCode(), readWriteHolder.hashCode());
-        assertEquals(Holders.readOnly(new Person("John Doe",26)).hashCode(), readOnlyHolder.hashCode());
-        assertEquals(Holders.synchronizedHolder(readWriteHolder).hashCode(), synchronizedHolder.hashCode());
+        assertEquals(Holder.of("Hello World").hashCode(), readWriteHolder.hashCode());
+        assertEquals(Holder.of(new Person("John Doe",26)).hashCode(), readOnlyHolder.hashCode());
+        assertEquals(Holder.synchronizedHolder(readWriteHolder).hashCode(), synchronizedHolder.hashCode());
     }
 
     @Test
     public void testForEach_Pass() {
-        Holder<Boolean> looped = Holders.readWrite(false);
+        Holder<Boolean> looped = Holder.of(false);
         readWriteHolder.forEach(s -> looped.set(true));
 
         assertInstanceOf(Iterable.class, readWriteHolder);
