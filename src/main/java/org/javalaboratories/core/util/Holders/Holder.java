@@ -221,6 +221,19 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
     }
 
     /**
+     * Returns {@code this} {@link Holder} object that satisfies the {@code
+     * predicate} function.
+     *
+     * @param predicate function to apply the negative test.
+     * @return {@code Holder} object that agrees/or meets the {@code predicate's}
+     * test.
+     * @throws NullPointerException if {@code predicate} function is {@code null}.
+     */
+    public Holder<T> filterNot(final Predicate<? super T> predicate) {
+        return filter(Objects.requireNonNull(predicate).negate());
+    }
+
+    /**
      * Returns value in this {@code Holder} container.
      */
     public T get() {
@@ -252,7 +265,8 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      * Sets {@code value} for this {@code holder}. Default implementation
      * is {@link UnsupportedOperationException}. Not all {@code holder}
      * implementations implement this method.
-     * @param value value
+     *
+     * @param value value of the contained object
      */
     public void set(T value) {
         throw new UnsupportedOperationException();

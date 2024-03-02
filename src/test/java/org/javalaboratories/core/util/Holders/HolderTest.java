@@ -110,17 +110,36 @@ public class HolderTest {
         int length = holder
                 .fold(0,n -> n);
 
-        assertEquals(length, 11);
+        assertEquals(11, length);
     }
 
     @Test
     public void testFlatMap_Pass() {
-        Holder<Integer> nested = Holder.of(5);
-        int value = nested
+        Holder<Integer> holder = Holder.of(5);
+        int value = holder
                 .flatMap(n -> Holder.of(n +2))
                 .fold(0,n -> n);
 
-        assertEquals(value,7);
+        assertEquals(7,value);
+    }
+
+    @Test
+    public void testFilter_Pass() {
+        String string = readWriteHolder
+                .filter(s -> s.equals("Hello World"))
+                .fold("",s -> s);
+
+        assertEquals("Hello World",string);
+    }
+
+    @Test
+    public void testFilterNot_Pass() {
+        String string = readWriteHolder
+                // Filter value when not equals to "Hello World"
+                .filterNot(s -> s.equals("Hello World"))
+                .fold("",s -> s);
+
+        assertEquals("",string);
     }
 
     @Test
