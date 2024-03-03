@@ -36,10 +36,10 @@ import java.util.function.Supplier;
  * Generally used in lambda expressions to mutate objects declared as effectively
  * final.
  * <p>
- * Implementations of this interface must enforce thread-safety where possible.
- * Ideally, the variable within the container should also be thread safe, because
- * the {@code Holder} container only guarantees that the reference of the
- * contained object is writable by one thread only.
+ * Derived implementations of this class must enforce thread-safety where
+ * possible. Ideally, the variable within the container should also be thread
+ * safe, because the {@code Holder} container only guarantees that the reference
+ * of the contained object is writable by one thread only.
  * <p>
  * Class is replaced with a pure alternative, namely {@link Eval},
  * which does not have to rely on side effects. Refer to the {@link Eval

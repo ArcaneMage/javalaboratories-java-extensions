@@ -45,7 +45,7 @@ public interface Context<T> {
     /**
      * Retrieves {@code value} from this container.
      * <p>
-     * If the {@code value} is unretrievable (is empty) then the {@code identity}
+     * If the {@code value} is irretrievable (is empty) then the {@code identity}
      * or initial value is returned, otherwise the {@code function} performs a
      * transformation/reduction on the container {@code value}.
      *
