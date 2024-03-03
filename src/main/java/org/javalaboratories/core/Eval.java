@@ -259,7 +259,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      * {@inheritDoc}
      */
     @Override
-    public T orElse(T other) {
+    public T orElse(final T other) {
         return value();
     }
 

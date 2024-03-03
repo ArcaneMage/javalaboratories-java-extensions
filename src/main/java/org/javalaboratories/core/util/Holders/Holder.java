@@ -219,7 +219,7 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      * {@inheritDoc}
      */
     @Override
-    public T orElse(T other) {
+    public T orElse(final T other) {
         lock.lock();
         try {
             return value == null ? other : value;
