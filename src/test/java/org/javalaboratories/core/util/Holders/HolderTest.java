@@ -199,11 +199,34 @@ public class HolderTest {
     }
 
     @Test
-    public void testGetOrElse_Pass() {
+    public void testOr_Pass() {
+        Holder<String> holder = Holder.empty();
+        String rHolder = holder
+                .or(() -> Holder.of("Hello World"))
+                .fold("", s -> s);
+
+        String rwHolder = readWriteHolder
+                .or(() -> Holder.of("Hello Galaxy"))
+                .fold("",s -> s);
+
+        assertEquals("Hello World",rHolder);
+        assertEquals("Hello World", rwHolder);
+    }
+
+    @Test
+    public void testOrElse_Pass() {
         Holder<String> holder = Holder.empty();
 
         assertEquals("Empty",holder.orElse("Empty"));
         assertEquals("Hello World",readWriteHolder.orElse("Empty"));
+    }
+
+    @Test
+    public void testOrElseGet_Pass() {
+        Holder<String> holder = Holder.empty();
+
+        assertEquals("Empty",holder.orElseGet(() -> "Empty"));
+        assertEquals("Hello World",readWriteHolder.orElseGet(() -> "Empty"));
     }
 
     @Test
