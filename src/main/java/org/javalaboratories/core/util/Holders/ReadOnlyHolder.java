@@ -16,6 +16,7 @@
 package org.javalaboratories.core.util.Holders;
 
 import java.io.Serial;
+import java.util.Objects;
 
 /**
  * Returns an immutable {@code Holder} implementation.
@@ -31,6 +32,24 @@ final class ReadOnlyHolder<T> extends Holder<T> {
     @Serial
     private static final long serialVersionUID = 3906482600158622341L;
 
+    public static final Holder<?> EMPTY = new ReadOnlyHolder<>(null);
+
+    /**
+     * Returns a mutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that can
+     * be overwritten with the {@code set} method.
+     * <p>
+     * This {@code Holder} is thread-safe.
+     * @param holder holder object to be assigned to this {@code holder}
+     * @param <T> type of {@code value} encapsulated in the container.
+     * @return an mutable implementation.
+     * @throws NullPointerException when holder object is null
+     */
+    static <T> Holder<T> readWrite(final Holder<T> holder) {
+        return new ReadWriteHolder<>(Objects.requireNonNull(holder).get());
+    }
+
     public ReadOnlyHolder(final T value) {
         super(value);
     }
@@ -43,10 +62,25 @@ final class ReadOnlyHolder<T> extends Holder<T> {
         return new ReadOnlyHolder<>(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Holder<T> readWrite() {
+        return readWrite(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Holder<T> readOnly() {
+        throw new IllegalStateException("Already in a read-only state");
+    }
+
     @Override
     public String toString() {
         String s = super.toString();
         return STR."\{s} (Read-Only)";
     }
-
 }

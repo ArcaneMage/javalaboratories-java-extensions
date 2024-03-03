@@ -315,7 +315,7 @@ public final class Reducers {
 
     private static <T> Reducer<T, Holder<T>, Maybe<T>> reduce(BinaryOperator<T> operator) {
         return new ReducerImpl<>(
-                Holder::empty,
+                () -> Holder.of(null),
                 (a,v) -> a.set(operator.apply(a.get() != null ? a.get() : v,v)),
                 (l,r) -> { l.set(operator.apply((l.get()),r.get())); return l; },
                 (result) -> Maybe.ofNullable(result.get()),

@@ -16,6 +16,7 @@
 package org.javalaboratories.core.util.Holders;
 
 import java.io.Serial;
+import java.util.Objects;
 
 /**
  * Returns a mutable {@code Holder} implementation.
@@ -29,6 +30,22 @@ import java.io.Serial;
 final class ReadWriteHolder<T> extends Holder<T> {
     @Serial
     private static final long serialVersionUID = -7908715729004692956L;
+
+    /**
+     * Returns an immutable {@code Holder} implementation.
+     * <p>
+     * The holder container contains a reference to the {@code value} that cannot
+     * be overwritten with the {@code set} method. Note that immutability refers
+     * to the holder object, not necessarily the value it contains.
+     * <p>
+     * @param holder holder object.
+     * @param <T> type of the {@code value} encapsulated in the container.
+     * @return an immutable implementation.
+     * @throws NullPointerException when holder is a null reference.
+     */
+    static <T> Holder<T> readOnly(final Holder<T> holder) {
+        return new ReadOnlyHolder<>(Objects.requireNonNull(holder).get());
+    }
 
     public ReadWriteHolder(final T value) {
         super(value);
@@ -59,5 +76,19 @@ final class ReadWriteHolder<T> extends Holder<T> {
     @Override
     protected <U> Holder<U> pure(U value) {
         return new ReadWriteHolder<>(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Holder<T> readOnly() {
+        return readOnly(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Holder<T> readWrite() {
+        throw new IllegalStateException("Already in a read-write state");
     }
 }

@@ -81,30 +81,30 @@ public class HolderTest {
     }
 
     @Test
-    public void testReadOnlyCopyConstructor_Pass() {
-        Holder<String> rholder = Holder.readOnly(readWriteHolder);
+    public void testReadOnlyCopyConstructor_Fail() {
+        Holder<String> rholder = readWriteHolder.readOnly();
 
         assertEquals("Hello World", rholder.get());
         assertThrows(UnsupportedOperationException.class, () -> rholder.set("John Bishop"));
     }
 
     @Test
-    public void testMutableCopyConstructorReset_Pass() {
-        Holder<String> rholder = Holder.readOnly(readWriteHolder);
-        Holder<String> mholder = rholder.readWrite();
-
-        assertEquals("Hello World", mholder.get());
-        mholder.set("John Bishop");
-        assertEquals("John Bishop", mholder.get());
-    }
-
-    @Test
-    public void testMutableCopyConstructor_Pass() {
-        Holder<Person> mholder = Holder.readWrite(readOnlyHolder);
+    public void testReadWriteCopyConstructor_Pass() {
+        Holder<Person> mholder = readOnlyHolder.readWrite();
 
         assertEquals("John Doe", mholder.get().getName());
         mholder.set(new Person("James Smith",30));
         assertEquals("James Smith",mholder.get().getName());
+    }
+
+    @Test
+    public void testReadOnlyState_Fail() {
+        assertThrows(IllegalStateException.class, () -> readOnlyHolder.readOnly());
+    }
+
+    @Test
+    public void testReadWriteState_Fail() {
+        assertThrows(IllegalStateException.class, () -> readWriteHolder.readWrite());
     }
 
     @Test

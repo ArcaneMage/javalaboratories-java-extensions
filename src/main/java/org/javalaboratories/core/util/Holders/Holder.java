@@ -52,6 +52,7 @@ import java.util.function.Predicate;
  */
 public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T>, Iterable<T>, Serializable
         permits ReadOnlyHolder, ReadWriteHolder {
+
     @Serial
     private static final long serialVersionUID = -3480539403374331932L;
 
@@ -69,7 +70,7 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      */
     @Deprecated
     public static <T> Holder<T> synchronizedHolder(final Holder<T> holder)  {
-        return readWrite(holder);
+        return new ReadWriteHolder<>(Objects.requireNonNull(holder).get());
     }
 
     /**
@@ -89,10 +90,11 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
     }
 
     /**
-     * Returns a mutable {@code Holder} implementation.
+     * Returns an immutable {@code Holder} implementation.
      * <p>
      * The holder container contains a reference to the {@code value} that can
-     * be overwritten with the {@code set} method.
+     * be overwritten with the {@code set} method. In this case, an {@code empty}
+     * {@link Holder} object contains {@code null}.
      * <p>
      * This {@code Holder} is thread-safe.
      * @param <T> type of {@code value} encapsulated in the container.
@@ -100,41 +102,9 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      * @throws NullPointerException when holder object is null
      */
     public static <T> Holder<T> empty() {
-        return new ReadWriteHolder<>(null);
-    }
-
-    /**
-     * Returns a mutable {@code Holder} implementation.
-     * <p>
-     * The holder container contains a reference to the {@code value} that can
-     * be overwritten with the {@code set} method.
-     * <p>
-     * This {@code Holder} is thread-safe.
-     * @param holder holder object to be assigned to this {@code holder}
-     * @param <T> type of {@code value} encapsulated in the container.
-     * @return an mutable implementation.
-     * @throws NullPointerException when holder object is null
-     */
-    public static <T> Holder<T> readWrite(final Holder<T> holder) {
-        return Holder.of(Objects.requireNonNull(holder).get());
-    }
-
-    /**
-     * Returns an immutable {@code Holder} implementation.
-     * <p>
-     * The holder container contains a reference to the {@code value} that cannot
-     * be overwritten with the {@code set} method. If the value to be held is mutable,
-     * it is recommended to provide a copy of it with the {@code Supplier}.
-     * Note that immutability refers to the holder object, not necessarily the value
-     * it contains.
-     * <p>
-     * @param holder holder object.
-     * @param <T> type of the {@code value} encapsulated in the container.
-     * @return an immutable implementation.
-     * @throws NullPointerException when holder is a null reference.
-     */
-    public static <T> Holder<T> readOnly(final Holder<T> holder) {
-        return new ReadOnlyHolder<>(Objects.requireNonNull(holder).get());
+        @SuppressWarnings("unchecked")
+        Holder<T> empty = (Holder<T>) ReadOnlyHolder.EMPTY;
+        return empty;
     }
 
     /**
@@ -158,10 +128,10 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      * it contains.
      * <p>
      * @return an immutable implementation.
+     * @throws IllegalStateException when {@code Holder} is already in a read-only
+     * state.
      */
-    public Holder<T> readOnly() {
-        return readOnly(this);
-    }
+    public abstract Holder<T> readOnly();
 
     /**
      * Returns a mutable {@code Holder} implementation.
@@ -171,10 +141,10 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      * <p>
      * This {@code Holder} is thread-safe.
      * @return an mutable implementation.
+     * @throws IllegalStateException when {@code Holder} is already in a read-write
+     * state.
      */
-    public Holder<T> readWrite() {
-        return readWrite(this);
-    }
+    public abstract Holder<T> readWrite();
 
     /**
      * {@inheritDoc}
