@@ -194,6 +194,19 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public T get() {
+        lock.lock();
+        try {
+            return value;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
      * Returns {@code Holder} describing this {@code} value, if present.
      * Otherwise, returns {@code Holder} value produced from {@code supplier}
      * function.
@@ -213,19 +226,6 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
             lock.unlock();
         }
         return Objects.requireNonNull(supplier).get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public T orElse(final T other) {
-        lock.lock();
-        try {
-            return value == null ? other : value;
-        } finally {
-            lock.unlock();
-        }
     }
 
     /**

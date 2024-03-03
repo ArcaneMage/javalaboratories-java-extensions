@@ -339,6 +339,17 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public B get() {
+        if (isRight())
+            return getRight();
+        else
+            throw new UnsupportedOperationException();
+    }
+
+    /**
      * Returns the given {@link Right} value or the {@code other} for the
      * {@link Left} implementation.
      *
