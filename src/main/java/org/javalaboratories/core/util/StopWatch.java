@@ -229,7 +229,7 @@ public final class StopWatch implements Serializable, Comparable<StopWatch> {
      */
     public long getTime() {
         return Try.of(() -> time / cycles)
-                .orElse(0L)
+                .or(0L)
                 .fold(0L, n -> n);
     }
 

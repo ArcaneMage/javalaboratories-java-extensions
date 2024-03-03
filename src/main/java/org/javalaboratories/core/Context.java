@@ -25,7 +25,7 @@ import java.util.function.Function;
  * containers and implement this interface.
  * <p>
  * Container value(s) are "safely" extractable via the {@link #fold(Object,
- * Function)} or the {@link #getOrElse(Object)} method.
+ * Function)} or the {@link #orElse(Object)} method.
  *
  * @param <T> Type of value in the container.
  */
@@ -41,7 +41,7 @@ public interface Context<T> {
      * @return contained {@code value} or {@code other} if {@code value} is
      * unavailable.
      */
-    T getOrElse(final T other);
+    T orElse(final T other);
 
     /**
      * Retrieves {@code value} from this container.
@@ -74,11 +74,11 @@ public interface Context<T> {
      * <p>
      * However, if the {@code value} is unavailable, then {@code null} is
      * returned. Managing the possible empty values can be achieved with the
-     * alternate methods {@link #fold} and {@link #getOrElse}.
+     * alternate methods {@link #fold} and {@link #orElse}.
      *
      * @return contained value.
      */
     default T get() {
-        return getOrElse(null);
+        return orElse(null);
     }
 }

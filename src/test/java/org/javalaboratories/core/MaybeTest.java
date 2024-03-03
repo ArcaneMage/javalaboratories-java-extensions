@@ -160,8 +160,8 @@ public class MaybeTest {
 
     @Test
     public void testGetOrElse_Pass() {
-        assertEquals("Hello World", maybe.getOrElse("Hello Mars"));
-        assertEquals("Hello Mars", empty.getOrElse("Hello Mars"));
+        assertEquals("Hello World", maybe.orElse("Hello Mars"));
+        assertEquals("Hello Mars", empty.orElse("Hello Mars"));
     }
 
     @Test

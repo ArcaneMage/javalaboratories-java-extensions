@@ -202,8 +202,8 @@ public class HolderTest {
     public void testGetOrElse_Pass() {
         Holder<String> holder = Holder.empty();
 
-        assertEquals("Empty",holder.getOrElse("Empty"));
-        assertEquals("Hello World",readWriteHolder.getOrElse("Empty"));
+        assertEquals("Empty",holder.orElse("Empty"));
+        assertEquals("Hello World",readWriteHolder.orElse("Empty"));
     }
 
     @Test

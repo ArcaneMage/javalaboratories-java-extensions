@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * This is a container object that holds a value.
@@ -193,16 +194,63 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
     }
 
     /**
-     * {@inheritDoc}
+     * Returns {@code Holder} describing this {@code} value, if present.
+     * Otherwise, returns {@code Holder} value produced from {@code supplier}
+     * function.
+     *
+     * @param supplier that produces the {@code Holder} object, but only
+     *                 if {@code value} is not present.
+     * @return Holder object.
+     * @throws NullPointerException if supplier function is a {@code null}
+     * reference.
      */
-    @Override
-    public T getOrElse(T other) {
+    public Holder<T> or(final Supplier<? extends Holder<T>> supplier) {
         lock.lock();
         try {
-            return value == null ? other : get();
+            if (value != null)
+                return this;
         } finally {
             lock.unlock();
         }
+        return Objects.requireNonNull(supplier).get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public T orElse(T other) {
+        lock.lock();
+        try {
+            return value == null ? other : value;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Returns {@code value} if present, otherwise gets resultant value of
+     * {@code supplier} function.
+     * {@code Supplier} function is only evaluated when {@code value} is
+     * not present, thus making this alternative to the {@link Holder#orElse(Object)}
+     * potentially more efficient.
+     *
+     * @param supplier function evaluates resultant value if {@code Holder}
+     *                 value doesn't not exist.
+     * @return {@code value} if present, otherwise gets resultant value from
+     * {@code supplier} function.
+     * @throws NullPointerException if supplier function is a {@code null}
+     * reference.
+     */
+    public T orElseGet(final Supplier<? extends T> supplier) {
+        lock.lock();
+        try {
+            if (value != null)
+                return value;
+        } finally {
+            lock.unlock();
+        }
+        return Objects.requireNonNull(supplier).get();
     }
 
     /**
@@ -246,18 +294,6 @@ public sealed abstract class Holder<T> extends Applicative<T> implements Monad<T
      */
     public Holder<T> filterNot(final Predicate<? super T> predicate) {
         return filter(Objects.requireNonNull(predicate).negate());
-    }
-
-    /**
-     * Returns value in this {@code Holder} container.
-     */
-    public T get() {
-        lock.lock();
-        try {
-            return value;
-        } finally {
-            lock.unlock();
-        }
     }
 
     /**

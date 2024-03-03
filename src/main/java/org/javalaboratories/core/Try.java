@@ -50,14 +50,14 @@ import java.util.stream.Stream;
  *
  *         // Using orElse to recover: result2="Result2=2500"
  *         String result2 = Try.of(() -> 100 / 0)
- *                             .orElse(100)
+ *                             .or(100)
  *                             .map(n -> n * 25)
  *                             .filter(n -> n > 500)
  *                             .fold("",n -> "Result2="+n);
  *
  *         // IOExceptions are handled gracefully too: result3=0
  *         int result3 = Try.of(() -> new String(Files.readAllBytes(Paths.get("does-not-exist.txt"))))
- *                             .orElse("")
+ *                             .or("")
  *                             .map(String::length)
  *                             .fold(-1,Function.identity());
  *     }
@@ -138,7 +138,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * {@inheritDoc}
      */
     @Override
-    public T getOrElse(final T value) {
+    public T orElse(final T value) {
         return isSuccess() ? get() : value;
     }
 
@@ -326,7 +326,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * @param other default value if this is a {@link Failure}
      * @return {@link Try} object.
      */
-    public Try<T> orElse(final T other) {
+    public Try<T> or(final T other) {
         Try<T> result =  this;
         if (!isSuccess()) {
             result = success(other);

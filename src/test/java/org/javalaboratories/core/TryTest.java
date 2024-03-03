@@ -91,7 +91,7 @@ public class TryTest {
                              .fold("",Function.identity());
 
         String string2 = aTry1.filter(s -> s.length() == 0)
-                              .getOrElse("Empty string?!");
+                              .orElse("Empty string?!");
 
         int number = aTry2.filter(n -> n > 5)
                     .fold(t -> t instanceof ArithmeticException ? 0 : 1,Function.identity());
@@ -110,7 +110,7 @@ public class TryTest {
                 .fold("",Function.identity());
 
         String string2 = aTry1.filterNot(s -> s.length() > 0)
-                .getOrElse("Empty string?!");
+                .orElse("Empty string?!");
 
         int number = aTry2.filterNot(n -> n > 5)
                 .fold(t -> t instanceof ArithmeticException ? 0 : 1,Function.identity());
@@ -217,10 +217,10 @@ public class TryTest {
     @Test
     public void testOrElse_Pass() {
         // When
-        String string = aTry1.orElse("")
+        String string = aTry1.or("")
                              .fold("",Function.identity());
 
-        int number = aTry2.orElse(-1)
+        int number = aTry2.or(-1)
                           .fold(0, Function.identity());
 
         // Then
@@ -407,13 +407,13 @@ public class TryTest {
                             .fold("",n -> "Result1="+n);
 
         String result2 = Try.of(() -> 100 / 0)
-                            .orElse(100)
+                            .or(100)
                             .map(n -> n * 25)
                             .filter(n -> n > 500)
                             .fold("",n -> "Result2="+n);
 
         int result3 = Try.of(() -> new String(Files.readAllBytes(Paths.get("does-not-exist.txt"))))
-                            .orElse("")
+                            .or("")
                             .map(String::length)
                             .fold(-1,Function.identity());
 

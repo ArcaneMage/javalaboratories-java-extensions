@@ -391,18 +391,6 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     }
 
     /**
-     * Returns {@code value} of {@code this} object if available, otherwise the
-     * {@code other} value is returned.
-     *
-     * @deprecated Consider using the {@link Maybe#orElse(Object)} instead.
-     */
-    @Deprecated
-    @Override
-    public T getOrElse(final T other) {
-        return orElse(other);
-    }
-
-    /**
      * If {@code this} is nonempty, the {@code action} function is performed.
      *
      * @param action function to execute if {@code this} is nonempty.

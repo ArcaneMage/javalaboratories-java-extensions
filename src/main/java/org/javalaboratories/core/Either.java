@@ -347,7 +347,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * {@link Left} implementation.
      */
     @Override
-    public B getOrElse(final B other) {
+    public B orElse(final B other) {
         return isLeft() ? other : getRight();
     }
 
