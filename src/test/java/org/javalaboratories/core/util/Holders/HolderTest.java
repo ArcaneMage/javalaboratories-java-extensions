@@ -1,6 +1,7 @@
 package org.javalaboratories.core.util.Holders;
 
 import nl.altindag.log.LogCaptor;
+import org.javalaboratories.core.Maybe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -134,6 +136,37 @@ public class HolderTest {
                 .fold(0,n -> n);
 
         assertEquals(11, length);
+    }
+
+    @Test
+    public void testMap_FunctorLaws_Pass() {
+        // Given
+        Holder<Integer> value = Holder.of(-1);
+
+        // (1) Identity law
+        assertEquals(value, value.map(Function.identity()));
+        assertEquals(value, value.map(x -> x));
+
+        // (2) If a function composition (g), (h), then the resulting functor should be the
+        // same as calling f with (h) and then with (g)
+        assertEquals(value.map(x -> (x + 1) * 2),value.map(x -> x + 1).map(x -> x * 2));
+    }
+
+    @Test
+    public void testFlatMap_MonadLaws_Pass() {
+        // Given
+        Holder<Integer> value = Holder.of(-1);
+        Function<Integer,Holder<Integer>> fa = x -> Holder.of(x * 2);
+        Function<Integer,Holder<Integer>> fb = Holder::of;
+
+        // (1) Left Identity law
+        assertEquals(value.flatMap(fa), fa.apply(-1));
+
+        // (2) Right Identity law
+        assertEquals(value.flatMap(fb), value);
+
+        // (3) Associative law
+        assertEquals(value.flatMap(fa).flatMap(fb),fa.apply(value.get()).flatMap(fb));
     }
 
     @Test
