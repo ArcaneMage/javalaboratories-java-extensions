@@ -319,7 +319,7 @@ public class HolderTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.stream()
                 .filter(n -> n % 2 == 0)
-                .reduce(Holder.of(0.0),(h,n) -> h.map(v -> v + n),(a,b) -> a.map(n -> n + b.fold(0.0,v -> v)))
+                .reduce(Holder.of(0.0),(h,v) -> h.map(n -> n + v),(a,b) -> a.map(n -> n + b.fold(0.0,v -> v)))
                 .map(n -> n / 2)
                 .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
 

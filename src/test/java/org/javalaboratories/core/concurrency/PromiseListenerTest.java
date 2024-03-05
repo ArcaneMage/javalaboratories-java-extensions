@@ -2,7 +2,6 @@ package org.javalaboratories.core.concurrency;
 
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
