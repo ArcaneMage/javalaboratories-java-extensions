@@ -300,12 +300,26 @@ public class HolderTest {
         assertTrue(logCaptor.getInfoLogs().stream()
                 .anyMatch(s -> s.equals("Peek value as \"Hello World, Galaxy\"")));
     }
+
     @Test
-    public void testUseCases_Pass() {
+    public void testUseCasesCollect_Pass() {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.stream()
                 .filter(n -> n % 2 == 0)
                 .collect(() -> Holder.of(0.0),(a,b) -> a.set(b + a.get()),(a,b) -> {})
+                .map(n -> n / 2)
+                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+
+        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        logger.info(result);
+    }
+
+    @Test
+    public void testUseCasesReduce_Pass() {
+        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
+        String result = numbers.stream()
+                .filter(n -> n % 2 == 0)
+                .reduce(Holder.of(0.0),(h,n) -> h.map(v -> v + n),(a,b) -> a.map(n -> n + b.fold(0.0,v -> v)))
                 .map(n -> n / 2)
                 .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
 
