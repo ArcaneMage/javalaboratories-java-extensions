@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -299,6 +300,19 @@ public class HolderTest {
         // Then
         assertTrue(logCaptor.getInfoLogs().stream()
                 .anyMatch(s -> s.equals("Peek value as \"Hello World, Galaxy\"")));
+    }
+
+    @Test
+    public void testHolderComparable_Pass() {
+        List<Holder<Integer>> list = Arrays.asList(Holder.of(9),Holder.of(5),Holder.of(3),Holder.of(8));
+
+        String sorted = list.stream()
+                .sorted()
+                .peek(c -> logger.info(String.valueOf(c)))
+                .map(h -> h.fold("",String::valueOf))
+                .collect(Collectors.joining(","));
+
+        assertEquals("3,5,8,9",sorted);
     }
 
     @Test

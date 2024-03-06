@@ -29,6 +29,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -434,6 +435,19 @@ public class EvalTest extends AbstractConcurrencyTest {
         assertFalse(asyncFailure.getException().isEmpty());
         asyncFailure.getException()
                 .ifPresent(e -> assertEquals("java.lang.ArithmeticException: / by zero",e.getMessage()));
+    }
+
+    @Test
+    public void testEval_Comparable_Pass() {
+        List<Eval<Integer>> list = Arrays.asList(Eval.eager(9),Eval.eager(5),Eval.eager(3),Eval.eager(8));
+
+        String sorted = list.stream()
+                .sorted()
+                .peek(c -> logger.info(String.valueOf(c)))
+                .map(e -> e.fold("",String::valueOf))
+                .collect(Collectors.joining(","));
+
+        assertEquals("3,5,8,9",sorted);
     }
 
     @Test
