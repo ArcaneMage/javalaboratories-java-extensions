@@ -53,7 +53,7 @@ import java.util.function.Supplier;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public abstract class Eval<T> extends NaturalOrderApplicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
+public abstract class Eval<T> extends CoreApplicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
     @Serial
     private static final long serialVersionUID = 1372673159914117700L;
 

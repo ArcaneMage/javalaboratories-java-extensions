@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.util.Holders;
 
-import org.javalaboratories.core.NaturalOrderApplicative;
+import org.javalaboratories.core.CoreApplicative;
 import org.javalaboratories.core.Eval;
 import org.javalaboratories.core.Monad;
 
@@ -51,7 +51,7 @@ import java.util.function.Supplier;
  * @see ReadWriteHolder
  * @see ReadOnlyHolder
  */
-public sealed abstract class Holder<T> extends NaturalOrderApplicative<T> implements Monad<T>, Iterable<T>, Serializable
+public sealed abstract class Holder<T> extends CoreApplicative<T> implements Monad<T>, Iterable<T>, Serializable
         permits ReadOnlyHolder, ReadWriteHolder {
 
     @Serial
