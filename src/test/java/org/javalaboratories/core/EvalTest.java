@@ -451,6 +451,19 @@ public class EvalTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    public void testEval_ComparableWithMixedStrategies_Pass() {
+        List<Eval<Integer>> list = Arrays.asList(Eval.later(() -> 9),Eval.eager(5),Eval.later(() -> 3),Eval.always(() -> 8));
+
+        String sorted = list.stream()
+                .sorted()
+                .peek(c -> logger.info(String.valueOf(c)))
+                .map(e -> e.fold("",String::valueOf))
+                .collect(Collectors.joining(","));
+
+        assertEquals("3,5,8,9",sorted);
+    }
+
+    @Test
     public void testEval_Applicative_Pass() {
         // When
         Eval<Integer> number1 = Eval.later(() -> 0);
