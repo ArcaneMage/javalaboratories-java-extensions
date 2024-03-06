@@ -316,6 +316,17 @@ public class HolderTest {
     }
 
     @Test
+    public void testHolderComparable_Fail() {
+        List<Holder<Person>> list = Arrays.asList(Holder.of(new Person("James May",26)),Holder.of(new Person("Alex Higgins",20)));
+
+        assertThrows(ClassCastException.class, () ->
+           list.stream()
+                .sorted()
+                .map(h -> h.fold("",Person::getName))
+                .collect(Collectors.joining(",")));
+    }
+
+    @Test
     public void testUseCasesCollect_Pass() {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.stream()
