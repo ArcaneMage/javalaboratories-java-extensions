@@ -20,9 +20,6 @@ import org.javalaboratories.core.Eval;
 import org.javalaboratories.core.Monad;
 
 import java.io.Serial;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -51,8 +48,7 @@ import java.util.function.Supplier;
  * @see ReadWriteHolder
  * @see ReadOnlyHolder
  */
-public sealed abstract class Holder<T> extends CoreApplicative<T> implements Monad<T>, Iterable<T>, Serializable
-        permits ReadOnlyHolder, ReadWriteHolder {
+public sealed abstract class Holder<T> extends CoreApplicative<T> implements Monad<T> permits ReadOnlyHolder, ReadWriteHolder {
 
     @Serial
     private static final long serialVersionUID = -3480539403374331932L;
@@ -334,14 +330,6 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
         } finally {
             lock.unlock();
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterator<T> iterator() {
-        return Collections.singletonList(get()).iterator();
     }
 
     /**

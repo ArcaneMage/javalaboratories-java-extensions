@@ -53,7 +53,7 @@ import java.util.function.Supplier;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public abstract class Eval<T> extends CoreApplicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
+public abstract class Eval<T> extends CoreApplicative<T> implements Monad<T>, Exportable<T> {
     @Serial
     private static final long serialVersionUID = 1372673159914117700L;
 
@@ -261,14 +261,6 @@ public abstract class Eval<T> extends CoreApplicative<T> implements Monad<T>, Ex
     @Override
     public T get() {
         return value();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterator<T> iterator() {
-        return toList().iterator();
     }
 
     /**

@@ -1,7 +1,6 @@
 package org.javalaboratories.core.util.Holders;
 
 import nl.altindag.log.LogCaptor;
-import org.javalaboratories.core.Maybe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -281,6 +280,9 @@ public class HolderTest {
     public void testForEach_Pass() {
         Holder<Boolean> looped = Holder.of(false);
         readWriteHolder.forEach(s -> looped.set(true));
+
+         Holder.empty()
+                .forEach(s -> logger.info(String.valueOf(s)));
 
         assertInstanceOf(Iterable.class, readWriteHolder);
         assertTrue(looped.get());

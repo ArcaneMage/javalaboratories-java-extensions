@@ -21,12 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.javalaboratories.core.util.Arguments;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -92,7 +87,7 @@ import java.util.function.Supplier;
 @EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
-public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Exportable<B>, Iterable<B>  {
+public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Exportable<B>  {
 
     @Getter(value=AccessLevel.PACKAGE)
     private final A left;

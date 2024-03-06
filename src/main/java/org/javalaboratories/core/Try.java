@@ -264,14 +264,6 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
 
     /**
      * {@inheritDoc}
-     */
-    @Override
-    public Iterator<T> iterator() {
-        return toList().iterator();
-    }
-
-    /**
-     * {@inheritDoc}
      *
      * @return resultant {@link Try} having applied the given function to that
      * value.

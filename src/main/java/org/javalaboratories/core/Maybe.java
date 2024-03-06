@@ -21,7 +21,6 @@ import org.javalaboratories.core.tuple.Tuple;
 import org.javalaboratories.core.util.Arguments;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -117,7 +116,7 @@ import java.util.stream.Stream;
  * @author Kevin H, Java Laboratories
  */
 @EqualsAndHashCode(callSuper=false)
-public final class Maybe<T> extends CoreApplicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
+public final class Maybe<T> extends CoreApplicative<T> implements Monad<T>, Exportable<T> {
     @Serial
     private static final long serialVersionUID = 3472763754156966484L;
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
