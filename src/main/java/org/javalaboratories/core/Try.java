@@ -212,11 +212,11 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
     @Override
     public <U> Try<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
         Objects.requireNonNull(mapper, "Function expected");
-        @SuppressWarnings("unchecked")
-        Try<U> self = (Try<U>) this;
+        Function<? super T,? extends Monad<U>> self = v -> Try.failure((Throwable)v);
+
         return isSuccess()
                 ? (Try<U>) Monad.super.flatMap(mapper)
-                : self;
+                : (Try<U>) self.apply(get());
     }
 
     /**
@@ -454,16 +454,13 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
                 : Collections.emptySet();
     }
 
-    private <U extends Throwable> Maybe<U> getThrowableValue() {
-        Maybe<U> result = Maybe.empty();
+    private Maybe<Throwable> getThrowableValue() {
+        Maybe<Throwable> result = Maybe.empty();
         Try<T> context = this;
         try {
             context.get();
         } catch (Throwable t) {
-            // All exceptions are encased in RuntimeException object so they
-            // need to be 'unpacked' for analysis.
-            @SuppressWarnings("unchecked")
-            U value = (U) t.getCause();
+            Throwable value = t.getCause();
             result = Maybe.of(value);
         }
         return result;

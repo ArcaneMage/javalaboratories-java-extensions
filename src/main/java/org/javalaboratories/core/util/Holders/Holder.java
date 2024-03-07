@@ -284,8 +284,8 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
      * @throws NullPointerException if {@code predicate} function is {@code null}.
      */
     public Holder<T> filter(final Predicate<? super T> predicate) {
-        Objects.requireNonNull(predicate,"Expected predicate function");
-        return predicate.test(get()) ? this : Holder.empty();
+        return Objects.requireNonNull(predicate,"Expected predicate function").test(get()) ?
+                this : Holder.empty();
     }
 
     /**
