@@ -87,6 +87,10 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
         return new ReadWriteHolder<>(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public <R> Holder<R> apply(final Applicative<Function<? super T,? extends R>> applicative)  {
         return (Holder<R>) super.apply(applicative);
     }

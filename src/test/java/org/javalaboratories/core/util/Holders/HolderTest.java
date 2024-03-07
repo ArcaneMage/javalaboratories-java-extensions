@@ -3,6 +3,7 @@ package org.javalaboratories.core.util.Holders;
 import lombok.Getter;
 import lombok.Setter;
 import nl.altindag.log.LogCaptor;
+import org.javalaboratories.core.Eval;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -68,6 +69,22 @@ public class HolderTest {
         readOnlyHolder = Holder.of(new Person(person)).readOnly();
 
         synchronizedHolder = Holder.synchronizedHolder(readWriteHolder);
+    }
+
+    @Test
+    public void testApplicative_Pass() {
+        // When
+        Holder<Integer> number1 = Holder.of(0);
+
+        // Given
+        Function<Integer,Integer> add = n -> n + 10;
+
+        Holder<Integer> value1 = number1
+                .apply(Holder.of(add))
+                .apply(Holder.of(add));
+
+        // Then
+        assertEquals(20,value1.get());
     }
 
     @Test
