@@ -68,16 +68,6 @@ public interface Monad<T> extends Functor<T> {
      */
     default <U> Monad<U> flatten() {
         Function<? super T,? extends Monad<U>> f = Monad.class::cast;
-
-        @SuppressWarnings("unchecked")
-        Monad<U> self = (Monad<U>) this;
-
-        // Attempt to return flattened value. If not possible, this monad is
-        // returned instead.
-        try {
-            return flatMap(f);
-        } catch (ClassCastException e) {
-            return self;
-        }
+        return flatMap(f);
     }
 }

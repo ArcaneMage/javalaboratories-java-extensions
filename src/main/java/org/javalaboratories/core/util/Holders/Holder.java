@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core.util.Holders;
 
+import org.javalaboratories.core.Applicative;
 import org.javalaboratories.core.CoreApplicative;
 import org.javalaboratories.core.Eval;
 import org.javalaboratories.core.Monad;
@@ -84,6 +85,10 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
      */
     public static <T> Holder<T> of(final T value) {
         return new ReadWriteHolder<>(value);
+    }
+
+    public <R> Holder<R> apply(final Applicative<Function<? super T,? extends R>> applicative)  {
+        return (Holder<R>) super.apply(applicative);
     }
 
     /**
