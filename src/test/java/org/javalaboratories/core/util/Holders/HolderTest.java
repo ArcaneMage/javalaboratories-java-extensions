@@ -1,5 +1,7 @@
 package org.javalaboratories.core.util.Holders;
 
+import lombok.Getter;
+import lombok.Setter;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,9 @@ public class HolderTest {
     private Holder<Person> readOnlyHolder;
     private Holder<String> synchronizedHolder;
 
-    private class Person {
+    @Setter
+    @Getter
+    private static class Person {
         private String name;
         private int age;
 
@@ -32,22 +36,6 @@ public class HolderTest {
 
         public Person(String name, int age) {
             this.name = name;
-            this.age = age;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
             this.age = age;
         }
 
