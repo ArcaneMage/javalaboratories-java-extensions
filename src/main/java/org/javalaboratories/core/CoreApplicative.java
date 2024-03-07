@@ -12,14 +12,14 @@ import java.util.Objects;
  *
  * @param <T> type of contained value.
  */
-public abstract class CoreApplicative<T> extends Applicative<T> implements Comparable<Applicative<T>> {
+public abstract class CoreApplicative<T> extends Applicative<T> implements Comparable<CoreApplicative<T>> {
 
     /**
      * {@inheritDoc}
      * @throws NullPointerException when other is a {@code null} reference.
      */
     @Override
-    public int compareTo(final Applicative<T> other) {
+    public int compareTo(final CoreApplicative<T> other) {
         try {
             // This is okay because the type casting failure is handled.
             // It is possible to enforce type checking by extending T from
