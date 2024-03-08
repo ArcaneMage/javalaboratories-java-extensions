@@ -231,8 +231,24 @@ means `map`, `flatMap` and others are available for operations on the contained 
 the `get` and `set` methods to read or mutate the contained value. Although they are mutable, holder objects are thread-safe, 
 in that the reference to the contained value cannot be changed by more than one thread. Ensure the contained value is 
 itself thread-safe to guarantee complete thread safety. Factory methods are provided to create both mutable immutable
-holders.
+holders. Below, are examples of usage:
 ```
+        // This example demenstrates side-effects where the Holder object
+        // captures the subtotal of the even numbers. Although it is mutated
+        // it is thread-safe.
+        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
+        Holder<Double> subtotal = Holder.of(0.0);
+        String result = numbers.parallelStream()
+                .filter(n -> n % 2 == 0)
+                .collect(() -> subtotal,(a,b) -> a.set(b + a.get()),(a,b) -> a.set(b.get()))
+                .map(n -> n / 2)
+                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+
+        assertEquals(30, subtotal.get());
+        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        
+        // In this example, the Holder object is created and mutated within the 
+        // context of the reducer.
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.parallelStream()
                 .filter(n -> n % 2 == 0)

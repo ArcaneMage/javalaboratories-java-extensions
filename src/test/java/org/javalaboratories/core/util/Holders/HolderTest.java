@@ -334,6 +334,20 @@ public class HolderTest {
     }
 
     @Test
+    public void testUseCaseSideEffect_Pass() {
+        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
+        Holder<Double> subtotal = Holder.of(0.0);
+        String result = numbers.parallelStream()
+                .filter(n -> n % 2 == 0)
+                .collect(() -> subtotal,(a,b) -> a.set(b + a.get()),(a,b) -> a.set(b.get()))
+                .map(n -> n / 2)
+                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+
+        assertEquals(30, subtotal.get());
+        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+    }
+
+    @Test
     public void testUseCasesCollect_Pass() {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.parallelStream()
