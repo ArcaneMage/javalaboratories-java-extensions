@@ -229,6 +229,22 @@ public class HolderTest {
     }
 
     @Test
+    public void testSetGet_Pass() {
+        Holder<Integer> accumulator = Holder.of(10);
+
+        assertEquals(15,accumulator.setGet(v -> v + 2 + 3));
+    }
+
+    @Test
+    public void testGetSet_Pass() {
+        Holder<Integer> accumulator = Holder.of(10);
+        int result = accumulator.getSet(v -> v + 2 + 3);
+
+        assertEquals(10, result);
+        assertEquals(15, accumulator.get());
+    }
+
+    @Test
     public void testGet_Pass() {
         assertEquals("Hello World", readWriteHolder.get());
         assertEquals("John Doe", readOnlyHolder.get().getName());
@@ -338,7 +354,7 @@ public class HolderTest {
         Holder<Double> subtotal = Holder.of(0.0);
         String result = numbers.parallelStream()
                 .filter(n -> n % 2 == 0)
-                .collect(() -> subtotal,(a,b) -> a.set(b + a.get()),(a,b) -> a.set(b.get()))
+                .collect(() -> subtotal,(a,b) -> a.setGet(v -> v + b),(a,b) -> a.set(b.get()))
                 .map(n -> n / 2)
                 .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
 

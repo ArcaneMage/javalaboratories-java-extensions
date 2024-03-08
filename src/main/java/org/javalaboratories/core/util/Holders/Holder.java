@@ -23,10 +23,7 @@ import org.javalaboratories.core.Monad;
 import java.io.Serial;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * This is a container object that holds a value.
@@ -212,6 +209,24 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
     }
 
     /**
+     * Gets {@code value} of this {@code holder} then computes resultant value
+     * of the function.
+     *
+     * @param function to compute the value.
+     * @return {@code value} before computation.
+     */
+    public T getSet(final Function<? super T,T> function) {
+        lock.lock();
+        try {
+            T result = value;
+            value = Objects.requireNonNull(function).apply(value);
+            return result;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
      * Returns {@code Holder} describing this {@code} value, if present.
      * Otherwise, returns {@code Holder} value produced from {@code supplier}
      * function.
@@ -326,6 +341,23 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
      */
     public void set(T value) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Sets {@code value} of this {@code holder} to the resultant value of
+     * the function and returns it to the client.
+     *
+     * @param function to compute the resultant value.
+     * @return the resultant value.
+     */
+    public T setGet(final Function<? super T,T> function) {
+        lock.lock();
+        try {
+            value = Objects.requireNonNull(function).apply(value);
+            return value;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
