@@ -71,7 +71,6 @@ public class Tuple2Test {
     @Test
     public void testMatch_Pass() {
         Holder<Integer> found = Holder.of(0);
-        found.set(0);
         tuple
             .match(Matcher.allOf("Adrian","Wall"), (a, b) -> {
                 logger.info("Matched on \"Adrian,Wall\" tuple -- should not match");
@@ -100,7 +99,7 @@ public class Tuple2Test {
 
         tuple_2
             .match(Matcher.allOf(1,2), (a, b) -> {
-                logger.info("Mathed on \"1,2\" tuple");
+                logger.info("Matched on \"1,2\" tuple");
                 found.set(found.get()+1);
             })
             .match(Matcher.allOf(1), (a, b) -> {
