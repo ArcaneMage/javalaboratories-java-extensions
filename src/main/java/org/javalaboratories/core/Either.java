@@ -337,7 +337,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
         if (isRight())
             return getRight();
         else
-            return (B) getLeft();
+            throw new UnsupportedOperationException();
     }
 
     /**
