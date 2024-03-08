@@ -167,9 +167,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * @throws NullPointerException if function is null;
      */
     public <C> Either<A,C> apply(final Applicative<Function<? super B,? extends C>> applicative) {
-        @SuppressWarnings("unchecked")
-        Either<A,C> self = (Either<A,C>) this;
-        return isLeft() ? self : (Either<A,C>) super.apply(applicative);
+        return isLeft() ? self() : (Either<A,C>) super.apply(applicative);
     }
 
     /**
