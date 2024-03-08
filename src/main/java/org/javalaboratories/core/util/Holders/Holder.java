@@ -52,7 +52,7 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
     private static final long serialVersionUID = -3480539403374331932L;
 
     protected T value;
-    protected final ReentrantLock lock;
+    private final ReentrantLock lock;
 
     /**
      * Returns a mutable, thread-safe {@code Holder} implementation.
@@ -216,14 +216,7 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
      * @return {@code value} before computation.
      */
     public T getSet(final Function<? super T,T> function) {
-        lock.lock();
-        try {
-            T result = value;
-            value = Objects.requireNonNull(function).apply(value);
-            return result;
-        } finally {
-            lock.unlock();
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -351,13 +344,7 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
      * @return the resultant value.
      */
     public T setGet(final Function<? super T,T> function) {
-        lock.lock();
-        try {
-            value = Objects.requireNonNull(function).apply(value);
-            return value;
-        } finally {
-            lock.unlock();
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -371,5 +358,13 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * @return main lock of this {@code Holder} object used to manage
+     * thread safety.
+     */
+    protected ReentrantLock getLock() {
+        return lock;
     }
 }

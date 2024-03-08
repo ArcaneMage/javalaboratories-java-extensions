@@ -95,6 +95,20 @@ public class HolderTest {
     }
 
     @Test
+    public void testReadOnlySetGet_Fail() {
+        Holder<Integer> accumulator = Holder.of(10).readOnly();
+
+        assertThrows(UnsupportedOperationException.class, () -> accumulator.setGet(v -> v + 10));
+    }
+
+    @Test
+    public void testReadOnlyGetSet_Fail() {
+        Holder<Integer> accumulator = Holder.of(10).readOnly();
+
+        assertThrows(UnsupportedOperationException.class, () -> accumulator.getSet(v -> v + 10));
+    }
+
+    @Test
     public void testReadWrite_Pass() {
         Holder<Person> mholder = readOnlyHolder.readWrite();
 

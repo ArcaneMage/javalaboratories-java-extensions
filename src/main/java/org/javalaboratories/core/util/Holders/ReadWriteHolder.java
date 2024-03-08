@@ -17,6 +17,7 @@ package org.javalaboratories.core.util.Holders;
 
 import java.io.Serial;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Returns a mutable {@code Holder} implementation.
@@ -52,6 +53,20 @@ final class ReadWriteHolder<T> extends Holder<T> {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public T getSet(final Function<? super T,T> function) {
+        getLock().lock();
+        try {
+            T result = value;
+            value = Objects.requireNonNull(function).apply(value);
+            return result;
+        } finally {
+            getLock().unlock();
+        }
+    }
+
+    /**
      * Sets/mutate the current value.
      * <p>
      * The mutation of the value is thread-safe. That is to say the reference
@@ -62,11 +77,28 @@ final class ReadWriteHolder<T> extends Holder<T> {
      * @param value value
      */
     public void set(T value) {
-        lock.lock();
+        getLock().lock();
         try {
             this.value = value;
         } finally {
-            lock.unlock();
+            getLock().unlock();
+        }
+    }
+
+    /**
+     * Sets {@code value} of this {@code holder} to the resultant value of
+     * the function and returns it to the client.
+     *
+     * @param function to compute the resultant value.
+     * @return the resultant value.
+     */
+    public T setGet(final Function<? super T,T> function) {
+        getLock().lock();
+        try {
+            value = Objects.requireNonNull(function).apply(value);
+            return value;
+        } finally {
+            getLock().unlock();
         }
     }
 
