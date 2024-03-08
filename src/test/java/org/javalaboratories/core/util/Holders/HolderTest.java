@@ -333,7 +333,7 @@ public class HolderTest {
     }
 
     @Test
-    public void testUseCaseSideEffect_Pass() {
+    public void testUseCaseCollect_SideEffects_Pass() {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         Holder<Double> subtotal = Holder.of(0.0);
         String result = numbers.parallelStream()
