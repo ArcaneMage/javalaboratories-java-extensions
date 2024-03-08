@@ -55,7 +55,7 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
     private static final long serialVersionUID = -3480539403374331932L;
 
     protected T value;
-    private final ReentrantLock lock;
+    protected final ReentrantLock lock;
 
     /**
      * Returns a mutable, thread-safe {@code Holder} implementation.
@@ -339,17 +339,5 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
         } finally {
             lock.unlock();
         }
-    }
-
-    /**
-     * Returns this {@code Reentrant} lock.
-     * <p>
-     * To be used by derived classes to read or write current value with thread
-     * safety.
-     *
-     * @return this {@code Reentrant} lock.
-     */
-    protected ReentrantLock getLock() {
-        return lock;
     }
 }

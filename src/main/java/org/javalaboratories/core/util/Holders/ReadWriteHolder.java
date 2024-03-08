@@ -62,11 +62,11 @@ final class ReadWriteHolder<T> extends Holder<T> {
      * @param value value
      */
     public void set(T value) {
-        getLock().lock();
+        lock.lock();
         try {
             this.value = value;
         } finally {
-            getLock().unlock();
+            lock.unlock();
         }
     }
 
