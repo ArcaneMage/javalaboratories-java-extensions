@@ -3,7 +3,6 @@ package org.javalaboratories.core.util.Holders;
 import lombok.Getter;
 import lombok.Setter;
 import nl.altindag.log.LogCaptor;
-import org.javalaboratories.core.Eval;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
