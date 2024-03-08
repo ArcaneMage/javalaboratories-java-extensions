@@ -244,7 +244,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      */
     public Either<A,B> filterOrElse(final Predicate<? super B> predicate, A other) {
         Arguments.requireNonNull(predicate, other);
-        return isLeft() ? this : filter(predicate).isPresent() ? this : Either.left(other);
+        return isLeft() ? self() : filter(predicate).isPresent() ? this : Either.left(other);
     }
 
     /**
@@ -414,7 +414,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
         if (isLeft()) {
             return supplier.get();
         } else {
-            return this;
+            return self();
         }
     }
 
