@@ -2,10 +2,10 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions)
 
-This is a library of utilities to encourage functional programming in Java, particularly for Java-8 developers but not
- exclusively. With inspiration from functional programming articles and languages like Haskell and Scala, new monads and
- enhancements to existing ones have been introduced. This page provides a brief description of the objects in the library,
-  but it is encouraged to review the javadoc documentation for additional information and examples. 
+This is a library of utilities to encourage and support functional programming in Java, With inspiration from functional 
+programming articles and languages like Haskell and Scala, new monads and enhancements to existing ones have been introduced.
+This page provides a brief description of the objects in the library, but it is encouraged to review the javadoc 
+documentation for additional information and examples. 
 
 ### Maven Central Repository
 The library is now available for download from Maven Central Repository. In the POM file add the maven dependency 
@@ -197,8 +197,7 @@ target object. Review the javadoc for more information.
 
         torrent.open();
         torrent.flood();
-```
- 
+``` 
 ### Handlers
 Handlers class provides a broad set of wrapper methods to handle checked exceptions within lambda expressions. Lambdas 
 are generally short and concise, but checked exceptions can sometimes cause the lambda expression to look unwieldy. 
@@ -224,6 +223,24 @@ For example, here is an example of a method performing file input/output:
         // But using the Handlers class, the expression becomes :-
  
         Consumer<String> consumer = Handlers.consumer(s -> writeFile(s));
+```
+### Holders
+In cases where it may be necessary to capture and manipulate values from or in lambdas, often containers are used, such as
+Atomic wrappers. This library now has new and improved Holders that are themselves applicatives, monads and functors, which
+means `map`, `flatMap` and others are available for operations on the contained value. The most basic operations include
+the `get` and `set` methods to read or mutate the contained value. Although they are mutable, holder objects are thread-safe, 
+in that the reference to the contained value cannot be changed by more than one thread. Ensure the contained value is 
+itself thread-safe to guarantee complete thread safety. Factory methods are provided to create both mutable immutable
+holders.
+```
+        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
+        String result = numbers.parallelStream()
+                .filter(n -> n % 2 == 0)
+                .reduce(Holder.of(0.0),(h,v) -> h.map(n -> n + v),(a,b) -> a.map(n -> n + b.fold(0.0,v -> v)))
+                .map(n -> n / 2)
+                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+
+        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
 ```
 ### Maybe
 The library introduces `Maybe` class, which is a "drop-in" replacement for `Optional`. It has features that are only 
@@ -265,8 +282,7 @@ There's a lot more to discover about `Promise` objects -- review the source's Ja
 functional programming within a stream context. Many of the `Collectors` methods have been implemented in `Reducers` class, 
 again as a possible "drop-in" replacement for `Collectors` class. `Reducers` also support a comprehensive set of statistical
 calculations such as mean, median, mode, standard deviation and much more. Expect to see an expansion of statistical 
-functions in this area over the coming days.  
-
+functions in this area over the coming days.
 ```
         List<String> strings = Arrays.asList("9","7","5","76","2","40","101");
 
@@ -344,7 +360,6 @@ collections and persistable. Here are some examples of usage:
         tupleEarth.match(allOf("^Earth$"),(a,b,c) -> logger.info("Earth's distance from Sun {}",c));
         // Outputs: "Earth's distance from Sun 92955807"
 ```
-
 ### Try
 `Try` is another class that represents a computation/operation that may either result in an exception or a success.
 It is similar to the `Either` class type, but it dynamically decides the success/failure state. The implementation of the
