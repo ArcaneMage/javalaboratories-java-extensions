@@ -265,9 +265,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      */
     @Override
     public <D> Either<A,D> flatMap(final Function<? super B,? extends Monad<D>> mapper) {
-        @SuppressWarnings("unchecked")
-        Either<A,D> self = (Either<A,D>) this;
-        return isLeft() ? self : (Either<A,D>) Monad.super.flatMap(mapper);
+        return isLeft() ? self() : (Either<A,D>) Monad.super.flatMap(mapper);
     }
 
     /**
@@ -287,9 +285,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      */
     @Override
     public <D> Either<A,D> flatten() {
-        @SuppressWarnings("unchecked")
-        Either<A,D> self = (Either<A,D>) this;
-        return isLeft() ? self : (Either<A,D>) Monad.super.<D>flatten();
+        return isLeft() ? self() : (Either<A,D>) Monad.super.<D>flatten();
     }
 
     /**
@@ -341,7 +337,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
         if (isRight())
             return getRight();
         else
-            throw new UnsupportedOperationException();
+            return (B) getLeft();
     }
 
     /**
@@ -383,9 +379,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      */
     @Override
     public <C> Either<A,C> map(final Function<? super B,? extends C> mapper) {
-        @SuppressWarnings("unchecked")
-        Either<A,C> self = (Either<A,C>) this;
-        return isLeft() ? self : (Either<A,C>) super.<C>map(mapper);
+        return isLeft() ? self() : (Either<A,C>) super.<C>map(mapper);
     }
 
     /**
@@ -396,13 +390,11 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      *              implementation.
      * @return current value of right-biased implementations.
      */
-    public Either<A,B> orElse(final Either<? super A,? super B> other) {
+    public Either<A,B> orElse(final Either<A,B> other) {
         if (isLeft()) {
-            @SuppressWarnings("unchecked")
-            Either<A,B> result = (Either<A,B>) other;
-            return result;
+            return other;
         } else {
-            return this;
+            return self();
         }
     }
 
@@ -417,12 +409,10 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * @param supplier function executed by {@link Left} implementation.
      * @return this {@code Right} or derives it from the {@code supplier}
      */
-    public Either<A,B> orElseGet(final Supplier<? extends Either<? super A,? super B>> supplier) {
+    public Either<A,B> orElseGet(final Supplier<? extends Either<A,B>> supplier) {
         Objects.requireNonNull(supplier);
         if (isLeft()) {
-            @SuppressWarnings("unchecked")
-            Either<A,B> result = (Either<A,B>) supplier.get();
-            return result;
+            return supplier.get();
         } else {
             return this;
         }
@@ -528,6 +518,12 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
     @Override
     public String toString() {
         return isRight() ? String.format("Right[%s]", getRight()) : String.format("Left[%s]", getLeft());
+    }
+
+    private <C> Either<A,C> self() {
+        @SuppressWarnings("unchecked")
+        Either<A,C> result = (Either<A,C>) this;
+        return result;
     }
 
     /**
