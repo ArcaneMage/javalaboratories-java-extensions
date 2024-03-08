@@ -240,7 +240,7 @@ holders. Below, are examples of usage:
         Holder<Double> subtotal = Holder.of(0.0);
         String result = numbers.parallelStream()
                 .filter(n -> n % 2 == 0)
-                .collect(() -> subtotal,(a,b) -> a.set(b + a.get()),(a,b) -> a.set(b.get()))
+                .collect(() -> subtotal,(a,b) -> a.setGet(v -> v + b),(a,b) -> a.set(b.get()))
                 .map(n -> n / 2)
                 .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
 
