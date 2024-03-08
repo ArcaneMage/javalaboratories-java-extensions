@@ -246,7 +246,10 @@ holders. Below, are examples of usage:
 
         assertEquals(30, subtotal.get());
         assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
-        
+
+        ...
+        ...
+                
         // In this example, the Holder object is created and mutated within the 
         // context of the reducer.
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
