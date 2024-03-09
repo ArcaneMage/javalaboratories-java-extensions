@@ -117,8 +117,8 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
      * @param value to be held
      */
     public Holder(final T value) {
-        this.value = value;
         this.lock = new ReentrantLock();
+        this.value = value;
     }
 
     /**
