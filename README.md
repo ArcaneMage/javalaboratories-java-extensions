@@ -236,16 +236,14 @@ holders. Below, are examples of usage:
         // This example demenstrates side-effects where the Holder object
         // captures the subtotal of the even numbers. Although it is mutated
         // it is thread-safe.
-        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
-        Holder<Double> subtotal = Holder.of(0.0);
-        String result = numbers.parallelStream()
+        Holder<Double> total = Holder.of(0.0);
+        IntStream
+                .range(0,1000)
+                .parallel()
                 .filter(n -> n % 2 == 0)
-                .collect(() -> subtotal,(a,b) -> a.setGet(v -> v + b),(a,b) -> a.set(b.get()))
-                .map(n -> n / 2)
-                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+                .forEach(n -> total.setGet(v -> v + n));;
 
-        assertEquals(30, subtotal.get());
-        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        assertEquals(249500.0, total.get());
 
         ...
         ...
