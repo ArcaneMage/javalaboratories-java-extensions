@@ -179,10 +179,10 @@ public class AtomicDoubleTest {
     @Test
     public void testConcurrency_Pass() {
         AtomicDouble result = IntStream
-                .range(0,2500)
+                .range(0,4096)
                 .parallel()
                 .filter(n -> n % 2 == 0)
                 .collect(AtomicDouble::new,(a,n) -> a.accumulateAndGet(n, Double::sum),(a,b) -> a.addAndGet(b.get()));
-        assertEquals(1561250.0,result.get());
+        assertEquals(4192256.0,result.get());
     }
 }

@@ -179,10 +179,10 @@ public class AtomicFloatTest {
     @Test
     public void testConcurrency_Pass() {
         AtomicFloat result = IntStream
-                .range(0,2500)
+                .range(0,4096)
                 .parallel()
                 .filter(n -> n % 2 == 0)
                 .collect(AtomicFloat::new,(a,n) -> a.accumulateAndGet(n, Float::sum),(a,b) -> a.addAndGet(b.get()));
-        assertEquals(1561250.0,result.get());
+        assertEquals(4192256.0,result.get());
     }
 }
