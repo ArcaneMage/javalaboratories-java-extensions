@@ -27,6 +27,7 @@ import java.util.function.DoubleUnaryOperator;
  * that work with numerically based classes.
  */
 public class AtomicDouble extends Number {
+
     @Serial
     private static final long serialVersionUID = -7469909919078037355L;
 
@@ -278,7 +279,7 @@ public class AtomicDouble extends Number {
         return Double.doubleToLongBits(value);
     }
 
-    private Double toDouble(final long longBits) {
+    private double toDouble(final long longBits) {
         return Double.longBitsToDouble(longBits);
     }
 }

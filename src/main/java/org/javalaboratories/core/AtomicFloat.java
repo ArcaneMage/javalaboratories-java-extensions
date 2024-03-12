@@ -279,7 +279,7 @@ public class AtomicFloat extends Number {
         return Float.floatToIntBits(value);
     }
 
-    private Float toFloat(final int intBits) {
+    private float toFloat(final int intBits) {
         return Float.intBitsToFloat(intBits);
     }
 }
