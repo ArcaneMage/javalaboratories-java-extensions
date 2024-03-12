@@ -28,9 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * that work with numerically based classes.
  */
 public class AtomicFloat extends Number {
-    @Serial
-    private static final long serialVersionUID = -7469909919078037355L;
 
+    @Serial
+    private static final long serialVersionUID = 8079395341022325432L;
     private final AtomicInteger intBits;
 
     /**
@@ -72,7 +72,7 @@ public class AtomicFloat extends Number {
      * @param delta value
      * @return the updated value
      */
-    public final float addAndGet(final int delta) {
+    public final float addAndGet(final float delta) {
         return accumulateAndGet(delta,Float::sum);
     }
 
@@ -146,7 +146,7 @@ public class AtomicFloat extends Number {
      * @param delta the value to add
      * @return the previous value
      */
-    public final float getAndAdd(final int delta) {
+    public final float getAndAdd(final float delta) {
         return getAndAccumulate(delta,Float::sum);
     }
 
@@ -217,7 +217,7 @@ public class AtomicFloat extends Number {
      *
      * @param newValue the new value
      */
-    public final void lazySet(int newValue) {
+    public final void lazySet(float newValue) {
         intBits.lazySet(toIntegerBits(newValue));
     }
 
@@ -234,7 +234,7 @@ public class AtomicFloat extends Number {
      *
      * @param newValue the new value.
      */
-    public final void set(final int newValue) {
+    public final void set(final float newValue) {
         intBits.set(toIntegerBits(newValue));
     }
 

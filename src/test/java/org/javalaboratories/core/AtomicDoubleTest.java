@@ -17,6 +17,8 @@ package org.javalaboratories.core;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AtomicDoubleTest {
@@ -172,5 +174,15 @@ public class AtomicDoubleTest {
         assertEquals(5.1f,a.floatValue());
         assertEquals(5,a.intValue());
         assertEquals(5L,a.longValue());
+    }
+
+    @Test
+    public void testConcurrency_Pass() {
+        AtomicDouble result = IntStream
+                .range(0,2500)
+                .parallel()
+                .filter(n -> n % 2 == 0)
+                .collect(AtomicDouble::new,(a,n) -> a.accumulateAndGet(n, Double::sum),(a,b) -> a.addAndGet(b.get()));
+        assertEquals(1561250.0,result.get());
     }
 }
