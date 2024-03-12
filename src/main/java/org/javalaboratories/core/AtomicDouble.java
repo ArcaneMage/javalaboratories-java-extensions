@@ -205,7 +205,7 @@ public class AtomicDouble extends Number {
     }
 
     /**
-     * {@inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public final int intValue() {

@@ -205,7 +205,7 @@ public class AtomicFloat extends Number {
     }
 
     /**
-     * {@inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public final int intValue() {
