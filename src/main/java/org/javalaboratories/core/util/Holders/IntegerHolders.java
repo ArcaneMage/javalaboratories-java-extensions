@@ -266,7 +266,7 @@ public final class IntegerHolders {
 
             @Override
             public Set<Characteristics> characteristics() {
-                return Set.of(Characteristics.CONCURRENT, Characteristics.UNORDERED);
+                return Set.of(Characteristics.UNORDERED);
             }
         };
     }
@@ -306,7 +306,7 @@ public final class IntegerHolders {
 
             @Override
             public Set<Characteristics> characteristics() {
-                return Set.of(Characteristics.CONCURRENT, Characteristics.UNORDERED);
+                return Set.of(Characteristics.UNORDERED);
             }
         };
     }
@@ -346,7 +346,7 @@ public final class IntegerHolders {
 
             @Override
             public Set<Characteristics> characteristics() {
-                return Set.of(Characteristics.CONCURRENT, Characteristics.UNORDERED);
+                return Set.of(Characteristics.UNORDERED);
             }
         };
     }

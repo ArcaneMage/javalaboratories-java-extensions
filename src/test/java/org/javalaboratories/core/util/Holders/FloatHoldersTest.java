@@ -25,15 +25,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DoubleHoldersTest {
-    private static final Logger logger = LoggerFactory.getLogger(DoubleHoldersTest.class);
+public class FloatHoldersTest {
+    private static final Logger logger = LoggerFactory.getLogger(FloatHoldersTest.class);
 
     @Test
     public void testCollect_Pass() {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.parallelStream()
                .filter(n -> n % 2 == 0)
-               .collect(() -> Holder.of(0.0),(a,b) -> a.setGet(v -> v + b),(a,b) -> a.setGet(v -> v + b.fold(0.0,n -> n)))
+               .collect(() -> Holder.of(0.0f),(a,b) -> a.setGet(v -> v + b),(a,b) -> a.setGet(v -> v + b.fold(0.0f,n -> n)))
                .map(n -> n / 2)
                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
 
@@ -43,9 +43,9 @@ public class DoubleHoldersTest {
 
     @Test
     public void testReadOnly_Pass() {
-        Holder<Double> holder = DoubleHolders.readOnly(5.0);
+        Holder<Float> holder = FloatHolders.readOnly(5.0f);
 
-        assertThrows(UnsupportedOperationException.class, () -> holder.set(2.0));
+        assertThrows(UnsupportedOperationException.class, () -> holder.set(2.0f));
     }
 
     @Test
@@ -53,8 +53,8 @@ public class DoubleHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.parallelStream()
                .filter(n -> n % 2 == 0)
-               .map(Double::valueOf)
-               .collect(DoubleHolders.summing())
+               .map(Float::valueOf)
+               .collect(FloatHolders.summing())
                .map(n -> n / 2)
                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
 
@@ -67,8 +67,8 @@ public class DoubleHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,11,10,1,2,3,4);
         String result = numbers.parallelStream()
                .filter(n -> n % 2 == 0)
-               .map(Double::valueOf)
-               .collect(DoubleHolders.max())
+               .map(Float::valueOf)
+               .collect(FloatHolders.max())
                .map(n -> n / 2)
                .fold("",n -> STR."Maximum of even numbers (10) / 2 = \{n}");
 
@@ -81,8 +81,8 @@ public class DoubleHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,11,10,1,2,3,4);
         String result = numbers.parallelStream()
                 .filter(n -> n % 2 == 0)
-                .map(Double::valueOf)
-                .collect(DoubleHolders.min())
+                .map(Float::valueOf)
+                .collect(FloatHolders.min())
                 .map(n -> n / 2)
                 .fold("",n -> STR."Minimum of even numbers (2) / 2 = \{n}");
 
@@ -95,7 +95,7 @@ public class DoubleHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.parallelStream()
             .filter(n -> n % 2 == 0)
-            .reduce(Holder.of(0.0),DoubleHolders::sum,DoubleHolders::sum)
+            .reduce(Holder.of(0.0f),FloatHolders::sum,FloatHolders::sum)
             .map(n -> n / 2)
             .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
 
@@ -108,7 +108,7 @@ public class DoubleHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,11,10,1,2,3,4);
         String result = numbers.parallelStream()
                 .filter(n -> n % 2 == 0)
-                .reduce(Holder.of(0.0),DoubleHolders::max,DoubleHolders::max)
+                .reduce(Holder.of(0.0f),FloatHolders::max,FloatHolders::max)
                 .map(n -> n / 2)
                 .fold("",n -> STR."Maximum of even numbers (10) / 2 = \{n}");
 
@@ -121,7 +121,7 @@ public class DoubleHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,11,10,1,2,3,4);
         String result = numbers.parallelStream()
                 .filter(n -> n % 2 == 0)
-                .reduce(Holder.of(Double.MAX_VALUE),DoubleHolders::min,DoubleHolders::min)
+                .reduce(Holder.of(Float.MAX_VALUE),FloatHolders::min,FloatHolders::min)
                 .map(n -> n / 2)
                 .fold("",n -> STR."Minimum of even numbers (2) / 2 = \{n}");
 
