@@ -85,6 +85,17 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
     }
 
     /**
+     * Copies given {@link Holder} object supplied by function.
+     *
+     * @param supplier supplies Holder to copy.
+     * @return new identical {@link Holder} object.
+     * @param <T> type of contained {@code value}.
+     */
+    public static <T> Holder<T> copy(final Supplier<Holder<? extends T>> supplier) {
+        return Holder.of(Objects.requireNonNull(supplier,"Supplier function expected").get().get());
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

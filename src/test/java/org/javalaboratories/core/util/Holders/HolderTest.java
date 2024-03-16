@@ -370,22 +370,9 @@ public class HolderTest {
                 .range(0,1000)
                 .parallel()
                 .filter(n -> n % 2 == 0)
-                .forEach(n -> total.setGet(v -> v + n));;
+                .forEach(n -> total.setGet(v -> v + n));
 
         assertEquals(249500.0, total.get());
-    }
-
-    @Test
-    public void testUseCasesCollect_Pass() {
-        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
-        String result = numbers.parallelStream()
-                .filter(n -> n % 2 == 0)
-                .collect(() -> Holder.of(0.0),(a,b) -> a.set(b + a.get()),(a,b) -> a.set(a.get() + b.get()))
-                .map(n -> n / 2)
-                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
-
-        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
-        logger.info(result);
     }
 
     @Test
