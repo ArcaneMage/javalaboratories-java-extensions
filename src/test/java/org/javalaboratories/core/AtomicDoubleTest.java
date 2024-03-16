@@ -15,11 +15,10 @@
  */
 package org.javalaboratories.core;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class AtomicDoubleTest {
 
@@ -28,10 +27,10 @@ public class AtomicDoubleTest {
         AtomicDouble a = new AtomicDouble();
         AtomicDouble b = new AtomicDouble(5);
 
-        assertNotNull(a);
-        assertNotNull(b);
-        assertEquals(0.0,a.doubleValue());
-        assertEquals(5.0,b.doubleValue());
+        Assertions.assertNotNull(a);
+        Assertions.assertNotNull(b);
+        Assertions.assertEquals(0.0,a.doubleValue());
+        Assertions.assertEquals(5.0,b.doubleValue());
     }
 
     @Test
@@ -40,7 +39,7 @@ public class AtomicDoubleTest {
 
         a.accumulateAndGet(5, (left,right) -> left + right + 5);
 
-        assertEquals(15.0,a.doubleValue());
+        Assertions.assertEquals(15.0,a.doubleValue());
     }
 
     @Test
@@ -49,7 +48,7 @@ public class AtomicDoubleTest {
 
         double result = a.addAndGet(20);
 
-        assertEquals(25.0,result);
+        Assertions.assertEquals(25.0,result);
     }
 
     @Test
@@ -58,7 +57,7 @@ public class AtomicDoubleTest {
 
         double result = a.decrementAndGet();
 
-        assertEquals(4.1,result);
+        Assertions.assertEquals(4.1,result);
     }
 
     @Test
@@ -67,8 +66,8 @@ public class AtomicDoubleTest {
 
         double result = a.getAndAdd(20);
 
-        assertEquals(5.0,result);
-        assertEquals(25.0, a.doubleValue());
+        Assertions.assertEquals(5.0,result);
+        Assertions.assertEquals(25.0, a.doubleValue());
     }
 
     @Test
@@ -77,8 +76,8 @@ public class AtomicDoubleTest {
 
         double result = a.getAndDecrement();
 
-        assertEquals(5.1,result);
-        assertEquals(4.1, a.doubleValue());
+        Assertions.assertEquals(5.1,result);
+        Assertions.assertEquals(4.1, a.doubleValue());
     }
 
     @Test
@@ -87,8 +86,8 @@ public class AtomicDoubleTest {
 
         double result = a.getAndIncrement();
 
-        assertEquals(5.1,result);
-        assertEquals(6.1, a.doubleValue());
+        Assertions.assertEquals(5.1,result);
+        Assertions.assertEquals(6.1, a.doubleValue());
     }
 
     @Test
@@ -97,8 +96,8 @@ public class AtomicDoubleTest {
 
         double result = a.getAndSet(10.0);
 
-        assertEquals(5.1,result);
-        assertEquals(10.0, a.doubleValue());
+        Assertions.assertEquals(5.1,result);
+        Assertions.assertEquals(10.0, a.doubleValue());
     }
 
     @Test
@@ -107,8 +106,8 @@ public class AtomicDoubleTest {
 
         double result = a.getAndUpdate(n -> n + 5);
 
-        assertEquals(5.1,result);
-        assertEquals(10.1, a.doubleValue());
+        Assertions.assertEquals(5.1,result);
+        Assertions.assertEquals(10.1, a.doubleValue());
     }
 
     @Test
@@ -117,8 +116,8 @@ public class AtomicDoubleTest {
 
         double result = a.incrementAndGet();
 
-        assertEquals(6.1,result);
-        assertEquals(6.1, a.doubleValue());
+        Assertions.assertEquals(6.1,result);
+        Assertions.assertEquals(6.1, a.doubleValue());
     }
 
     @Test
@@ -127,7 +126,7 @@ public class AtomicDoubleTest {
 
         a.lazySet(10);
 
-        assertEquals(10.0, a.doubleValue());
+        Assertions.assertEquals(10.0, a.doubleValue());
     }
 
     @Test
@@ -136,14 +135,14 @@ public class AtomicDoubleTest {
 
         a.set(10);
 
-        assertEquals(10.0, a.doubleValue());
+        Assertions.assertEquals(10.0, a.doubleValue());
     }
 
     @Test
     public void testToString_Pass() {
         AtomicDouble a = new AtomicDouble(5.0);
 
-        assertEquals("5.0", a.toString());
+        Assertions.assertEquals("5.0", a.toString());
     }
 
     @Test
@@ -152,8 +151,8 @@ public class AtomicDoubleTest {
 
         double result = a.updateAndGet(n -> n + 5);
 
-        assertEquals(10.1,result);
-        assertEquals(10.1, a.doubleValue());
+        Assertions.assertEquals(10.1,result);
+        Assertions.assertEquals(10.1, a.doubleValue());
     }
 
     @Test
@@ -162,18 +161,18 @@ public class AtomicDoubleTest {
 
         boolean result = a.weakCompareAndSet(5.1,10.1);
 
-        assertTrue(result);
-        assertEquals(10.1, a.doubleValue());
+        Assertions.assertTrue(result);
+        Assertions.assertEquals(10.1, a.doubleValue());
     }
 
     @Test
     public void testNumberInterface_Pass() {
         AtomicDouble a = new AtomicDouble(5.1);
 
-        assertEquals(5.1,a.doubleValue());
-        assertEquals(5.1f,a.floatValue());
-        assertEquals(5,a.intValue());
-        assertEquals(5L,a.longValue());
+        Assertions.assertEquals(5.1,a.doubleValue());
+        Assertions.assertEquals(5.1f,a.floatValue());
+        Assertions.assertEquals(5,a.intValue());
+        Assertions.assertEquals(5L,a.longValue());
     }
 
     @Test
@@ -183,6 +182,6 @@ public class AtomicDoubleTest {
                 .parallel()
                 .filter(n -> n % 2 == 0)
                 .collect(AtomicDouble::new,(a,n) -> a.accumulateAndGet(n, Double::sum),(a,b) -> a.addAndGet(b.get()));
-        assertEquals(4192256.0,result.get());
+        Assertions.assertEquals(4192256.0,result.get());
     }
 }

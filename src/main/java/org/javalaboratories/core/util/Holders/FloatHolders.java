@@ -40,9 +40,9 @@ import java.util.stream.Collector;
  *                .map(Float::valueOf)
  *                .collect(FloatHolders.summing())
  *                .map(n -> n / 2)
- *                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+ *                .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
  *
- *         assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+ *         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
  *         logger.info(result);
  *     }
  * </pre>
@@ -55,9 +55,9 @@ import java.util.stream.Collector;
  *             .filter(n -> n % 2 == 0)
  *             .reduce(Holder.of(0.0f),FloatHolders::sum,FloatHolders::sum)
  *             .map(n -> n / 2)
- *             .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+ *             .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
  *
- *         assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+ *         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
  *         logger.info(result);
  *     }
  * </pre>
