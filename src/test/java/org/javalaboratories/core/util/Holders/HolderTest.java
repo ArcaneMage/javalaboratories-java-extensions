@@ -382,9 +382,9 @@ public class HolderTest {
                 .filter(n -> n % 2 == 0)
                 .reduce(Holder.of(0.0),(h,v) -> h.map(n -> n + v),(a,b) -> a.map(n -> n + b.fold(0.0,v -> v)))
                 .map(n -> n / 2)
-                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+                .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
 
-        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
     }
 
@@ -396,9 +396,9 @@ public class HolderTest {
                 .mapToDouble(Double::valueOf)
                 .reduce(0.0, Double::sum) / 2;
 
-        String result = STR."Mean of even numbers (2,4,6,8,10) / 2 = \{meanEven}";
+        String result = STR."Sum of even numbers (2,4,6,8,10) / 2 = \{meanEven}";
 
-        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
     }
 

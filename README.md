@@ -255,9 +255,23 @@ holders. Below, are examples of usage:
                 .filter(n -> n % 2 == 0)
                 .reduce(Holder.of(0.0),(h,v) -> h.map(n -> n + v),(a,b) -> a.map(n -> n + b.fold(0.0,v -> v)))
                 .map(n -> n / 2)
-                .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+                .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
 
         assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+```
+In addition to the above, Holder objects come supplied with helper classes to perform operations such as `sum`, `max` and 
+`min` within streams. Explore the `Holders` package for more information:
+```
+        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
+        String result = numbers.parallelStream()
+               .filter(n -> n % 2 == 0)
+               .map(Double::valueOf)
+               .collect(DoubleHolders.summing())
+               .map(n -> n / 2)
+               .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        logger.info(result);
 ```
 ### Maybe
 The library introduces `Maybe` class, which is a "drop-in" replacement for `Optional`. It has features that are only 

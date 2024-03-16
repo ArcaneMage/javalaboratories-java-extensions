@@ -35,9 +35,9 @@ public class DoubleHoldersTest {
                .filter(n -> n % 2 == 0)
                .collect(() -> Holder.of(0.0),(a,b) -> a.setGet(v -> v + b),(a,b) -> a.setGet(v -> v + b.fold(0.0,n -> n)))
                .map(n -> n / 2)
-               .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+               .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
 
-        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
     }
 
@@ -56,9 +56,9 @@ public class DoubleHoldersTest {
                .map(Double::valueOf)
                .collect(DoubleHolders.summing())
                .map(n -> n / 2)
-               .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+               .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
 
-        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
     }
 
@@ -97,9 +97,9 @@ public class DoubleHoldersTest {
             .filter(n -> n % 2 == 0)
             .reduce(Holder.of(0.0),DoubleHolders::sum,DoubleHolders::sum)
             .map(n -> n / 2)
-            .fold("",n -> STR."Mean of even numbers (2,4,6,8,10) / 2 = \{n}");
+            .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
 
-        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
     }
 
