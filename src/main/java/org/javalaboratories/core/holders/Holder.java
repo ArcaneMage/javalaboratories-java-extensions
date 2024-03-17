@@ -43,8 +43,12 @@ import java.util.function.*;
  *
  * @param <T> type of variable to hold.
  *
- * @see ReadWriteHolder
+ * @see DoubleHolders
+ * @see FloatHolders
+ * @see LongHolders
+ * @see IntegerHolders
  * @see ReadOnlyHolder
+ * @see ReadWriteHolder
  */
 public sealed abstract class Holder<T> extends CoreApplicative<T> implements Monad<T> permits ReadOnlyHolder, ReadWriteHolder {
 
@@ -85,7 +89,7 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
     }
 
     /**
-     * Copies given {@link Holder} object supplied by function.
+     * Copies given {@link Holder} object supplied by the function.
      *
      * @param supplier supplies Holder to copy.
      * @return new identical {@link Holder} object.
