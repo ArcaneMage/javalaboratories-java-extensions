@@ -50,6 +50,7 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
      * Constructor to setup internal handlers.
      * <p>
      * Recommended to use factory methods for creation.
+     *
      * @param task main transmute task handler that will be executed
      *             asynchronously.
      * @throws NullPointerException if task parameter is null.
@@ -75,7 +76,7 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
 
     /**
      * Factory method to construct this {@link TaskAction} object,
-     * <p>
+     *
      * @param task main transmute task handler that will be executed
      *             asynchronously.
      * @param <T> type of object to be transmuted.
@@ -89,7 +90,7 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
 
     /**
      * Factory method to construct this {@link TaskAction} object,
-     * <p>
+     *
      * @param task main transmute task handler that will be executed
      *             asynchronously.
      * @param completionHandler to handle task completion -- this is optional.

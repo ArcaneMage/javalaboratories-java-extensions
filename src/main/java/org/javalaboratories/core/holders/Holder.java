@@ -144,7 +144,7 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
      * it is recommended to provide a copy of it with the {@code Supplier}.
      * Note that immutability refers to the holder object, not necessarily the value
      * it contains.
-     * <p>
+     *
      * @return an immutable implementation.
      * @throws IllegalStateException when {@code Holder} is already in a read-only
      * state.

@@ -41,7 +41,7 @@ public interface ConcurrentResourceFloodStability<T> extends ResourceFloodStabil
      * This is the number of threads or {@code flood workers} actively involved
      * in sending requests to the {@link ResourceFloodStability.Target} or
      * {@code resource}.
-     * <p>
+     *
      * @return number of threads.
      */
     int getThreads();

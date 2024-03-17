@@ -21,6 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.javalaboratories.core.util.Arguments;
 
+import java.io.Serial;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -88,6 +89,9 @@ import java.util.function.Supplier;
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
 public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Exportable<B>  {
+
+    @Serial
+    private static final long serialVersionUID = -4116501214744175698L;
 
     @Getter(value=AccessLevel.PACKAGE)
     private final A left;
@@ -174,7 +178,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * Returns {@code true} if this is a {@link Right} implementation and the
      * {@code element} is {@code equal} to the {@code right} value, otherwise
      * {@code false} is returned.
-     * <p>
+     *
      * @param element with which to perform equality test (resultant value of
      * {@code equals} method).
      *
@@ -191,7 +195,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * Default implementation is to validate existence of {@link Predicate}
      * function. Implementations should call this method first to enable
      * validation.
-     * <p>
+     *
      * @param predicate the predicate function.
      * @return resultant value of {@link Predicate} or {@code false} if
      * this is a {@link Left} implementation.
@@ -214,7 +218,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * Default implementation is to validate existence of {@link Predicate}
      * function. Implementations should call this method first to enable
      * validation.
-     * <p>
+     *
      * @param predicate function to execute
      * @return maybe object containing possible {@code either} object.
      * @throws NullPointerException if no {@code predicate} is null.
@@ -255,7 +259,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * Default implementation is to validate existence of {@link Function}
      * object. Implementations should call this method first to enable
      * validation.
-     * <p>
+     *
      * @param mapper function to execute
      * @param <D> Type of the right value (transformed)
      * @return the transformed {@link Either} object.
@@ -276,7 +280,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * Default implementation is to validate existence of {@link Function}
      * object. Implementations should call this method first to enable
      * validation.
-     * <p>
+     *
      * @param <D> Type of the right value (transformed)
      * @return the transformed {@link Either} object.
      * @throws NullPointerException if no {@code predicate} is null.
@@ -317,7 +321,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * Default implementation is to validate existence of {@link Predicate}
      * object. Implementations should call this method first to enable
      * validation.
-     * <p>
+     *
      * @param predicate function to execute for the {@code Right} value.
      * @return the transformed {@link Either} object.
      * @throws NullPointerException if no {@code predicate} is null.
@@ -383,7 +387,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
     /**
      * For {@link Right} implementation, returns this object or the given
      * {@code other} parameter if it's a {@link Left} implementation.
-     * <p>
+     *
      * @param other alternative {@link Either} object returned for {@link Left}
      *              implementation.
      * @return current value of right-biased implementations.
@@ -462,7 +466,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * For {@link Right} implementation, returns an immutable list of the
      * {@code right} value, if available; {@link Left} implementations return
      * an empty list.
-     * <p>
+     *
      * @return a collection of a single {@code right} value, if it exists.
      */
     @Override
@@ -476,7 +480,7 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * For {@link Right} implementation, returns an immutable map of the
      * {@code right} value, if available; {@link Left} implementations return
      * an empty map.
-     * <p>
+     *
      * @return a map of a single {@code right} value, if it exists.
      */
     @Override
@@ -534,14 +538,14 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * <p>
      * Use the {@link Either#left(Object)} or {@link Either#right(Object)} to
      * create an instance of this object.
-     * <p>
+     *
      * @param <A> Type of left value.
      * @param <B> Type of right value.
      */
     public final static class Right<A,B> extends Either<A,B> {
         /**
          * Constructs this {@link Either} object.
-         * <p>
+         *
          * @param right value to be backed by this object.
          */
         public Right(B right) {
@@ -584,14 +588,14 @@ public abstract class Either<A,B> extends Applicative<B> implements Monad<B>, Ex
      * <p>
      * Use the {@link Either#left(Object)} or {@link Either#right(Object)} to
      * create an instance of this object.
-     * <p>
+     *
      * @param <A> Type of left value.
      * @param <B> Type of right value.
      */
     public final static class Left<A,B> extends Either<A,B> {
         /**
          * Constructs this {@link Either} object.
-         * <p>
+         *
          * @param left value to be backed by this object.
          */
         public Left(A left) {

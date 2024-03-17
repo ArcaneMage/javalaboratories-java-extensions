@@ -306,7 +306,6 @@ public abstract class Eval<T> extends CoreApplicative<T> implements Monad<T>, Ex
 
     /**
      * Returns an immutable list of containing {@code this} {@code value}.
-     * <p>
      *
      * @return a {@link List} object containing a {@code value} from {@code
      * this} object.
@@ -604,7 +603,7 @@ final class EvalValue<E> implements Serializable {
             );
     /**
      * Constructs this {@code value}
-     * <p>
+     *
      * @param caching set to {@code true} to enable "caching" (write once).
      */
     public EvalValue(boolean caching) {

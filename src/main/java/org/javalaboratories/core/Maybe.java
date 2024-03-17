@@ -171,7 +171,7 @@ public final class Maybe<T> extends CoreApplicative<T> implements Monad<T>, Expo
      * method will provide a {@code Maybe} instance with an {@code empty}
      * value, otherwise a {@code Maybe} object is returned with the
      * encapsulated {@code value}.
-     * <p>
+     *
      * @param value represented by {@code Maybe} object.
      * @param <T> Type of value.
      * @return a {@code Maybe} encapsulating {@code value}
@@ -250,7 +250,7 @@ public final class Maybe<T> extends CoreApplicative<T> implements Monad<T>, Expo
 
     /**
      * Determines whether {@code this} contains the {@code element}.
-     * <p>
+     *
      * @param element with which to test equality with this {@link Maybe} {@code
      * value}
      * @return true when {@code element} equals the encapsulated {@code value}.
@@ -353,7 +353,7 @@ public final class Maybe<T> extends CoreApplicative<T> implements Monad<T>, Expo
      * <p>
      * If {@code this} contains a {@link Maybe} value, it is returned, otherwise
      * {@code this} is returned.
-     * <p>
+     *
      * @param <U> Type of value within {@code nested} {@link Maybe} object.
      * @return flattened {@link Maybe} object.
      */

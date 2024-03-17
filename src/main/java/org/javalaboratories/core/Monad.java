@@ -62,7 +62,7 @@ public interface Monad<T> extends Functor<T> {
      * <p>
      * If {@code this} contains a {@link Monad} value, it is returned, otherwise
      * {@code this} is returned.
-     * <p>
+     *
      * @param <U> Type of value within {@code nested} {@link Monad} object.
      * @return flattened {@link Monad} object.
      */

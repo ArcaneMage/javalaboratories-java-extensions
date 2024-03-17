@@ -74,7 +74,7 @@ public final class TaskAction<T> extends AbstractAction<T> {
 
     /**
      * Factory method to construct this {@link TaskAction} object,
-     * <p>
+     *
      * @param task main task handler that will be executed asynchronously.
      * @param <T> Type of the object to be processed by the task.
      * @return an instance of {@link TaskAction}
@@ -89,7 +89,7 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * <p>
      * Note: There is no return value from the {@code task}, hence the
      * {@code completionHandler} resultant value will be {@code null}.
-     * <p>
+     *
      * @param task main task handler that will be executed asynchronously.
      * @param completionHandler to handle task completion -- this is optional.
      * @param <T> Type of the object to be processed by the task.

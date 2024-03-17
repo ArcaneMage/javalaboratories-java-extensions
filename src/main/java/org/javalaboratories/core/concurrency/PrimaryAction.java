@@ -67,7 +67,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
 
     /**
      * Factory method to construct this {@link PrimaryAction} object.
-     * <p>
+     *
      * @param task main task handler that will be executed asynchronously.
      * @param <T> type of object return from the task.
      * @return new instance of {@link PrimaryAction}
@@ -79,7 +79,7 @@ public final class PrimaryAction<T> extends AbstractAction<T> {
 
     /**
      * Factory method to construct this {@link PrimaryAction} object,
-     * <p>
+     *
      * @param task main task handler that will be executed asynchronously.
      * @param completionHandler to handle task completion -- this is optional.
      * @param <T> type of object return from the task.

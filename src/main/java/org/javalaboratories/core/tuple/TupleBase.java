@@ -37,7 +37,7 @@ public interface TupleBase {
 
     /**
      * Returns non-zero based position of an element within this tuple container.
-     * <p>
+     *
      * @param object element with which to search.
      * @return zero-based position of the object, 0 to indicate not found.
      */

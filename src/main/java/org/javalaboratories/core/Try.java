@@ -399,7 +399,6 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
     /**
      * Returns an immutable list of containing {@code this} nonempty, {@code
      * value}.
-     * <p>
      *
      * @return a {@link List} object containing a {@code value} from {@code
      * this} object, if available. Otherwise, an {@code empty} {@code List} is

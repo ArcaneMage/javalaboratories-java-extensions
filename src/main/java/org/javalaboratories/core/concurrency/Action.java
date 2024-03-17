@@ -45,7 +45,7 @@ public interface Action<T> extends CompletableFuture.AsynchronousCompletionTask 
      * <p>
      * If the action does not return a completion handler (optional), it will
      * be ignored.
-     * <p>
+     *
      * @return a {@link Maybe} object encapsulating the completion handler.
      */
     Maybe<BiConsumer<T,Throwable>> getCompletionHandler();

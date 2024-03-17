@@ -38,7 +38,7 @@ public interface EventSubscriber<T extends Event> extends EventListener {
     /**
      * This method is invoked to notify this object that a state change occurred in
      * the source of the {@code Event}.
-     * <p>
+     *
      * @param event the object event sent from the {@link EventPublisher}.
      */
     void notify(final T event);

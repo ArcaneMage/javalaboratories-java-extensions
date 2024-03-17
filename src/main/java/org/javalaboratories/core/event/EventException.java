@@ -17,6 +17,8 @@ package org.javalaboratories.core.event;
 
 import org.javalaboratories.core.Maybe;
 
+import java.io.Serial;
+
 /**
  * Exception raised by {@link EventPublisher} and {@link Event} objects.
  * <p>
@@ -25,12 +27,14 @@ import org.javalaboratories.core.Maybe;
  */
 public class EventException extends RuntimeException {
 
+    @Serial
+    private static final long serialVersionUID = 1993393000874106496L;
     private final Event event;
 
     /**
      * Constructs an instance of this {@code exception} object, but the
      * {@link Event} is unknown at the time of the exception.
-     * <p>
+     *
      * @param message the message describing the exception.
      */
     public EventException(String message) {
@@ -40,7 +44,7 @@ public class EventException extends RuntimeException {
     /**
      * Constructs an instance of this {@code exception} object, but the
      * {@link Event} is unknown at the time of the exception.
-     * <p>
+     *
      * @param message the message describing the exception.
      * @param cause the underlying cause of the exception.
      */
@@ -50,7 +54,7 @@ public class EventException extends RuntimeException {
 
     /**
      * Constructs an instance of this {@code exception} object.
-     * <p>
+     *
      * @param message the message describing the exception.
      * @param cause the underlying cause of the exception.
      * @param event the current {@code event} being processed.

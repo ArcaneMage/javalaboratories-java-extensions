@@ -108,7 +108,6 @@ public final class Promises {
      * fail, the first rejection encountered will be returned encapsulated as a
      * {@link Promise} object. Use the {@link Promise#handle(Consumer)} to catch
      * or handle the exception thrown asynchronously.
-     * <p>
      *
      * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
      * @param <T> Type of value returned from asynchronous task.
@@ -133,7 +132,6 @@ public final class Promises {
      * A {@link Promise} object is immediately returned, providing a reference
      * to an asynchronous process that is currently waiting completion of the all
      * the {@code actions} objects.
-     * <p>
      *
      * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
      * @param settle {@code true} all promises will either resolve or reject, but
