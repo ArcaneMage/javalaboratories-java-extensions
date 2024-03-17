@@ -1,4 +1,4 @@
-package org.javalaboratories.core.util.Holders;
+package org.javalaboratories.core.holders;
 
 import lombok.Getter;
 import lombok.Setter;

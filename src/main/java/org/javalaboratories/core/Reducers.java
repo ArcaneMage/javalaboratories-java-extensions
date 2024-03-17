@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core;
 
-import org.javalaboratories.core.util.Holders.Holder;
+import org.javalaboratories.core.holders.Holder;
 import org.javalaboratories.core.statistics.DoubleStatisticalCalculators;
 import org.javalaboratories.core.statistics.IntStatisticalCalculators;
 import org.javalaboratories.core.statistics.LongStatisticalCalculators;

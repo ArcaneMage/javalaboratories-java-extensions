@@ -1,7 +1,7 @@
 package org.javalaboratories.core.tuple;
 
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.util.Holders.Holder;
+import org.javalaboratories.core.holders.Holder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

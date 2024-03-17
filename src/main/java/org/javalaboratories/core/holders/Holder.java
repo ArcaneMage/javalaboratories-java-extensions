@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.util.Holders;
+package org.javalaboratories.core.holders;
 
 import org.javalaboratories.core.Applicative;
 import org.javalaboratories.core.CoreApplicative;

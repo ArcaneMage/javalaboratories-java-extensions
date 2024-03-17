@@ -20,6 +20,7 @@ module javalaboratories.java.extensions {
   requires org.slf4j;
 
   exports org.javalaboratories.core;
+  exports org.javalaboratories.core.atomic;
   exports org.javalaboratories.core.collection;
   exports org.javalaboratories.core.concurrency;
   exports org.javalaboratories.core.concurrency.utils;
@@ -31,5 +32,5 @@ module javalaboratories.java.extensions {
   exports org.javalaboratories.core.statistics;
   exports org.javalaboratories.core.tuple;
   exports org.javalaboratories.core.util;
-  exports org.javalaboratories.core.util.Holders;
+  exports org.javalaboratories.core.holders;
 }

@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.util.Holders;
+package org.javalaboratories.core.holders;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class FloatHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.parallelStream()
                .filter(n -> n % 2 == 0)
-               .collect(() -> Holder.of(0.0f),(a,b) -> a.setGet(v -> v + b),(a,b) -> a.setGet(v -> v + b.fold(0.0f,n -> n)))
+               .collect(() -> Holder.of(0.0f),(a, b) -> a.setGet(v -> v + b),(a, b) -> a.setGet(v -> v + b.fold(0.0f, n -> n)))
                .map(n -> n / 2)
                .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
 

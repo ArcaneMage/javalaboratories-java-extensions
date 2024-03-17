@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.util.Holders;
+package org.javalaboratories.core.holders;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -25,27 +25,27 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class LongHoldersTest {
-    private static final Logger logger = LoggerFactory.getLogger(LongHoldersTest.class);
+public class DoubleHoldersTest {
+    private static final Logger logger = LoggerFactory.getLogger(DoubleHoldersTest.class);
 
     @Test
     public void testCollect_Pass() {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.parallelStream()
                .filter(n -> n % 2 == 0)
-               .collect(() -> Holder.of(0L),(a,b) -> a.setGet(v -> v + b),(a,b) -> a.setGet(v -> v + b.fold(0L,n -> n)))
+               .collect(() -> Holder.of(0.0),(a, b) -> a.setGet(v -> v + b),(a, b) -> a.setGet(v -> v + b.fold(0.0, n -> n)))
                .map(n -> n / 2)
                .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
 
-        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15",result);
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
     }
 
     @Test
     public void testReadOnly_Pass() {
-        Holder<Long> holder = LongHolders.readOnly(5L);
+        Holder<Double> holder = DoubleHolders.readOnly(5.0);
 
-        assertThrows(UnsupportedOperationException.class, () -> holder.set(2L));
+        assertThrows(UnsupportedOperationException.class, () -> holder.set(2.0));
     }
 
     @Test
@@ -53,12 +53,12 @@ public class LongHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.parallelStream()
                .filter(n -> n % 2 == 0)
-               .map(Long::valueOf)
-               .collect(LongHolders.summing())
+               .map(Double::valueOf)
+               .collect(DoubleHolders.summing())
                .map(n -> n / 2)
                .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
 
-        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15",result);
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
     }
 
@@ -67,12 +67,12 @@ public class LongHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,11,10,1,2,3,4);
         String result = numbers.parallelStream()
                .filter(n -> n % 2 == 0)
-               .map(Long::valueOf)
-               .collect(LongHolders.max())
+               .map(Double::valueOf)
+               .collect(DoubleHolders.max())
                .map(n -> n / 2)
                .fold("",n -> STR."Maximum of even numbers (10) / 2 = \{n}");
 
-        assertEquals("Maximum of even numbers (10) / 2 = 5",result);
+        assertEquals("Maximum of even numbers (10) / 2 = 5.0",result);
         logger.info(result);
     }
 
@@ -81,12 +81,12 @@ public class LongHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,11,10,1,2,3,4);
         String result = numbers.parallelStream()
                 .filter(n -> n % 2 == 0)
-                .map(Long::valueOf)
-                .collect(LongHolders.min())
+                .map(Double::valueOf)
+                .collect(DoubleHolders.min())
                 .map(n -> n / 2)
                 .fold("",n -> STR."Minimum of even numbers (2) / 2 = \{n}");
 
-        assertEquals("Minimum of even numbers (2) / 2 = 1",result);
+        assertEquals("Minimum of even numbers (2) / 2 = 1.0",result);
         logger.info(result);
     }
 
@@ -95,11 +95,11 @@ public class LongHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
         String result = numbers.parallelStream()
             .filter(n -> n % 2 == 0)
-            .reduce(Holder.of(0L),LongHolders::sum,LongHolders::sum)
+            .reduce(Holder.of(0.0),DoubleHolders::sum,DoubleHolders::sum)
             .map(n -> n / 2)
             .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
 
-        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15",result);
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
     }
 
@@ -108,11 +108,11 @@ public class LongHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,11,10,1,2,3,4);
         String result = numbers.parallelStream()
                 .filter(n -> n % 2 == 0)
-                .reduce(Holder.of(0L),LongHolders::max,LongHolders::max)
+                .reduce(Holder.of(0.0),DoubleHolders::max,DoubleHolders::max)
                 .map(n -> n / 2)
                 .fold("",n -> STR."Maximum of even numbers (10) / 2 = \{n}");
 
-        assertEquals("Maximum of even numbers (10) / 2 = 5",result);
+        assertEquals("Maximum of even numbers (10) / 2 = 5.0",result);
         logger.info(result);
     }
 
@@ -121,11 +121,11 @@ public class LongHoldersTest {
         List<Integer> numbers = Arrays.asList(5,6,7,8,9,11,10,1,2,3,4);
         String result = numbers.parallelStream()
                 .filter(n -> n % 2 == 0)
-                .reduce(Holder.of(Long.MAX_VALUE),LongHolders::min,LongHolders::min)
+                .reduce(Holder.of(Double.MAX_VALUE),DoubleHolders::min,DoubleHolders::min)
                 .map(n -> n / 2)
                 .fold("",n -> STR."Minimum of even numbers (2) / 2 = \{n}");
 
-        assertEquals("Minimum of even numbers (2) / 2 = 1",result);
+        assertEquals("Minimum of even numbers (2) / 2 = 1.0",result);
         logger.info(result);
     }
 

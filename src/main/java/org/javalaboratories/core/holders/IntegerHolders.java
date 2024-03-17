@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.util.Holders;
+package org.javalaboratories.core.holders;
 
 import java.util.Objects;
 import java.util.Set;
@@ -24,8 +24,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * This is a helper class for {@code double Holders}, that is to say {@link Holder}
- * objects containing {@code double} value type.
+ * This is a helper class for {@code int Holders}, that is to say {@link Holder}
+ * objects containing {@code int} value type.
  * <p>
  * The class supports the following mathematical functions {@code sum, min} and
  * {@code max} designed to be used with {@code Streams} collector and reduction
@@ -37,8 +37,8 @@ import java.util.stream.Collector;
  *         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
  *         String result = numbers.parallelStream()
  *                .filter(n -> n % 2 == 0)
- *                .map(Double::valueOf)
- *                .collect(DoubleHolders.summing())
+ *                .map(Integer::valueOf)
+ *                .collect(IntegerHolders.summing())
  *                .map(n -> n / 2)
  *                .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
  *
@@ -53,7 +53,7 @@ import java.util.stream.Collector;
  *         List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
  *         String result = numbers.parallelStream()
  *             .filter(n -> n % 2 == 0)
- *             .reduce(Holder.of(0.0),DoubleHolders::sum,DoubleHolders::sum)
+ *             .reduce(Holder.of(0),IntegerHolders::sum,IntegerHolders::sum)
  *             .map(n -> n / 2)
  *             .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
  *
@@ -63,36 +63,36 @@ import java.util.stream.Collector;
  * </pre>
  *
  * @see FloatHolders
- * @see IntegerHolders
+ * @see DoubleHolders
  * @see LongHolders
  */
-public final class DoubleHolders {
+public final class IntegerHolders {
 
     /**
-     * Constructs a {@link Holder} object to hold a {@code double} value.
+     * Constructs a {@link Holder} object to hold a {@code int} value.
      *
-     * @param value the double value.
-     * @return an instance {@link Holder} with contained {@code double}
+     * @param value the int value.
+     * @return an instance {@link Holder} with contained {@code int}
      * value.
      */
-    public static Holder<Double> of(double value) {
+    public static Holder<Integer> of(int value) {
         return Holder.of(value);
     }
 
     /**
-     * Constructs a {@link Holder} object to hold a read-only {@code double}
+     * Constructs a {@link Holder} object to hold a read-only {@code int}
      * value.
      *
-     * @param value the double value.
-     * @return a read-only instance {@link Holder} with contained {@code double}
+     * @param value the int value.
+     * @return a read-only instance {@link Holder} with contained {@code int}
      * value.
      */
-    public static Holder<Double> readOnly(double value) {
+    public static Holder<Integer> readOnly(int value) {
         return Holder.of(value).readOnly();
     }
 
     /**
-     * Adds two {@link Holder} objects containing {@code double} values
+     * Adds two {@link Holder} objects containing {@code int} values
      * together.
      * <p>
      * The given {@link Holder} objects are not mutated, and a new instance
@@ -103,14 +103,14 @@ public final class DoubleHolders {
      * @return summation result in new {@link Holder} object.
      * @throws NullPointerException when either parameter is a null reference.
      */
-    public static Holder<Double> sum(final Holder<Double> a, final Holder<Double> b) {
-        Holder<Double> ha = Holder.copy(() -> Objects.requireNonNull(a));
-        return ha.map(n -> n + Objects.requireNonNull(b).fold(0.0,v -> v));
+    public static Holder<Integer> sum(final Holder<Integer> a, final Holder<Integer> b) {
+        Holder<Integer> ha = Holder.copy(() -> Objects.requireNonNull(a));
+        return ha.map(n -> n + Objects.requireNonNull(b).fold(0,v -> v));
     }
 
     /**
      * Adds {@code int} value to {@link Holder} object containing {@code
-     * double} values together.
+     * int} values together.
      * <p>
      * The given {@link Holder} object is not mutated, and a new instance
      * containing the resultant summation is returned.
@@ -120,13 +120,13 @@ public final class DoubleHolders {
      * @return summation result in new {@link Holder} object.
      * @throws NullPointerException when either parameter is a null reference.
      */
-    public static Holder<Double> sum(final Holder<Double> a, final int b) {
+    public static Holder<Integer> sum(final Holder<Integer> a, final int b) {
         return sum(a,(long) b);
     }
 
     /**
      * Adds {@code long} value to {@link Holder} object containing {@code
-     * double} values together.
+     * int} values together.
      * <p>
      * The given {@link Holder} object is not mutated, and a new instance
      * containing the resultant summation is returned.
@@ -136,9 +136,9 @@ public final class DoubleHolders {
      * @return summation result in new {@link Holder} object.
      * @throws NullPointerException when either parameter is a null reference.
      */
-    public static Holder<Double> sum(final Holder<Double> a, final long b) {
-        Holder<Double> r = Holder.of(0.0);
-        return r.map(n -> n + Objects.requireNonNull(a).fold(0.0,v -> v) + b);
+    public static Holder<Integer> sum(final Holder<Integer> a, final long b) {
+        Holder<Integer> r = Holder.of(0);
+        return r.map(n -> n + Objects.requireNonNull(a).fold(0,v -> v) + (int)b);
     }
 
     /**
@@ -152,9 +152,9 @@ public final class DoubleHolders {
      * @return the resultant value in new {@link Holder} object.
      * @throws NullPointerException when either parameter is a null reference.
      */
-    public static Holder<Double> max(final Holder<Double> a, final Holder<Double> b) {
-        return of(Double.max(Objects.requireNonNull(a).fold(0.0, Function.identity()),
-                Objects.requireNonNull(b).fold(0.0, Function.identity())));
+    public static Holder<Integer> max(final Holder<Integer> a, final Holder<Integer> b) {
+        return of(Integer.max(Objects.requireNonNull(a).fold(0, Function.identity()),
+                Objects.requireNonNull(b).fold(0, Function.identity())));
     }
 
     /**
@@ -168,7 +168,7 @@ public final class DoubleHolders {
      * @return the resultant value in new {@link Holder} object.
      * @throws NullPointerException when either parameter is a null reference.
      */
-    public static Holder<Double> max(final Holder<Double> a, final int b) {
+    public static Holder<Integer> max(final Holder<Integer> a, final int b) {
         return max(a,(long) b);
     }
 
@@ -183,8 +183,8 @@ public final class DoubleHolders {
      * @return the resultant value in new {@link Holder} object.
      * @throws NullPointerException when either parameter is a null reference.
      */
-    public static Holder<Double> max(final Holder<Double> a, final long b) {
-        return of(Double.max(Objects.requireNonNull(a).fold(0.0,n -> n),b));
+    public static Holder<Integer> max(final Holder<Integer> a, final long b) {
+        return of(Integer.max(Objects.requireNonNull(a).fold(0,n -> n),(int)b));
     }
 
     /**
@@ -198,9 +198,9 @@ public final class DoubleHolders {
      * @return the resultant value in new {@link Holder} object.
      * @throws NullPointerException when either parameter is a null reference.
      */
-    public static Holder<Double> min(final Holder<Double> a, final Holder<Double> b) {
-        return of(Double.min(Objects.requireNonNull(a).fold(0.0, Function.identity()),
-                Objects.requireNonNull(b).fold(0.0, Function.identity())));
+    public static Holder<Integer> min(final Holder<Integer> a, final Holder<Integer> b) {
+        return of(Integer.min(Objects.requireNonNull(a).fold(0, Function.identity()),
+                Objects.requireNonNull(b).fold(0, Function.identity())));
     }
 
     /**
@@ -214,7 +214,7 @@ public final class DoubleHolders {
      * @return the resultant value in new {@link Holder} object.
      * @throws NullPointerException when either parameter is a null reference.
      */
-    public static Holder<Double> min(final Holder<Double> a, final int b) {
+    public static Holder<Integer> min(final Holder<Integer> a, final int b) {
         return min(a, (long) b);
     }
 
@@ -229,38 +229,38 @@ public final class DoubleHolders {
      * @return the resultant value in new {@link Holder} object.
      * @throws NullPointerException when either parameter is a null reference.
      */
-    public static Holder<Double> min(final Holder<Double> a, final long b) {
-        return of(Double.min(Objects.requireNonNull(a).fold(0.0,n -> n),b));
+    public static Holder<Integer> min(final Holder<Integer> a, final long b) {
+        return of(Integer.min(Objects.requireNonNull(a).fold(0,n -> n),(int)b));
     }
 
     /**
-     * Sums {@link Holder} objects containing {@code double} values together.
+     * Sums {@link Holder} objects containing {@code int} values together.
      * <p>
      * Returns a custom {@link Collector} that collects and sums {@link Holder}
-     * objects containing {@code double} values.
+     * objects containing {@code int} values.
      *
      * @return a custom Collector for summation.
      */
-    public static Collector<Double,Holder<Double>,Holder<Double>> summing() {
+    public static Collector<Integer,Holder<Integer>,Holder<Integer>> summing() {
         return new Collector<>() {
 
             @Override
-            public Supplier<Holder<Double>> supplier() {
-                return () -> Holder.of(0.0);
+            public Supplier<Holder<Integer>> supplier() {
+                return () -> Holder.of(0);
             }
 
             @Override
-            public BiConsumer<Holder<Double>, Double> accumulator() {
+            public BiConsumer<Holder<Integer>, Integer> accumulator() {
                 return (a,b) -> a.setGet(v -> v + b);
             }
 
             @Override
-            public BinaryOperator<Holder<Double>> combiner() {
+            public BinaryOperator<Holder<Integer>> combiner() {
                 return (a,b) -> {a.setGet(v -> v + b.get()); return a;};
             }
 
             @Override
-            public Function<Holder<Double>, Holder<Double>> finisher() {
+            public Function<Holder<Integer>, Holder<Integer>> finisher() {
                 return h -> h;
             }
 
@@ -272,35 +272,35 @@ public final class DoubleHolders {
     }
 
     /**
-     * Calculates the largest {@code double} value contained in a stream of
+     * Calculates the largest {@code int} value contained in a stream of
      * {@link Holder} objects.
      * <p>
      * Returns a custom {@link Collector} that collects and determines a {@link
-     * Holder} object with the largest {@code double} value in the {@code
+     * Holder} object with the largest {@code int} value in the {@code
      * stream}.
      *
      * @return a custom Collector for summation.
      */
-    public static Collector<Double,Holder<Double>,Holder<Double>> max() {
+    public static Collector<Integer,Holder<Integer>,Holder<Integer>> max() {
         return new Collector<>() {
 
             @Override
-            public Supplier<Holder<Double>> supplier() {
-                return () -> Holder.of(0.0);
+            public Supplier<Holder<Integer>> supplier() {
+                return () -> Holder.of(0);
             }
 
             @Override
-            public BiConsumer<Holder<Double>, Double> accumulator() {
-                return (a, b) -> a.setGet(v -> Double.max(v, b));
+            public BiConsumer<Holder<Integer>, Integer> accumulator() {
+                return (a, b) -> a.setGet(v -> Integer.max(v, b));
             }
 
             @Override
-            public BinaryOperator<Holder<Double>> combiner() {
-                return (a, b) -> {a.setGet(v -> Double.max(v, b.get()));return a;};
+            public BinaryOperator<Holder<Integer>> combiner() {
+                return (a, b) -> {a.setGet(v -> Integer.max(v, b.get()));return a;};
             }
 
             @Override
-            public Function<Holder<Double>, Holder<Double>> finisher() {
+            public Function<Holder<Integer>, Holder<Integer>> finisher() {
                 return h -> h;
             }
 
@@ -312,35 +312,35 @@ public final class DoubleHolders {
     }
 
     /**
-     * Calculates the smallest {@code double} value contained in a stream of
+     * Calculates the smallest {@code int} value contained in a stream of
      * {@link Holder} objects.
      * <p>
      * Returns a custom {@link Collector} that collects and determines a {@link
-     * Holder} object with the smallest {@code double} value in the {@code
+     * Holder} object with the smallest {@code int} value in the {@code
      * stream}.
      *
      * @return a custom Collector for summation.
      */
-    public static Collector<Double,Holder<Double>,Holder<Double>> min() {
+    public static Collector<Integer,Holder<Integer>,Holder<Integer>> min() {
         return new Collector<>() {
 
             @Override
-            public Supplier<Holder<Double>> supplier() {
-                return () -> Holder.of(Double.MAX_VALUE);
+            public Supplier<Holder<Integer>> supplier() {
+                return () -> Holder.of(Integer.MAX_VALUE);
             }
 
             @Override
-            public BiConsumer<Holder<Double>, Double> accumulator() {
-                return (a, b) -> a.setGet(v -> Double.min(v, b));
+            public BiConsumer<Holder<Integer>, Integer> accumulator() {
+                return (a, b) -> a.setGet(v -> Integer.min(v, b));
             }
 
             @Override
-            public BinaryOperator<Holder<Double>> combiner() {
-                return (a, b) -> {a.setGet(v -> Double.min(v, b.get()));return a;};
+            public BinaryOperator<Holder<Integer>> combiner() {
+                return (a, b) -> {a.setGet(v -> Integer.min(v, b.get()));return a;};
             }
 
             @Override
-            public Function<Holder<Double>, Holder<Double>> finisher() {
+            public Function<Holder<Integer>, Holder<Integer>> finisher() {
                 return h -> h;
             }
 
@@ -351,5 +351,5 @@ public final class DoubleHolders {
         };
     }
 
-    private DoubleHolders() {}
+    private IntegerHolders() {}
 }
