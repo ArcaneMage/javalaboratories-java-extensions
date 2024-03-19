@@ -17,7 +17,6 @@ package org.javalaboratories.core.holders;
 
 import org.javalaboratories.core.Applicative;
 import org.javalaboratories.core.CoreApplicative;
-import org.javalaboratories.core.Eval;
 import org.javalaboratories.core.Monad;
 
 import java.io.Serial;
@@ -31,15 +30,15 @@ import java.util.function.*;
  * Generally used in lambda expressions to mutate objects declared as effectively
  * final.
  * <p>
- * Derived implementations of this class must enforce thread-safety where
- * possible. Ideally, the variable within the container should also be thread
- * safe, because the {@code Holder} container only guarantees that the reference
- * of the contained object is writable by one thread only.
+ * Derived implementations of this class must enforce thread-safety. Ideally, the
+ * variable within the container should also be thread safe, because the {@code
+ * Holder} container only guarantees that the reference of the contained object
+ * is writable by only one thread.
  * <p>
- * Class is replaced with a pure alternative, namely {@link Eval},
- * which does not have to rely on side effects. Refer to the {@link Eval
- * #cpeek(Consumer)} and {@link Eval#cpeek(Predicate, Consumer)}  methods for
- * details.
+ * The {@link Holder} has been improved significantly with the introduction of
+ * {@link org.javalaboratories.core.Functor} and {@link Monad} behaviours.
+ * Moreover, helper classes have also been provided to aid ease of use with
+ * streams, for example the {@link DoubleHolders} class.
  *
  * @param <T> type of variable to hold.
  *
@@ -47,8 +46,6 @@ import java.util.function.*;
  * @see FloatHolders
  * @see LongHolders
  * @see IntegerHolders
- * @see ReadOnlyHolder
- * @see ReadWriteHolder
  */
 public sealed abstract class Holder<T> extends CoreApplicative<T> implements Monad<T> permits ReadOnlyHolder, ReadWriteHolder {
 
@@ -65,7 +62,7 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
      * {@code set} method.
      * @param <T> type encapsulated in the container.
      * @return an mutable, thread-safe implementation.
-     * @deprecated Factory method replaced by {@code safeHolder}
+     * @deprecated Factory method replaced by {@code of} factory method.
      */
     @Deprecated
     public static <T> Holder<T> synchronizedHolder(final Holder<T> holder)  {
