@@ -20,6 +20,7 @@ import org.javalaboratories.core.CoreApplicative;
 import org.javalaboratories.core.Monad;
 
 import java.io.Serial;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.*;
@@ -86,14 +87,28 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
     }
 
     /**
-     * Copies given {@link Holder} object supplied by the function.
+     * This is a copy constructor that copies given {@link Holder} object
+     * supplied by the function.
      *
-     * @param supplier supplies Holder to copy.
+     * @param supplier supplies Holder for copying.
      * @return new identical {@link Holder} object.
      * @param <T> type of contained {@code value}.
+     * @throws NullPointerException when the supplier function is null.
      */
     public static <T> Holder<T> copy(final Supplier<Holder<? extends T>> supplier) {
-        return Holder.of(Objects.requireNonNull(supplier,"Supplier function expected").get().get());
+        return Holder.of(Objects.requireNonNull(supplier,"Supplier function expected"). get().get());
+    }
+
+    /**
+     * This is a copy constructor that copies given {@link Holder} object.
+     *
+     * @param holder supplies Holder for copying.
+     * @return new identical {@link Holder} object.
+     * @param <T> type of contained {@code value}.
+     * @throws NullPointerException when the holder object is null.
+     */
+    public static <T> Holder<T> copy(final Holder<T> holder) {
+        return copy(() -> Objects.requireNonNull(holder,"Holder object expected"));
     }
 
     /**
@@ -114,7 +129,6 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
      * This {@code Holder} is thread-safe.
      * @param <T> type of {@code value} encapsulated in the container.
      * @return an mutable implementation.
-     * @throws NullPointerException when holder object is null
      */
     public static <T> Holder<T> empty() {
         @SuppressWarnings("unchecked")

@@ -88,6 +88,18 @@ public class HolderTest {
     }
 
     @Test
+    public void testCopyConstructors_Pass() {
+        Holder<String> rholder1 = Holder.copy(readWriteHolder);
+        Holder<String> rholder2 = Holder.copy(() -> readWriteHolder);
+
+        assertNotSame(rholder1, readWriteHolder);
+        assertNotSame(rholder2, readWriteHolder);
+        assertNotSame(rholder1,rholder2);
+        assertEquals(readWriteHolder,rholder1);
+        assertEquals(readWriteHolder,rholder2);
+    }
+
+    @Test
     public void testReadOnly_Fail() {
         Holder<String> rholder = readWriteHolder.readOnly();
 
