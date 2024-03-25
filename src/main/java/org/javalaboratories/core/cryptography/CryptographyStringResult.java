@@ -15,9 +15,9 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.Secrets;
+public interface CryptographyStringResult extends CryptographyResult {
 
-public interface CryptographyResult {
+    byte[] getData();
 
-    Secrets getSecrets();
+    String getDataAsBase64();
 }

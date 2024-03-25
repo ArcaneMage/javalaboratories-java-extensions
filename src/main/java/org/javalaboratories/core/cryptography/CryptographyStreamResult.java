@@ -15,9 +15,10 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.Secrets;
 
-public interface CryptographyResult {
+import java.io.OutputStream;
 
-    Secrets getSecrets();
+public interface CryptographyStreamResult<T extends OutputStream> extends CryptographyResult {
+
+    T getStream();
 }

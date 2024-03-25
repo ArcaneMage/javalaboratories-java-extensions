@@ -25,6 +25,8 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.*;
 
+import static java.lang.StringTemplate.STR;
+
 /**
  * This is a container object that holds a value.
  * <p>
