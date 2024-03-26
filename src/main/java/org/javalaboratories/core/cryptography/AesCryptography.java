@@ -78,7 +78,6 @@ public final class AesCryptography implements SymmetricCryptography {
     public <T extends OutputStream> CryptographyStreamResult<T> decrypt(final Secrets secrets, final InputStream cipherStream,
                                                                         final T outputStream) {
         Secrets s = Objects.requireNonNull(secrets,"Expected secrets object");
-
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE,s.key(),s.ivParameterSpec());
@@ -168,7 +167,7 @@ public final class AesCryptography implements SymmetricCryptography {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_FACTORY);
             KeySpec spec = new PBEKeySpec(password.toCharArray(),salt.getBytes(),65536,256);
             SecretKey key = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
-            return new Secrets(key,iv,salt);
+            return new Secrets(key,iv);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new CryptographyException("Failed to create secrets from password",e);
         }

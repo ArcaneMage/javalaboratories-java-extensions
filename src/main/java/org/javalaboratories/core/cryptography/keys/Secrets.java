@@ -20,23 +20,27 @@ import org.javalaboratories.core.cryptography.CryptographyException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.Objects;
 
-public record Secrets(SecretKey key, IvParameterSpec ivParameterSpec, String salt) {
+public record Secrets(SecretKey key, IvParameterSpec ivParameterSpec) {
 
     private static final int FILE_BUFFER_SIZE = 1024;
 
     public static Secrets from(final String secrets) {
-        String s[] = Objects.requireNonNull(secrets, "Expected encoded secrets to import").split(":");
-        if (s.length != 3)
+        String[] s = Objects.requireNonNull(secrets, "Expected encoded secrets to import").split(":");
+        if (s.length != 2)
             throw new CryptographyException("Secrets string does not conform to exported format");
         try {
             byte[] key = Base64.getDecoder().decode(s[0]);
             byte[] iv = Base64.getDecoder().decode(s[1]);
-            String salt = s[2];
-            return new Secrets(new SecretKeySpec(key,0,key.length,"AES"),new IvParameterSpec(iv),salt);
+            return new Secrets(new SecretKeySpec(key,0,key.length,"AES"),new IvParameterSpec(iv));
         } catch (IllegalArgumentException e) {
             throw new CryptographyException("Failed to decode secrets string: does not conform to exported format",e);
         }
@@ -63,20 +67,15 @@ public record Secrets(SecretKey key, IvParameterSpec ivParameterSpec, String sal
         }
     }
 
-    public Secrets(SecretKey key,IvParameterSpec ivParameterSpec,String salt) {
+    public Secrets(final SecretKey key, final IvParameterSpec ivParameterSpec) {
         this.key = Objects.requireNonNull(key);
         this.ivParameterSpec = Objects.requireNonNull(ivParameterSpec);
-        this.salt = salt;
-    }
-
-    public Secrets(SecretKey key, IvParameterSpec ivParameterSpec){
-        this(key,ivParameterSpec,null);
     }
 
     public String export() {
         String keyAsBase64 = Base64.getEncoder().encodeToString(this.key.getEncoded());
         String ivAsBase64 = Base64.getEncoder().encodeToString(this.ivParameterSpec.getIV());
-        return STR."\{keyAsBase64}:\{ivAsBase64}:\{salt}";
+        return STR."\{keyAsBase64}:\{ivAsBase64}";
     }
 
     public void exportToFile(final File file) {

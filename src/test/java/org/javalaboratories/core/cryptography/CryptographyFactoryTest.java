@@ -32,13 +32,13 @@ public class CryptographyFactoryTest {
 
     private static final String PASSWORD = "F0xedFence75";
     private static final String STRING_LITERAL = "The quick brown fox jumped over the fence";
-    private static final String ENCRYPTED_STRING_KEY_DATA ="2luLVfxQ36Sm2zJduR78fVEXsJhc1XPJMB39HxYxfKY=:C9jHCw5JZ9QrCf9VmzzcSg==:9n5gO/ToBn9Uw0BiTbxoqUD2NjXEdKdvnHIzXrsoS8g=";
+    private static final String ENCRYPTED_STRING_KEY_DATA ="2luLVfxQ36Sm2zJduR78fVEXsJhc1XPJMB39HxYxfKY=:C9jHCw5JZ9QrCf9VmzzcSg==";
     private static final String ENCRYPTED_STRING_DATA ="NK7qCuERH2Jt0vwI2L30UOi/iEsgkEzJ5tCS+/+mQHkMsC5isE2dRoOJdGOSEHsq";
 
     private static final String ENCRYPTED_FILE = "aes-encrypted-file.enc";
     private static final String ENCRYPTED_FILE_KEY = "aes-encrypted-file.key";
     private static final String UNENCRYPTED_FILE = "aes-unencrypted-file.txt";
-    private static final String ENCRYPTED_FILE_KEY_DATA = "UqjkUwrKBA2MkMQk8D65NTxR2pUM/eC6tRyXXB8LJ+Q=:l3vnLUyav/6zkZ5mm+V8Cg==:WYXA2BKqMfgR2qu6pNwxrpFzWyFNt1fGcA6VN/WUzaQ=";
+    private static final String ENCRYPTED_FILE_KEY_DATA = "UqjkUwrKBA2MkMQk8D65NTxR2pUM/eC6tRyXXB8LJ+Q=:l3vnLUyav/6zkZ5mm+V8Cg==";
     private static final String ENCRYPTED_FILE_TEST = "aes-encrypted-test-file.tmp";
     private static final String UNENCRYPTED_FILE_TEST = "aes-unencrypted-test-file.tmp";
     private static final String FILE_DATA = "This is a test file with encrypted data -- TOP SECRET!";
