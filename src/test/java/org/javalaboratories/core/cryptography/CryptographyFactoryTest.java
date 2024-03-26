@@ -16,11 +16,15 @@
 package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.Secrets;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,19 +35,34 @@ public class CryptographyFactoryTest {
     private static final String ENCRYPTED_STRING_KEY_DATA ="2luLVfxQ36Sm2zJduR78fVEXsJhc1XPJMB39HxYxfKY=:C9jHCw5JZ9QrCf9VmzzcSg==:9n5gO/ToBn9Uw0BiTbxoqUD2NjXEdKdvnHIzXrsoS8g=";
     private static final String ENCRYPTED_STRING_DATA ="NK7qCuERH2Jt0vwI2L30UOi/iEsgkEzJ5tCS+/+mQHkMsC5isE2dRoOJdGOSEHsq";
 
-    private static final String ENCRYPTED_FILE = "/aes-encrypted-file.enc";
-    private static final String ENCRYPTED_FILE_KEY = "/aes-encrypted-file.key";
+    private static final String ENCRYPTED_FILE = "aes-encrypted-file.enc";
+    private static final String ENCRYPTED_FILE_KEY = "aes-encrypted-file.key";
+    private static final String UNENCRYPTED_FILE = "aes-unencrypted-file.txt";
     private static final String ENCRYPTED_FILE_KEY_DATA = "UqjkUwrKBA2MkMQk8D65NTxR2pUM/eC6tRyXXB8LJ+Q=:l3vnLUyav/6zkZ5mm+V8Cg==:WYXA2BKqMfgR2qu6pNwxrpFzWyFNt1fGcA6VN/WUzaQ=";
-    private static final String ENCRYPTED_FILE_TEST = "aes-encrypted-file-test.enc";
+    private static final String ENCRYPTED_FILE_TEST = "aes-encrypted-test-file.tmp";
+    private static final String UNENCRYPTED_FILE_TEST = "aes-unencrypted-test-file.tmp";
     private static final String FILE_DATA = "This is a test file with encrypted data -- TOP SECRET!";
 
-    @AfterEach
-    public void tearDown() {
-        new File(ENCRYPTED_FILE_TEST).delete();
+    private File encryptedFile;
+    private File encryptedFileKey;
+    private File unencryptedFile;
+    private File encryptedFileTest;
+    private File unencryptedFileTest;
+    private ClassLoader classLoader;
+
+    @BeforeEach
+    public void setup() throws Exception {
+       classLoader = CryptographyFactoryTest.class.getClassLoader();
+       encryptedFile = Paths.get(classLoader.getResource(ENCRYPTED_FILE).toURI()).toFile();
+       encryptedFileKey = Paths.get(classLoader.getResource(ENCRYPTED_FILE_KEY).toURI()).toFile();
+       unencryptedFile = Paths.get(classLoader.getResource(UNENCRYPTED_FILE).toURI()).toFile();
+
+       encryptedFileTest = Paths.get(classLoader.getResource(ENCRYPTED_FILE_TEST).toURI()).toFile();
+       unencryptedFileTest = Paths.get(classLoader.getResource(UNENCRYPTED_FILE_TEST).toURI()).toFile();
     }
 
     @Test
-    public void testEncryptionDecryption_Pass() {
+    public void testStringEncryption_Pass() {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         CryptographyStringResult result = cryptography.encrypt(PASSWORD, STRING_LITERAL);
         String encrypted = result.getDataAsBase64();
@@ -53,7 +72,7 @@ public class CryptographyFactoryTest {
     }
 
     @Test
-    public void testDecryption_Pass() {
+    public void testStringDecryption_Pass() {
         Secrets secrets = Secrets.from(ENCRYPTED_STRING_KEY_DATA);
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         String decoded = cryptography.decrypt(secrets, ENCRYPTED_STRING_DATA);
@@ -64,48 +83,61 @@ public class CryptographyFactoryTest {
     @Test
     public void testSecrets_Pass() {
         Secrets secrets = Secrets.from(ENCRYPTED_STRING_KEY_DATA);
-        Secrets secretsFile = Secrets.fromStream(CryptographyFactoryTest.class.getResourceAsStream(ENCRYPTED_FILE_KEY));
+        Secrets secretsFile = Secrets.fromStream(classLoader.getResourceAsStream(ENCRYPTED_FILE_KEY));
 
         assertEquals(ENCRYPTED_STRING_KEY_DATA,secrets.export());
         assertEquals(ENCRYPTED_FILE_KEY_DATA,secretsFile.export());
     }
 
     @Test
-    public void testFileDecryption_Pass() {
+    public void testFileDecryption_Pass() throws IOException {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
-        Secrets secrets = Secrets.fromStream(CryptographyFactoryTest.class.getResourceAsStream(ENCRYPTED_FILE_KEY));
+        Secrets secrets = Secrets.fromFile(encryptedFileKey);
 
-        CryptographyStreamResult<ByteArrayOutputStream> streamResult = cryptography
-                .decrypt(secrets, CryptographyFactoryTest.class.getResourceAsStream(ENCRYPTED_FILE), new ByteArrayOutputStream());
+        CryptographyFileResult result = cryptography
+                .decrypt(secrets,encryptedFile, unencryptedFileTest);
 
-        assertEquals(FILE_DATA,streamResult.getStream().toString());
+        String s = Files.lines(result.getFile().toPath())
+                        .collect(Collectors.joining());
+
+        assertEquals(FILE_DATA,s);
     }
 
     @Test
-    public void testStreamEncryptionDecryption_Pass() {
+    public void testFileEncryption_Pass() throws IOException {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
-        CryptographyStreamResult<ByteArrayOutputStream> streamResult = cryptography
+        CryptographyFileResult result = cryptography
+                .encrypt(PASSWORD,unencryptedFile, encryptedFileTest);
+
+        CryptographyStreamResult<ByteArrayOutputStream> result2 = cryptography
+                .decrypt(result.getSecrets(),new FileInputStream(encryptedFileTest),new ByteArrayOutputStream());
+
+        assertEquals(FILE_DATA,result2.getStream().toString());
+    }
+
+    @Test
+    public void testStreamEncryption_Pass() {
+        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        CryptographyStreamResult<ByteArrayOutputStream> result = cryptography
                 .encrypt(PASSWORD,new ByteArrayInputStream(STRING_LITERAL.getBytes()),new ByteArrayOutputStream());
 
-        ByteArrayInputStream cipherStream = new ByteArrayInputStream(streamResult.getStream().toByteArray());
-        CryptographyStreamResult<ByteArrayOutputStream> decodedResult = cryptography
-                .decrypt(streamResult.getSecrets(),cipherStream,new ByteArrayOutputStream());
+        CryptographyStreamResult<ByteArrayOutputStream> result2 = cryptography
+                .decrypt(result.getSecrets(),new ByteArrayInputStream(result.getStream().toByteArray()),
+                        new ByteArrayOutputStream());
 
-        assertEquals(STRING_LITERAL,decodedResult.getStream().toString());
+        assertEquals(STRING_LITERAL,result2.getStream().toString());
     }
 
     @Test
-    public void testFileEncryptionDecryption_Pass() throws FileNotFoundException {
+    public void testStreamDecryption_Pass() {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
-        CryptographyStreamResult<FileOutputStream> streamResult = cryptography
-                .encrypt(PASSWORD,new ByteArrayInputStream(STRING_LITERAL.getBytes()),
-                        new FileOutputStream(ENCRYPTED_FILE_TEST));
+        Secrets secrets = Secrets.from(ENCRYPTED_STRING_KEY_DATA);
 
-        CryptographyStreamResult<ByteArrayOutputStream> streamResult2 = cryptography
-                .decrypt(streamResult.getSecrets(), new FileInputStream(ENCRYPTED_FILE_TEST),
+        CryptographyStreamResult<ByteArrayOutputStream> result = cryptography
+                .decrypt(secrets,new ByteArrayInputStream(Base64.getDecoder().decode(ENCRYPTED_STRING_DATA)),
                         new ByteArrayOutputStream());
 
-        assertEquals(STRING_LITERAL, streamResult2.getStream().toString());
+        assertEquals(STRING_LITERAL,result.getStream().toString());
     }
 
     @Disabled

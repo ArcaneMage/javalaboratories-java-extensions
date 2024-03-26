@@ -51,7 +51,15 @@ public record Secrets(SecretKey key, IvParameterSpec ivParameterSpec, String sal
                 strbuf.append(buffer, 0, length);
             return from(strbuf.toString());
         } catch (IOException e) {
-            throw new CryptographyException("Failed to import secrets from file",e);
+            throw new CryptographyException("Failed to import secrets from stream",e);
+        }
+    }
+
+    public static Secrets fromFile(final File file) {
+        try (FileInputStream is = new FileInputStream(Objects.requireNonNull(file,"Expected file"))) {
+            return fromStream(is);
+        } catch (IOException e) {
+            throw new CryptographyException("Failed to import secrets from stream",e);
         }
     }
 

@@ -17,8 +17,8 @@ package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.Secrets;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.Objects;
 
 /**
  * An object that implements this interface has the ability to both encrypt and
@@ -37,8 +37,9 @@ public interface SymmetricCryptography {
      * @param secrets contains private key, salt and initial vector values.
      * @param cipherText the cipher text to be decrypted.
      * @return decoded string.
+     * @throws NullPointerException when parameters are null.
      */
-    String decrypt(Secrets secrets, String cipherText);
+    String decrypt(final Secrets secrets, final String cipherText);
 
     /**
      * Decrypts {@link InputStream} that contains a stream of cipher data.
@@ -49,9 +50,10 @@ public interface SymmetricCryptography {
      * @return a {@link CryptographyStreamResult} that encapsulate decoded
      * data.
      * @param <T> of output stream.
+     * @throws NullPointerException when parameters are null.
      */
-    <T extends OutputStream> CryptographyStreamResult<T> decrypt(Secrets secrets, InputStream cipherStream,
-                                                                 T outputStream);
+    <T extends OutputStream> CryptographyStreamResult<T> decrypt(final Secrets secrets, final InputStream cipherStream,
+                                                                 final T outputStream);
 
     /**
      * Encrypts {@link String} with a given {@code password}.
@@ -60,8 +62,9 @@ public interface SymmetricCryptography {
      * @param string a string to be encrypted.
      * @return a {@link CryptographyStringResult} encapsulating encryption
      * key and cipher text.
+     * @throws NullPointerException when parameters are null.
      */
-    CryptographyStringResult encrypt(String password, String string);
+    CryptographyStringResult encrypt(final String password, final String string);
 
     /**
      * Encrypts the {@link InputStream} with the given {@code password}.
@@ -72,7 +75,65 @@ public interface SymmetricCryptography {
      * @return a {@link CryptographyStreamResult} object encapsulating encrypted
      * data.
      * @param <T> type of output stream.
+     * @throws NullPointerException when parameters are null.
      */
-    <T extends OutputStream> CryptographyStreamResult<T> encrypt(String password, InputStream inputStream,
-                                                                 T cipherStream);
+    <T extends OutputStream> CryptographyStreamResult<T> encrypt(final String password, final InputStream inputStream,
+                                                                 final T cipherStream);
+
+    /**
+     * Encrypts the {@link File} with a given {@code password}.
+     *
+     * @param password a password of the encrypted file.
+     * @param source source file with which to encrypt.
+     * @param cipherFile encrypted file.
+     * @return a {@link CryptographyFileResult} encapsulating encrypted key and
+     * file.
+     * @throws NullPointerException when parameters are null.
+     */
+    default CryptographyFileResult encrypt(final String password, final File source, final File cipherFile) {
+        try (InputStream is = new FileInputStream(Objects.requireNonNull(source,"Expected source file"));
+             OutputStream os = new FileOutputStream(Objects.requireNonNull(cipherFile,"Expected cipher file"))) {
+            CryptographyStreamResult<OutputStream> result = encrypt(Objects.requireNonNull(password,"Expected password"), is, os);
+            return new CryptographyFileResult() {
+                @Override
+                public File getFile() {
+                    return cipherFile;
+                }
+                @Override
+                public Secrets getSecrets() {
+                    return result.getSecrets();
+                }
+            };
+        } catch (IOException e) {
+            throw new CryptographyException("Failed to encrypt file",e);
+        }
+    }
+
+    /**
+     * Decrypts the {@link File} with a given {@link Secrets}.
+     *
+     * @param secrets a password of the encrypted file.
+     * @param output decrypted file output.
+     * @param cipherFile encrypted file.
+     * @return a {@link CryptographyFileResult} encapsulating encrypted key and
+     * output file.
+     */
+    default CryptographyFileResult decrypt(final Secrets secrets, final File cipherFile, final File output) {
+        try (InputStream is = new FileInputStream(Objects.requireNonNull(cipherFile,"Expected cipher file"));
+             OutputStream os = new FileOutputStream(Objects.requireNonNull(output,"Expected output file"))) {
+            CryptographyStreamResult<OutputStream> result = decrypt(Objects.requireNonNull(secrets,"Expected secrets object"), is, os);
+            return new CryptographyFileResult() {
+                @Override
+                public File getFile() {
+                    return output;
+                }
+                @Override
+                public Secrets getSecrets() {
+                    return result.getSecrets();
+                }
+            };
+        } catch (IOException e) {
+            throw new CryptographyException("Failed to encrypt file",e);
+        }
+    }
 }
