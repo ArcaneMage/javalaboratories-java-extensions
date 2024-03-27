@@ -15,9 +15,17 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import org.javalaboratories.core.Maybe;
+
+import java.util.Base64;
+
 public interface CryptographyStringResult extends CryptographyResult {
 
     byte[] getData();
 
-    String getDataAsBase64();
+    default String getDataAsBase64() {
+        return Base64.getEncoder().encodeToString(getData());
+    }
+
+    Maybe<String> getDataAsString();
 }

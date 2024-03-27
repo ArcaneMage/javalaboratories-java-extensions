@@ -15,9 +15,9 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.Secrets;
+import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
 public interface CryptographyResult {
 
-    Secrets getSecrets();
+    SymmetricSecretKey getKey();
 }

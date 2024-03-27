@@ -17,7 +17,6 @@ package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.Secrets;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -32,13 +31,13 @@ public class CryptographyFactoryTest {
 
     private static final String PASSWORD = "F0xedFence75";
     private static final String STRING_LITERAL = "The quick brown fox jumped over the fence";
-    private static final String ENCRYPTED_STRING_KEY_DATA ="2luLVfxQ36Sm2zJduR78fVEXsJhc1XPJMB39HxYxfKY=:C9jHCw5JZ9QrCf9VmzzcSg==";
-    private static final String ENCRYPTED_STRING_DATA ="NK7qCuERH2Jt0vwI2L30UOi/iEsgkEzJ5tCS+/+mQHkMsC5isE2dRoOJdGOSEHsq";
+    private static final String ENCRYPTED_STRING_KEY_DATA = "xTu2qcvSVqfx5YuMc7jePQ55ne1g4AjdnpgXdalsZSY=:HV4Ab5AhpiFoTLdj0XVQZA==";
+    private static final String ENCRYPTED_STRING_DATA = "HV4Ab5AhpiFoTLdj0XVQZM2ABXjJR5TEo9IBL9ySz6odA02jpT+RLEbfza3BPMTaMRIXcOgsoqgVXFyuSLEwKg==";
 
     private static final String ENCRYPTED_FILE = "aes-encrypted-file.enc";
     private static final String ENCRYPTED_FILE_KEY = "aes-encrypted-file.key";
     private static final String UNENCRYPTED_FILE = "aes-unencrypted-file.txt";
-    private static final String ENCRYPTED_FILE_KEY_DATA = "UqjkUwrKBA2MkMQk8D65NTxR2pUM/eC6tRyXXB8LJ+Q=:l3vnLUyav/6zkZ5mm+V8Cg==";
+    private static final String ENCRYPTED_FILE_KEY_DATA = "zJbPtats1KXzfJ5j6lISPxRstiP2D6ZnHmO0a9kkdY8=:tV7YKY6dsRa7Be7g1+MuFg==";
     private static final String ENCRYPTED_FILE_TEST = "aes-encrypted-test-file.tmp";
     private static final String UNENCRYPTED_FILE_TEST = "aes-unencrypted-test-file.tmp";
     private static final String FILE_DATA = "This is a test file with encrypted data -- TOP SECRET!";
@@ -140,7 +139,7 @@ public class CryptographyFactoryTest {
         assertEquals(STRING_LITERAL,result.getStream().toString());
     }
 
-    @Disabled
+    @Test
     public void testEncryptionFileCreation_Pass() throws IOException  {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         String s = "This is a test file with encrypted data -- TOP SECRET!";

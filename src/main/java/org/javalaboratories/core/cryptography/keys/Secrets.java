@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.Objects;
 
+@Deprecated
 public record Secrets(SecretKey key, IvParameterSpec ivParameterSpec) {
 
     private static final int FILE_BUFFER_SIZE = 1024;

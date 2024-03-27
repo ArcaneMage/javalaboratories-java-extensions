@@ -15,22 +15,17 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.Secrets;
+import org.javalaboratories.core.Maybe;
+import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+import org.javalaboratories.core.util.Bytes;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.Base64;
 import java.util.Objects;
 
@@ -39,11 +34,10 @@ import static javax.crypto.Cipher.ENCRYPT_MODE;
 public final class AesCryptography implements SymmetricCryptography {
 
     private static final int FILE_BUFFER_SIZE = 512;
+    private static final int HEADER_SIZE = 16;
     private static final int IV_BYTES = 16;
-    private static final int SALT_BYTES = 32;
 
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
-    private static final String SECRET_KEY_FACTORY = "PBKDF2WithHmacSHA256";
 
     /**
      * Package-private default constructor.
@@ -57,14 +51,19 @@ public final class AesCryptography implements SymmetricCryptography {
      * {@inheritDoc}
      */
     @Override
-    public String decrypt(final Secrets secrets, final String cipherText) {
+    public CryptographyStringResult decrypt(final SymmetricSecretKey key, final String cipherText) {
         String  ct = Objects.requireNonNull(cipherText, "Expected encrypted cipher text");
-        Secrets s = Objects.requireNonNull(secrets, "Expected secrets object");
+        SymmetricSecretKey k = Objects.requireNonNull(key, "Expected key object");
         try {
+            byte[] ctBytes = Base64.getDecoder().decode(ct);
+
+            // Read IV Header
+            IvParameterSpec iv = new IvParameterSpec(ctBytes,0,HEADER_SIZE);
+
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE,s.key(),s.ivParameterSpec());
-            byte[] bytes = cipher.doFinal(Base64.getDecoder().decode(ct));
-            return new String(bytes);
+            cipher.init(Cipher.DECRYPT_MODE,k,iv);
+            byte[] bytes = cipher.doFinal(Bytes.trimLeft(ctBytes,HEADER_SIZE));
+            return createStringResult(key,bytes,new String(bytes));
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt cipher text");
         }
@@ -74,14 +73,17 @@ public final class AesCryptography implements SymmetricCryptography {
      * {@inheritDoc}
      */
     @Override
-    public <T extends OutputStream> CryptographyStreamResult<T> decrypt(final Secrets secrets, final InputStream cipherStream,
+    public <T extends OutputStream> CryptographyStreamResult<T> decrypt(final SymmetricSecretKey key, final InputStream cipherStream,
                                                                         final T outputStream) {
-        Secrets s = Objects.requireNonNull(secrets,"Expected secrets object");
+        SymmetricSecretKey k = Objects.requireNonNull(key,"Expected key object");
         try {
+            // Read IV Header
+            IvParameterSpec iv = readIvHeader(cipherStream);
+
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE,s.key(),s.ivParameterSpec());
+            cipher.init(Cipher.DECRYPT_MODE,k,iv);
             write(cipher,cipherStream,outputStream);
-            return createStreamResult(secrets,outputStream);
+            return createStreamResult(k,outputStream);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt cipher text stream",e);
         } catch (IOException e) {
@@ -93,15 +95,19 @@ public final class AesCryptography implements SymmetricCryptography {
      * {@inheritDoc}
      */
     @Override
-    public CryptographyStringResult encrypt(final String password, final String string) {
-        String p = Objects.requireNonNull(password, "Expected password");
+    public CryptographyStringResult encrypt(final SymmetricSecretKey key, final String string) {
+        SymmetricSecretKey k = Objects.requireNonNull(key, "Expected password");
         String s = Objects.requireNonNull(string, "Expected string to encrypt");
         try {
-            Secrets secrets = createSecretsFromPassword(p);
+            IvParameterSpec iv = generateIvParameterSpec();
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(ENCRYPT_MODE, secrets.key(), secrets.ivParameterSpec());
+            cipher.init(ENCRYPT_MODE,k,iv);
             byte[] bytes = cipher.doFinal(s.getBytes());
-            return createStringResult(secrets,bytes);
+
+            // Prefix IV Header
+            bytes = Bytes.concat(iv.getIV(),bytes);
+
+            return createStringResult(k,bytes,null);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
@@ -111,15 +117,20 @@ public final class AesCryptography implements SymmetricCryptography {
      * {@inheritDoc}
      */
     @Override
-    public <T extends OutputStream> CryptographyStreamResult<T> encrypt(final String password, final InputStream inputStream,
+    public <T extends OutputStream> CryptographyStreamResult<T> encrypt(final SymmetricSecretKey key, final InputStream inputStream,
                                                                         final T cipherStream) {
-        String p = Objects.requireNonNull(password, "Expected password");
+        SymmetricSecretKey k = Objects.requireNonNull(key, "Expected key object");
         try {
-            Secrets secrets = createSecretsFromPassword(p);
+            IvParameterSpec iv = generateIvParameterSpec();
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(ENCRYPT_MODE, secrets.key(), secrets.ivParameterSpec());
+            cipher.init(ENCRYPT_MODE,k,iv);
+
+            // Write Prefix IV Header
+            Objects.requireNonNull(cipherStream)
+                    .write(iv.getIV());
+
             write(cipher,inputStream,cipherStream);
-            return createStreamResult(secrets,cipherStream);
+            return createStreamResult(k,cipherStream);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt stream",e);
         } catch (IOException e) {
@@ -127,47 +138,53 @@ public final class AesCryptography implements SymmetricCryptography {
         }
     }
 
-    private <T extends OutputStream> CryptographyStreamResult<T> createStreamResult(Secrets secrets,T stream) {
+    private <T extends OutputStream> CryptographyStreamResult<T> createStreamResult(final SymmetricSecretKey key,
+                                                                                    final T stream) {
         return new CryptographyStreamResult<>() {
             @Override
             public T getStream() {
                 return stream;
             }
             @Override
-            public Secrets getSecrets() {
-                return secrets;
+            public SymmetricSecretKey getKey() {
+                return key;
             }
         };
     }
 
-    private CryptographyStringResult createStringResult(final Secrets secrets, byte[] bytes) {
+    private CryptographyStringResult createStringResult(final SymmetricSecretKey key, byte[] bytes,String text) {
         return new CryptographyStringResult() {
             @Override
-            public Secrets getSecrets() {
-                return secrets;
+            public SymmetricSecretKey getKey() {
+                return key;
             }
             @Override
             public byte[] getData() {
                 return bytes;
             }
             @Override
-            public String getDataAsBase64() {
-                return Base64.getEncoder().encodeToString(getData());
+            public Maybe<String> getDataAsString() {
+                return Maybe.ofNullable(text);
             }
         };
     }
 
-    private Secrets createSecretsFromPassword(final String password) {
-        String salt = getSecureRandomBytes(SALT_BYTES).asBase64();
-        IvParameterSpec iv = new IvParameterSpec(getSecureRandomBytes(IV_BYTES).bytes());
-        try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_FACTORY);
-            KeySpec spec = new PBEKeySpec(password.toCharArray(),salt.getBytes(),65536,256);
-            SecretKey key = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
-            return new Secrets(key,iv);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new CryptographyException("Failed to create secrets from password",e);
-        }
+    private IvParameterSpec generateIvParameterSpec() {
+        return new IvParameterSpec(getSecureRandomBytes(IV_BYTES).bytes());
+    }
+
+    private static SecureRandomBytes getSecureRandomBytes(final int byteSize) {
+        SecureRandom r = new SecureRandom();
+        byte[] bytes = new byte[byteSize];
+        r.nextBytes(bytes);
+        return new SecureRandomBytes(bytes,Base64.getEncoder().encodeToString(bytes));
+    }
+
+    private IvParameterSpec readIvHeader(final InputStream cipherStream) throws IOException {
+        byte[] bytes = new byte[HEADER_SIZE];
+        if (Objects.requireNonNull(cipherStream).read(bytes) == -1)
+            throw new IOException("Failed to read Header -- end of stream encountered");
+        return new IvParameterSpec(bytes);
     }
 
     private void write(final Cipher cipher, final InputStream inputStream, final OutputStream outputStream)
@@ -185,13 +202,6 @@ public final class AesCryptography implements SymmetricCryptography {
             if (finalBytes != null)
                 os.write(finalBytes);
         }
-    }
-
-    private static SecureRandomBytes getSecureRandomBytes(final int byteSize) {
-        SecureRandom r = new SecureRandom();
-        byte[] bytes = new byte[byteSize];
-        r.nextBytes(bytes);
-        return new SecureRandomBytes(bytes,Base64.getEncoder().encodeToString(bytes));
     }
 
     private record SecureRandomBytes(byte[] bytes, String asBase64) {}
