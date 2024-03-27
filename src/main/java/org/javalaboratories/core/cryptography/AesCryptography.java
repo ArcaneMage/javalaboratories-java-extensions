@@ -60,7 +60,6 @@ public final class AesCryptography implements SymmetricCryptography {
     public String decrypt(final Secrets secrets, final String cipherText) {
         String  ct = Objects.requireNonNull(cipherText, "Expected encrypted cipher text");
         Secrets s = Objects.requireNonNull(secrets, "Expected secrets object");
-
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE,s.key(),s.ivParameterSpec());
@@ -97,9 +96,8 @@ public final class AesCryptography implements SymmetricCryptography {
     public CryptographyStringResult encrypt(final String password, final String string) {
         String p = Objects.requireNonNull(password, "Expected password");
         String s = Objects.requireNonNull(string, "Expected string to encrypt");
-
-        Secrets secrets = createSecretsFromPassword(p);
         try {
+            Secrets secrets = createSecretsFromPassword(p);
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(ENCRYPT_MODE, secrets.key(), secrets.ivParameterSpec());
             byte[] bytes = cipher.doFinal(s.getBytes());
@@ -116,7 +114,6 @@ public final class AesCryptography implements SymmetricCryptography {
     public <T extends OutputStream> CryptographyStreamResult<T> encrypt(final String password, final InputStream inputStream,
                                                                         final T cipherStream) {
         String p = Objects.requireNonNull(password, "Expected password");
-
         try {
             Secrets secrets = createSecretsFromPassword(p);
             Cipher cipher = Cipher.getInstance(ALGORITHM);
