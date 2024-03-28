@@ -15,7 +15,6 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.Secrets;
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
 import java.io.*;
