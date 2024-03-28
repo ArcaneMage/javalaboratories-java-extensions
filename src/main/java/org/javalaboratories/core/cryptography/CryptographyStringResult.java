@@ -29,7 +29,6 @@ import java.util.Base64;
  * <p>
  * This object is returned from performing cryptographic operations with {@code
  * String} objects.
- *
  */
 public interface CryptographyStringResult extends CryptographyResult {
 
