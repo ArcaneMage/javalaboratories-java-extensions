@@ -17,7 +17,18 @@ package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
+/**
+ * {@code CryptographyResult} object is returned from performing cryptographic
+ * operations with the {@link SymmetricCryptography} object.
+ * <p>
+ * It encapsulates the {@link SymmetricSecretKey} that is associated with the
+ * {@code cipher text}.
+ */
 public interface CryptographyResult {
 
+    /**
+     * @return the key that is associated with the {@code cipher text}.
+     * @see SymmetricSecretKey
+     */
     SymmetricSecretKey getKey();
 }

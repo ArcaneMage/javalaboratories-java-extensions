@@ -16,16 +16,40 @@
 package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.Maybe;
+import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
 import java.util.Base64;
 
+/**
+ * {@code CryptographyResult} object is returned from performing cryptographic
+ * operations with the {@link SymmetricCryptography} object.
+ * <p>
+ * It encapsulates the {@link SymmetricSecretKey} and {@code String} that are
+ * associated with the {@code cipher text}.
+ * <p>
+ * This object is returned from performing cryptographic operations with {@code
+ * String} objects.
+ *
+ */
 public interface CryptographyStringResult extends CryptographyResult {
 
+    /**
+     * @return the encrypted/decrypted data as bytes, depending on {@link
+     * SymmetricCryptography} {@code String} operation.
+     */
     byte[] getData();
 
+    /**
+     * @return the encrypted/decrypted data as a Base64 string.
+     */
     default String getDataAsBase64() {
         return Base64.getEncoder().encodeToString(getData());
     }
 
+    /**
+     * @return the decrypted data as a string. The string is only available in
+     * decrypted form, and therefore will not be accessible for encrypted
+     * objects.
+     */
     Maybe<String> getDataAsString();
 }

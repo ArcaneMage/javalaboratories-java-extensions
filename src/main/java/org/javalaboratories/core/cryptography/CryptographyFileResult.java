@@ -15,8 +15,25 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+
 import java.io.File;
 
+/**
+ * {@code CryptographyResult} object is returned from performing cryptographic
+ * operations with the {@link SymmetricCryptography} object.
+ * <p>
+ * It encapsulates the {@link SymmetricSecretKey} and {@code File} that are
+ * associated with the {@code cipher text}.
+ * <p>
+ * This object is returned from performing cryptographic operations with {@code
+ * files}
+ */
 public interface CryptographyFileResult extends CryptographyResult {
+
+    /**
+     * @return file object to the decrypted/encrypted cipher text, depending on
+     * {@link SymmetricCryptography} file operation.
+     */
     File getFile();
 }

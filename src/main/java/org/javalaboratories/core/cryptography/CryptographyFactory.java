@@ -23,7 +23,8 @@ package org.javalaboratories.core.cryptography;
  * <pre>
  *     {@code
  *         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
- *         CryptographyStringResult result = cryptography.encrypt(PASSWORD, STRING_LITERAL);
+ *         CryptographyStringResult result =
+ *             cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), STRING_LITERAL);
  *         String encrypted = result.getDataAsBase64();
  *
  *         Outputs -> "d9WYwk6LrIzw8zsNWnijsw=="

@@ -15,10 +15,27 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
 import java.io.OutputStream;
 
+/**
+ * {@code CryptographyResult} object is returned from performing cryptographic
+ * operations with the {@link SymmetricCryptography} object.
+ * <p>
+ * It encapsulates the {@link SymmetricSecretKey} and {@code stream} that are
+ * associated with the {@code cipher text}.
+ * <p>
+ * This object is returned from performing cryptographic operations with {@code
+ * streams}
+ *
+ * @param <T> type of output stream.
+ */
 public interface CryptographyStreamResult<T extends OutputStream> extends CryptographyResult {
 
+    /**
+     * @return decrypted/encrypted cipher text in the {@code output stream},
+     * depending on {@link SymmetricCryptography} {@code stream} operation.
+     */
     T getStream();
 }

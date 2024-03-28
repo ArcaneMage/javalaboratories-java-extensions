@@ -154,7 +154,7 @@ public final class AesCryptography implements SymmetricCryptography {
         };
     }
 
-    private CryptographyStringResult createStringResult(final SymmetricSecretKey key, byte[] bytes,String text) {
+    private CryptographyStringResult createStringResult(final SymmetricSecretKey key, byte[] bytes, String text) {
         return new CryptographyStringResult() {
             @Override
             public SymmetricSecretKey getKey() {
