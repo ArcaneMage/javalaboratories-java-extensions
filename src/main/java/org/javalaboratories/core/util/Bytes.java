@@ -49,7 +49,7 @@ public final class Bytes {
 
     /**
      * Trims/truncates the left-most bytes from the byte array source and
-     * returns a copy of that byte array.
+     * returns a copy of the source byte array.
      *
      * @param source source of byte array to truncate.
      * @param bytes number of bytes with which to truncate on the left.
@@ -63,7 +63,7 @@ public final class Bytes {
 
     /**
      * Trims/truncates the right-most bytes from the byte array source and
-     * returns a copy of that byte array.
+     * returns a copy of the source byte array.
      *
      * @param source source of byte array to truncate.
      * @param bytes number of bytes with which to truncate on the right.
