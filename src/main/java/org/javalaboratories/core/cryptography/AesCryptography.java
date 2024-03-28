@@ -66,6 +66,8 @@ public final class AesCryptography implements SymmetricCryptography {
             return createStringResult(key,bytes,new String(bytes));
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt cipher text");
+        } catch (IllegalArgumentException e) {
+            throw new CryptographyException("Failed to decrypt encoded cipher text");
         }
     }
 

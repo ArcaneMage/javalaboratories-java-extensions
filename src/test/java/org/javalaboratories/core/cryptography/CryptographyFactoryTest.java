@@ -26,12 +26,15 @@ import java.util.Base64;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CryptographyFactoryTest {
 
     private static final String PASSWORD = "F0xedFence75";
     private static final String STRING_LITERAL = "The quick brown fox jumped over the fence";
     private static final String ENCRYPTED_STRING_DATA = "xGc/N5WQGeje8QHK68GPdUbho0YIX3mYj/Zqt4YcH5zOD6COPDqdRgt5wqTjvkAvOLMOp/RGMM8yRn2GBsFRZA==";
+    private static final String TAMPERED_ENCRYPTED_STRING_DATA = "xGc/N5WQGeje8QHK68GPdUbho0YIX3mYj/Zqt4YcH5zOD6COPDqdRgt5wqTjvkAvOLMOp/RGMM8yRn2GBsFRYA==";
+    private static final String BAD_ENCRYPTED_STRING_DATA = "7883This is a badly encrypted nonsense==";
 
     private static final String ENCRYPTED_FILE = "aes-encrypted-file.enc";
     private static final String ENCRYPTED_FILE_KEY = "aes-encrypted-file.key";
@@ -39,6 +42,8 @@ public class CryptographyFactoryTest {
     private static final String ENCRYPTED_FILE_TEST = "aes-encrypted-test-file.tmp";
     private static final String UNENCRYPTED_FILE_TEST = "aes-unencrypted-test-file.tmp";
     private static final String FILE_DATA = "This is a test file with encrypted data -- TOP SECRET!";
+
+    private static final String INVALID_FILE = "aes-encrypted-file-does-not-exist.tmp";
 
     private File encryptedFile;
     private File encryptedFileKey;
@@ -79,6 +84,15 @@ public class CryptographyFactoryTest {
     }
 
     @Test
+    public void testStringDecryption_Fail() {
+        SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
+        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+
+        assertThrows(CryptographyException.class, () -> cryptography.decrypt(key,TAMPERED_ENCRYPTED_STRING_DATA));
+        assertThrows(CryptographyException.class, () -> cryptography.decrypt(key,BAD_ENCRYPTED_STRING_DATA));
+    }
+
+    @Test
     public void testFileDecryption_Pass() throws IOException {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         SymmetricSecretKey key = SymmetricSecretKey.from(encryptedFileKey);
@@ -92,6 +106,14 @@ public class CryptographyFactoryTest {
         assertEquals(FILE_DATA,s);
     }
 
+    @Test
+    public void testFileDecryption_Fail() {
+        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        SymmetricSecretKey key = SymmetricSecretKey.from(encryptedFileKey);
+
+        assertThrows(CryptographyException.class,() -> cryptography
+                .decrypt(key,new File(INVALID_FILE),unencryptedFileTest));
+    }
 
     @Test
     public void testFileEncryption_Pass() throws IOException {
@@ -129,5 +151,16 @@ public class CryptographyFactoryTest {
                         new ByteArrayOutputStream());
 
         assertEquals(STRING_LITERAL,result.getStream().toString());
+    }
+
+    @Test
+    public void testStreamDecryption_Fail() {
+        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
+
+        assertThrows(CryptographyException.class, () -> cryptography
+                .decrypt(key,new ByteArrayInputStream(TAMPERED_ENCRYPTED_STRING_DATA.getBytes()),new ByteArrayOutputStream()));
+        assertThrows(CryptographyException.class, () -> cryptography
+                .decrypt(key,new ByteArrayInputStream(BAD_ENCRYPTED_STRING_DATA.getBytes()),new ByteArrayOutputStream()));
     }
 }
