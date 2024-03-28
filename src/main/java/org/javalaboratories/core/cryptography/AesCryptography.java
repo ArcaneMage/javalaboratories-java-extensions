@@ -169,15 +169,11 @@ public final class AesCryptography implements SymmetricCryptography {
         };
     }
 
-    private IvParameterSpec generateIvParameterSpec() {
-        return new IvParameterSpec(getSecureRandomBytes(IV_BYTES).bytes());
-    }
-
-    private static SecureRandomBytes getSecureRandomBytes(final int byteSize) {
+    private static IvParameterSpec generateIvParameterSpec() {
         SecureRandom r = new SecureRandom();
-        byte[] bytes = new byte[byteSize];
+        byte[] bytes = new byte[IV_BYTES];
         r.nextBytes(bytes);
-        return new SecureRandomBytes(bytes,Base64.getEncoder().encodeToString(bytes));
+        return new IvParameterSpec(bytes);
     }
 
     private IvParameterSpec readIvHeader(final InputStream cipherStream) throws IOException {
@@ -203,6 +199,4 @@ public final class AesCryptography implements SymmetricCryptography {
                 os.write(finalBytes);
         }
     }
-
-    private record SecureRandomBytes(byte[] bytes, String asBase64) {}
 }
