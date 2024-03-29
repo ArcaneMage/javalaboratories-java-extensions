@@ -19,7 +19,11 @@ import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
@@ -50,11 +54,10 @@ public class CryptographyFactoryTest {
     private File unencryptedFile;
     private File encryptedFileTest;
     private File unencryptedFileTest;
-    private ClassLoader classLoader;
 
     @BeforeEach
     public void setup() throws Exception {
-       classLoader = CryptographyFactoryTest.class.getClassLoader();
+       ClassLoader classLoader = CryptographyFactoryTest.class.getClassLoader();
        encryptedFile = Paths.get(classLoader.getResource(ENCRYPTED_FILE).toURI()).toFile();
        encryptedFileKey = Paths.get(classLoader.getResource(ENCRYPTED_FILE_KEY).toURI()).toFile();
        unencryptedFile = Paths.get(classLoader.getResource(UNENCRYPTED_FILE).toURI()).toFile();

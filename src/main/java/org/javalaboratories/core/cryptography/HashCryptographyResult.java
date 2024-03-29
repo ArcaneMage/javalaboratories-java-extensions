@@ -15,16 +15,19 @@
  */
 package org.javalaboratories.core.cryptography;
 
-public enum MdAlgorithms {
-    MD2("MD2"), MD5("MD5"), SHA1("SHA-1"), SHA256("SHA-256"), SHA384("SHA-384"), SHA512("SHA-512");
+import org.apache.commons.codec.binary.Hex;
 
-    private String algorithm;
+import java.util.Base64;
 
-    MdAlgorithms(String algorithm) {
-        this.algorithm = algorithm;
+public interface HashCryptographyResult {
+
+    byte[] getHash();
+
+    default String getHashAsBase64() {
+        return Base64.getEncoder().encodeToString(getHash());
     }
 
-    public String getAlgorithm() {
-        return this.algorithm;
+    default String getHashAsHex() {
+        return Hex.encodeHexString(getHash());
     }
 }
