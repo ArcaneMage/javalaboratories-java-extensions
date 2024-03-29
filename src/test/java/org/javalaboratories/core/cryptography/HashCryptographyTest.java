@@ -15,6 +15,128 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class HashCryptographyTest {
 
+    private HashCryptography cryptography;
+
+    private static final String TEXT = "The quick brown fox jumped over the fence";
+    private static final String BASE64_128BITS = "szXZywC4mbxlE+zbshhwhw==";
+    private static final String HEX_128BITS = "B335D9CB00B899BC6513ECDBB2187087";
+
+    private static final String BASE64_160BITS = "1ccuMJ2E5F6VQxTSQpOYQzO5Pb4=";
+    private static final String HEX_160BITS = "D5C72E309D84E45E954314D24293984333B93DBE";
+
+    private static final String BASE64_256BITS = "pUUZqlAmlZ87Mc6/zsLnal8FhncpWdKiIF0Tcq4Tbhc=";
+    private static final String HEX_256BITS = "A54519AA5026959F3B31CEBFCEC2E76A5F0586772959D2A2205D1372AE136E17";
+
+    private static final String BASE64_512BITS = "tlROj+WnzT6DLromCTHXjBhlrLQRYO5aZH+ARfjUJ8+AnaH8QX+H+/MHOaSeZ1P6jjWD2QFGdNQxgwQQX8wv8g==";
+    private static final String HEX_512BITS = "B6544E8FE5A7CD3E832EBA260931D78C1865ACB41160EE5A647F8045F8D427CF809DA1FC417F87FBF30739A49E6753FA8E3583D9014674D4318304105FCC2FF2";
+    @BeforeEach
+    public void setup() {
+        cryptography = CryptographyFactory.getHashCryptography();
+    }
+
+    @Test
+    public void testStringMd5Hashing_Pass() {
+        HashCryptographyResult result = cryptography.hash(TEXT,MessageDigestAlgorithms.MD5);
+
+        assertEquals(16,result.getHash().length);
+        assertEquals(BASE64_128BITS,result.getHashAsBase64());
+        assertEquals(HEX_128BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testString160bitsHashing_Pass() {
+        HashCryptographyResult result = cryptography.hash(TEXT);
+
+        assertEquals(20,result.getHash().length);
+        assertEquals(BASE64_160BITS,result.getHashAsBase64());
+        assertEquals(HEX_160BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testString256bitsHashing_Pass() {
+        HashCryptographyResult result = cryptography.hash(TEXT,MessageDigestAlgorithms.SHA256);
+
+        assertEquals(32,result.getHash().length);
+        assertEquals(BASE64_256BITS,result.getHashAsBase64());
+        assertEquals(HEX_256BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testString512bitsHashing_Pass() {
+        HashCryptographyResult result = cryptography.hash(TEXT,MessageDigestAlgorithms.SHA512);
+
+        assertEquals(64,result.getHash().length);
+        assertEquals(BASE64_512BITS,result.getHashAsBase64());
+        assertEquals(HEX_512BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testStreamMd5Hashing_Pass() {
+        HashCryptographyResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()),MessageDigestAlgorithms.MD5);
+
+        assertEquals(16,result.getHash().length);
+        assertEquals(BASE64_128BITS,result.getHashAsBase64());
+        assertEquals(HEX_128BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testStream160bitsHashing_Pass() {
+        HashCryptographyResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()));
+
+        assertEquals(20,result.getHash().length);
+        assertEquals(BASE64_160BITS,result.getHashAsBase64());
+        assertEquals(HEX_160BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testStream256bitsHashing_Pass() {
+        HashCryptographyResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()),
+                MessageDigestAlgorithms.SHA256);
+
+        assertEquals(32,result.getHash().length);
+        assertEquals(BASE64_256BITS,result.getHashAsBase64());
+        assertEquals(HEX_256BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testFileMd5Hashing_Pass() throws URISyntaxException {
+        ClassLoader classLoader = HashCryptographyTest.class.getClassLoader();
+        HashCryptographyResult result = cryptography.hash(Paths.get(classLoader.getResource("hash-unencrypted-file.txt")
+                .toURI()).toFile(),MessageDigestAlgorithms.MD5);
+
+        assertEquals(16,result.getHash().length);
+        assertEquals(BASE64_128BITS,result.getHashAsBase64());
+        assertEquals(HEX_128BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testFile160bitsHashing_Pass() throws URISyntaxException {
+        ClassLoader classLoader = HashCryptographyTest.class.getClassLoader();
+        HashCryptographyResult result = cryptography.hash(Paths.get(classLoader.getResource("hash-unencrypted-file.txt")
+                .toURI()).toFile());
+        assertEquals(20,result.getHash().length);
+        assertEquals(BASE64_160BITS,result.getHashAsBase64());
+        assertEquals(HEX_160BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testFile256bitsHashing_Pass() throws URISyntaxException {
+        ClassLoader classLoader = HashCryptographyTest.class.getClassLoader();
+        HashCryptographyResult result = cryptography.hash(Paths.get(classLoader.getResource("hash-unencrypted-file.txt")
+                .toURI()).toFile(),MessageDigestAlgorithms.SHA256);
+
+        assertEquals(32,result.getHash().length);
+        assertEquals(BASE64_256BITS,result.getHashAsBase64());
+        assertEquals(HEX_256BITS,result.getHashAsHex());    }
 }

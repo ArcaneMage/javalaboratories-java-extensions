@@ -73,7 +73,7 @@ public final class CryptographyFactory {
      * Message Digest hashing/encryption.
      */
     public static HashCryptography getHashCryptography() {
-        return new DefaultMessageDigestCryptography();
+        return new DefaultHashCryptography();
     }
 
     private CryptographyFactory() {}

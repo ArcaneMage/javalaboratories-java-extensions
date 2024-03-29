@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class CryptographyFactoryTest {
 
     private static final String PASSWORD = "F0xedFence75";
-    private static final String STRING_LITERAL = "The quick brown fox jumped over the fence";
+    private static final String TEXT = "The quick brown fox jumped over the fence";
     private static final String ENCRYPTED_STRING_DATA = "xGc/N5WQGeje8QHK68GPdUbho0YIX3mYj/Zqt4YcH5zOD6COPDqdRgt5wqTjvkAvOLMOp/RGMM8yRn2GBsFRZA==";
     private static final String TAMPERED_ENCRYPTED_STRING_DATA = "xGc/N5WQGeje8QHK68GPdUbho0YIX3mYj/Zqt4YcH5zOD6COPDqdRgt5wqTjvkAvOLMOp/RGMM8yRn2GBsFRYA==";
     private static final String BAD_ENCRYPTED_STRING_DATA = "7883This is a badly encrypted nonsense==";
@@ -69,11 +69,11 @@ public class CryptographyFactoryTest {
     @Test
     public void testStringEncryption_Pass() {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
-        CryptographyStringResult result = cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), STRING_LITERAL);
+        CryptographyStringResult result = cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), TEXT);
         String encrypted = result.getDataAsBase64();
 
         CryptographyStringResult stringResult = cryptography.decrypt(result.getKey(),encrypted);
-        assertEquals(STRING_LITERAL, stringResult.getDataAsString().orElseThrow());
+        assertEquals(TEXT, stringResult.getDataAsString().orElseThrow());
     }
 
 
@@ -83,7 +83,7 @@ public class CryptographyFactoryTest {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         CryptographyStringResult result = cryptography.decrypt(key,ENCRYPTED_STRING_DATA);
 
-        assertEquals(STRING_LITERAL,result.getDataAsString().orElseThrow());
+        assertEquals(TEXT,result.getDataAsString().orElseThrow());
     }
 
     @Test
@@ -135,13 +135,13 @@ public class CryptographyFactoryTest {
     public void testStreamEncryption_Pass() {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         CryptographyStreamResult<ByteArrayOutputStream> result = cryptography
-                .encrypt(SymmetricSecretKey.from(PASSWORD),new ByteArrayInputStream(STRING_LITERAL.getBytes()),new ByteArrayOutputStream());
+                .encrypt(SymmetricSecretKey.from(PASSWORD),new ByteArrayInputStream(TEXT.getBytes()),new ByteArrayOutputStream());
 
         CryptographyStreamResult<ByteArrayOutputStream> result2 = cryptography
                 .decrypt(result.getKey(),new ByteArrayInputStream(result.getStream().toByteArray()),
                         new ByteArrayOutputStream());
 
-        assertEquals(STRING_LITERAL,result2.getStream().toString());
+        assertEquals(TEXT,result2.getStream().toString());
     }
 
     @Test
@@ -153,7 +153,7 @@ public class CryptographyFactoryTest {
                 .decrypt(key,new ByteArrayInputStream(Base64.getDecoder().decode(ENCRYPTED_STRING_DATA)),
                         new ByteArrayOutputStream());
 
-        assertEquals(STRING_LITERAL,result.getStream().toString());
+        assertEquals(TEXT,result.getStream().toString());
     }
 
     @Test

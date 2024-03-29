@@ -28,6 +28,6 @@ public interface HashCryptographyResult {
     }
 
     default String getHashAsHex() {
-        return Hex.encodeHexString(getHash());
+        return Hex.encodeHexString(getHash()).toUpperCase();
     }
 }
