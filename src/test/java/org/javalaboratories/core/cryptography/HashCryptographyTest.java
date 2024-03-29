@@ -17,12 +17,23 @@ package org.javalaboratories.core.cryptography;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class HashCryptographyTest {
 
@@ -41,9 +52,13 @@ public class HashCryptographyTest {
     private static final String BASE64_512BITS = "tlROj+WnzT6DLromCTHXjBhlrLQRYO5aZH+ARfjUJ8+AnaH8QX+H+/MHOaSeZ1P6jjWD2QFGdNQxgwQQX8wv8g==";
     private static final String HEX_512BITS = "B6544E8FE5A7CD3E832EBA260931D78C1865ACB41160EE5A647F8045F8D427CF809DA1FC417F87FBF30739A49E6753FA8E3583D9014674D4318304105FCC2FF2";
 
+    private final InputStream mockInputStream = mock(InputStream.class);
+
     @BeforeEach
-    public void setup() {
+    public void setup() throws IOException {
         cryptography = CryptographyFactory.getHashCryptography();
+
+        when(mockInputStream.read(any())).thenThrow(IOException.class);
     }
 
     @Test
@@ -83,6 +98,15 @@ public class HashCryptographyTest {
     }
 
     @Test
+    public void testStringHashing_withNoSuchAlgorithmException_Fail() {
+        try (MockedStatic<MessageDigest> md = Mockito.mockStatic(MessageDigest.class)) {
+            md.when(() -> MessageDigest.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
+
+            assertThrows(CryptographyException.class,() -> cryptography.hash(TEXT));
+        }
+    }
+
+    @Test
     public void testStreamMd5Hashing_Pass() {
         HashCryptographyResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()),MessageDigestAlgorithms.MD5);
 
@@ -98,6 +122,20 @@ public class HashCryptographyTest {
         assertEquals(20,result.getHash().length);
         assertEquals(BASE64_160BITS,result.getHashAsBase64());
         assertEquals(HEX_160BITS,result.getHashAsHex());
+    }
+
+    @Test
+    public void testStreamHashing_withIOException_Fail()  {
+        assertThrows(CryptographyException.class, () -> cryptography.hash(mockInputStream));
+    }
+
+    @Test
+    public void testStreamHashing_withNoSuchAlgorithmException_Fail() {
+        try (MockedStatic<MessageDigest> md = Mockito.mockStatic(MessageDigest.class)) {
+            md.when(() -> MessageDigest.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
+
+            assertThrows(CryptographyException.class,() -> cryptography.hash(new ByteArrayInputStream(TEXT.getBytes())));
+        }
     }
 
     @Test
