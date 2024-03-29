@@ -23,8 +23,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 /**
- * A class that implements this interface has the ability to generate has values
- * leveraging the {@code message digest} algorithm.
+ * A class that implements the {@link HashCryptography} has the ability to
+ * generate hash values leveraging the {@code message digest} algorithm.
  * <p>
  * The interface supports the hashing of the following types: {@link String},
  * {@link InputStream} and {@link File}. Supported algorithms include {@code
