@@ -46,6 +46,7 @@ public interface HashCryptography {
      * @param s the string to hash
      * @param algorithms the algorithm enum.
      * @return a {@link HashCryptographyResult}
+     * @throws NullPointerException when parameters are null.
      */
     HashCryptographyResult hash(final String s,final MessageDigestAlgorithms algorithms);
 
@@ -59,6 +60,7 @@ public interface HashCryptography {
      * @param is the input stream to hash
      * @param algorithms the algorithm enum.
      * @return a {@link HashCryptographyResult}
+     * @throws NullPointerException when parameters are null.
      */
     HashCryptographyResult hash(final InputStream is, MessageDigestAlgorithms algorithms);
 
@@ -71,6 +73,7 @@ public interface HashCryptography {
      *
      * @param s the string to hash
      * @return a {@link HashCryptographyResult}
+     * @throws NullPointerException when parameters are null.
      */
     default HashCryptographyResult hash(final String s) {
         return hash(s,MessageDigestAlgorithms.SHA1);
@@ -84,6 +87,7 @@ public interface HashCryptography {
      * is required.
      *
      * @return a {@link HashCryptographyResult}
+     * @throws NullPointerException when parameters are null.
      */
     default HashCryptographyResult hash(final InputStream is) {
         return hash(is,MessageDigestAlgorithms.SHA1);
@@ -97,6 +101,7 @@ public interface HashCryptography {
      * is required.
      *
      * @return a {@link HashCryptographyResult}
+     * @throws NullPointerException when parameters are null.
      */
     default HashCryptographyResult hash(final File file) {
         return hash(file,MessageDigestAlgorithms.SHA1);
@@ -112,6 +117,7 @@ public interface HashCryptography {
      * @param file the input stream to hash
      * @param algorithms the algorithm enum.
      * @return a {@link HashCryptographyResult}
+     * @throws NullPointerException when parameters are null.
      */
     default HashCryptographyResult hash(final File file, MessageDigestAlgorithms algorithms) {
         File f = Objects.requireNonNull(file, "Expected file object");
