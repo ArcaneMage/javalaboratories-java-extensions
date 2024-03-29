@@ -19,14 +19,39 @@ import org.apache.commons.codec.binary.Hex;
 
 import java.util.Base64;
 
+/**
+ * An implementation of this object returned after the execution of a hash
+ * function in the {@link HashCryptography} object.
+ * <p>
+ * For convenience, it comes supplied with useful transformation properties:
+ * {@code asBase64} amd {@code asHex}.
+ */
 public interface HashCryptographyResult {
 
+    /**
+     * Returns the computed hash.
+     * <p>
+     * The number of bytes returned depends on the algorithm used to compute
+     * the hash. For example, MD5 will generate 128 bits, 16 bytes.
+     *
+     * @return the hash in bytes.
+     */
     byte[] getHash();
 
+    /**
+     * Returns the computed hash as Base64 format.
+     *
+     * @return the hash in Base64 form.
+     */
     default String getHashAsBase64() {
         return Base64.getEncoder().encodeToString(getHash());
     }
 
+    /**
+     * Returns the computed hash as hexadecimal format.
+     *
+     * @return the hash in hexadecimal form.
+     */
     default String getHashAsHex() {
         return Hex.encodeHexString(getHash()).toUpperCase();
     }

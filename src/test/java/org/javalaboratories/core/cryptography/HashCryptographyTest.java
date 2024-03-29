@@ -40,6 +40,7 @@ public class HashCryptographyTest {
 
     private static final String BASE64_512BITS = "tlROj+WnzT6DLromCTHXjBhlrLQRYO5aZH+ARfjUJ8+AnaH8QX+H+/MHOaSeZ1P6jjWD2QFGdNQxgwQQX8wv8g==";
     private static final String HEX_512BITS = "B6544E8FE5A7CD3E832EBA260931D78C1865ACB41160EE5A647F8045F8D427CF809DA1FC417F87FBF30739A49E6753FA8E3583D9014674D4318304105FCC2FF2";
+
     @BeforeEach
     public void setup() {
         cryptography = CryptographyFactory.getHashCryptography();
