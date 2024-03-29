@@ -143,7 +143,7 @@ public interface SymmetricCryptography {
                 }
             };
         } catch (IOException e) {
-            throw new CryptographyException("Failed to encrypt file",e);
+            throw new CryptographyException("Failed to decrypt file",e);
         }
     }
 }
