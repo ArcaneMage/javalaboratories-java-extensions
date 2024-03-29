@@ -31,7 +31,7 @@ import java.util.Objects;
 
 import static javax.crypto.Cipher.ENCRYPT_MODE;
 
-public final class DefaultAesCryptography implements SymmetricCryptography {
+public final class DefaultAesSymmetricCryptography implements SymmetricCryptography {
 
     private static final int FILE_BUFFER_SIZE = 512;
     private static final int HEADER_SIZE = 16;
@@ -45,7 +45,7 @@ public final class DefaultAesCryptography implements SymmetricCryptography {
      * This method is only to be called from the {@link CryptographyFactory}, it
      * must be called directly.
      */
-    DefaultAesCryptography() {}
+    DefaultAesSymmetricCryptography() {}
 
     /**
      * {@inheritDoc}

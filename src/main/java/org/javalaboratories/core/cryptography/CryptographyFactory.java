@@ -59,7 +59,7 @@ public final class CryptographyFactory {
      * AES encryption/decryption standard.
      */
     public static SymmetricCryptography getSymmetricCryptography() {
-        return new DefaultAesCryptography();
+        return new DefaultAesSymmetricCryptography();
     }
 
     /**
