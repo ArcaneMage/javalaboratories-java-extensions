@@ -18,21 +18,24 @@ package org.javalaboratories.core.cryptography;
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import javax.crypto.Cipher;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
-public class CryptographyFactoryTest {
+public class AesSymmetricCryptographyTest {
 
     private static final String PASSWORD = "F0xedFence75";
     private static final String TEXT = "The quick brown fox jumped over the fence";
@@ -49,6 +52,10 @@ public class CryptographyFactoryTest {
 
     private static final String INVALID_FILE = "aes-encrypted-file-does-not-exist.tmp";
 
+    private final InputStream mockInputStream = mock(InputStream.class);
+    private final InputStream mockEndOfInputStream = mock(InputStream.class);
+    private final OutputStream mockOutputStream = mock(OutputStream.class);
+
     private File encryptedFile;
     private File encryptedFileKey;
     private File unencryptedFile;
@@ -57,13 +64,17 @@ public class CryptographyFactoryTest {
 
     @BeforeEach
     public void setup() throws Exception {
-       ClassLoader classLoader = CryptographyFactoryTest.class.getClassLoader();
+       ClassLoader classLoader = AesSymmetricCryptographyTest.class.getClassLoader();
        encryptedFile = Paths.get(classLoader.getResource(ENCRYPTED_FILE).toURI()).toFile();
        encryptedFileKey = Paths.get(classLoader.getResource(ENCRYPTED_FILE_KEY).toURI()).toFile();
        unencryptedFile = Paths.get(classLoader.getResource(UNENCRYPTED_FILE).toURI()).toFile();
 
        encryptedFileTest = Paths.get(classLoader.getResource(ENCRYPTED_FILE_TEST).toURI()).toFile();
        unencryptedFileTest = Paths.get(classLoader.getResource(UNENCRYPTED_FILE_TEST).toURI()).toFile();
+
+       when(mockInputStream.read(any())).thenThrow(IOException.class);
+       doThrow(IOException.class).when(mockOutputStream).write(any());
+       when(mockEndOfInputStream.read(any())).thenReturn(-1);
     }
 
     @Test
@@ -76,6 +87,15 @@ public class CryptographyFactoryTest {
         assertEquals(TEXT, stringResult.getDataAsString().orElseThrow());
     }
 
+    @Test
+    public void testStringEncryption_withGeneralSecurityException_Fail() {
+        try (MockedStatic<Cipher> cipher = Mockito.mockStatic(Cipher.class)) {
+            cipher.when(() -> Cipher.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
+            SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+
+            assertThrows(CryptographyException.class,() -> cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), TEXT));
+        }
+    }
 
     @Test
     public void testStringDecryption_Pass() {
@@ -145,6 +165,24 @@ public class CryptographyFactoryTest {
     }
 
     @Test
+    public void testStreamEncryption_withGeneralSecurityException_Fail() {
+        try (MockedStatic<Cipher> cipher = Mockito.mockStatic(Cipher.class)) {
+            cipher.when(() -> Cipher.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
+            SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+
+            assertThrows(CryptographyException.class,() -> cryptography.encrypt(SymmetricSecretKey.from(PASSWORD),
+                    new ByteArrayInputStream(TEXT.getBytes()),new ByteArrayOutputStream()));
+        }
+    }
+
+    @Test
+    public void testStreamEncryption_withIOException_Fail() {
+        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        assertThrows(CryptographyException.class,() -> cryptography.encrypt(SymmetricSecretKey.from(PASSWORD),
+                mockInputStream,mockOutputStream));
+    }
+
+    @Test
     public void testStreamDecryption_Pass() {
         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
@@ -165,5 +203,19 @@ public class CryptographyFactoryTest {
                 .decrypt(key,new ByteArrayInputStream(TAMPERED_ENCRYPTED_STRING_DATA.getBytes()),new ByteArrayOutputStream()));
         assertThrows(CryptographyException.class, () -> cryptography
                 .decrypt(key,new ByteArrayInputStream(BAD_ENCRYPTED_STRING_DATA.getBytes()),new ByteArrayOutputStream()));
+    }
+
+    @Test
+    public void testStreamDecryption_withIOException_Fail() {
+        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        assertThrows(CryptographyException.class,() -> cryptography.decrypt(SymmetricSecretKey.from(PASSWORD),
+                mockInputStream,mockOutputStream));
+    }
+
+    @Test
+    public void testStreamDecryption_withEndOfStream_Fail() {
+        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        assertThrows(CryptographyException.class,() -> cryptography.decrypt(SymmetricSecretKey.from(PASSWORD),
+                mockEndOfInputStream,mockOutputStream));
     }
 }
