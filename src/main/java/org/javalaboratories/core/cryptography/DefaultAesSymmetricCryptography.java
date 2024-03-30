@@ -33,10 +33,10 @@ import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 public final class DefaultAesSymmetricCryptography implements SymmetricCryptography {
 
-    private static final int FILE_BUFFER_SIZE = 512;
     private static final int HEADER_SIZE = 16;
     private static final int IV_BYTES = 16;
-
+    private static final int STREAM_BUFFER_SIZE = 512;
+    
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
 
     /**
@@ -189,7 +189,7 @@ public final class DefaultAesSymmetricCryptography implements SymmetricCryptogra
             throws IOException, GeneralSecurityException {
         try (InputStream is = Objects.requireNonNull(inputStream,"Expected input stream");
              OutputStream os = Objects.requireNonNull(outputStream,"Expected output stream")) {
-            byte[] buffer = new byte[FILE_BUFFER_SIZE];
+            byte[] buffer = new byte[STREAM_BUFFER_SIZE];
             int length;
             while ((length = is.read(buffer)) != -1) {
                 byte[] output = cipher.update(buffer, 0, length);

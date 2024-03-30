@@ -37,7 +37,7 @@ import java.util.Objects;
  */
 public final class DefaultHashCryptography implements HashCryptography {
 
-    private static final int BUFFER_SIZE = 512;
+    private static final int STREAM_BUFFER_SIZE = 512;
 
     /**
      * {@inheritDoc}
@@ -63,7 +63,7 @@ public final class DefaultHashCryptography implements HashCryptography {
     public HashCryptographyResult hash(final InputStream inputStream, final MessageDigestAlgorithms algorithms) {
         try (InputStream is = Objects.requireNonNull(inputStream)) {
             MessageDigest md = MessageDigest.getInstance(Objects.requireNonNull(algorithms).getAlgorithm());
-            byte[] buffer = new byte[BUFFER_SIZE];
+            byte[] buffer = new byte[STREAM_BUFFER_SIZE];
             int read;
             while((read = is.read(buffer)) != -1)
                 md.update(buffer,0,read);

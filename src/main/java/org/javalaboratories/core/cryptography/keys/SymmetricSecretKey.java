@@ -74,6 +74,8 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     private static final String DEFAULT_SALT = "75586321";
     private static final String KEY_ALGORITHM = "AES";
     private static final String SECRET_KEY_FACTORY = "PBKDF2WithHmacSHA256";
+
+    private static final int KEY_LENGTH = 256;
     private static final int SALT_BYTES = 8;
 
     public enum SaltMode {AUTO_GENERATE, DEFAULT}
@@ -100,7 +102,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     public static SymmetricSecretKey from(final String password, final String salt) {
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_FACTORY);
-            KeySpec spec = new PBEKeySpec(Objects.requireNonNull(password).toCharArray(),salt.getBytes(),65536,256);
+            KeySpec spec = new PBEKeySpec(Objects.requireNonNull(password).toCharArray(),salt.getBytes(),65536,KEY_LENGTH);
             return new SymmetricSecretKey(factory.generateSecret(spec).getEncoded(),KEY_ALGORITHM);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new CryptographyException("Failed to create secret key",e);
