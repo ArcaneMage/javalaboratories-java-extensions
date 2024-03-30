@@ -75,10 +75,26 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     private static final String KEY_ALGORITHM = "AES";
     private static final String SECRET_KEY_FACTORY = "PBKDF2WithHmacSHA256";
 
+    private static final int AUTO_PASSWORD_BYTES = 32;
     private static final int KEY_LENGTH = 256;
     private static final int SALT_BYTES = 8;
 
     public enum SaltMode {AUTO_GENERATE, DEFAULT}
+
+    /**
+     * Creates a {@link SymmetricSecretKey} object with an auto-generated
+     * password and salt.
+     * <p>
+     * The {@code key} is designed to be used with the {@link
+     * SymmetricCryptography} interface.
+     *
+     * @return the resultant {@code secret key} is completely made up from
+     * securely randomised password and salt.
+     */
+    public static SymmetricSecretKey newInstance() {
+        return from(Base64.getEncoder().encodeToString(getSecureRandomBytes(AUTO_PASSWORD_BYTES)),
+                SaltMode.AUTO_GENERATE);
+    }
 
     /**
      * Creates a {@link SymmetricSecretKey} object from a given {@code password}
@@ -151,12 +167,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     public static SymmetricSecretKey from(final String password, final SaltMode mode) {
         String p = Objects.requireNonNull(password,"Expected password");
         return switch(mode) {
-            case AUTO_GENERATE -> {
-                SecureRandom r = new SecureRandom();
-                byte[] bytes = new byte[SALT_BYTES];
-                r.nextBytes(bytes);
-                yield from(p, Base64.getEncoder().encodeToString(bytes));
-            }
+            case AUTO_GENERATE -> from(p,Base64.getEncoder().encodeToString(getSecureRandomBytes(SALT_BYTES)));
             case DEFAULT -> from(p,DEFAULT_SALT);
         };
     }
@@ -246,6 +257,13 @@ public final class SymmetricSecretKey extends SecretKeySpec {
         } catch (IOException e) {
             throw new CryptographyException("Failed to write key file",e);
         }
+    }
+
+    private static byte[] getSecureRandomBytes(int bytes) {
+        SecureRandom r = new SecureRandom();
+        byte[] result = new byte[bytes];
+        r.nextBytes(result);
+        return result;
     }
 
     private SymmetricSecretKey(final byte[] key, final String algorithm) {

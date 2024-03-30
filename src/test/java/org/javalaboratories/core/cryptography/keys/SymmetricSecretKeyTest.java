@@ -37,12 +37,20 @@ public class SymmetricSecretKeyTest {
     private static final String ENCRYPTED_FILE_KEY = "aes-encrypted-file.key";
 
     @Test
+    public void testNewInstance_Pass() {
+        SymmetricSecretKey key1 = SymmetricSecretKey.newInstance();
+        SymmetricSecretKey key2 = SymmetricSecretKey.newInstance();
+
+        assertNotEquals(key1,key2);
+    }
+
+    @Test
     public void testFromPassword_Pass() {
-        SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
+        SymmetricSecretKey key1 = SymmetricSecretKey.from(PASSWORD);
         SymmetricSecretKey key2 = SymmetricSecretKey.from(PASSWORD2);
 
-        assertEquals(SymmetricSecretKey.from(PASSWORD), key);
-        assertNotEquals(key,key2);
+        assertEquals(SymmetricSecretKey.from(PASSWORD), key1);
+        assertNotEquals(key1,key2);
     }
 
     @Test
