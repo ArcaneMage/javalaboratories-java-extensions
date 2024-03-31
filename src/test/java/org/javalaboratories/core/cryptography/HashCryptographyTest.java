@@ -63,7 +63,7 @@ public class HashCryptographyTest {
 
     @Test
     public void testStringMd5Hashing_Pass() {
-        HashCryptographyResult result = cryptography.hash(TEXT,MessageDigestAlgorithms.MD5);
+        MessageDigestResult result = cryptography.hash(TEXT,MessageDigestAlgorithms.MD5);
 
         assertEquals(16,result.getHash().length);
         assertEquals(BASE64_128BITS,result.getHashAsBase64());
@@ -72,7 +72,7 @@ public class HashCryptographyTest {
 
     @Test
     public void testString160bitsHashing_Pass() {
-        HashCryptographyResult result = cryptography.hash(TEXT);
+        MessageDigestResult result = cryptography.hash(TEXT);
 
         assertEquals(20,result.getHash().length);
         assertEquals(BASE64_160BITS,result.getHashAsBase64());
@@ -81,7 +81,7 @@ public class HashCryptographyTest {
 
     @Test
     public void testString256bitsHashing_Pass() {
-        HashCryptographyResult result = cryptography.hash(TEXT,MessageDigestAlgorithms.SHA256);
+        MessageDigestResult result = cryptography.hash(TEXT,MessageDigestAlgorithms.SHA256);
 
         assertEquals(32,result.getHash().length);
         assertEquals(BASE64_256BITS,result.getHashAsBase64());
@@ -90,7 +90,7 @@ public class HashCryptographyTest {
 
     @Test
     public void testString512bitsHashing_Pass() {
-        HashCryptographyResult result = cryptography.hash(TEXT,MessageDigestAlgorithms.SHA512);
+        MessageDigestResult result = cryptography.hash(TEXT,MessageDigestAlgorithms.SHA512);
 
         assertEquals(64,result.getHash().length);
         assertEquals(BASE64_512BITS,result.getHashAsBase64());
@@ -108,7 +108,7 @@ public class HashCryptographyTest {
 
     @Test
     public void testStreamMd5Hashing_Pass() {
-        HashCryptographyResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()),MessageDigestAlgorithms.MD5);
+        MessageDigestResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()),MessageDigestAlgorithms.MD5);
 
         assertEquals(16,result.getHash().length);
         assertEquals(BASE64_128BITS,result.getHashAsBase64());
@@ -117,7 +117,7 @@ public class HashCryptographyTest {
 
     @Test
     public void testStream160bitsHashing_Pass() {
-        HashCryptographyResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()));
+        MessageDigestResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()));
 
         assertEquals(20,result.getHash().length);
         assertEquals(BASE64_160BITS,result.getHashAsBase64());
@@ -140,7 +140,7 @@ public class HashCryptographyTest {
 
     @Test
     public void testStream256bitsHashing_Pass() {
-        HashCryptographyResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()),
+        MessageDigestResult result = cryptography.hash(new ByteArrayInputStream(TEXT.getBytes()),
                 MessageDigestAlgorithms.SHA256);
 
         assertEquals(32,result.getHash().length);
@@ -151,7 +151,7 @@ public class HashCryptographyTest {
     @Test
     public void testFileMd5Hashing_Pass() throws URISyntaxException {
         ClassLoader classLoader = HashCryptographyTest.class.getClassLoader();
-        HashCryptographyResult result = cryptography.hash(Paths.get(classLoader.getResource("hash-unencrypted-file.txt")
+        MessageDigestResult result = cryptography.hash(Paths.get(classLoader.getResource("hash-unencrypted-file.txt")
                 .toURI()).toFile(),MessageDigestAlgorithms.MD5);
 
         assertEquals(16,result.getHash().length);
@@ -162,7 +162,7 @@ public class HashCryptographyTest {
     @Test
     public void testFile160bitsHashing_Pass() throws URISyntaxException {
         ClassLoader classLoader = HashCryptographyTest.class.getClassLoader();
-        HashCryptographyResult result = cryptography.hash(Paths.get(classLoader.getResource("hash-unencrypted-file.txt")
+        MessageDigestResult result = cryptography.hash(Paths.get(classLoader.getResource("hash-unencrypted-file.txt")
                 .toURI()).toFile());
         assertEquals(20,result.getHash().length);
         assertEquals(BASE64_160BITS,result.getHashAsBase64());
@@ -172,7 +172,7 @@ public class HashCryptographyTest {
     @Test
     public void testFile256bitsHashing_Pass() throws URISyntaxException {
         ClassLoader classLoader = HashCryptographyTest.class.getClassLoader();
-        HashCryptographyResult result = cryptography.hash(Paths.get(classLoader.getResource("hash-unencrypted-file.txt")
+        MessageDigestResult result = cryptography.hash(Paths.get(classLoader.getResource("hash-unencrypted-file.txt")
                 .toURI()).toFile(),MessageDigestAlgorithms.SHA256);
 
         assertEquals(32,result.getHash().length);

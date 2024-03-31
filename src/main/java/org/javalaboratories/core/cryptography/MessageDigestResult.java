@@ -26,7 +26,7 @@ import java.util.Base64;
  * For convenience, it comes supplied with useful transformation properties:
  * {@code asBase64} amd {@code asHex}.
  */
-public interface HashCryptographyResult {
+public interface MessageDigestResult {
 
     /**
      * Returns the computed hash.

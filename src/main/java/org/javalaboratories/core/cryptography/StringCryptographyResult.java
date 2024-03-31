@@ -15,27 +15,41 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
-import java.io.OutputStream;
+import java.security.Key;
+import java.util.Base64;
 
 /**
  * {@code CryptographyResult} object is returned from performing cryptographic
- * operations with the {@link SymmetricCryptography} object.
+ * operations with the {@link AesCryptography} object.
  * <p>
- * It encapsulates the {@link SymmetricSecretKey} and {@code stream} that are
+ * It encapsulates the {@link SymmetricSecretKey} and {@code String} that are
  * associated with the {@code cipher text}.
  * <p>
  * This object is returned from performing cryptographic operations with {@code
- * streams}
- *
- * @param <T> type of output stream.
+ * String} objects.
  */
-public interface CryptographyStreamResult<T extends OutputStream> extends CryptographyResult {
+public interface StringCryptographyResult<K extends Key> extends CryptographyResult<K> {
 
     /**
-     * @return decrypted/encrypted cipher text in the {@code output stream},
-     * depending on {@link SymmetricCryptography} {@code stream} operation.
+     * @return the encrypted/decrypted data as bytes, depending on {@link
+     * AesCryptography} {@code String} operation.
      */
-    T getStream();
+    byte[] getData();
+
+    /**
+     * @return the encrypted/decrypted data as a Base64 string.
+     */
+    default String getDataAsBase64() {
+        return Base64.getEncoder().encodeToString(getData());
+    }
+
+    /**
+     * @return the decrypted data as a string. The string is only available in
+     * decrypted form, and therefore will not be accessible for encrypted
+     * objects.
+     */
+    Maybe<String> getDataAsString();
 }

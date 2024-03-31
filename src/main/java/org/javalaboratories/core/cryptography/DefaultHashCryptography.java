@@ -43,7 +43,7 @@ public final class DefaultHashCryptography implements HashCryptography {
      * {@inheritDoc}
      */
     @Override
-    public HashCryptographyResult hash(final String string, final MessageDigestAlgorithms algorithms) {
+    public MessageDigestResult hash(final String string, final MessageDigestAlgorithms algorithms) {
         String s = Objects.requireNonNull(string);
         MessageDigestAlgorithms a = Objects.requireNonNull(algorithms);
         try {
@@ -60,7 +60,7 @@ public final class DefaultHashCryptography implements HashCryptography {
      * {@inheritDoc}
      */
     @Override
-    public HashCryptographyResult hash(final InputStream inputStream, final MessageDigestAlgorithms algorithms) {
+    public MessageDigestResult hash(final InputStream inputStream, final MessageDigestAlgorithms algorithms) {
         try (InputStream is = Objects.requireNonNull(inputStream)) {
             MessageDigest md = MessageDigest.getInstance(Objects.requireNonNull(algorithms).getAlgorithm());
             byte[] buffer = new byte[STREAM_BUFFER_SIZE];

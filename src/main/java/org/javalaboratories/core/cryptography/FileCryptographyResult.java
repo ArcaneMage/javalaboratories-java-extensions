@@ -18,10 +18,11 @@ package org.javalaboratories.core.cryptography;
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
 import java.io.File;
+import java.security.Key;
 
 /**
  * {@code CryptographyResult} object is returned from performing cryptographic
- * operations with the {@link SymmetricCryptography} object.
+ * operations with the {@link AesCryptography} object.
  * <p>
  * It encapsulates the {@link SymmetricSecretKey} and {@code File} that are
  * associated with the {@code cipher text}.
@@ -29,11 +30,11 @@ import java.io.File;
  * This object is returned from performing cryptographic operations with {@code
  * files}
  */
-public interface CryptographyFileResult extends CryptographyResult {
+public interface FileCryptographyResult<K extends Key> extends CryptographyResult<K> {
 
     /**
      * @return file object to the decrypted/encrypted cipher text, depending on
-     * {@link SymmetricCryptography} file operation.
+     * {@link AesCryptography} file operation.
      */
     File getFile();
 }

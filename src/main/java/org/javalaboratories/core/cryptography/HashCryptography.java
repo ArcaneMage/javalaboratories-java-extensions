@@ -45,10 +45,10 @@ public interface HashCryptography {
      *
      * @param s the string to hash
      * @param algorithms the algorithm enum.
-     * @return a {@link HashCryptographyResult}
+     * @return a {@link MessageDigestResult}
      * @throws NullPointerException when parameters are null.
      */
-    HashCryptographyResult hash(final String s,final MessageDigestAlgorithms algorithms);
+    MessageDigestResult hash(final String s, final MessageDigestAlgorithms algorithms);
 
     /**
      * Generates a hash for the given {@code InputStream}, leveraging the supplied
@@ -59,10 +59,10 @@ public interface HashCryptography {
      *
      * @param is the input stream to hash
      * @param algorithms the algorithm enum.
-     * @return a {@link HashCryptographyResult}
+     * @return a {@link MessageDigestResult}
      * @throws NullPointerException when parameters are null.
      */
-    HashCryptographyResult hash(final InputStream is, MessageDigestAlgorithms algorithms);
+    MessageDigestResult hash(final InputStream is, MessageDigestAlgorithms algorithms);
 
     /**
      * Generates a hash for the given {@code String}, leveraging the supplied
@@ -72,10 +72,10 @@ public interface HashCryptography {
      * is required.
      *
      * @param s the string to hash
-     * @return a {@link HashCryptographyResult}
+     * @return a {@link MessageDigestResult}
      * @throws NullPointerException when parameters are null.
      */
-    default HashCryptographyResult hash(final String s) {
+    default MessageDigestResult hash(final String s) {
         return hash(s,MessageDigestAlgorithms.SHA1);
     }
 
@@ -86,10 +86,10 @@ public interface HashCryptography {
      * The default algorithm used for hashing is {@code SHA-1}, so no algorithm
      * is required.
      *
-     * @return a {@link HashCryptographyResult}
+     * @return a {@link MessageDigestResult}
      * @throws NullPointerException when parameters are null.
      */
-    default HashCryptographyResult hash(final InputStream is) {
+    default MessageDigestResult hash(final InputStream is) {
         return hash(is,MessageDigestAlgorithms.SHA1);
     }
 
@@ -100,10 +100,10 @@ public interface HashCryptography {
      * The default algorithm used for hashing is {@code SHA-1}, so no algorithm
      * is required.
      *
-     * @return a {@link HashCryptographyResult}
+     * @return a {@link MessageDigestResult}
      * @throws NullPointerException when parameters are null.
      */
-    default HashCryptographyResult hash(final File file) {
+    default MessageDigestResult hash(final File file) {
         return hash(file,MessageDigestAlgorithms.SHA1);
     }
 
@@ -116,10 +116,10 @@ public interface HashCryptography {
      *
      * @param file the input stream to hash
      * @param algorithms the algorithm enum.
-     * @return a {@link HashCryptographyResult}
+     * @return a {@link MessageDigestResult}
      * @throws NullPointerException when parameters are null.
      */
-    default HashCryptographyResult hash(final File file, MessageDigestAlgorithms algorithms) {
+    default MessageDigestResult hash(final File file, MessageDigestAlgorithms algorithms) {
         File f = Objects.requireNonNull(file, "Expected file object");
         try (FileInputStream fis = new FileInputStream(f)) {
             return hash(fis,algorithms);

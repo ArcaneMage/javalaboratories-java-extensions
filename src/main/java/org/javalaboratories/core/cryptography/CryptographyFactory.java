@@ -24,7 +24,7 @@ import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
  * interfaces. For example:
  * <pre>
  *     {@code
- *         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+ *         AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
  *         CryptographyStringResult result =
  *             cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), STRING_LITERAL);
  *         String cipherText = result.getDataAsBase64();
@@ -32,7 +32,7 @@ import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
  *         Outputs -> "xGc/N5WQGeje8QHK68GPdUbho0YIX3mYj/Zqgt5wqTjvkAvOLMOp/RGMM8yRn2GBsFRZA=="
  *         ...
  *         ...
- *         SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+ *         AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
  *         CryptographyStringResult result =
  *             cryptography.decrypt(SymmetricSecretKey.from(PASSWORD), cipherText);
  *         String string = result.getDataAsString.orElseThrow();
@@ -43,7 +43,7 @@ import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
  * In addition to {@code Strings}, support for {@code InputStream} and {@code
  * OutputStream} are also provided, as well as {@code File} encryption/decryption.
  *
- * @see SymmetricCryptography
+ * @see AesCryptography
  * @see SymmetricSecretKey
  */
 public final class CryptographyFactory {
@@ -55,11 +55,11 @@ public final class CryptographyFactory {
      * Symmetric cryptography means the same key is used for both encryption and
      * decryption.
      *
-     * @return {@link SymmetricCryptography} object is returned, encapsulating
+     * @return {@link AesCryptography} object is returned, encapsulating
      * AES encryption/decryption standard.
      */
-    public static SymmetricCryptography getSymmetricCryptography() {
-        return new DefaultAesSymmetricCryptography();
+    public static AesCryptography getSymmetricCryptography() {
+        return new DefaultAesCryptography();
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Kevin Henry
+ * Copyright 2024 Kevin Henry
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,18 +17,20 @@ package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
+import java.security.Key;
+
 /**
  * {@code CryptographyResult} object is returned from performing cryptographic
- * operations with the {@link SymmetricCryptography} object.
+ * operations with the {@link AesCryptography} object.
  * <p>
  * It encapsulates the {@link SymmetricSecretKey} that is associated with the
  * {@code cipher text}.
  */
-public interface CryptographyResult {
+public interface CryptographyResult<K extends Key> {
 
     /**
      * @return the key that is associated with the {@code cipher text}.
      * @see SymmetricSecretKey
      */
-    SymmetricSecretKey getKey();
+    K getKey();
 }

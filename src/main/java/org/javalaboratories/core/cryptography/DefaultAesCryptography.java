@@ -31,7 +31,7 @@ import java.util.Objects;
 
 import static javax.crypto.Cipher.ENCRYPT_MODE;
 
-public final class DefaultAesSymmetricCryptography implements SymmetricCryptography {
+public final class DefaultAesCryptography implements AesCryptography {
 
     private static final int HEADER_SIZE = 16;
     private static final int IV_BYTES = 16;
@@ -45,13 +45,13 @@ public final class DefaultAesSymmetricCryptography implements SymmetricCryptogra
      * This method is only to be called from the {@link CryptographyFactory}, it
      * must be called directly.
      */
-    DefaultAesSymmetricCryptography() {}
+    DefaultAesCryptography() {}
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public CryptographyStringResult decrypt(final SymmetricSecretKey key, final String cipherText) {
+    public <K extends SymmetricSecretKey> StringCryptographyResult<K> decrypt(final K key, final String cipherText) {
         String  ct = Objects.requireNonNull(cipherText, "Expected encrypted cipher text");
         SymmetricSecretKey k = Objects.requireNonNull(key, "Expected key object");
         try {
@@ -75,9 +75,10 @@ public final class DefaultAesSymmetricCryptography implements SymmetricCryptogra
      * {@inheritDoc}
      */
     @Override
-    public <T extends OutputStream> CryptographyStreamResult<T> decrypt(final SymmetricSecretKey key, final InputStream cipherStream,
-                                                                        final T outputStream) {
-        SymmetricSecretKey k = Objects.requireNonNull(key,"Expected key object");
+    public <K extends SymmetricSecretKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K key,
+                                                                                                       final InputStream cipherStream,
+                                                                                                       final T outputStream) {
+        K k = Objects.requireNonNull(key,"Expected key object");
         try {
             // Read IV Header
             IvParameterSpec iv = readIvHeader(cipherStream);
@@ -97,8 +98,8 @@ public final class DefaultAesSymmetricCryptography implements SymmetricCryptogra
      * {@inheritDoc}
      */
     @Override
-    public CryptographyStringResult encrypt(final SymmetricSecretKey key, final String string) {
-        SymmetricSecretKey k = Objects.requireNonNull(key, "Expected password");
+    public <K extends SymmetricSecretKey> StringCryptographyResult<K> encrypt(final K key, final String string) {
+        K k = Objects.requireNonNull(key, "Expected password");
         String s = Objects.requireNonNull(string, "Expected string to encrypt");
         try {
             IvParameterSpec iv = generateIvParameterSpec();
@@ -119,9 +120,10 @@ public final class DefaultAesSymmetricCryptography implements SymmetricCryptogra
      * {@inheritDoc}
      */
     @Override
-    public <T extends OutputStream> CryptographyStreamResult<T> encrypt(final SymmetricSecretKey key, final InputStream inputStream,
-                                                                        final T cipherStream) {
-        SymmetricSecretKey k = Objects.requireNonNull(key, "Expected key object");
+    public <K extends SymmetricSecretKey,T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K key,
+                                                                                                       final InputStream inputStream,
+                                                                                                       final T cipherStream) {
+        K k = Objects.requireNonNull(key, "Expected key object");
         try {
             IvParameterSpec iv = generateIvParameterSpec();
             Cipher cipher = Cipher.getInstance(ALGORITHM);
@@ -140,24 +142,24 @@ public final class DefaultAesSymmetricCryptography implements SymmetricCryptogra
         }
     }
 
-    private <T extends OutputStream> CryptographyStreamResult<T> createStreamResult(final SymmetricSecretKey key,
-                                                                                    final T stream) {
-        return new CryptographyStreamResult<>() {
+    private <K extends SymmetricSecretKey, T extends OutputStream> StreamCryptographyResult<K,T> createStreamResult(final K key,
+                                                                                                                    final T stream) {
+        return new StreamCryptographyResult<>() {
             @Override
             public T getStream() {
                 return stream;
             }
             @Override
-            public SymmetricSecretKey getKey() {
+            public K getKey() {
                 return key;
             }
         };
     }
 
-    private CryptographyStringResult createStringResult(final SymmetricSecretKey key, byte[] bytes, String text) {
-        return new CryptographyStringResult() {
+    private <K extends SymmetricSecretKey> StringCryptographyResult<K> createStringResult(final K key, byte[] bytes, String text) {
+        return new StringCryptographyResult<>() {
             @Override
-            public SymmetricSecretKey getKey() {
+            public K getKey() {
                 return key;
             }
             @Override

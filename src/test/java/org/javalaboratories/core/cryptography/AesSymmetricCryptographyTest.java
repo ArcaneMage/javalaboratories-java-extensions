@@ -79,11 +79,11 @@ public class AesSymmetricCryptographyTest {
 
     @Test
     public void testStringEncryption_Pass() {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
-        CryptographyStringResult result = cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), TEXT);
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        StringCryptographyResult<SymmetricSecretKey> result = cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), TEXT);
         String encrypted = result.getDataAsBase64();
 
-        CryptographyStringResult stringResult = cryptography.decrypt(result.getKey(),encrypted);
+        StringCryptographyResult<SymmetricSecretKey> stringResult = cryptography.decrypt(result.getKey(),encrypted);
         assertEquals(TEXT, stringResult.getDataAsString().orElseThrow());
     }
 
@@ -91,7 +91,7 @@ public class AesSymmetricCryptographyTest {
     public void testStringEncryption_withGeneralSecurityException_Fail() {
         try (MockedStatic<Cipher> cipher = Mockito.mockStatic(Cipher.class)) {
             cipher.when(() -> Cipher.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
-            SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+            AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
 
             assertThrows(CryptographyException.class,() -> cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), TEXT));
         }
@@ -100,8 +100,8 @@ public class AesSymmetricCryptographyTest {
     @Test
     public void testStringDecryption_Pass() {
         SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
-        CryptographyStringResult result = cryptography.decrypt(key,ENCRYPTED_STRING_DATA);
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        StringCryptographyResult<SymmetricSecretKey> result = cryptography.decrypt(key,ENCRYPTED_STRING_DATA);
 
         assertEquals(TEXT,result.getDataAsString().orElseThrow());
     }
@@ -109,7 +109,7 @@ public class AesSymmetricCryptographyTest {
     @Test
     public void testStringDecryption_Fail() {
         SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
 
         assertThrows(CryptographyException.class, () -> cryptography.decrypt(key,TAMPERED_ENCRYPTED_STRING_DATA));
         assertThrows(CryptographyException.class, () -> cryptography.decrypt(key,BAD_ENCRYPTED_STRING_DATA));
@@ -117,10 +117,10 @@ public class AesSymmetricCryptographyTest {
 
     @Test
     public void testFileDecryption_Pass() throws IOException {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         SymmetricSecretKey key = SymmetricSecretKey.from(encryptedFileKey);
 
-        CryptographyFileResult result = cryptography
+        FileCryptographyResult<SymmetricSecretKey> result = cryptography
                 .decrypt(key,encryptedFile, unencryptedFileTest);
 
         String s = Files.lines(result.getFile().toPath())
@@ -131,7 +131,7 @@ public class AesSymmetricCryptographyTest {
 
     @Test
     public void testFileDecryption_Fail() {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         SymmetricSecretKey key = SymmetricSecretKey.from(encryptedFileKey);
 
         assertThrows(CryptographyException.class,() -> cryptography
@@ -140,11 +140,11 @@ public class AesSymmetricCryptographyTest {
 
     @Test
     public void testFileEncryption_Pass() throws IOException {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
-        CryptographyFileResult result = cryptography
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        FileCryptographyResult<SymmetricSecretKey> result = cryptography
                 .encrypt(SymmetricSecretKey.from(PASSWORD),unencryptedFile, encryptedFileTest);
 
-        CryptographyStreamResult<ByteArrayOutputStream> result2 = cryptography
+        StreamCryptographyResult<SymmetricSecretKey,ByteArrayOutputStream> result2 = cryptography
                 .decrypt(result.getKey(),new FileInputStream(encryptedFileTest),new ByteArrayOutputStream());
 
         assertEquals(FILE_DATA,result2.getStream().toString());
@@ -153,11 +153,11 @@ public class AesSymmetricCryptographyTest {
 
     @Test
     public void testStreamEncryption_Pass() {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
-        CryptographyStreamResult<ByteArrayOutputStream> result = cryptography
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        StreamCryptographyResult<SymmetricSecretKey,ByteArrayOutputStream> result = cryptography
                 .encrypt(SymmetricSecretKey.from(PASSWORD),new ByteArrayInputStream(TEXT.getBytes()),new ByteArrayOutputStream());
 
-        CryptographyStreamResult<ByteArrayOutputStream> result2 = cryptography
+        StreamCryptographyResult<SymmetricSecretKey,ByteArrayOutputStream> result2 = cryptography
                 .decrypt(result.getKey(),new ByteArrayInputStream(result.getStream().toByteArray()),
                         new ByteArrayOutputStream());
 
@@ -168,7 +168,7 @@ public class AesSymmetricCryptographyTest {
     public void testStreamEncryption_withGeneralSecurityException_Fail() {
         try (MockedStatic<Cipher> cipher = Mockito.mockStatic(Cipher.class)) {
             cipher.when(() -> Cipher.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
-            SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+            AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
 
             assertThrows(CryptographyException.class,() -> cryptography.encrypt(SymmetricSecretKey.from(PASSWORD),
                     new ByteArrayInputStream(TEXT.getBytes()),new ByteArrayOutputStream()));
@@ -177,17 +177,17 @@ public class AesSymmetricCryptographyTest {
 
     @Test
     public void testStreamEncryption_withIOException_Fail() {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         assertThrows(CryptographyException.class,() -> cryptography.encrypt(SymmetricSecretKey.from(PASSWORD),
                 mockInputStream,mockOutputStream));
     }
 
     @Test
     public void testStreamDecryption_Pass() {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
 
-        CryptographyStreamResult<ByteArrayOutputStream> result = cryptography
+        StreamCryptographyResult<SymmetricSecretKey,ByteArrayOutputStream> result = cryptography
                 .decrypt(key,new ByteArrayInputStream(Base64.getDecoder().decode(ENCRYPTED_STRING_DATA)),
                         new ByteArrayOutputStream());
 
@@ -196,7 +196,7 @@ public class AesSymmetricCryptographyTest {
 
     @Test
     public void testStreamDecryption_Fail() {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
 
         assertThrows(CryptographyException.class, () -> cryptography
@@ -207,14 +207,14 @@ public class AesSymmetricCryptographyTest {
 
     @Test
     public void testStreamDecryption_withIOException_Fail() {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         assertThrows(CryptographyException.class,() -> cryptography.decrypt(SymmetricSecretKey.from(PASSWORD),
                 mockInputStream,mockOutputStream));
     }
 
     @Test
     public void testStreamDecryption_withEndOfStream_Fail() {
-        SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         assertThrows(CryptographyException.class,() -> cryptography.decrypt(SymmetricSecretKey.from(PASSWORD),
                 mockEndOfInputStream,mockOutputStream));
     }

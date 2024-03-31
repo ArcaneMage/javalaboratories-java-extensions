@@ -16,7 +16,7 @@
 package org.javalaboratories.core.cryptography.keys;
 
 import org.javalaboratories.core.cryptography.CryptographyException;
-import org.javalaboratories.core.cryptography.SymmetricCryptography;
+import org.javalaboratories.core.cryptography.AesCryptography;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -86,7 +86,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      * password and salt.
      * <p>
      * The {@code key} is designed to be used with the {@link
-     * SymmetricCryptography} interface.
+     * AesCryptography} interface.
      *
      * @return the resultant {@code secret key} is completely made up from
      * securely randomised password and salt.
@@ -101,7 +101,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      * and {@code salt}.
      * <p>
      * The {@code key} is designed to be used with the {@link 
-     * SymmetricCryptography} interface. 
+     * AesCryptography} interface.
      * <p>
      * All {@code keys} have a {@code salt} supplied; in the case of the {@code 
      * keys} created a password only, a default salt is supplied. Although, in 
@@ -129,7 +129,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      * Creates a {@link SymmetricSecretKey} object from a given {@code password}.
      * <p>
      * The {@code key} is designed to be used with the {@link
-     * SymmetricCryptography} interface. 
+     * AesCryptography} interface.
      * <p>
      * All {@code keys} have a {@code salt} supplied; in the case of the {@code
      * keys} created a password only, a default salt is supplied. Although, in 
@@ -149,7 +149,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      * and {@code salt mode}.
      * <p>
      * The {@code key} is designed to be used with the {@link
-     * SymmetricCryptography} interface. 
+     * AesCryptography} interface.
      * <p>
      * All {@code keys} have a {@code salt} supplied; in the case of the {@code
      * keys} created a password only, a default salt is supplied. Although, in 
@@ -177,7 +177,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      * InputStream}.
      * <p>
      * The {@code key} is designed to be used with the {@link
-     * SymmetricCryptography} interface. 
+     * AesCryptography} interface.
      * <p>
      * The {@code key} would have been persisted to the stream with the 
      * use of the {@link SymmetricSecretKey#write(OutputStream)} method.
@@ -202,7 +202,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      * Creates a {@link SymmetricSecretKey} object from the given {@link File}.
      * <p>
      * The {@code key} is designed to be used with the {@link
-     * SymmetricCryptography} interface. 
+     * AesCryptography} interface.
      * <p>
      * The {@code key} would have been persisted to the file with the 
      * use of the {@link SymmetricSecretKey#write(File)} method.
