@@ -15,22 +15,19 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+import org.javalaboratories.core.Maybe;
 
-import java.security.Key;
+import java.util.Base64;
 
-/**
- * {@code CryptographyResult} object is returned from performing cryptographic
- * operations with the {@link AesCryptography} object.
- * <p>
- * It encapsulates the {@link SymmetricSecretKey} that is associated with the
- * {@code cipher text}.
- */
-public interface CryptographyResult<K extends Key> extends HybridCryptographyResult {
+public interface HybridCryptographyResult {
 
-    /**
-     * @return the key that is associated with the {@code cipher text}.
-     * @see SymmetricSecretKey
-     */
-    K getKey();
+    default Maybe<byte[]> getCipherKey() {
+        return Maybe.empty();
+    }
+
+    default String geCipherKeyAsBase64() {
+        return getCipherKey()
+                .map(b -> Base64.getEncoder().encodeToString(b))
+                .orElseThrow(() -> new CryptographyException("Failed encode cipher key"));
+    }
 }

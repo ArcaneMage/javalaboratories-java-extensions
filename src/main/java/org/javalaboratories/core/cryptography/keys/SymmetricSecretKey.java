@@ -97,6 +97,19 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     }
 
     /**
+     * Creates a {@link SymmetricSecretKey} object from encoded bytes.
+     * <p>
+     * The {@code key} is designed to be used with the {@link
+     * AesCryptography} interface.
+     *
+     * @return the resultant {@code secret key} is completely made up from
+     * previously encoded bytes from {@code SymmetricSecretKey}.
+     */
+    public static SymmetricSecretKey from(final byte[] bytes) {
+        return new SymmetricSecretKey(bytes,KEY_ALGORITHM);
+    }
+
+    /**
      * Creates a {@link SymmetricSecretKey} object from a given {@code password}
      * and {@code salt}.
      * <p>

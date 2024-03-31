@@ -21,15 +21,20 @@ import java.io.OutputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-public interface RsaCryptography {
+public interface RsaHybridCryptography {
 
     <K extends PublicKey> StringCryptographyResult<K> encrypt(final K key, final String string);
 
-    <K extends PublicKey, T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K key, final InputStream is, final T cipherStream);
+    <K extends PublicKey, T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K key,
+                                                                                        final InputStream is,
+                                                                                        final T cipherStream);
 
-    <K extends PrivateKey> StringCryptographyResult<K>  decrypt(final K key, final String ciphertext);
+    <K extends PrivateKey> StringCryptographyResult<K> decrypt(final K key, final String cipherKey, final String ciphertext);
 
-    <K extends PrivateKey, T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K key, final InputStream cipherStream, final T os);
+    <K extends PrivateKey, T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K key,
+                                                                                         final String cipherKey,
+                                                                                         final InputStream cipherStream,
+                                                                                         final T os);
 
     default <K extends PublicKey> FileCryptographyResult<K> encrypt(final K key, final File inputFile, File cipherFile) {
         return null;

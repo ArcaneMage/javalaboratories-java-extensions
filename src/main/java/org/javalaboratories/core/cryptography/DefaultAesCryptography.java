@@ -156,7 +156,8 @@ public final class DefaultAesCryptography implements AesCryptography {
         };
     }
 
-    private <K extends SymmetricSecretKey> StringCryptographyResult<K> createStringResult(final K key, byte[] bytes, String text) {
+    private <K extends SymmetricSecretKey> StringCryptographyResult<K> createStringResult(final K key, final byte[] bytes,
+                                                                                          final String text) {
         return new StringCryptographyResult<>() {
             @Override
             public K getKey() {
