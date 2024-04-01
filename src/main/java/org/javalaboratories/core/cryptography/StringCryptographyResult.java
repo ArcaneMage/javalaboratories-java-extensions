@@ -37,13 +37,13 @@ public interface StringCryptographyResult<K extends Key> extends CryptographyRes
      * @return the encrypted/decrypted data as bytes, depending on {@link
      * AesCryptography} {@code String} operation.
      */
-    byte[] getData();
+    byte[] getBytes();
 
     /**
      * @return the encrypted/decrypted data as a Base64 string.
      */
-    default String getDataAsBase64() {
-        return Base64.getEncoder().encodeToString(getData());
+    default String getBytesAsBase64() {
+        return Base64.getEncoder().encodeToString(getBytes());
     }
 
     /**
@@ -51,5 +51,5 @@ public interface StringCryptographyResult<K extends Key> extends CryptographyRes
      * decrypted form, and therefore will not be accessible for encrypted
      * objects.
      */
-    Maybe<String> getDataAsString();
+    Maybe<String> getString();
 }

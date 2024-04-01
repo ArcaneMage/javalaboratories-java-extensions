@@ -65,9 +65,9 @@ public final class DefaultAesCryptography implements AesCryptography {
             byte[] bytes = cipher.doFinal(Bytes.trimLeft(ctBytes,HEADER_SIZE));
             return createStringResult(key,bytes,new String(bytes));
         } catch (GeneralSecurityException e) {
-            throw new CryptographyException("Failed to decrypt cipher text");
+            throw new CryptographyException("Failed to decrypt cipher text",e);
         } catch (IllegalArgumentException e) {
-            throw new CryptographyException("Failed to decrypt encoded cipher text");
+            throw new CryptographyException("Failed to decrypt encoded cipher text",e);
         }
     }
 
@@ -164,11 +164,11 @@ public final class DefaultAesCryptography implements AesCryptography {
                 return key;
             }
             @Override
-            public byte[] getData() {
+            public byte[] getBytes() {
                 return bytes;
             }
             @Override
-            public Maybe<String> getDataAsString() {
+            public Maybe<String> getString() {
                 return Maybe.ofNullable(text);
             }
         };

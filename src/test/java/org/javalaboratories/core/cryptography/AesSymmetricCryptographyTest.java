@@ -81,10 +81,10 @@ public class AesSymmetricCryptographyTest {
     public void testStringEncryption_Pass() {
         AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         StringCryptographyResult<SymmetricSecretKey> result = cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), TEXT);
-        String encrypted = result.getDataAsBase64();
+        String encrypted = result.getBytesAsBase64();
 
         StringCryptographyResult<SymmetricSecretKey> stringResult = cryptography.decrypt(result.getKey(),encrypted);
-        assertEquals(TEXT, stringResult.getDataAsString().orElseThrow());
+        assertEquals(TEXT, stringResult.getString().orElseThrow());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class AesSymmetricCryptographyTest {
         AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
         StringCryptographyResult<SymmetricSecretKey> result = cryptography.decrypt(key,ENCRYPTED_STRING_DATA);
 
-        assertEquals(TEXT,result.getDataAsString().orElseThrow());
+        assertEquals(TEXT,result.getString().orElseThrow());
     }
 
     @Test

@@ -90,7 +90,8 @@ public interface RsaHybridCryptography {
      *
      * @param privateKey the key with which to decrypt the string.
      * @param cipherKey the RSA encrypted cipher key in {@code Base64} form.
-     * @param ciphertext the {@code String} to be decrypted.
+     * @param ciphertext the {@code String} to be decrypted in {@code Base64}
+     *                   form.
      *
      * @return a {@link StringCryptographyResult} encapsulated deciphered text.
      * @param <K> the type of key.

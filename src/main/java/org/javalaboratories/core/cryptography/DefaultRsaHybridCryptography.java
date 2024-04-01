@@ -75,7 +75,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE,pk);
             byte[] cipherKeyBytes = cipher.doFinal(secretKey.getEncoded());
-            return createStringResult(pk,cipherKeyBytes,aesResult.getData(),null);
+            return createStringResult(pk,cipherKeyBytes,aesResult.getBytes(),null);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
@@ -123,7 +123,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
 
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
             StringCryptographyResult<SymmetricSecretKey> result = aes.decrypt(secretKey,s);
-            return createStringResult(pk,null,result.getData(),new String(result.getData()));
+            return createStringResult(pk,null,result.getBytes(),new String(result.getBytes()));
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
@@ -164,11 +164,11 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
                 return key;
             }
             @Override
-            public byte[] getData() {
+            public byte[] getBytes() {
                 return bytes;
             }
             @Override
-            public Maybe<String> getDataAsString() {
+            public Maybe<String> getString() {
                 return Maybe.ofNullable(text);
             }
             @Override
