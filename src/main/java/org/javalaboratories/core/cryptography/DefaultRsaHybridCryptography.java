@@ -29,10 +29,40 @@ import java.security.PublicKey;
 import java.util.Base64;
 import java.util.Objects;
 
-public class DefaultRsaHybridCryptography implements RsaHybridCryptography {
+/**
+ * {@code DefaultRsaHybridCryptography} supports the RSA encryption of {@code
+ * Strings}, {@code Streams} and {@code Files}.
+ * <p>
+ * Being RSA {@link PublicKey}, {@link PrivateKey} keys are required for
+ * encryption and decryption respectively. The term {@code hybrid} means that
+ * there are multiple encryption algorithms are required because RSA encryption
+ * is not sufficient for encrypting/decrypting large amounts of data. The
+ * approach taken for encryption:
+ * <ol>
+ *     <li>Create/generate a secret key, leveraging AES</li>
+ *     <li>Encrypt the the data with AES using the secret key</li>
+ *     <li>Encrypt the secret key with RSA public key</li>
+ *     <li>Return the {@code ciphertext} with the encrypted key</li>
+ * </ol>
+ * To decrypt the {@code ciphertext}, the steps are reversed:
+ * <ol>
+ *     <li>Decrypt the secret key with the RSA private key</li>
+ *     <li>Decrypt the {@code ciphertext} with the secret key with AES
+ *     decryption</li>
+ *     <li>Return deciphered text</li>
+ * </ol>
+ * Unlike the symmetric decryption package, RSA decryption will require an
+ * additional parameter, the {@code cipherKey} that is the encrypted AES key.
+ *
+ * @see RsaHybridCryptography
+ */
+public final class DefaultRsaHybridCryptography implements RsaHybridCryptography {
 
     private static final String ALGORITHM = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <K extends PublicKey> StringCryptographyResult<K> encrypt(final K publicKey, final String string) {
         K pk = Objects.requireNonNull(publicKey,"Expected public key");
@@ -51,6 +81,9 @@ public class DefaultRsaHybridCryptography implements RsaHybridCryptography {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <K extends PublicKey,T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K publicKey,
                                                                                               final InputStream inputStream,
@@ -74,6 +107,9 @@ public class DefaultRsaHybridCryptography implements RsaHybridCryptography {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <K extends PrivateKey> StringCryptographyResult<K> decrypt(final K privateKey, final String cipherKey, final String ciphertext) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
@@ -93,6 +129,9 @@ public class DefaultRsaHybridCryptography implements RsaHybridCryptography {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <K extends PrivateKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K privateKey,
                                                                                                final String cipherKey,
