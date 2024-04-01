@@ -49,6 +49,21 @@ import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 public final class CryptographyFactory {
 
     /**
+     * Provides an interface for {@code Asymmetric} encryption and decryption,
+     * levering RSA standard.
+     * <p>
+     * Asymmetric cryptography means that there are multiple keys required to
+     * encrypt/decrypt {@code ciphertext}, namely {@code PublicKey} and
+     * {@code PrivateKey}.
+     *
+     * @return {@link RsaHybridCryptography} object is returned, encapsulating
+     * RSA encryption/decryption standard.
+     */
+    public static RsaHybridCryptography getAsymmetricHybridCryptography() {
+        return new DefaultRsaHybridCryptography();
+    }
+
+    /**
      * Provides an interface for {@code Symmetric} encryption and decryption,
      * levering AES standard.
      * <p>
