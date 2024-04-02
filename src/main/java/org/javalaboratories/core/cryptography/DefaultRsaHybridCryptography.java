@@ -137,7 +137,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
 
             return createStringResult(pk,sessionKeyBytes,bytes,new String(bytes));
         } catch (CryptographyException e) {
-            throw new CryptographyException("Failed to encrypt string",e);
+            throw new CryptographyException("Failed to decrypt string",e);
         }
     }
 

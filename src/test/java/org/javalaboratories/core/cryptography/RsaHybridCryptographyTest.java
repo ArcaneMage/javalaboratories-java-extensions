@@ -1,22 +1,26 @@
 package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.RsaKeys;
+import org.javalaboratories.core.util.Bytes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import javax.crypto.Cipher;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Notes for creating public and private key files using {@code openssl} commands:
@@ -49,19 +53,37 @@ public class RsaHybridCryptographyTest {
             "0sd1jsHPCZ4Aw11z944a9xWebwzEVaeGroxU0ywz9Zq4Vflh1gxY4LObguFd1Xcy4qopfhdiZ9trEfhtu7G+vvmQwr64J966LvU";
     private static final String TEXT = "The quick brown fox jumped over the fence and then back again, just for a laugh.";
     private static final String FILE_TEXT = "This is a test file with encrypted data -- TOP SECRET!";
+
     private RsaHybridCryptography cryptography;
+
+    private PrivateKey wrongPrivateKey;
+    private PublicKey wrongPublicKey;
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
+    private final InputStream mockInputStream = mock(InputStream.class);
+    private final InputStream mockEndOfInputStream = mock(InputStream.class);
+    private final OutputStream mockOutputStream = mock(OutputStream.class);
+
     @BeforeEach
-    public void setup() throws URISyntaxException {
+    public void setup() throws GeneralSecurityException, URISyntaxException, IOException {
         ClassLoader classLoader = RsaHybridCryptographyTest.class.getClassLoader();
         File privateKeyfile = Paths.get(classLoader.getResource(PRIVATE_KEY_FILE).toURI()).toFile();
         File publicKeyfile = Paths.get(classLoader.getResource(PUBLIC_KEY_FILE).toURI()).toFile();
 
         privateKey = RsaKeys.getPrivateKeyFrom(privateKeyfile);
         publicKey = RsaKeys.getPublicKeyFrom(publicKeyfile);
+
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        KeyPair keyPair = generator.generateKeyPair();
+        wrongPrivateKey = keyPair.getPrivate();
+        wrongPublicKey = keyPair.getPublic();
+
         cryptography = CryptographyFactory.getAsymmetricHybridCryptography();
+
+        when(mockInputStream.read(any())).thenThrow(IOException.class);
+        doThrow(IOException.class).when(mockOutputStream).write(any());
+        when(mockEndOfInputStream.read(any())).thenReturn(-1);
     }
 
     @Test
@@ -69,7 +91,19 @@ public class RsaHybridCryptographyTest {
         StringCryptographyResult<PublicKey> result = cryptography.encrypt(publicKey,TEXT);
 
         StringCryptographyResult<PrivateKey> stringResult = cryptography.decrypt(privateKey, result.getBytesAsBase64());
+
+        assertNotNull(result.getKey());
+        assertNotNull(result.getSessionKey());
         assertEquals(TEXT, stringResult.getString().orElseThrow());
+    }
+
+    @Test
+    public void testStringEncryption_withGeneralSecurityException_Fail() {
+        try (MockedStatic<Cipher> cipher = Mockito.mockStatic(Cipher.class)) {
+            cipher.when(() -> Cipher.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
+
+            assertThrows(CryptographyException.class, () -> cryptography.encrypt(publicKey, TEXT));
+        }
     }
 
     @Test
@@ -77,6 +111,11 @@ public class RsaHybridCryptographyTest {
         StringCryptographyResult<PrivateKey> result = cryptography.decrypt(privateKey,CIPHERTEXT);
 
         assertEquals(TEXT, result.getString().orElseThrow());
+    }
+
+    @Test
+    public void testStringDecryption_wrongPrivateKey_Fail() {
+        assertThrows(CryptographyException.class, () -> cryptography.decrypt(wrongPrivateKey,CIPHERTEXT));
     }
 
     @Test
@@ -88,7 +127,15 @@ public class RsaHybridCryptographyTest {
                 .decrypt(privateKey,new ByteArrayInputStream(result.getStream().toByteArray()),
                         new ByteArrayOutputStream());
 
+        assertNotNull(result.getKey());
+        assertNotNull(result.getSessionKey());
         assertEquals(TEXT,result2.getStream().toString());
+    }
+
+    @Test
+    public void testStreamEncryption_withIOException_Fail() {
+        assertThrows(CryptographyException.class, () -> cryptography
+                .encrypt(publicKey, mockInputStream, mockOutputStream));
     }
 
     @Test
@@ -101,13 +148,35 @@ public class RsaHybridCryptographyTest {
     }
 
     @Test
+    public void testStreamDecryption_withIOExceptionEOS_Fail() {
+        assertThrows(CryptographyException.class, () -> cryptography
+                .decrypt(privateKey, mockEndOfInputStream, mockOutputStream));
+    }
+
+    @Test
+    public void testStreamDecryption_withCorruptedSessionKey_Fail() {
+        try (MockedStatic<Bytes> bytes = Mockito.mockStatic(Bytes.class)) {
+            bytes.when(() -> Bytes.fromBytes(any())).thenReturn(127);
+
+            assertThrows(CryptographyException.class, () -> cryptography
+                    .decrypt(privateKey, new ByteArrayInputStream(TEXT.getBytes()), new ByteArrayOutputStream()));
+        }
+    }
+
+    @Test
+    public void testStreamDecryption_withIOException_Fail() {
+        assertThrows(CryptographyException.class, () -> cryptography
+                .decrypt(privateKey, mockInputStream, mockOutputStream));
+    }
+
+    @Test
     public void testFileCryptography_Pass() throws URISyntaxException, IOException {
         ClassLoader classLoader = RsaHybridCryptographyTest.class.getClassLoader();
         File file = Paths.get(classLoader.getResource(AES_UNENCRYPTED_FILE).toURI()).toFile();
         File cipherFile = Paths.get(classLoader.getResource(RSA_ENCRYPTED_TEST_FILE).toURI()).toFile();
         File decipheredFile = Paths.get(classLoader.getResource(RSA_UNENCRYPTED_TEST_FILE).toURI()).toFile();
 
-        cryptography.encrypt(publicKey,file,cipherFile);
+        FileCryptographyResult<PublicKey> result = cryptography.encrypt(publicKey,file,cipherFile);
 
         FileCryptographyResult<PrivateKey> result2 = cryptography
                 .decrypt(privateKey,cipherFile,decipheredFile);
@@ -115,8 +184,13 @@ public class RsaHybridCryptographyTest {
         String s = Files.lines(result2.getFile().toPath())
                 .collect(Collectors.joining());
 
-        assertEquals(FILE_TEXT,s);
+        assertNotNull(result.getFile());
+        assertNotNull(result.getKey());
+        assertNotNull(result.getSessionKey());
 
+        assertNotNull(result2.getKey());
+        assertNotNull(result2.getSessionKey());
+        assertEquals(FILE_TEXT,s);
     }
 
 }
