@@ -97,7 +97,6 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
         try (InputStream is = Objects.requireNonNull(inputStream,"Expected input stream");
              T os = Objects.requireNonNull(cipherStream, "Expected cipher stream")) {
             SymmetricSecretKey secretKey = SymmetricSecretKey.newInstance();
-            AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
 
             // Encrypt session key with public key
             Cipher cipher = Cipher.getInstance(ALGORITHM);
@@ -110,6 +109,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             os.write(sessionKeyBytes);
 
             // Now encrypt message with AES
+            AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
             StreamCryptographyResult<SymmetricSecretKey,T> aesResult = aes.encrypt(secretKey,is,os);
 
             return createStreamResult(pk,sessionKeyBytes,aesResult.getStream());
