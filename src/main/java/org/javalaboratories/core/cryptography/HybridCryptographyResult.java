@@ -21,12 +21,12 @@ import java.util.Base64;
 
 public interface HybridCryptographyResult {
 
-    default Maybe<byte[]> getCipherKey() {
+    default Maybe<byte[]> getSessionKey() {
         return Maybe.empty();
     }
 
     default String geCipherKeyAsBase64() {
-        return getCipherKey()
+        return getSessionKey()
                 .map(b -> Base64.getEncoder().encodeToString(b))
                 .orElseThrow(() -> new CryptographyException("Failed encode cipher key"));
     }

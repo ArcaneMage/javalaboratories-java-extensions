@@ -151,8 +151,8 @@ public interface RsaHybridCryptography {
                     return result.getKey();
                 }
                 @Override
-                public Maybe<byte[]> getCipherKey() {
-                   return result.getCipherKey();
+                public Maybe<byte[]> getSessionKey() {
+                   return result.getSessionKey();
                 }
             };
         } catch (IOException e) {
@@ -189,8 +189,8 @@ public interface RsaHybridCryptography {
                     return result.getKey();
                 }
                 @Override
-                public Maybe<byte[]> getCipherKey() {
-                   return result.getCipherKey();
+                public Maybe<byte[]> getSessionKey() {
+                   return result.getSessionKey();
                 }
             };
         } catch (IOException e) {

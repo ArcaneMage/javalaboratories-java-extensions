@@ -78,9 +78,9 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             StreamCryptographyResult<PublicKey, ByteArrayOutputStream> result =
                     encrypt(publicKey,new ByteArrayInputStream(s.getBytes()),new ByteArrayOutputStream());
 
-            byte[] cipherKeyBytes = result.getCipherKey()
+            byte[] sessionKeyBytes = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
-            return createStringResult(pk,cipherKeyBytes,result.getStream().toByteArray(),null);
+            return createStringResult(pk,sessionKeyBytes,result.getStream().toByteArray(),null);
         } catch (CryptographyException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
@@ -102,17 +102,17 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             // Encrypt session key with public key
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE,pk);
-            byte[] cipherKeyBytes = cipher.doFinal(secretKey.getEncoded());
+            byte[] sessionKeyBytes = cipher.doFinal(secretKey.getEncoded());
 
             // Write the RSA encrypted session key to the output stream first
-            byte[] cipherKeyBytesSz = Bytes.toByteArray(cipherKeyBytes.length);
-            os.write(cipherKeyBytesSz);
-            os.write(cipherKeyBytes);
+            byte[] sessionKeyBytesSz = Bytes.toByteArray(sessionKeyBytes.length);
+            os.write(sessionKeyBytesSz);
+            os.write(sessionKeyBytes);
 
             // Now encrypt message with AES
             StreamCryptographyResult<SymmetricSecretKey,T> aesResult = aes.encrypt(secretKey,is,os);
 
-            return createStreamResult(pk,cipherKeyBytes,aesResult.getStream());
+            return createStreamResult(pk,sessionKeyBytes,aesResult.getStream());
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt stream",e);
         } catch (IOException e) {
@@ -131,11 +131,11 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             StreamCryptographyResult<PrivateKey, ByteArrayOutputStream> result =
                     decrypt(privateKey,new ByteArrayInputStream(Base64.getDecoder().decode(s)),new ByteArrayOutputStream());
 
-            byte[] cipherKeyBytes = result.getCipherKey()
+            byte[] sessionKeyBytes = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
             byte[] bytes = result.getStream().toByteArray();
 
-            return createStringResult(pk,cipherKeyBytes,bytes,new String(bytes));
+            return createStringResult(pk,sessionKeyBytes,bytes,new String(bytes));
         } catch (CryptographyException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
@@ -170,7 +170,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
         }
     }
 
-    private <K extends Key> StringCryptographyResult<K> createStringResult(final K key, final byte[] cipherKey,
+    private <K extends Key> StringCryptographyResult<K> createStringResult(final K key, final byte[] sessionKey,
                                                                            final byte[] bytes, final String text) {
         return new StringCryptographyResult<>() {
             @Override
@@ -186,14 +186,14 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
                 return Maybe.ofNullable(text);
             }
             @Override
-            public Maybe<byte[]> getCipherKey() {
-                return Maybe.of(cipherKey);
+            public Maybe<byte[]> getSessionKey() {
+                return Maybe.of(sessionKey);
             }
         };
     }
 
     private <K extends Key, T extends OutputStream> StreamCryptographyResult<K,T> createStreamResult(final K key,
-                                                                                                     final byte[]cipherKey,
+                                                                                                     final byte[]sessionKey,
                                                                                                      final T stream) {
         return new StreamCryptographyResult<>() {
             @Override
@@ -205,14 +205,14 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
                 return key;
             }
             @Override
-            public Maybe<byte[]> getCipherKey() {
-                return Maybe.of(cipherKey);
+            public Maybe<byte[]> getSessionKey() {
+                return Maybe.of(sessionKey);
             }
         };
     }
 
     private byte[] readSessionKeyFromStream(InputStream stream) throws IOException {
-        byte[] b = new byte[4]; // 32 it number encoded
+        byte[] b = new byte[4]; // 32bit number encoded
         if (stream.read(b) == -1)
             throw new IOException("Failed to read session key size in stream");
         int sessionKeySize = Bytes.fromBytes(b);
