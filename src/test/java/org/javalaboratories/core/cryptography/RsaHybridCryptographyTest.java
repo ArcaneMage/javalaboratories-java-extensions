@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *     }
  * </pre>
  */
-public class RsaAsymmetricCryptographyTest {
+public class RsaHybridCryptographyTest {
 
     private static final String PRIVATE_KEY_FILE = "rsa-private-key-pkcs8.pem";
     private static final String PUBLIC_KEY_FILE = "rsa-public-key.pem";
@@ -55,7 +55,7 @@ public class RsaAsymmetricCryptographyTest {
 
     @BeforeEach
     public void setup() throws URISyntaxException {
-        ClassLoader classLoader = RsaAsymmetricCryptographyTest.class.getClassLoader();
+        ClassLoader classLoader = RsaHybridCryptographyTest.class.getClassLoader();
         File privateKeyfile = Paths.get(classLoader.getResource(PRIVATE_KEY_FILE).toURI()).toFile();
         File publicKeyfile = Paths.get(classLoader.getResource(PUBLIC_KEY_FILE).toURI()).toFile();
 
@@ -102,7 +102,7 @@ public class RsaAsymmetricCryptographyTest {
 
     @Test
     public void testFileCryptography_Pass() throws URISyntaxException, IOException {
-        ClassLoader classLoader = RsaAsymmetricCryptographyTest.class.getClassLoader();
+        ClassLoader classLoader = RsaHybridCryptographyTest.class.getClassLoader();
         File file = Paths.get(classLoader.getResource(AES_UNENCRYPTED_FILE).toURI()).toFile();
         File cipherFile = Paths.get(classLoader.getResource(RSA_ENCRYPTED_TEST_FILE).toURI()).toFile();
         File decipheredFile = Paths.get(classLoader.getResource(RSA_UNENCRYPTED_TEST_FILE).toURI()).toFile();
