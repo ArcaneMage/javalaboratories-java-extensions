@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BytesTest {
@@ -54,5 +55,31 @@ public class BytesTest {
         byte[] result = Bytes.trimRight(SOURCE_BYTES,3);
 
         assertTrue(Arrays.equals(new byte[]{1,2,3,4,5,6,7}, result));
+    }
+
+    @Test
+    public void testToByteArray() {
+        byte[] bytes = Bytes.toByteArray(0xAABBCCDD);
+        byte[] bytes2 = Bytes.toByteArray(0xFFFFFFFF);
+        byte[] bytes3 = Bytes.toByteArray(0x00000002);
+
+        assertTrue(Arrays.equals(new byte[]{(byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD},bytes));
+        assertTrue(Arrays.equals(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF},bytes2));
+        assertTrue(Arrays.equals(new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x02},bytes3));
+    }
+
+    @Test
+    public void testFromBytes() {
+        byte[] bytes = new byte[]{(byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD};
+        byte[] bytes2 = new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF};
+        byte[] bytes3 = new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x02};
+
+        int value = Bytes.fromBytes(bytes);
+        int value2 = Bytes.fromBytes(bytes2);
+        int value3 = Bytes.fromBytes(bytes3);
+
+        assertEquals(0xAABBCCDD,value);
+        assertEquals(0xFFFFFFFF,value2);
+        assertEquals(0x00000002,value3);
     }
 }

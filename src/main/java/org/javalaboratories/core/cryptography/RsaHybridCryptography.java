@@ -107,7 +107,6 @@ public interface RsaHybridCryptography {
      * privateKey}.
      *
      * @param privateKey the key with which to decrypt the {@code cipherStream}.
-     * @param cipherKey the RSA encrypted cipher key in {@code Base64} form.
      * @param cipherStream the {@code InputStream} to be decrypted, the {@code ciphertext}.
      * @param outputStream the output of the deciphered text/data.
      *
@@ -117,7 +116,6 @@ public interface RsaHybridCryptography {
      * @throws NullPointerException whenever parameters are null.
      */
     <K extends PrivateKey, T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K privateKey,
-                                                                                         final String cipherKey,
                                                                                          final InputStream cipherStream,
                                                                                          final T outputStream);
 
@@ -161,7 +159,6 @@ public interface RsaHybridCryptography {
      * Decrypts the {@code File} using RSA algorithm with the given {@code privateKey}.
      *
      * @param privateKey the key with which to decrypt the {@code source}.
-     * @param cipherKey the RSA encrypted cipher key in {@code Base64} form.
      * @param cipherFile the input file of the {@code ciphertext}.
      * @param output the output of the deciphered text/data.
      *
@@ -170,13 +167,13 @@ public interface RsaHybridCryptography {
      * @throws CryptographyException cryptography failure.
      * @throws NullPointerException whenever parameters are null.
      */
-    default <K extends PrivateKey> FileCryptographyResult<K> decrypt(final K privateKey, final String cipherKey,
+    default <K extends PrivateKey> FileCryptographyResult<K> decrypt(final K privateKey,
                                                                      final File cipherFile, File output) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
         try (InputStream is = new FileInputStream(Objects.requireNonNull(cipherFile,"Expected cipher file"));
              OutputStream os = new FileOutputStream(Objects.requireNonNull(output,"Expected output file"))) {
             StreamCryptographyResult<K,OutputStream> result = decrypt(Objects.requireNonNull(pk,
-                    "Expected key object"), cipherKey, is, os);
+                    "Expected key object"), is, os);
             return new FileCryptographyResult<>() {
                 @Override
                 public File getFile() {

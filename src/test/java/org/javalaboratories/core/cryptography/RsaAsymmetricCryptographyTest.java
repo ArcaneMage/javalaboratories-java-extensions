@@ -46,8 +46,11 @@ public class RsaAsymmetricCryptographyTest {
             "3iGrPlMO/ixq7XdVuPe2jrfQMRno5J4Dyy+JwEYNmwwWO9tH1kmBP9yirqKY5wF9KHtdTvqwr4EowwK4Xlqb8d0lF3ASzJXnsed+3FgAig6" +
             "Q4PwQt0K7MvQH48IGVM16FY75bDD386SAHWnAAnOgS18+XssZYgyEpGfnaaY3D3AERVCeSvt1zM/ni4IpqCEqK1HV++vbVk2NJLuEmljFRg" +
             "5ZVkZ/4RqFKPUc/XzyU26JWAuBEbc47qqC69+cCCzQ0IbGdQH08g==";
-    private static final String CIPHERTEXT="xCJQkWTO68ohV5i/tnOnTqogJZGWp+kZEieSjoyHnLKK9DUewsfxF7897ldp35hnd9H+VcBss+/V" +
-            "nh7EKO//BfGCs0ygxKSTeJmOctscmceL7HUR6tVjKbuyGlcJiA22vUFeGJQ/Qz+BvBKJCuuh+g==";
+    private static final String CIPHERTEXT="AAABAIE6T+0umXOuKxAae8iD3Vd1JWL6s6Bldj7wti5C2bT/IQ+V2ICzRV34PYJfxi5TjTun/4Sp" +
+            "JYDER7tGO+/evm++QOC2D76ic0nlU+PlcJT3WwR5teiMJHl9cSvYczQsPuayBSKRIhrVra5KiCEs0pHWpej5rfUOIA+baC+qyoazfdxLWgg" +
+            "wTe6x8KuEGpvB/7TTL0mEebpZAbVIegK0KBCcxzb6MTRKOkSJBo2qYLYissq7Y5ey8xdJf7mgUVevL68f8anIeMzyMYiaRSV03Q/84e+Q4E" +
+            "AD7v6F7A1Qd/yecyu+Ppi+LRAOSfcy3DGw/YpkHJOS7S8vboNHCHAufQCrGLRi8aw0AKI4eKutO4vexP04WviBO9x6N/QSjxdTNZ4QLFmlH" +
+            "0sd1jsHPCZ4Aw11z944a9xWebwzEVaeGroxU0ywz9Zq4Vflh1gxY4LObguFd1Xcy4qopfhdiZ9trEfhtu7G+vvmQwr64J966LvU";
     private static final String TEXT = "The quick brown fox jumped over the fence and then back again, just for a laugh.";
     private static final String FILE_TEXT = "This is a test file with encrypted data -- TOP SECRET!";
     private RsaHybridCryptography cryptography;
@@ -87,7 +90,7 @@ public class RsaAsymmetricCryptographyTest {
                 .encrypt(publicKey, new ByteArrayInputStream(TEXT.getBytes()), new ByteArrayOutputStream());
 
         StreamCryptographyResult<PrivateKey,ByteArrayOutputStream> result2 = cryptography
-                .decrypt(privateKey,result.geCipherKeyAsBase64(),new ByteArrayInputStream(result.getStream().toByteArray()),
+                .decrypt(privateKey,new ByteArrayInputStream(result.getStream().toByteArray()),
                         new ByteArrayOutputStream());
 
         assertEquals(TEXT,result2.getStream().toString());
@@ -96,7 +99,7 @@ public class RsaAsymmetricCryptographyTest {
     @Test
     public void testStreamDecryption_Pass() {
         StreamCryptographyResult<PrivateKey,ByteArrayOutputStream> result = cryptography
-                .decrypt(privateKey, CIPHER_KEY, new ByteArrayInputStream(Base64.getDecoder().decode(CIPHERTEXT)),
+                .decrypt(privateKey, new ByteArrayInputStream(Base64.getDecoder().decode(CIPHERTEXT)),
                         new ByteArrayOutputStream());
 
         assertEquals(TEXT,result.getStream().toString());
@@ -109,11 +112,10 @@ public class RsaAsymmetricCryptographyTest {
         File cipherFile = Paths.get(classLoader.getResource(RSA_ENCRYPTED_TEST_FILE).toURI()).toFile();
         File decipheredFile = Paths.get(classLoader.getResource(RSA_UNENCRYPTED_TEST_FILE).toURI()).toFile();
 
-        FileCryptographyResult<PublicKey> result = cryptography
-                .encrypt(publicKey,file,cipherFile);
+        cryptography.encrypt(publicKey,file,cipherFile);
 
         FileCryptographyResult<PrivateKey> result2 = cryptography
-                .decrypt(privateKey,result.geCipherKeyAsBase64(),cipherFile,decipheredFile);
+                .decrypt(privateKey,cipherFile,decipheredFile);
 
         String s = Files.lines(result2.getFile().toPath())
                 .collect(Collectors.joining());

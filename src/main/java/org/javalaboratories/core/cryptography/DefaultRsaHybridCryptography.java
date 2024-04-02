@@ -17,6 +17,7 @@ package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+import org.javalaboratories.core.util.Bytes;
 
 import javax.crypto.Cipher;
 import java.io.IOException;
@@ -94,11 +95,19 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             SymmetricSecretKey secretKey = SymmetricSecretKey.newInstance();
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
 
-            StreamCryptographyResult<SymmetricSecretKey,T> aesResult = aes.encrypt(secretKey,is,os);
-
+            // Encrypt session key with public key
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE,pk);
             byte[] cipherKeyBytes = cipher.doFinal(secretKey.getEncoded());
+
+            // Write the RSA encrypted session key to the output stream first
+            byte[] cipherKeyBytesSz = Bytes.toByteArray(cipherKeyBytes.length);
+            os.write(cipherKeyBytesSz);
+            os.write(cipherKeyBytes);
+
+            // Now encrypt message with AES
+            StreamCryptographyResult<SymmetricSecretKey,T> aesResult = aes.encrypt(secretKey,is,os);
+
             return createStreamResult(pk,cipherKeyBytes,aesResult.getStream());
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt stream",e);
@@ -134,21 +143,23 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
      */
     @Override
     public <K extends PrivateKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K privateKey,
-                                                                                               final String cipherKey,
                                                                                                final InputStream cipherStream,
                                                                                                T outputStream) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
-        String ck = Objects.requireNonNull(cipherKey,"Expected hybrid cipher key");
         try (InputStream is = Objects.requireNonNull(cipherStream,"Expected cipher stream");
              T os = Objects.requireNonNull(outputStream,"Expected out stream")) {
+
+            // Read the RSA session key first, decrypt and derive AES secret key
+            byte[] encryptedSessionKey = readSessionKeyFromStream(cipherStream);
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE,pk);
-            byte[] cipherKeyBytes = cipher.doFinal(Base64.getDecoder().decode(ck));
-            SymmetricSecretKey secretKey = SymmetricSecretKey.from(cipherKeyBytes);
+            byte[] sessionKeyBytes = cipher.doFinal(encryptedSessionKey);
+            SymmetricSecretKey secretKey = SymmetricSecretKey.from(sessionKeyBytes);
 
+            // Decrypt AES message with AES secret key
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
             StreamCryptographyResult<SymmetricSecretKey,T> aesResult = aes.decrypt(secretKey,is,os);
-            return createStreamResult(pk,cipherKeyBytes,aesResult.getStream());
+            return createStreamResult(pk,sessionKeyBytes,aesResult.getStream());
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt stream",e);
         } catch (IOException e) {
@@ -195,5 +206,18 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
                 return Maybe.of(cipherKey);
             }
         };
+    }
+
+    private byte[] readSessionKeyFromStream(InputStream stream) throws IOException {
+        byte[] b = new byte[4]; // 32 it number encoded
+        if (stream.read(b) == -1)
+            throw new IOException("Failed to read session key size in stream");
+        int sessionKeySize = Bytes.fromBytes(b);
+        if (sessionKeySize < 128 || sessionKeySize > 1024)
+            throw new IOException("Failed to read session key: corrupted");
+        byte[] result = new byte[sessionKeySize];
+        if (stream.read(result) == -1)
+            throw new IOException("Failed to read encrypted session key in stream");
+        return result;
     }
 }

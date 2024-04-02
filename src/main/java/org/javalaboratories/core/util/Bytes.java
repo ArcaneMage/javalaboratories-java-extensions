@@ -15,6 +15,10 @@
  */
 package org.javalaboratories.core.util;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.util.Objects;
+
 /**
  * Bytes class containing useful byte array operations.
  */
@@ -73,6 +77,37 @@ public final class Bytes {
         byte[] result = new byte[source.length - bytes];
         System.arraycopy(source,0,result,0,source.length - bytes);
         return result;
+    }
+
+    /**
+     * Converts an integer value into a byte array.
+     *
+     * @param value integer value to be transformed.
+     * @return byte array.
+     */
+    public static byte[] toByteArray(int value) {
+        return new byte[] {
+                (byte)(value >> 24),
+                (byte)(value >> 16),
+                (byte)(value >> 8),
+                (byte)value
+        };
+    }
+
+    /**
+     * Converts four bytes (32 bits) to an integer.
+     * <p>
+     * The byte array would've been created by the {@link Bytes#toByteArray(int)}
+     * function.
+     *
+     * @param bytes the byte array with encoded integer.
+     * @return the integer
+     */
+    public static int fromBytes(byte[] bytes) {
+        byte[] b = Objects.requireNonNull(bytes);
+        if (b.length != 4)
+            throw new IllegalArgumentException("Expected 32 bit array");
+        return (((bytes[0] & 0xFF) << 24) + ((bytes[1] & 0xFF) << 16) + ((bytes[2] & 0xFF) << 8) + (bytes[3] & 0xFF));
     }
 
     private Bytes() {}
