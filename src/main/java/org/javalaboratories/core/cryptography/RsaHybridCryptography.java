@@ -98,8 +98,7 @@ public interface RsaHybridCryptography {
      * @throws CryptographyException cryptography failure.
      * @throws NullPointerException whenever parameters are null.
      */
-    <K extends PrivateKey> StringCryptographyResult<K> decrypt(final K privateKey, final String cipherKey,
-                                                               final String ciphertext);
+    <K extends PrivateKey> StringCryptographyResult<K> decrypt(final K privateKey, final String ciphertext);
 
 
     /**

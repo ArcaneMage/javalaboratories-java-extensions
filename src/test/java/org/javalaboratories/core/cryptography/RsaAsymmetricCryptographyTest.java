@@ -42,10 +42,6 @@ public class RsaAsymmetricCryptographyTest {
     private static final String RSA_ENCRYPTED_TEST_FILE = "rsa-encrypted-test-file.tmp";
     private static final String RSA_UNENCRYPTED_TEST_FILE = "rsa-unencrypted-test-file.tmp";
 
-    private static final String CIPHER_KEY="WpmHWkCker2ZpoNZViBEUc/oLm8NOKgDFjN0egfjw727rdGLQ/PC3GfVLtK/+t2c3LnyQi3mmsuy" +
-            "3iGrPlMO/ixq7XdVuPe2jrfQMRno5J4Dyy+JwEYNmwwWO9tH1kmBP9yirqKY5wF9KHtdTvqwr4EowwK4Xlqb8d0lF3ASzJXnsed+3FgAig6" +
-            "Q4PwQt0K7MvQH48IGVM16FY75bDD386SAHWnAAnOgS18+XssZYgyEpGfnaaY3D3AERVCeSvt1zM/ni4IpqCEqK1HV++vbVk2NJLuEmljFRg" +
-            "5ZVkZ/4RqFKPUc/XzyU26JWAuBEbc47qqC69+cCCzQ0IbGdQH08g==";
     private static final String CIPHERTEXT="AAABAIE6T+0umXOuKxAae8iD3Vd1JWL6s6Bldj7wti5C2bT/IQ+V2ICzRV34PYJfxi5TjTun/4Sp" +
             "JYDER7tGO+/evm++QOC2D76ic0nlU+PlcJT3WwR5teiMJHl9cSvYczQsPuayBSKRIhrVra5KiCEs0pHWpej5rfUOIA+baC+qyoazfdxLWgg" +
             "wTe6x8KuEGpvB/7TTL0mEebpZAbVIegK0KBCcxzb6MTRKOkSJBo2qYLYissq7Y5ey8xdJf7mgUVevL68f8anIeMzyMYiaRSV03Q/84e+Q4E" +
@@ -72,14 +68,13 @@ public class RsaAsymmetricCryptographyTest {
     public void testStringEncryption_Pass() {
         StringCryptographyResult<PublicKey> result = cryptography.encrypt(publicKey,TEXT);
 
-        StringCryptographyResult<PrivateKey> stringResult = cryptography.decrypt(privateKey,result.geCipherKeyAsBase64(),
-                result.getBytesAsBase64());
+        StringCryptographyResult<PrivateKey> stringResult = cryptography.decrypt(privateKey, result.getBytesAsBase64());
         assertEquals(TEXT, stringResult.getString().orElseThrow());
     }
 
     @Test
     public void testStringDecryption_Pass() {
-        StringCryptographyResult<PrivateKey> result = cryptography.decrypt(privateKey,CIPHER_KEY,CIPHERTEXT);
+        StringCryptographyResult<PrivateKey> result = cryptography.decrypt(privateKey,CIPHERTEXT);
 
         assertEquals(TEXT, result.getString().orElseThrow());
     }

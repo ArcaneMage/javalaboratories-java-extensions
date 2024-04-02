@@ -20,9 +20,7 @@ import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 import org.javalaboratories.core.util.Bytes;
 
 import javax.crypto.Cipher;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.PrivateKey;
@@ -69,15 +67,13 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
         K pk = Objects.requireNonNull(publicKey,"Expected public key");
         String s = Objects.requireNonNull(string,"Expected string to encrypt");
         try {
-            SymmetricSecretKey secretKey = SymmetricSecretKey.newInstance();
-            AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
-            StringCryptographyResult<SymmetricSecretKey> aesResult = aes.encrypt(secretKey,s);
+            StreamCryptographyResult<PublicKey, ByteArrayOutputStream> result =
+                    encrypt(publicKey,new ByteArrayInputStream(s.getBytes()),new ByteArrayOutputStream());
 
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.ENCRYPT_MODE,pk);
-            byte[] cipherKeyBytes = cipher.doFinal(secretKey.getEncoded());
-            return createStringResult(pk,cipherKeyBytes,aesResult.getBytes(),null);
-        } catch (GeneralSecurityException e) {
+            byte[] cipherKeyBytes = result.getCipherKey()
+                    .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
+            return createStringResult(pk,cipherKeyBytes,result.getStream().toByteArray(),null);
+        } catch (CryptographyException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
     }
@@ -120,20 +116,19 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
      * {@inheritDoc}
      */
     @Override
-    public <K extends PrivateKey> StringCryptographyResult<K> decrypt(final K privateKey, final String cipherKey, final String ciphertext) {
+    public <K extends PrivateKey> StringCryptographyResult<K> decrypt(final K privateKey, final String ciphertext) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
-        String ck = Objects.requireNonNull(cipherKey,"Expected hybrid cipher key");
         String s = Objects.requireNonNull(ciphertext,"Expected string to decrypt");
         try {
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE,pk);
-            byte[] cipherKeyBytes = cipher.doFinal(Base64.getDecoder().decode(ck));
-            SymmetricSecretKey secretKey = SymmetricSecretKey.from(cipherKeyBytes);
+            StreamCryptographyResult<PrivateKey, ByteArrayOutputStream> result =
+                    decrypt(privateKey,new ByteArrayInputStream(Base64.getDecoder().decode(s)),new ByteArrayOutputStream());
 
-            AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
-            StringCryptographyResult<SymmetricSecretKey> result = aes.decrypt(secretKey,s);
-            return createStringResult(pk,null,result.getBytes(),new String(result.getBytes()));
-        } catch (GeneralSecurityException e) {
+            byte[] cipherKeyBytes = result.getCipherKey()
+                    .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
+            byte[] bytes = result.getStream().toByteArray();
+
+            return createStringResult(pk,cipherKeyBytes,bytes,new String(bytes));
+        } catch (CryptographyException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
     }
