@@ -56,8 +56,6 @@ public class RsaHybridCryptographyTest {
 
     private RsaHybridCryptography cryptography;
 
-    private PrivateKey wrongPrivateKey;
-    private PublicKey wrongPublicKey;
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
@@ -74,11 +72,6 @@ public class RsaHybridCryptographyTest {
         privateKey = RsaKeys.getPrivateKeyFrom(privateKeyfile);
         publicKey = RsaKeys.getPublicKeyFrom(publicKeyfile);
 
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        KeyPair keyPair = generator.generateKeyPair();
-        wrongPrivateKey = keyPair.getPrivate();
-        wrongPublicKey = keyPair.getPublic();
-
         cryptography = CryptographyFactory.getAsymmetricHybridCryptography();
 
         when(mockInputStream.read(any())).thenThrow(IOException.class);
@@ -93,7 +86,7 @@ public class RsaHybridCryptographyTest {
         StringCryptographyResult<PrivateKey> stringResult = cryptography.decrypt(privateKey, result.getBytesAsBase64());
 
         assertNotNull(result.getKey());
-        assertNotNull(result.getSessionKey());
+        assertTrue(result.getSessionKey().isPresent());
         assertEquals(TEXT, stringResult.getString().orElseThrow());
     }
 
@@ -114,8 +107,12 @@ public class RsaHybridCryptographyTest {
     }
 
     @Test
-    public void testStringDecryption_wrongPrivateKey_Fail() {
-        assertThrows(CryptographyException.class, () -> cryptography.decrypt(wrongPrivateKey,CIPHERTEXT));
+    public void testStringDecryption_withGeneralSecurityException_Fail() {
+        try (MockedStatic<Cipher> cipher = Mockito.mockStatic(Cipher.class)) {
+            cipher.when(() -> Cipher.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
+
+            assertThrows(CryptographyException.class, () -> cryptography.decrypt(privateKey, CIPHERTEXT));
+        }
     }
 
     @Test
@@ -128,7 +125,7 @@ public class RsaHybridCryptographyTest {
                         new ByteArrayOutputStream());
 
         assertNotNull(result.getKey());
-        assertNotNull(result.getSessionKey());
+        assertTrue(result.getSessionKey().isPresent());
         assertEquals(TEXT,result2.getStream().toString());
     }
 
@@ -186,10 +183,10 @@ public class RsaHybridCryptographyTest {
 
         assertNotNull(result.getFile());
         assertNotNull(result.getKey());
-        assertNotNull(result.getSessionKey());
+        assertTrue(result.getSessionKey().isPresent());
 
         assertNotNull(result2.getKey());
-        assertNotNull(result2.getSessionKey());
+        assertTrue(result2.getSessionKey().isPresent());
         assertEquals(FILE_TEXT,s);
     }
 

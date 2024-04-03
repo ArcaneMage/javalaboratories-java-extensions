@@ -40,7 +40,7 @@ public interface AesCryptography {
      * Decrypts string ciphers with the given {@link SymmetricSecretKey} object.
      *
      * @param key contains private key with which to decrypt the data.
-     * @param cipherText the cipher text to be decrypted.
+     * @param cipherText the cipher text to be decrypted in Base64 format.
      * @return a {@link StringCryptographyResult} encapsulating encryption
      * key and deciphered string.
      * @throws NullPointerException when parameters are null.
