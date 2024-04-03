@@ -17,7 +17,13 @@ package org.javalaboratories.core.cryptography.keys;
 
 import org.javalaboratories.core.cryptography.CryptographyException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -28,10 +34,23 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * This utility class provides useful tools with which to read RSA keys from
+ * file or stream.
+ * <p>
+ * Both public and private key file/stream formats are expected to be in PEM
+ * or CRT form.
+ */
 public final class RsaKeys {
 
     private static final String ALGORITHM = "RSA";
 
+    /**
+     * Reads private RSA key from the given file.
+     *
+     * @param file the RSA key file
+     * @return an instance of the PrivateKey.
+     */
     public static PrivateKey getPrivateKeyFrom(final File file) {
         try {
             return getPrivateKeyFrom(new FileInputStream(Objects.requireNonNull(file,"Expected file object")));
@@ -40,6 +59,12 @@ public final class RsaKeys {
         }
     }
 
+    /**
+     * Reads private RSA key from the given file.
+     *
+     * @param inputStream the RSA key stream -- expected format is PEM/CRT.
+     * @return an instance of the PrivateKey.
+     */
     public static PrivateKey getPrivateKeyFrom(final InputStream inputStream) {
         InputStream is = Objects.requireNonNull(inputStream);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
@@ -54,6 +79,12 @@ public final class RsaKeys {
         }
     }
 
+    /**
+     * Reads public RSA key from the given file.
+     *
+     * @param file the RSA key file
+     * @return an instance of the PublicKey.
+     */
     public static PublicKey getPublicKeyFrom(final File file) {
         try {
             return getPublicKeyFrom(new FileInputStream(Objects.requireNonNull(file,"Expected file object")));
@@ -62,6 +93,12 @@ public final class RsaKeys {
         }
     }
 
+    /**
+     * Reads public RSA key from the given file.
+     *
+     * @param inputStream the RSA key stream -- expected format is PEM/CRT.
+     * @return an instance of the PublicKey.
+     */
     public static PublicKey getPublicKeyFrom(final InputStream inputStream) {
         InputStream is = Objects.requireNonNull(inputStream);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
@@ -77,11 +114,15 @@ public final class RsaKeys {
     }
 
     private static byte[] keyDataToBytes(final BufferedReader reader) {
-        return reader.lines()
-            .map(l -> l.contains("BEGIN") || l.contains("END") ? "": l)
-            .map(l -> l.replace(System.lineSeparator(),""))
-            .collect(Collectors.collectingAndThen(Collectors.joining(),
-                    s -> Base64.getDecoder().decode(s)));
+        try {
+            return reader.lines()
+                    .map(l -> l.contains("BEGIN") || l.contains("END") ? "" : l)
+                    .map(l -> l.replace(System.lineSeparator(), ""))
+                    .collect(Collectors.collectingAndThen(Collectors.joining(),
+                            s -> Base64.getDecoder().decode(s)));
+        } catch (UncheckedIOException e) {
+            throw new CryptographyException("Failed to read key data in stream",e);
+        }
     }
 
     private RsaKeys() {}
