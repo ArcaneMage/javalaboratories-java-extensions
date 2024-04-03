@@ -21,9 +21,7 @@ import org.javalaboratories.core.util.Bytes;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -53,19 +51,13 @@ public final class DefaultAesCryptography implements AesCryptography {
     @Override
     public <K extends SymmetricSecretKey> StringCryptographyResult<K> decrypt(final K key, final String cipherText) {
         String  ct = Objects.requireNonNull(cipherText, "Expected encrypted cipher text");
-        SymmetricSecretKey k = Objects.requireNonNull(key, "Expected key object");
+        K k = Objects.requireNonNull(key, "Expected key object");
         try {
             byte[] ctBytes = Base64.getDecoder().decode(ct);
-
-            // Read IV Header
-            IvParameterSpec iv = new IvParameterSpec(ctBytes,0,HEADER_SIZE);
-
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE,k,iv);
-            byte[] bytes = cipher.doFinal(Bytes.trimLeft(ctBytes,HEADER_SIZE));
-            return createStringResult(key,bytes,new String(bytes));
-        } catch (GeneralSecurityException e) {
-            throw new CryptographyException("Failed to decrypt cipher text",e);
+            StreamCryptographyResult<K, ByteArrayOutputStream> result =
+                    decrypt(k,new ByteArrayInputStream(ctBytes),new ByteArrayOutputStream());
+            byte[] decryptedBytes = result.getStream().toByteArray();
+            return createStringResult(key,decryptedBytes,new String(decryptedBytes));
         } catch (IllegalArgumentException e) {
             throw new CryptographyException("Failed to decrypt encoded cipher text",e);
         }
@@ -101,19 +93,11 @@ public final class DefaultAesCryptography implements AesCryptography {
     public <K extends SymmetricSecretKey> StringCryptographyResult<K> encrypt(final K key, final String string) {
         K k = Objects.requireNonNull(key, "Expected password");
         String s = Objects.requireNonNull(string, "Expected string to encrypt");
-        try {
-            IvParameterSpec iv = generateIvParameterSpec();
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(ENCRYPT_MODE,k,iv);
-            byte[] bytes = cipher.doFinal(s.getBytes());
 
-            // Prefix IV Header
-            bytes = Bytes.concat(iv.getIV(),bytes);
+        StreamCryptographyResult<K,ByteArrayOutputStream> result =
+                encrypt(k,new ByteArrayInputStream(s.getBytes()), new ByteArrayOutputStream());
 
-            return createStringResult(k,bytes,null);
-        } catch (GeneralSecurityException e) {
-            throw new CryptographyException("Failed to encrypt string",e);
-        }
+        return createStringResult(k,result.getStream().toByteArray(),null);
     }
 
     /**

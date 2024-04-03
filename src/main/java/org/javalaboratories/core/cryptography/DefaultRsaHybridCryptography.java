@@ -79,8 +79,8 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
         K pk = Objects.requireNonNull(publicKey,"Expected public key");
         String s = Objects.requireNonNull(string,"Expected string to encrypt");
         try {
-            StreamCryptographyResult<PublicKey, ByteArrayOutputStream> result =
-                    encrypt(publicKey,new ByteArrayInputStream(s.getBytes()),new ByteArrayOutputStream());
+            StreamCryptographyResult<K, ByteArrayOutputStream> result =
+                    encrypt(pk,new ByteArrayInputStream(s.getBytes()),new ByteArrayOutputStream());
 
             byte[] sessionKeyBytes = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
@@ -132,8 +132,8 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
         String s = Objects.requireNonNull(ciphertext,"Expected string to decrypt");
         try {
-            StreamCryptographyResult<PrivateKey, ByteArrayOutputStream> result =
-                    decrypt(privateKey,new ByteArrayInputStream(Base64.getDecoder().decode(s)),new ByteArrayOutputStream());
+            StreamCryptographyResult<K, ByteArrayOutputStream> result =
+                    decrypt(pk,new ByteArrayInputStream(Base64.getDecoder().decode(s)),new ByteArrayOutputStream());
 
             byte[] sessionKeyBytes = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
