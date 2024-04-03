@@ -116,6 +116,11 @@ public class RsaHybridCryptographyTest {
     }
 
     @Test
+    public void testStringDecryption_withBase64Exception_Fail() {
+        assertThrows(CryptographyException.class, () -> cryptography.decrypt(privateKey, TEXT));
+    }
+
+    @Test
     public void testStreamEncryption_Pass() {
         StreamCryptographyResult<PublicKey,ByteArrayOutputStream> result = cryptography
                 .encrypt(publicKey, new ByteArrayInputStream(TEXT.getBytes()), new ByteArrayOutputStream());
