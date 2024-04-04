@@ -13,10 +13,9 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.cryptography.keys;
+package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.cryptography.CryptographyResult;
 
 import java.security.Key;
 import java.util.Objects;

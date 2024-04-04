@@ -15,8 +15,6 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.CryptographyResultImpl;
-
 import java.io.OutputStream;
 import java.security.Key;
 import java.util.Objects;

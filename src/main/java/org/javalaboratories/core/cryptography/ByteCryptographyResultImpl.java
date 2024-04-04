@@ -16,7 +16,6 @@
 package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.cryptography.keys.CryptographyResultImpl;
 
 import java.security.Key;
 import java.util.Objects;
