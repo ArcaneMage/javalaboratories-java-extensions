@@ -19,7 +19,7 @@ import java.io.OutputStream;
 import java.security.Key;
 import java.util.Objects;
 
-public final class StreamCryptographyResultImpl<K extends Key, T extends OutputStream> extends CryptographyResultImpl<K>
+public final class StreamCryptographyResultImpl<K extends Key, T extends OutputStream> extends SessionCryptographyResultImpl<K>
         implements StreamCryptographyResult<K,T> {
 
     private final T outputStream;

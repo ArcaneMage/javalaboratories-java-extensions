@@ -19,7 +19,7 @@ import org.javalaboratories.core.Maybe;
 
 import java.util.Base64;
 
-public interface HybridCryptographyResult {
+public interface SessionCryptographyResult {
 
     default Maybe<byte[]> getSessionKey() {
         return Maybe.empty();

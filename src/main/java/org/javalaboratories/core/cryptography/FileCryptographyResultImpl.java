@@ -19,7 +19,7 @@ import java.io.File;
 import java.security.Key;
 import java.util.Objects;
 
-public final class FileCryptographyResultImpl<K extends Key> extends CryptographyResultImpl<K>
+public final class FileCryptographyResultImpl<K extends Key> extends SessionCryptographyResultImpl<K>
         implements FileCryptographyResult<K> {
 
     private final File file;

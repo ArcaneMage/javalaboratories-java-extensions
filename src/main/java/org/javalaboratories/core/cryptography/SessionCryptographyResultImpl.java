@@ -15,19 +15,21 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import org.javalaboratories.core.Maybe;
 
 import java.security.Key;
-import java.util.Objects;
 
-public class CryptographyResultImpl<K extends Key> implements CryptographyResult<K> {
-    private final K key;
+public class SessionCryptographyResultImpl<K extends Key> extends CryptographyResultImpl<K> implements SessionCryptographyResult {
 
-    public CryptographyResultImpl(final K key) {
-        this.key = Objects.requireNonNull(key);
+    private final byte[] sessionKey;
+
+    public SessionCryptographyResultImpl(final K key, final byte[] sessionKey) {
+        super(key);
+        this.sessionKey = sessionKey;
     }
 
     @Override
-    public K getKey() {
-        return key;
+    public Maybe<byte[]> getSessionKey() {
+        return Maybe.ofNullable(sessionKey);
     }
 }

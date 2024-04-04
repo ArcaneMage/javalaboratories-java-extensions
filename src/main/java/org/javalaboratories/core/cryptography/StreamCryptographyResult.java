@@ -33,7 +33,8 @@ import java.security.Key;
  *
  * @param <T> type of output stream.
  */
-public interface StreamCryptographyResult<K extends Key,T extends OutputStream> extends CryptographyResult<K> {
+public interface StreamCryptographyResult<K extends Key,T extends OutputStream> extends CryptographyResult<K>,
+        SessionCryptographyResult {
 
     /**
      * @return decrypted/encrypted cipher text in the {@code output stream},

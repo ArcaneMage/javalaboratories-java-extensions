@@ -20,7 +20,7 @@ import org.javalaboratories.core.Maybe;
 import java.security.Key;
 import java.util.Objects;
 
-public final class ByteCryptographyResultImpl<K extends Key> extends CryptographyResultImpl<K>
+public final class ByteCryptographyResultImpl<K extends Key> extends SessionCryptographyResultImpl<K>
         implements ByteCryptographyResult<K> {
 
     private final byte[] bytes;

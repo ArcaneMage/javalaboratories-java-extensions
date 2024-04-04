@@ -26,7 +26,7 @@ import java.security.Key;
  * It encapsulates the {@link SymmetricSecretKey} that is associated with the
  * {@code cipher text}.
  */
-public interface CryptographyResult<K extends Key> extends HybridCryptographyResult {
+public interface CryptographyResult<K extends Key> {
 
     /**
      * @return the key that is associated with the {@code cipher text}.
