@@ -21,13 +21,11 @@ import java.util.Base64;
 
 public interface SessionCryptographyResult {
 
-    default Maybe<byte[]> getSessionKey() {
-        return Maybe.empty();
-    }
+    Maybe<byte[]> getSessionKey();
 
     default String getSessionKeyAsBase64() {
         return getSessionKey()
                 .map(b -> Base64.getEncoder().encodeToString(b))
-                .orElseThrow(() -> new CryptographyException("Failed to encode cipher key"));
+                .orElseThrow(() -> new CryptographyException("Failed to encode session key"));
     }
 }
