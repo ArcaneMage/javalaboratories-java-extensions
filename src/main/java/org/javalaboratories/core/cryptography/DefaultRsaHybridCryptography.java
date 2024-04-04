@@ -19,15 +19,12 @@ import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 import org.javalaboratories.core.util.Bytes;
 
 import javax.crypto.Cipher;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Base64;
 import java.util.Objects;
 
 /**

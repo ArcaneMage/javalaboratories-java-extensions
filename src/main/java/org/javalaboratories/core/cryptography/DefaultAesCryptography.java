@@ -22,7 +22,6 @@ import javax.crypto.spec.IvParameterSpec;
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Objects;
 
 import static javax.crypto.Cipher.ENCRYPT_MODE;
