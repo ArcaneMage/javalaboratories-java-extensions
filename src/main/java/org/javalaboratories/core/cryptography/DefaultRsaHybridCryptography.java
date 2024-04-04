@@ -90,9 +90,9 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
 
             // Now encrypt message with AES
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
-            StreamCryptographyResult<SymmetricSecretKey,T> aesResult = aes.encrypt(secretKey,is,os);
+            StreamCryptographyResult<SymmetricSecretKey,T> result = aes.encrypt(secretKey,is,os);
 
-            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,aesResult.getStream());
+            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,result.getStream());
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt stream",e);
         } catch (IOException e) {
@@ -120,8 +120,8 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
 
             // Decrypt AES message with AES secret key
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
-            StreamCryptographyResult<SymmetricSecretKey,T> aesResult = aes.decrypt(secretKey,is,os);
-            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,aesResult.getStream());
+            StreamCryptographyResult<SymmetricSecretKey,T> result = aes.decrypt(secretKey,is,os);
+            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,result.getStream());
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt stream",e);
         } catch (IOException e) {
