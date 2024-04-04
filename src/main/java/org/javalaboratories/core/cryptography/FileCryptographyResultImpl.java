@@ -15,10 +15,22 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+
 import java.io.File;
 import java.security.Key;
 import java.util.Objects;
 
+/**
+ * {@code CryptographyResult} object is returned from performing cryptographic
+ * operations with the {@link AesCryptography} object.
+ * <p>
+ * It encapsulates the {@link SymmetricSecretKey} and {@code File} that are
+ * associated with the {@code cipher text}.
+ * <p>
+ * This object is returned from performing cryptographic operations with {@code
+ * files}
+ */
 public final class FileCryptographyResultImpl<K extends Key> extends SessionCryptographyResultImpl<K>
         implements FileCryptographyResult<K> {
 
@@ -33,6 +45,9 @@ public final class FileCryptographyResultImpl<K extends Key> extends SessionCryp
         this.file = Objects.requireNonNull(file);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public File getFile() {
         return file;

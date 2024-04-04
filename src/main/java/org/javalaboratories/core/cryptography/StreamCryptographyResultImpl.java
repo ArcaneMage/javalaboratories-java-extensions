@@ -15,10 +15,25 @@
  */
 package org.javalaboratories.core.cryptography;
 
+import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+
 import java.io.OutputStream;
 import java.security.Key;
 import java.util.Objects;
 
+/**
+ * {@code CryptographyResult} object is returned from performing cryptographic
+ * operations with the {@link AesCryptography} and {@link RsaHybridCryptography}
+ * objects.
+ * <p>
+ * It encapsulates the {@link SymmetricSecretKey} and {@code stream} that are
+ * associated with the {@code cipher text}.
+ * <p>
+ * This object is returned from performing cryptographic operations with {@code
+ * streams}
+ *
+ * @param <T> type of output stream.
+ */
 public final class StreamCryptographyResultImpl<K extends Key, T extends OutputStream> extends SessionCryptographyResultImpl<K>
         implements StreamCryptographyResult<K,T> {
 
@@ -33,6 +48,9 @@ public final class StreamCryptographyResultImpl<K extends Key, T extends OutputS
         this.outputStream = Objects.requireNonNull(outputStream);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public T getStream() {
         return outputStream;

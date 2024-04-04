@@ -16,10 +16,22 @@
 package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.Maybe;
+import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
 import java.security.Key;
 import java.util.Objects;
 
+/**
+ * {@code CryptographyResult} object is returned from performing cryptographic
+ * operations with the {@link AesCryptography} and {@link RsaHybridCryptography}
+ * objects.
+ * <p>
+ * It encapsulates the {@link SymmetricSecretKey} and {@code String} that are
+ * associated with the {@code cipher text}.
+ * <p>
+ * This object is returned from performing cryptographic operations with {@code
+ * String} objects.
+ */
 public final class ByteCryptographyResultImpl<K extends Key> extends SessionCryptographyResultImpl<K>
         implements ByteCryptographyResult<K> {
 
@@ -36,11 +48,17 @@ public final class ByteCryptographyResultImpl<K extends Key> extends SessionCryp
         this.string = Maybe.ofNullable(string);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] getBytes() {
         return bytes;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Maybe<String> getString() {
         return string;
