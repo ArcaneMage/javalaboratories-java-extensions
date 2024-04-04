@@ -15,19 +15,28 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.Maybe;
+import org.javalaboratories.core.cryptography.keys.CryptographyResultImpl;
 
-import java.util.Base64;
+import java.io.File;
+import java.security.Key;
+import java.util.Objects;
 
-public interface HybridCryptographyResult {
+public final class FileCryptographyResultImpl<K extends Key> extends CryptographyResultImpl<K>
+        implements FileCryptographyResult<K> {
 
-    default Maybe<byte[]> getSessionKey() {
-        return Maybe.empty();
+    private final File file;
+
+    public FileCryptographyResultImpl(final K key, final File file) {
+        this(key,null,file);
     }
 
-    default String getSessionKeyAsBase64() {
-        return getSessionKey()
-                .map(b -> Base64.getEncoder().encodeToString(b))
-                .orElseThrow(() -> new CryptographyException("Failed to encode cipher key"));
+    public FileCryptographyResultImpl(final K key, byte[] sessionKey, final File file) {
+        super(key, sessionKey);
+        this.file = Objects.requireNonNull(file);
+    }
+
+    @Override
+    public File getFile() {
+        return file;
     }
 }

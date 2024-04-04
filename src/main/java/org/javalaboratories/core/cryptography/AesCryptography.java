@@ -41,12 +41,12 @@ public interface AesCryptography {
      *
      * @param key contains private key with which to decrypt the data.
      * @param cipherText the cipher text to be decrypted in Base64 format.
-     * @return a {@link StringCryptographyResult} encapsulating encryption
+     * @return a {@link ByteCryptographyResult} encapsulating encryption
      * key and deciphered string.
      * @throws NullPointerException when parameters are null.
      * @see SymmetricSecretKey
      */
-     <K extends SymmetricSecretKey> StringCryptographyResult<K> decrypt(final K key, final String cipherText);
+     <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final String cipherText);
 
     /**
      * Decrypts {@link InputStream} that contains a stream of cipher data.
@@ -69,12 +69,12 @@ public interface AesCryptography {
      *
      * @param key a key to with which to the encrypted data.
      * @param string a string to be encrypted.
-     * @return a {@link StringCryptographyResult} encapsulating encryption
+     * @return a {@link ByteCryptographyResult} encapsulating encryption
      * key and cipher text.
      * @throws NullPointerException when parameters are null.
      * @see SymmetricSecretKey
      */
-    <K extends SymmetricSecretKey> StringCryptographyResult<K> encrypt(final K key, final String string);
+    <K extends SymmetricSecretKey> ByteCryptographyResult<K> encrypt(final K key, final String string);
 
     /**
      * Encrypts the {@link InputStream} with the given {@code SymmetricSecretKey}.
@@ -107,16 +107,8 @@ public interface AesCryptography {
              OutputStream os = new FileOutputStream(Objects.requireNonNull(cipherFile,"Expected cipher file"))) {
             StreamCryptographyResult<K,OutputStream> result = encrypt(Objects.requireNonNull(key,
                     "Expected key object"), is, os);
-            return new FileCryptographyResult<>() {
-                @Override
-                public File getFile() {
-                    return cipherFile;
-                }
-                @Override
-                public K getKey() {
-                    return result.getKey();
-                }
-            };
+
+            return new FileCryptographyResultImpl<>(result.getKey(),cipherFile);
         } catch (IOException e) {
             throw new CryptographyException("Failed to encrypt file",e);
         }
@@ -136,16 +128,8 @@ public interface AesCryptography {
              OutputStream os = new FileOutputStream(Objects.requireNonNull(output,"Expected output file"))) {
             StreamCryptographyResult<K,OutputStream> result = decrypt(Objects.requireNonNull(key,
                     "Expected key object"), is, os);
-            return new FileCryptographyResult<>() {
-                @Override
-                public File getFile() {
-                    return output;
-                }
-                @Override
-                public K getKey() {
-                    return result.getKey();
-                }
-            };
+
+            return new FileCryptographyResultImpl<>(result.getKey(),output);
         } catch (IOException e) {
             throw new CryptographyException("Failed to decrypt file",e);
         }

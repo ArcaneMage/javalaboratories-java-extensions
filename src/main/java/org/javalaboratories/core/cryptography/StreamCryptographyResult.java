@@ -22,7 +22,8 @@ import java.security.Key;
 
 /**
  * {@code CryptographyResult} object is returned from performing cryptographic
- * operations with the {@link AesCryptography} object.
+ * operations with the {@link AesCryptography} and {@link RsaHybridCryptography}
+ * objects.
  * <p>
  * It encapsulates the {@link SymmetricSecretKey} and {@code stream} that are
  * associated with the {@code cipher text}.

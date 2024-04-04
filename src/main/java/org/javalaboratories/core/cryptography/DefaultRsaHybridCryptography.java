@@ -15,7 +15,6 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 import org.javalaboratories.core.util.Bytes;
 
@@ -26,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
-import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Base64;
@@ -75,7 +73,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
      * {@inheritDoc}
      */
     @Override
-    public <K extends PublicKey> StringCryptographyResult<K> encrypt(final K publicKey, final String string) {
+    public <K extends PublicKey> ByteCryptographyResult<K> encrypt(final K publicKey, final String string) {
         K pk = Objects.requireNonNull(publicKey,"Expected public key");
         String s = Objects.requireNonNull(string,"Expected string to encrypt");
         try {
@@ -84,7 +82,8 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
 
             byte[] sessionKeyBytes = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
-            return createStringResult(pk,sessionKeyBytes,result.getStream().toByteArray(),null);
+
+            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,result.getStream().toByteArray(),null);
         } catch (CryptographyException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
@@ -116,7 +115,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
             StreamCryptographyResult<SymmetricSecretKey,T> aesResult = aes.encrypt(secretKey,is,os);
 
-            return createStreamResult(pk,sessionKeyBytes,aesResult.getStream());
+            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,aesResult.getStream());
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt stream",e);
         } catch (IOException e) {
@@ -128,7 +127,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
      * {@inheritDoc}
      */
     @Override
-    public <K extends PrivateKey> StringCryptographyResult<K> decrypt(final K privateKey, final String ciphertext) {
+    public <K extends PrivateKey> ByteCryptographyResult<K> decrypt(final K privateKey, final String ciphertext) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
         String s = Objects.requireNonNull(ciphertext,"Expected string to decrypt");
         try {
@@ -136,10 +135,10 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
                     decrypt(pk,new ByteArrayInputStream(Base64.getDecoder().decode(s)),new ByteArrayOutputStream());
 
             byte[] sessionKeyBytes = result.getSessionKey()
-                    .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
+                    .orElseThrow(() -> new CryptographyException("Failed to access session key"));
             byte[] bytes = result.getStream().toByteArray();
 
-            return createStringResult(pk,sessionKeyBytes,bytes,new String(bytes));
+            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,bytes,new String(bytes));
         } catch (CryptographyException e) {
             throw new CryptographyException("Failed to decrypt string",e);
         } catch (IllegalArgumentException e) {
@@ -168,53 +167,12 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             // Decrypt AES message with AES secret key
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
             StreamCryptographyResult<SymmetricSecretKey,T> aesResult = aes.decrypt(secretKey,is,os);
-            return createStreamResult(pk,sessionKeyBytes,aesResult.getStream());
+            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,aesResult.getStream());
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt stream",e);
         } catch (IOException e) {
             throw new CryptographyException("Failed to process stream",e);
         }
-    }
-
-    private <K extends Key> StringCryptographyResult<K> createStringResult(final K key, final byte[] sessionKey,
-                                                                           final byte[] bytes, final String text) {
-        return new StringCryptographyResult<>() {
-            @Override
-            public K getKey() {
-                return key;
-            }
-            @Override
-            public byte[] getBytes() {
-                return bytes;
-            }
-            @Override
-            public Maybe<String> getString() {
-                return Maybe.ofNullable(text);
-            }
-            @Override
-            public Maybe<byte[]> getSessionKey() {
-                return Maybe.of(sessionKey);
-            }
-        };
-    }
-
-    private <K extends Key, T extends OutputStream> StreamCryptographyResult<K,T> createStreamResult(final K key,
-                                                                                                     final byte[]sessionKey,
-                                                                                                     final T stream) {
-        return new StreamCryptographyResult<>() {
-            @Override
-            public T getStream() {
-                return stream;
-            }
-            @Override
-            public K getKey() {
-                return key;
-            }
-            @Override
-            public Maybe<byte[]> getSessionKey() {
-                return Maybe.of(sessionKey);
-            }
-        };
     }
 
     private byte[] readSessionKeyFromStream(InputStream stream) throws IOException {

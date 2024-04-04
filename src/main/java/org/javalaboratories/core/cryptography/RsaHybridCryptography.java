@@ -15,8 +15,6 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.Maybe;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -69,12 +67,12 @@ public interface RsaHybridCryptography {
      *
      * @param publicKey the key with which to encrypt the string.
      * @param string the string to be encrypted.
-     * @return a {@link StringCryptographyResult} encapsulated ciphertext.
+     * @return a {@link ByteCryptographyResult} encapsulated ciphertext.
      * @param <K> the type of key.
      * @throws CryptographyException cryptography failure.
      * @throws NullPointerException whenever parameters are null.
      */
-    <K extends PublicKey> StringCryptographyResult<K> encrypt(final K publicKey, final String string);
+    <K extends PublicKey> ByteCryptographyResult<K> encrypt(final K publicKey, final String string);
 
     /**
      * Encrypts the {@code InputStream} using RSA algorithm with the given {@code
@@ -99,12 +97,12 @@ public interface RsaHybridCryptography {
      * @param ciphertext the {@code String} to be decrypted in {@code Base64}
      *                   form.
      *
-     * @return a {@link StringCryptographyResult} encapsulated deciphered text.
+     * @return a {@link ByteCryptographyResult} encapsulated deciphered text.
      * @param <K> the type of key.
      * @throws CryptographyException cryptography failure.
      * @throws NullPointerException whenever parameters are null.
      */
-    <K extends PrivateKey> StringCryptographyResult<K> decrypt(final K privateKey, final String ciphertext);
+    <K extends PrivateKey> ByteCryptographyResult<K> decrypt(final K privateKey, final String ciphertext);
 
 
     /**
@@ -141,20 +139,10 @@ public interface RsaHybridCryptography {
         try (InputStream is = new FileInputStream(Objects.requireNonNull(source,"Expected source file"));
              OutputStream os = new FileOutputStream(Objects.requireNonNull(cipherFile,"Expected cipher file"))) {
             StreamCryptographyResult<K,OutputStream> result = encrypt(Objects.requireNonNull(pk, "Expected key object"), is, os);
-            return new FileCryptographyResult<>() {
-                @Override
-                public File getFile() {
-                    return cipherFile;
-                }
-                @Override
-                public K getKey() {
-                    return result.getKey();
-                }
-                @Override
-                public Maybe<byte[]> getSessionKey() {
-                   return result.getSessionKey();
-                }
-            };
+
+            byte[] sessionKey = result.getSessionKey()
+                    .orElseThrow(() -> new CryptographyException("No session key found for encryption"));
+            return new FileCryptographyResultImpl<>(result.getKey(),sessionKey,cipherFile);
         } catch (IOException e) {
             throw new CryptographyException("Failed to encrypt file",e);
         }
@@ -179,20 +167,10 @@ public interface RsaHybridCryptography {
              OutputStream os = new FileOutputStream(Objects.requireNonNull(output,"Expected output file"))) {
             StreamCryptographyResult<K,OutputStream> result = decrypt(Objects.requireNonNull(pk,
                     "Expected key object"), is, os);
-            return new FileCryptographyResult<>() {
-                @Override
-                public File getFile() {
-                    return output;
-                }
-                @Override
-                public K getKey() {
-                    return result.getKey();
-                }
-                @Override
-                public Maybe<byte[]> getSessionKey() {
-                   return result.getSessionKey();
-                }
-            };
+
+            byte[] sessionKey = result.getSessionKey()
+                    .orElseThrow(() -> new CryptographyException("No session key found for decryption"));
+            return new FileCryptographyResultImpl<>(result.getKey(),sessionKey,output);
         } catch (IOException e) {
             throw new CryptographyException("Failed to decrypt file",e);
         }

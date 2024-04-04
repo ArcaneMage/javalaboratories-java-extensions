@@ -15,9 +15,7 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.Maybe;
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
-import org.javalaboratories.core.util.Bytes;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -49,7 +47,7 @@ public final class DefaultAesCryptography implements AesCryptography {
      * {@inheritDoc}
      */
     @Override
-    public <K extends SymmetricSecretKey> StringCryptographyResult<K> decrypt(final K key, final String cipherText) {
+    public <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final String cipherText) {
         String  ct = Objects.requireNonNull(cipherText, "Expected encrypted cipher text");
         K k = Objects.requireNonNull(key, "Expected key object");
         try {
@@ -57,7 +55,7 @@ public final class DefaultAesCryptography implements AesCryptography {
             StreamCryptographyResult<K, ByteArrayOutputStream> result =
                     decrypt(k,new ByteArrayInputStream(ctBytes),new ByteArrayOutputStream());
             byte[] decryptedBytes = result.getStream().toByteArray();
-            return createStringResult(key,decryptedBytes,new String(decryptedBytes));
+            return new ByteCryptographyResultImpl<>(key,decryptedBytes,new String(decryptedBytes));
         } catch (IllegalArgumentException e) {
             throw new CryptographyException("Failed to decrypt encoded cipher text",e);
         }
@@ -78,7 +76,7 @@ public final class DefaultAesCryptography implements AesCryptography {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE,k,iv);
             write(cipher,cipherStream,outputStream);
-            return createStreamResult(k,outputStream);
+            return new StreamCryptographyResultImpl<>(k,outputStream);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt cipher text stream",e);
         } catch (IOException e) {
@@ -90,14 +88,14 @@ public final class DefaultAesCryptography implements AesCryptography {
      * {@inheritDoc}
      */
     @Override
-    public <K extends SymmetricSecretKey> StringCryptographyResult<K> encrypt(final K key, final String string) {
+    public <K extends SymmetricSecretKey> ByteCryptographyResult<K> encrypt(final K key, final String string) {
         K k = Objects.requireNonNull(key, "Expected password");
         String s = Objects.requireNonNull(string, "Expected string to encrypt");
 
         StreamCryptographyResult<K,ByteArrayOutputStream> result =
                 encrypt(k,new ByteArrayInputStream(s.getBytes()), new ByteArrayOutputStream());
 
-        return createStringResult(k,result.getStream().toByteArray(),null);
+        return new ByteCryptographyResultImpl<>(k,result.getStream().toByteArray(),null);
     }
 
     /**
@@ -118,44 +116,12 @@ public final class DefaultAesCryptography implements AesCryptography {
                     .write(iv.getIV());
 
             write(cipher,inputStream,cipherStream);
-            return createStreamResult(k,cipherStream);
+            return new StreamCryptographyResultImpl<>(k,cipherStream);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt stream",e);
         } catch (IOException e) {
             throw new CryptographyException("Failed to process streams",e);
         }
-    }
-
-    private <K extends SymmetricSecretKey, T extends OutputStream> StreamCryptographyResult<K,T> createStreamResult(final K key,
-                                                                                                                    final T stream) {
-        return new StreamCryptographyResult<>() {
-            @Override
-            public T getStream() {
-                return stream;
-            }
-            @Override
-            public K getKey() {
-                return key;
-            }
-        };
-    }
-
-    private <K extends SymmetricSecretKey> StringCryptographyResult<K> createStringResult(final K key, final byte[] bytes,
-                                                                                          final String text) {
-        return new StringCryptographyResult<>() {
-            @Override
-            public K getKey() {
-                return key;
-            }
-            @Override
-            public byte[] getBytes() {
-                return bytes;
-            }
-            @Override
-            public Maybe<String> getString() {
-                return Maybe.ofNullable(text);
-            }
-        };
     }
 
     private static IvParameterSpec generateIvParameterSpec() {

@@ -86,9 +86,9 @@ public class RsaHybridCryptographyTest {
 
     @Test
     public void testStringEncryption_Pass() {
-        StringCryptographyResult<PublicKey> result = cryptography.encrypt(publicKey,TEXT);
+        ByteCryptographyResult<PublicKey> result = cryptography.encrypt(publicKey,TEXT);
 
-        StringCryptographyResult<PrivateKey> stringResult = cryptography.decrypt(privateKey, result.getBytesAsBase64());
+        ByteCryptographyResult<PrivateKey> stringResult = cryptography.decrypt(privateKey, result.getBytesAsBase64());
 
         assertNotNull(result.getKey());
         assertTrue(result.getSessionKey().isPresent());
@@ -106,7 +106,7 @@ public class RsaHybridCryptographyTest {
 
     @Test
     public void testStringDecryption_Pass() {
-        StringCryptographyResult<PrivateKey> result = cryptography.decrypt(privateKey,CIPHERTEXT);
+        ByteCryptographyResult<PrivateKey> result = cryptography.decrypt(privateKey,CIPHERTEXT);
 
         assertEquals(TEXT, result.getString().orElseThrow());
     }
