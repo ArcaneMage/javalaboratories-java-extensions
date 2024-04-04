@@ -17,12 +17,8 @@ package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.Base64;
 import java.util.Objects;
 
 /**
@@ -35,18 +31,6 @@ import java.util.Objects;
  * including {@code files}.
  */
 public interface AesCryptography {
-
-    /**
-     * Decrypts string ciphers with the given {@link SymmetricSecretKey} object.
-     *
-     * @param key contains private key with which to decrypt the data.
-     * @param cipherText the cipher text to be decrypted in Base64 format.
-     * @return a {@link ByteCryptographyResult} encapsulating encryption
-     * key and deciphered string.
-     * @throws NullPointerException when parameters are null.
-     * @see SymmetricSecretKey
-     */
-     <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final String cipherText);
 
     /**
      * Decrypts {@link InputStream} that contains a stream of cipher data.
@@ -65,18 +49,6 @@ public interface AesCryptography {
                                                                                                 final T outputStream);
 
     /**
-     * Encrypts {@link String} with a given {@code SymmetricSecretKey}.
-     *
-     * @param key a key to with which to the encrypted data.
-     * @param string a string to be encrypted.
-     * @return a {@link ByteCryptographyResult} encapsulating encryption
-     * key and cipher text.
-     * @throws NullPointerException when parameters are null.
-     * @see SymmetricSecretKey
-     */
-    <K extends SymmetricSecretKey> ByteCryptographyResult<K> encrypt(final K key, final String string);
-
-    /**
      * Encrypts the {@link InputStream} with the given {@code SymmetricSecretKey}.
      *
      * @param key with which to encrypt the {@link InputStream}.
@@ -91,6 +63,50 @@ public interface AesCryptography {
     <K extends SymmetricSecretKey, T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K key,
                                                                                                  final InputStream inputStream,
                                                                                                  final T cipherStream);
+
+    /**
+     * Decrypts string ciphers with the given {@link SymmetricSecretKey} object.
+     *
+     * @param key contains private key with which to decrypt the data.
+     * @param cipherText the cipher text to be decrypted in Base64 format.
+     * @return a {@link ByteCryptographyResult} encapsulating encryption
+     * key and deciphered string.
+     * @throws NullPointerException when parameters are null.
+     * @see SymmetricSecretKey
+     */
+    default <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final String cipherText) {
+        String  ct = Objects.requireNonNull(cipherText, "Expected encrypted cipher text");
+        K k = Objects.requireNonNull(key, "Expected key object");
+        try {
+            byte[] ctBytes = Base64.getDecoder().decode(ct);
+            StreamCryptographyResult<K, ByteArrayOutputStream> result =
+                    decrypt(k,new ByteArrayInputStream(ctBytes),new ByteArrayOutputStream());
+            byte[] decryptedBytes = result.getStream().toByteArray();
+            return new ByteCryptographyResultImpl<>(key,decryptedBytes,new String(decryptedBytes));
+        } catch (IllegalArgumentException e) {
+            throw new CryptographyException("Failed to decrypt encoded cipher text",e);
+        }
+    }
+
+    /**
+     * Encrypts {@link String} with a given {@code SymmetricSecretKey}.
+     *
+     * @param key a key to with which to the encrypted data.
+     * @param string a string to be encrypted.
+     * @return a {@link ByteCryptographyResult} encapsulating encryption
+     * key and cipher text.
+     * @throws NullPointerException when parameters are null.
+     * @see SymmetricSecretKey
+     */
+    default <K extends SymmetricSecretKey> ByteCryptographyResult<K> encrypt(final K key, final String string) {
+        K k = Objects.requireNonNull(key, "Expected password");
+        String s = Objects.requireNonNull(string, "Expected string to encrypt");
+
+        StreamCryptographyResult<K,ByteArrayOutputStream> result =
+                encrypt(k,new ByteArrayInputStream(s.getBytes()), new ByteArrayOutputStream());
+
+        return new ByteCryptographyResultImpl<>(k,result.getStream().toByteArray(),null);
+    }
 
     /**
      * Encrypts the {@link File} with a given {@code SymmetricSecretKey}.

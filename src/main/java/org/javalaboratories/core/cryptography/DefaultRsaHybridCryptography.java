@@ -73,26 +73,6 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
      * {@inheritDoc}
      */
     @Override
-    public <K extends PublicKey> ByteCryptographyResult<K> encrypt(final K publicKey, final String string) {
-        K pk = Objects.requireNonNull(publicKey,"Expected public key");
-        String s = Objects.requireNonNull(string,"Expected string to encrypt");
-        try {
-            StreamCryptographyResult<K, ByteArrayOutputStream> result =
-                    encrypt(pk,new ByteArrayInputStream(s.getBytes()),new ByteArrayOutputStream());
-
-            byte[] sessionKeyBytes = result.getSessionKey()
-                    .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
-
-            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,result.getStream().toByteArray(),null);
-        } catch (CryptographyException e) {
-            throw new CryptographyException("Failed to encrypt string",e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public <K extends PublicKey,T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K publicKey,
                                                                                               final InputStream inputStream,
                                                                                               final T cipherStream) {
@@ -120,29 +100,6 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             throw new CryptographyException("Failed to encrypt stream",e);
         } catch (IOException e) {
             throw new CryptographyException("Failed to process stream",e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <K extends PrivateKey> ByteCryptographyResult<K> decrypt(final K privateKey, final String ciphertext) {
-        K pk = Objects.requireNonNull(privateKey,"Expected private key");
-        String s = Objects.requireNonNull(ciphertext,"Expected string to decrypt");
-        try {
-            StreamCryptographyResult<K, ByteArrayOutputStream> result =
-                    decrypt(pk,new ByteArrayInputStream(Base64.getDecoder().decode(s)),new ByteArrayOutputStream());
-
-            byte[] sessionKeyBytes = result.getSessionKey()
-                    .orElseThrow(() -> new CryptographyException("Failed to access session key"));
-            byte[] bytes = result.getStream().toByteArray();
-
-            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,bytes,new String(bytes));
-        } catch (CryptographyException e) {
-            throw new CryptographyException("Failed to decrypt string",e);
-        } catch (IllegalArgumentException e) {
-            throw new CryptographyException("Failed to decode Base64 string",e);
         }
     }
 

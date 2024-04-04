@@ -47,24 +47,6 @@ public final class DefaultAesCryptography implements AesCryptography {
      * {@inheritDoc}
      */
     @Override
-    public <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final String cipherText) {
-        String  ct = Objects.requireNonNull(cipherText, "Expected encrypted cipher text");
-        K k = Objects.requireNonNull(key, "Expected key object");
-        try {
-            byte[] ctBytes = Base64.getDecoder().decode(ct);
-            StreamCryptographyResult<K, ByteArrayOutputStream> result =
-                    decrypt(k,new ByteArrayInputStream(ctBytes),new ByteArrayOutputStream());
-            byte[] decryptedBytes = result.getStream().toByteArray();
-            return new ByteCryptographyResultImpl<>(key,decryptedBytes,new String(decryptedBytes));
-        } catch (IllegalArgumentException e) {
-            throw new CryptographyException("Failed to decrypt encoded cipher text",e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public <K extends SymmetricSecretKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K key,
                                                                                                        final InputStream cipherStream,
                                                                                                        final T outputStream) {
@@ -82,20 +64,6 @@ public final class DefaultAesCryptography implements AesCryptography {
         } catch (IOException e) {
             throw new CryptographyException("Failed to process streams",e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <K extends SymmetricSecretKey> ByteCryptographyResult<K> encrypt(final K key, final String string) {
-        K k = Objects.requireNonNull(key, "Expected password");
-        String s = Objects.requireNonNull(string, "Expected string to encrypt");
-
-        StreamCryptographyResult<K,ByteArrayOutputStream> result =
-                encrypt(k,new ByteArrayInputStream(s.getBytes()), new ByteArrayOutputStream());
-
-        return new ByteCryptographyResultImpl<>(k,result.getStream().toByteArray(),null);
     }
 
     /**

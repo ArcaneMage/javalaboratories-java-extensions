@@ -15,14 +15,10 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Base64;
 import java.util.Objects;
 
 /**
@@ -62,19 +58,6 @@ import java.util.Objects;
 public interface RsaHybridCryptography {
 
     /**
-     * Encrypts the string using the RSA algorithm with the given {@code
-     * publicKey}.
-     *
-     * @param publicKey the key with which to encrypt the string.
-     * @param string the string to be encrypted.
-     * @return a {@link ByteCryptographyResult} encapsulated ciphertext.
-     * @param <K> the type of key.
-     * @throws CryptographyException cryptography failure.
-     * @throws NullPointerException whenever parameters are null.
-     */
-    <K extends PublicKey> ByteCryptographyResult<K> encrypt(final K publicKey, final String string);
-
-    /**
      * Encrypts the {@code InputStream} using RSA algorithm with the given {@code
      * publicKey}.
      *
@@ -88,22 +71,6 @@ public interface RsaHybridCryptography {
     <K extends PublicKey, T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K publicKey,
                                                                                         final InputStream inputStream,
                                                                                         final T cipherStream);
-
-    /**
-     * Decrypts the {@code String} using RSA algorithm with the given {@code
-     * privateKey}.
-     *
-     * @param privateKey the key with which to decrypt the string.
-     * @param ciphertext the {@code String} to be decrypted in {@code Base64}
-     *                   form.
-     *
-     * @return a {@link ByteCryptographyResult} encapsulated deciphered text.
-     * @param <K> the type of key.
-     * @throws CryptographyException cryptography failure.
-     * @throws NullPointerException whenever parameters are null.
-     */
-    <K extends PrivateKey> ByteCryptographyResult<K> decrypt(final K privateKey, final String ciphertext);
-
 
     /**
      * Decrypts the {@code InputStream} using RSA algorithm with the given {@code
@@ -121,6 +88,65 @@ public interface RsaHybridCryptography {
     <K extends PrivateKey, T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K privateKey,
                                                                                          final InputStream cipherStream,
                                                                                          final T outputStream);
+
+    /**
+     * Encrypts the string using the RSA algorithm with the given {@code
+     * publicKey}.
+     *
+     * @param publicKey the key with which to encrypt the string.
+     * @param string the string to be encrypted.
+     * @return a {@link ByteCryptographyResult} encapsulated ciphertext.
+     * @param <K> the type of key.
+     * @throws CryptographyException cryptography failure.
+     * @throws NullPointerException whenever parameters are null.
+     */
+    default <K extends PublicKey> ByteCryptographyResult<K> encrypt(final K publicKey, final String string) {
+        K pk = Objects.requireNonNull(publicKey,"Expected public key");
+        String s = Objects.requireNonNull(string,"Expected string to encrypt");
+        try {
+            StreamCryptographyResult<K, ByteArrayOutputStream> result =
+                    encrypt(pk,new ByteArrayInputStream(s.getBytes()),new ByteArrayOutputStream());
+
+            byte[] sessionKeyBytes = result.getSessionKey()
+                    .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
+
+            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,result.getStream().toByteArray(),null);
+        } catch (CryptographyException e) {
+            throw new CryptographyException("Failed to encrypt string",e);
+        }
+    }
+
+    /**
+     * Decrypts the {@code String} using RSA algorithm with the given {@code
+     * privateKey}.
+     *
+     * @param privateKey the key with which to decrypt the string.
+     * @param ciphertext the {@code String} to be decrypted in {@code Base64}
+     *                   form.
+     *
+     * @return a {@link ByteCryptographyResult} encapsulated deciphered text.
+     * @param <K> the type of key.
+     * @throws CryptographyException cryptography failure.
+     * @throws NullPointerException whenever parameters are null.
+     */
+    default <K extends PrivateKey> ByteCryptographyResult<K> decrypt(final K privateKey, final String ciphertext) {
+        K pk = Objects.requireNonNull(privateKey,"Expected private key");
+        String s = Objects.requireNonNull(ciphertext,"Expected string to decrypt");
+        try {
+            StreamCryptographyResult<K, ByteArrayOutputStream> result =
+                    decrypt(pk,new ByteArrayInputStream(Base64.getDecoder().decode(s)),new ByteArrayOutputStream());
+
+            byte[] sessionKeyBytes = result.getSessionKey()
+                    .orElseThrow(() -> new CryptographyException("Failed to access session key"));
+            byte[] bytes = result.getStream().toByteArray();
+
+            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,bytes,new String(bytes));
+        } catch (CryptographyException e) {
+            throw new CryptographyException("Failed to decrypt string",e);
+        } catch (IllegalArgumentException e) {
+            throw new CryptographyException("Failed to decode Base64 string",e);
+        }
+    }
 
     /**
      * Encrypts the {@code File} using RSA algorithm with the given {@code publicKey}.
