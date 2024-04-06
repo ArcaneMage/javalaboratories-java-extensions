@@ -92,6 +92,7 @@ public class RsaHybridCryptographyTest {
 
         assertNotNull(result.getKey());
         assertTrue(result.getSessionKey().isPresent());
+        assertFalse(result.isSignable());
         assertEquals(TEXT, stringResult.getString().orElseThrow());
     }
 
@@ -137,6 +138,7 @@ public class RsaHybridCryptographyTest {
         assertNotNull(result.getKey());
         assertTrue(result.getSessionKey().isPresent());
         assertFalse(result.getSessionKeyAsBase64().isEmpty());
+        assertFalse(result.isSignable());
         assertEquals(TEXT,result2.getStream().toString());
     }
 
@@ -196,11 +198,12 @@ public class RsaHybridCryptographyTest {
         assertNotNull(result.getKey());
         assertTrue(result.getSessionKey().isPresent());
         assertFalse(result.getSessionKeyAsBase64().isEmpty());
+        assertFalse(result.isSignable());
 
         assertNotNull(result2.getKey());
         assertTrue(result2.getSessionKey().isPresent());
         assertFalse(result.getSessionKeyAsBase64().isEmpty());
+        assertFalse(result.isSignable());
         assertEquals(FILE_TEXT,s);
     }
-
 }

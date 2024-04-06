@@ -109,8 +109,10 @@ public interface RsaHybridCryptography {
 
             byte[] sessionKeyBytes = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
+            byte[] messageHash = result.getMessageHash()
+                    .orElseGet(() -> null);
 
-            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,result.getStream().toByteArray(),null);
+            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,messageHash,result.getStream().toByteArray(),null);
         } catch (CryptographyException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
@@ -138,9 +140,11 @@ public interface RsaHybridCryptography {
 
             byte[] sessionKeyBytes = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("Failed to access session key"));
+            byte[] messageHash = result.getMessageHash()
+                    .orElseGet(() -> null);
             byte[] bytes = result.getStream().toByteArray();
 
-            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,bytes,new String(bytes));
+            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,messageHash,bytes,new String(bytes));
         } catch (CryptographyException e) {
             throw new CryptographyException("Failed to decrypt string",e);
         } catch (IllegalArgumentException e) {
@@ -168,7 +172,10 @@ public interface RsaHybridCryptography {
 
             byte[] sessionKey = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("No session key found for encryption"));
-            return new FileCryptographyResultImpl<>(result.getKey(),sessionKey,cipherFile);
+            byte[] messageHash = result.getMessageHash()
+                    .orElseGet(() -> null);
+
+            return new FileCryptographyResultImpl<>(result.getKey(),sessionKey,messageHash,cipherFile);
         } catch (IOException e) {
             throw new CryptographyException("Failed to encrypt file",e);
         }
@@ -196,7 +203,10 @@ public interface RsaHybridCryptography {
 
             byte[] sessionKey = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("No session key found for decryption"));
-            return new FileCryptographyResultImpl<>(result.getKey(),sessionKey,output);
+            byte[] messageHash = result.getMessageHash()
+                    .orElseGet(() -> null);
+
+            return new FileCryptographyResultImpl<>(result.getKey(),sessionKey,messageHash,output);
         } catch (IOException e) {
             throw new CryptographyException("Failed to decrypt file",e);
         }

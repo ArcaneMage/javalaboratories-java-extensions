@@ -30,7 +30,7 @@ import java.security.Key;
  * This object is returned from performing cryptographic operations with {@code
  * files}
  */
-public interface FileCryptographyResult<K extends Key> extends CryptographyResult<K>, SessionCryptographyResult {
+public interface FileCryptographyResult<K extends Key> extends CryptographyResult<K>, SessionMessage, SignableMessage {
 
     /**
      * @return file object to the decrypted/encrypted cipher text, depending on

@@ -19,13 +19,20 @@ import org.javalaboratories.core.Maybe;
 
 import java.security.Key;
 
-public class SessionCryptographyResultImpl<K extends Key> extends CryptographyResultImpl<K> implements SessionCryptographyResult {
+public class SignableSessionCryptographyResultImpl<K extends Key> extends CryptographyResultImpl<K> implements SessionMessage, SignableMessage {
 
     private final byte[] sessionKey;
+    private final byte[] messageHash;
 
-    public SessionCryptographyResultImpl(final K key, final byte[] sessionKey) {
+    public SignableSessionCryptographyResultImpl(final K key, final byte[] sessionKey, final byte[] messageHash) {
         super(key);
         this.sessionKey = sessionKey;
+        this.messageHash = messageHash;
+    }
+
+    @Override
+    public Maybe<byte[]> getMessageHash() {
+        return Maybe.ofNullable(messageHash);
     }
 
     @Override

@@ -31,17 +31,17 @@ import java.util.Objects;
  * This object is returned from performing cryptographic operations with {@code
  * files}
  */
-public final class FileCryptographyResultImpl<K extends Key> extends SessionCryptographyResultImpl<K>
+public final class FileCryptographyResultImpl<K extends Key> extends SignableSessionCryptographyResultImpl<K>
         implements FileCryptographyResult<K> {
 
     private final File file;
 
     public FileCryptographyResultImpl(final K key, final File file) {
-        this(key,null,file);
+        this(key,null,null,file);
     }
 
-    public FileCryptographyResultImpl(final K key, byte[] sessionKey, final File file) {
-        super(key, sessionKey);
+    public FileCryptographyResultImpl(final K key, byte[] sessionKey, byte[] messageHash, final File file) {
+        super(key, sessionKey,messageHash);
         this.file = Objects.requireNonNull(file);
     }
 

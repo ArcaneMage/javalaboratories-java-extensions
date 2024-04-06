@@ -39,6 +39,8 @@ public final class DefaultHashCryptography implements HashCryptography {
 
     private static final int STREAM_BUFFER_SIZE = 512;
 
+    DefaultHashCryptography() {}
+
     /**
      * {@inheritDoc}
      */
@@ -75,6 +77,4 @@ public final class DefaultHashCryptography implements HashCryptography {
             throw new CryptographyException("Failed to generate hash",e);
         }
     }
-
-    DefaultHashCryptography() {}
 }

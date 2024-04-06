@@ -19,13 +19,17 @@ import org.javalaboratories.core.Maybe;
 
 import java.util.Base64;
 
-public interface SessionCryptographyResult {
+public interface SignableMessage {
 
-    Maybe<byte[]> getSessionKey();
+    Maybe<byte[]> getMessageHash();
 
-    default String getSessionKeyAsBase64() {
-        return getSessionKey()
+    default boolean isSignable() {
+        return getMessageHash().isPresent();
+    }
+
+    default String getMessageHashAsBase64() {
+        return getMessageHash()
                 .map(b -> Base64.getEncoder().encodeToString(b))
-                .orElseThrow(() -> new CryptographyException("Failed to encode session key"));
+                .orElseThrow(() -> new CryptographyException("Failed to encode message hash"));
     }
 }

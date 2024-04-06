@@ -22,9 +22,7 @@ import javax.crypto.Cipher;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.util.Objects;
 
 /**
@@ -66,6 +64,32 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
 
     private static final String ALGORITHM = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
 
+    private final MessageDigestAlgorithms checkSumAlgorithm;
+
+    /**
+     * Default constructor
+     * <p>
+     * Creates an instance of this {@link RsaHybridCryptography} implementation
+     * with no checksum algorithm. Therefore, no {@code message} hash is generated
+     * from any of the cryptographic operations, and that would mean it would not
+     * be possible to sign or verify the messages.
+     */
+    DefaultRsaHybridCryptography() {
+        this(null);
+    }
+
+    /**
+     * Crates an instance of this {@link RsaHybridCryptography} implementation
+     * with checksum algorithm. This is required if there is a need to sign or
+     * verify messages.
+     *
+     * @param algorithm a message digest algorithm.
+     * @see MessageDigestAlgorithms
+     */
+    DefaultRsaHybridCryptography(final MessageDigestAlgorithms algorithm) {
+        this.checkSumAlgorithm = algorithm;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -74,7 +98,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
                                                                                               final InputStream inputStream,
                                                                                               final T cipherStream) {
         K pk = Objects.requireNonNull(publicKey,"Expected public key");
-        try (InputStream is = Objects.requireNonNull(inputStream,"Expected input stream");
+        try (InputStream is = getInputStream(Objects.requireNonNull(inputStream,"Expected input stream"));
              T os = Objects.requireNonNull(cipherStream, "Expected cipher stream")) {
             SymmetricSecretKey secretKey = SymmetricSecretKey.newInstance();
 
@@ -92,7 +116,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
             StreamCryptographyResult<SymmetricSecretKey,T> result = aes.encrypt(secretKey,is,os);
 
-            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,result.getStream());
+            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,getMessageHashFromInputStream(is),result.getStream());
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt stream",e);
         } catch (IOException e) {
@@ -109,7 +133,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
                                                                                                T outputStream) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
         try (InputStream is = Objects.requireNonNull(cipherStream,"Expected cipher stream");
-             T os = Objects.requireNonNull(outputStream,"Expected out stream")) {
+             T os = getOutputStream(Objects.requireNonNull(outputStream,"Expected out stream"))) {
 
             // Read the RSA session key first, decrypt and derive AES secret key
             byte[] encryptedSessionKey = readSessionKeyFromStream(cipherStream);
@@ -121,12 +145,36 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             // Decrypt AES message with AES secret key
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
             StreamCryptographyResult<SymmetricSecretKey,T> result = aes.decrypt(secretKey,is,os);
-            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,result.getStream());
+            return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,getMessageHashFromOutputStream(os),result.getStream());
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt stream",e);
         } catch (IOException e) {
             throw new CryptographyException("Failed to process stream",e);
         }
+    }
+
+    private byte[] getMessageHashFromInputStream(final InputStream is) {
+        return checkSumAlgorithm != null ? ((DigestInputStream) is).getMessageDigest().digest() : null;
+    }
+
+    private byte[] getMessageHashFromOutputStream(final OutputStream os) {
+        return checkSumAlgorithm != null ? ((DigestOutputStream) os).getMessageDigest().digest() : null;
+    }
+
+    private InputStream getInputStream(final InputStream is) throws GeneralSecurityException {
+        return checkSumAlgorithm != null
+                ? new DigestInputStream(is,MessageDigest.getInstance(checkSumAlgorithm.getAlgorithm()))
+                : is;
+    }
+
+    private <T extends OutputStream> T getOutputStream(final T os) throws GeneralSecurityException {
+        @SuppressWarnings("unchecked")
+        // Justification: compatible outputStream type
+        // is returned
+        T result = checkSumAlgorithm != null
+                ? (T) new DigestOutputStream(os, MessageDigest.getInstance(checkSumAlgorithm.getAlgorithm()))
+                : os;
+        return result;
     }
 
     private byte[] readSessionKeyFromStream(InputStream stream) throws IOException {

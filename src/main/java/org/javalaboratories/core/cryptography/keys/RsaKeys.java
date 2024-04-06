@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * file or stream.
  * <p>
  * Both public and private key file/stream formats are expected to be in PEM
- * or CRT form.
+ * or CER form.
  */
 public final class RsaKeys {
 
@@ -49,7 +49,7 @@ public final class RsaKeys {
      * Reads private RSA key from the given file.
      *
      * @param file the RSA key file
-     * @return an instance of the PrivateKey.
+     * @return an instance of the PrivateKey
      */
     public static PrivateKey getPrivateKeyFrom(final File file) {
         try {
@@ -62,7 +62,7 @@ public final class RsaKeys {
     /**
      * Reads private RSA key from the given file.
      *
-     * @param inputStream the RSA key stream -- expected format is PEM/CRT.
+     * @param inputStream the RSA key stream -- expected format is PEM/CER.
      * @return an instance of the PrivateKey.
      */
     public static PrivateKey getPrivateKeyFrom(final InputStream inputStream) {
@@ -96,7 +96,7 @@ public final class RsaKeys {
     /**
      * Reads public RSA key from the given file.
      *
-     * @param inputStream the RSA key stream -- expected format is PEM/CRT.
+     * @param inputStream the RSA key stream -- expected format is PEM/CER.
      * @return an instance of the PublicKey.
      */
     public static PublicKey getPublicKeyFrom(final InputStream inputStream) {

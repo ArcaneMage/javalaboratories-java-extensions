@@ -55,12 +55,36 @@ public final class CryptographyFactory {
      * Asymmetric cryptography means that there are multiple keys required to
      * encrypt/decrypt {@code ciphertext}, namely {@code PublicKey} and
      * {@code PrivateKey}.
+     * <p>
+     * Encrypted messages will not have a checksum and therefore cannot be
+     * signed or verified. For that requirement, consider the use of the
+     * factory method {@link CryptographyFactory#getSignableAsymmetricHybridCryptography(MessageDigestAlgorithms)}.
      *
      * @return {@link RsaHybridCryptography} object is returned, encapsulating
      * RSA encryption/decryption standard.
      */
     public static RsaHybridCryptography getAsymmetricHybridCryptography() {
         return new DefaultRsaHybridCryptography();
+    }
+
+    /**
+     * Provides an interface for {@code Asymmetric} encryption and decryption,
+     * levering RSA standard.
+     * <p>
+     * Asymmetric cryptography means that there are multiple keys required to
+     * encrypt/decrypt {@code ciphertext}, namely {@code PublicKey} and
+     * {@code PrivateKey}.
+     * <p>
+     * Encrypted messages will have a checksum associated and therefore can be
+     * signed or verified. If this not a requirement, consider the use of the
+     * factory method {@link CryptographyFactory#getAsymmetricHybridCryptography()}
+     *
+     * @param algorithm the algorithm with which to generate the message checksum.
+     * @return {@link RsaHybridCryptography} object is returned, encapsulating
+     * RSA encryption/decryption standard.
+     */
+    public static RsaHybridCryptography getSignableAsymmetricHybridCryptography(MessageDigestAlgorithms algorithm) {
+        return new DefaultRsaHybridCryptography(algorithm);
     }
 
     /**

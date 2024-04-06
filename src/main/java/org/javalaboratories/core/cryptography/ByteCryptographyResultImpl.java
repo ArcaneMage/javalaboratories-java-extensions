@@ -32,18 +32,19 @@ import java.util.Objects;
  * This object is returned from performing cryptographic operations with {@code
  * String} objects.
  */
-public final class ByteCryptographyResultImpl<K extends Key> extends SessionCryptographyResultImpl<K>
+public final class ByteCryptographyResultImpl<K extends Key> extends SignableSessionCryptographyResultImpl<K>
         implements ByteCryptographyResult<K> {
 
     private final byte[] bytes;
     private final Maybe<String> string;
 
     public ByteCryptographyResultImpl(final K key, byte[] bytes, String string) {
-        this(key,null,bytes,string);
+        this(key,null,null,bytes,string);
     }
 
-    public ByteCryptographyResultImpl(final K key, final byte[] sessionKey, final byte[] bytes, final String string) {
-        super(key,sessionKey);
+    public ByteCryptographyResultImpl(final K key, final byte[] sessionKey, final byte[] messageHash, final byte[] bytes,
+                                      final String string) {
+        super(key,sessionKey,messageHash);
         this.bytes = Objects.requireNonNull(bytes);
         this.string = Maybe.ofNullable(string);
     }

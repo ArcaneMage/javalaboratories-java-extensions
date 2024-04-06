@@ -32,7 +32,7 @@ import java.util.Base64;
  * This object is returned from performing cryptographic operations with {@code
  * String} objects.
  */
-public interface ByteCryptographyResult<K extends Key> extends CryptographyResult<K>, SessionCryptographyResult {
+public interface ByteCryptographyResult<K extends Key> extends CryptographyResult<K>, SessionMessage, SignableMessage {
 
     /**
      * @return the encrypted/decrypted data as bytes, depending on {@link

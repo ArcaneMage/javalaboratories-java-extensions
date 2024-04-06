@@ -34,17 +34,17 @@ import java.util.Objects;
  *
  * @param <T> type of output stream.
  */
-public final class StreamCryptographyResultImpl<K extends Key, T extends OutputStream> extends SessionCryptographyResultImpl<K>
+public final class StreamCryptographyResultImpl<K extends Key, T extends OutputStream> extends SignableSessionCryptographyResultImpl<K>
         implements StreamCryptographyResult<K,T> {
 
     private final T outputStream;
 
     public StreamCryptographyResultImpl(final K key, final T outputStream) {
-        this(key,null,outputStream);
+        this(key,null,null,outputStream);
     }
 
-    public StreamCryptographyResultImpl(final K key, final byte[] sessionKey, final T outputStream) {
-        super(key, sessionKey);
+    public StreamCryptographyResultImpl(final K key, final byte[] sessionKey, final byte[] messageHash, final T outputStream) {
+        super(key, sessionKey,messageHash);
         this.outputStream = Objects.requireNonNull(outputStream);
     }
 
