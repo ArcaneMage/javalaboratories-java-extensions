@@ -210,7 +210,7 @@ public class RsaHybridCryptographyTest {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    //------------------------------ Signable unit tests
+    //------------------------------ Signable cryptography unit tests
     //------------------------------------------------------------------------------------------------------------------
     @Test
     public void testSignableStringEncryption_Pass() {
@@ -224,4 +224,65 @@ public class RsaHybridCryptographyTest {
         assertEquals(TEXT, stringResult.getString().orElseThrow());
     }
 
+    @Test
+    public void testSignableStringDecryption_Pass() {
+        ByteCryptographyResult<PrivateKey> result = signableCryptography.decrypt(privateKey,CIPHERTEXT);
+
+        assertEquals(TEXT, result.getString().orElseThrow());
+        assertTrue(result.isSignable());
+    }
+
+    @Test
+    public void testSignableStreamEncryption_Pass() {
+        StreamCryptographyResult<PublicKey,ByteArrayOutputStream> result = signableCryptography
+                .encrypt(publicKey, new ByteArrayInputStream(TEXT.getBytes()), new ByteArrayOutputStream());
+
+        StreamCryptographyResult<PrivateKey,ByteArrayOutputStream> result2 = signableCryptography
+                .decrypt(privateKey,new ByteArrayInputStream(result.getStream().toByteArray()),
+                        new ByteArrayOutputStream());
+
+        assertNotNull(result.getKey());
+        assertTrue(result.getSessionKey().isPresent());
+        assertFalse(result.getSessionKeyAsBase64().isEmpty());
+        assertTrue(result.isSignable());
+        assertEquals(TEXT,result2.getStream().toString());
+    }
+
+    @Test
+    public void testSignableStreamDecryption_Pass() {
+        StreamCryptographyResult<PrivateKey,ByteArrayOutputStream> result = signableCryptography
+                .decrypt(privateKey, new ByteArrayInputStream(Base64.getDecoder().decode(CIPHERTEXT)),
+                        new ByteArrayOutputStream());
+
+        assertEquals(TEXT,result.getStream().toString());
+        assertTrue(result.isSignable());
+    }
+
+    @Test
+    public void testSignableFileCryptography_Pass() throws URISyntaxException, IOException {
+        ClassLoader classLoader = RsaHybridCryptographyTest.class.getClassLoader();
+        File file = Paths.get(classLoader.getResource(AES_UNENCRYPTED_FILE).toURI()).toFile();
+        File cipherFile = Paths.get(classLoader.getResource(RSA_ENCRYPTED_TEST_FILE).toURI()).toFile();
+        File decipheredFile = Paths.get(classLoader.getResource(RSA_UNENCRYPTED_TEST_FILE).toURI()).toFile();
+
+        FileCryptographyResult<PublicKey> result = signableCryptography.encrypt(publicKey,file,cipherFile);
+
+        FileCryptographyResult<PrivateKey> result2 = signableCryptography
+                .decrypt(privateKey,cipherFile,decipheredFile);
+
+        String s = Files.lines(result2.getFile().toPath())
+                .collect(Collectors.joining());
+
+        assertNotNull(result.getFile());
+        assertNotNull(result.getKey());
+        assertTrue(result.getSessionKey().isPresent());
+        assertFalse(result.getSessionKeyAsBase64().isEmpty());
+        assertTrue(result.isSignable());
+
+        assertNotNull(result2.getKey());
+        assertTrue(result2.getSessionKey().isPresent());
+        assertFalse(result.getSessionKeyAsBase64().isEmpty());
+        assertTrue(result.isSignable());
+        assertEquals(FILE_TEXT,s);
+    }
 }
