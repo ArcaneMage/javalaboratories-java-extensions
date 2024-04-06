@@ -25,6 +25,7 @@ module javalaboratories.java.extensions {
   exports org.javalaboratories.core.concurrency;
   exports org.javalaboratories.core.concurrency.utils;
   exports org.javalaboratories.core.cryptography;
+  exports org.javalaboratories.core.cryptography.transport;
   exports org.javalaboratories.core.cryptography.keys;
   exports org.javalaboratories.core.event;
   exports org.javalaboratories.core.function;
