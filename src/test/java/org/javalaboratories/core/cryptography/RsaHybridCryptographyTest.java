@@ -60,6 +60,7 @@ public class RsaHybridCryptographyTest {
     private static final String FILE_TEXT = "This is a test file with encrypted data -- TOP SECRET!";
 
     private RsaHybridCryptography cryptography;
+    private RsaHybridCryptography signableCryptography;
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
@@ -78,6 +79,7 @@ public class RsaHybridCryptographyTest {
         publicKey = RsaKeys.getPublicKeyFrom(publicKeyfile);
 
         cryptography = CryptographyFactory.getAsymmetricHybridCryptography();
+        signableCryptography = CryptographyFactory.getSignableAsymmetricHybridCryptography(MessageDigestAlgorithms.SHA256);
 
         when(mockInputStream.read(any())).thenThrow(IOException.class);
         doThrow(IOException.class).when(mockOutputStream).write(any());
@@ -206,4 +208,20 @@ public class RsaHybridCryptographyTest {
         assertFalse(result.isSignable());
         assertEquals(FILE_TEXT,s);
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+    //------------------------------ Signable unit tests
+    //------------------------------------------------------------------------------------------------------------------
+    @Test
+    public void testSignableStringEncryption_Pass() {
+        ByteCryptographyResult<PublicKey> result = signableCryptography.encrypt(publicKey,TEXT);
+
+        ByteCryptographyResult<PrivateKey> stringResult = signableCryptography.decrypt(privateKey, result.getBytesAsBase64());
+
+        assertNotNull(result.getKey());
+        assertTrue(result.getSessionKey().isPresent());
+        assertTrue(result.isSignable());
+        assertEquals(TEXT, stringResult.getString().orElseThrow());
+    }
+
 }
