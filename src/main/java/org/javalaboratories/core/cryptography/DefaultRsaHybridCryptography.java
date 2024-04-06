@@ -144,7 +144,8 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
 
             // Decrypt AES message with AES secret key
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
-            StreamCryptographyResult<SymmetricSecretKey,T> result = aes.decrypt(secretKey,is,os);
+            aes.decrypt(secretKey,is,os);
+
             return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,getMessageHashFromOutputStream(os),outputStream);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt stream",e);
