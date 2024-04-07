@@ -28,7 +28,7 @@ import java.security.PublicKey;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MessageSignerTest {
+public class MessageRsaSignerTest {
 
     private static final String SIGNING_PRIVATE_KEY_FILE = "rsa-signing-private-key-pkcs8.pem";
     private static final String PUBLIC_KEY_FILE = "rsa-public-key.pem";
@@ -50,18 +50,18 @@ public class MessageSignerTest {
     private PrivateKey signingKey;
     private PublicKey publicKey;
 
-    private MessageSigner signer;
+    private MessageRsaSigner signer;
 
     @BeforeEach
     public void setup() throws URISyntaxException {
-        ClassLoader classLoader = MessageSignerTest.class.getClassLoader();
+        ClassLoader classLoader = MessageRsaSignerTest.class.getClassLoader();
         File privateKeyfile = Paths.get(classLoader.getResource(SIGNING_PRIVATE_KEY_FILE).toURI()).toFile();
         File publicKeyfile = Paths.get(classLoader.getResource(PUBLIC_KEY_FILE).toURI()).toFile();
 
         signingKey = RsaKeys.getPrivateKeyFrom(privateKeyfile);
         publicKey = RsaKeys.getPublicKeyFrom(publicKeyfile);
 
-        signer = new MessageSigner(signingKey);
+        signer = new MessageRsaSigner(signingKey);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class MessageSignerTest {
 
     @Test
     public void testAuthenticatorEquality_Pass() {
-        MessageSigner authenticator2 = new MessageSigner(signingKey);
+        MessageRsaSigner authenticator2 = new MessageRsaSigner(signingKey);
         assertEquals(authenticator2, signer);
     }
 }

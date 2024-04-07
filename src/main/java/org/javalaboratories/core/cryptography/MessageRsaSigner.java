@@ -15,9 +15,7 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.Value;
 import org.javalaboratories.core.cryptography.transport.SignedTransitMessage;
 import org.javalaboratories.core.util.Bytes;
@@ -37,29 +35,18 @@ import java.util.Base64;
 import java.util.Objects;
 
 @Value
-public class MessageSigner {
+@EqualsAndHashCode(callSuper = true)
+public class MessageRsaSigner extends MessageRsaAuthentication{
 
-    private static final int STREAM_BUFFER_SIZE = 4096;
-
-    private static final String MESSAGE_NOT_SIGNABLE = "Encrypted data is not signable";
-    private static final String DEFAULT_SIGNING_ALGORITHM = "SHA256withRSA";
-    private static final String DEFAULT_KEY_FACTORY_ALGORITHM = "RSA";
-
-    MessageDigestAlgorithms algorithm;
     PrivateKey privateKey;
 
-    @Getter(AccessLevel.PRIVATE)
-    @EqualsAndHashCode.Exclude
-    RsaHybridCryptography signable;
-
-    public MessageSigner(final PrivateKey key) {
+    public MessageRsaSigner(final PrivateKey key) {
         this(key,MessageDigestAlgorithms.SHA256);
     }
 
-    public MessageSigner(final PrivateKey key, MessageDigestAlgorithms algorithm) {
+    public MessageRsaSigner(final PrivateKey key, MessageDigestAlgorithms algorithm) {
+        super(algorithm);
         this.privateKey = Objects.requireNonNull(key);
-        this.algorithm = Objects.requireNonNull(algorithm);
-        this.signable = CryptographyFactory.getSignableAsymmetricHybridCryptography(algorithm);
     }
 
     public SignedTransitMessage<String> encrypt(final PublicKey publicKey, final String string) {
@@ -75,7 +62,7 @@ public class MessageSigner {
     }
 
     public SignedTransitMessage<byte[]> encrypt(final PublicKey key, final  byte[] bytes) {
-        ByteCryptographyResult<PublicKey> result = signable.encrypt(key,bytes);
+        ByteCryptographyResult<PublicKey> result = signable().encrypt(key,bytes);
         PublicKey signatureKey = getSignaturePublicKey();
         return result.getMessageHash()
             .map(this::sign)
@@ -90,7 +77,7 @@ public class MessageSigner {
         File file = Objects.requireNonNull(source,"Expected source file to encrypt");
         File ct = Objects.requireNonNull(ciphertext,"Expected output file object");
 
-        FileCryptographyResult<PublicKey> result = signable.encrypt(pk,file,ct);
+        FileCryptographyResult<PublicKey> result = signable().encrypt(pk,file,ct);
         byte[] signed = result.getMessageHash()
             .map(this::sign)
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
