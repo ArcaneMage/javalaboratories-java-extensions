@@ -18,12 +18,14 @@ package org.javalaboratories;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.javalaboratories.core.cryptography.ByteCryptographyResult;
+import org.javalaboratories.core.cryptography.CryptographyException;
 import org.javalaboratories.core.cryptography.MessageDigestAlgorithms;
 import org.javalaboratories.core.cryptography.MessageRsaAuthentication;
 import org.javalaboratories.core.cryptography.transport.SignedTransitMessage;
+import org.javalaboratories.core.cryptography.transport.TransitMessage;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Objects;
 
 @Value
@@ -41,8 +43,40 @@ public class MessageRsaVerifier extends MessageRsaAuthentication {
         this.publicKey = Objects.requireNonNull(key);
     }
 
-    public SignedTransitMessage<byte[]> decrypt(final PrivateKey key, final byte[] ciphertext) {
-        ByteCryptographyResult<PrivateKey> result = signable().decrypt(key,ciphertext);
-        return null;
+    public TransitMessage<String> decrypt(final PrivateKey key, final SignedTransitMessage<String> message) {
+        // TODO: Fix this pesky type erasure issue.
+    }
+
+    public TransitMessage<byte[]> decrypt(final PrivateKey key, final SignedTransitMessage<byte[]> message) {
+        SignedTransitMessage<byte[]> m = Objects.requireNonNull(message);
+
+        ByteCryptographyResult<PrivateKey> result = signable().decrypt(key,m.data());
+        return result.getMessageHash()
+            .map(h -> verify(h,m))
+            .filter(s -> s)
+            .map(b -> new TransitMessage<>(result.getBytes()))
+            .orElseThrow(() -> new CryptographyException("Failed to verify message"));
+    }
+
+    public boolean verify(byte[] hash,SignedTransitMessage<byte[]> message) {
+        PublicKey signatureKey = getSignaturePublicKey(message.publicKey());
+        try {
+            Signature signature = Signature.getInstance(DEFAULT_SIGNING_ALGORITHM);
+            signature.initVerify(signatureKey);
+            signature.update(message.signature());
+            return signature.verify(hash);
+        } catch (GeneralSecurityException e) {
+            throw new CryptographyException("Failed to verify signature",e);
+        }
+    }
+
+    private PublicKey getSignaturePublicKey(byte[] encoded) {
+        try {
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(encoded);
+            KeyFactory kf = KeyFactory.getInstance(DEFAULT_SIGNING_ALGORITHM);
+            return kf.generatePublic(spec);
+        } catch (GeneralSecurityException e) {
+            throw new CryptographyException("Failed to decode public key",e);
+        }
     }
 }
