@@ -15,4 +15,4 @@
  */
 package org.javalaboratories.core.cryptography.transport;
 
-public record Message<T> (T data, T signature, T publicKey) {}
+public record SignedTransitMessage<T> (T data, T signature, T publicKey) {}

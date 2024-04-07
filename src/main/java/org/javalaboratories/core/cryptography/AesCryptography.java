@@ -68,24 +68,41 @@ public interface AesCryptography {
      * Decrypts string ciphers with the given {@link SymmetricSecretKey} object.
      *
      * @param key contains private key with which to decrypt the data.
-     * @param cipherText the cipher text to be decrypted in Base64 format.
+     * @param ciphertext the ciphertext to be decrypted in Base64 format.
      * @return a {@link ByteCryptographyResult} encapsulating encryption
      * key and deciphered string.
      * @throws NullPointerException when parameters are null.
      * @see SymmetricSecretKey
      */
-    default <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final String cipherText) {
-        String  ct = Objects.requireNonNull(cipherText, "Expected encrypted cipher text");
+    default <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final String ciphertext) {
+        String  ct = Objects.requireNonNull(ciphertext, "Expected encrypted cipher text");
         K k = Objects.requireNonNull(key, "Expected key object");
         try {
-            byte[] ctBytes = Base64.getDecoder().decode(ct);
-            StreamCryptographyResult<K, ByteArrayOutputStream> result =
-                    decrypt(k,new ByteArrayInputStream(ctBytes),new ByteArrayOutputStream());
-            byte[] decryptedBytes = result.getStream().toByteArray();
-            return new ByteCryptographyResultImpl<>(key,decryptedBytes,new String(decryptedBytes));
+            ByteCryptographyResult<K> result = decrypt(k,Base64.getDecoder().decode(ct));
+
+            return new ByteCryptographyResultImpl<>(key,result.getBytes(),new String(result.getBytes()));
         } catch (IllegalArgumentException e) {
-            throw new CryptographyException("Failed to decrypt encoded cipher text",e);
+            throw new CryptographyException("Failed to decrypt encoded ciphertext",e);
         }
+    }
+
+    /**
+     * Decrypts string ciphers with the given {@link SymmetricSecretKey} object.
+     *
+     * @param key contains private key with which to decrypt the data.
+     * @param bytes the cipher text to be decrypted.
+     * @return a {@link ByteCryptographyResult} encapsulating encryption
+     * key and deciphered string.
+     * @throws NullPointerException when parameters are null.
+     * @see SymmetricSecretKey
+     */
+    default <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final byte[] bytes) {
+        K k = Objects.requireNonNull(key, "Expected key object");
+        byte[] b = Objects.requireNonNull(bytes, "Expected encrypted bytes");
+        StreamCryptographyResult<K, ByteArrayOutputStream> result =
+                decrypt(k,new ByteArrayInputStream(b),new ByteArrayOutputStream());
+        byte[] decryptedBytes = result.getStream().toByteArray();
+        return new ByteCryptographyResultImpl<>(key,decryptedBytes,null);
     }
 
     /**
@@ -101,9 +118,29 @@ public interface AesCryptography {
     default <K extends SymmetricSecretKey> ByteCryptographyResult<K> encrypt(final K key, final String string) {
         K k = Objects.requireNonNull(key, "Expected password");
         String s = Objects.requireNonNull(string, "Expected string to encrypt");
+        try {
+            return encrypt(k, s.getBytes());
+        } catch (CryptographyException e) {
+            throw new CryptographyException("Failed to encrypt string",e);
+        }
+    }
+
+    /**
+     * Encrypts {@link String} with a given {@code SymmetricSecretKey}.
+     *
+     * @param key a key to with which to the encrypted data.
+     * @param bytes bytes to be encrypted.
+     * @return a {@link ByteCryptographyResult} encapsulating encryption
+     * key and cipher text.
+     * @throws NullPointerException when parameters are null.
+     * @see SymmetricSecretKey
+     */
+    default <K extends SymmetricSecretKey> ByteCryptographyResult<K> encrypt(final K key, final byte[] bytes) {
+        K k = Objects.requireNonNull(key, "Expected password");
+        byte[] b = Objects.requireNonNull(bytes, "Expected string to encrypt");
 
         StreamCryptographyResult<K,ByteArrayOutputStream> result =
-                encrypt(k,new ByteArrayInputStream(s.getBytes()), new ByteArrayOutputStream());
+                encrypt(k,new ByteArrayInputStream(b), new ByteArrayOutputStream());
 
         return new ByteCryptographyResultImpl<>(k,result.getStream().toByteArray(),null);
     }

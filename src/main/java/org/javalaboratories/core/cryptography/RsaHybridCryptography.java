@@ -104,15 +104,7 @@ public interface RsaHybridCryptography {
         K pk = Objects.requireNonNull(publicKey,"Expected public key");
         String s = Objects.requireNonNull(string,"Expected string to encrypt");
         try {
-            StreamCryptographyResult<K, ByteArrayOutputStream> result =
-                    encrypt(pk,new ByteArrayInputStream(s.getBytes()),new ByteArrayOutputStream());
-
-            byte[] sessionKeyBytes = result.getSessionKey()
-                    .orElseThrow(() -> new CryptographyException("Failed to access cipher key"));
-            byte[] messageHash = result.getMessageHash()
-                    .orElseGet(() -> null);
-
-            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,messageHash,result.getStream().toByteArray(),null);
+            return encrypt(pk,s.getBytes());
         } catch (CryptographyException e) {
             throw new CryptographyException("Failed to encrypt string",e);
         }
@@ -135,20 +127,78 @@ public interface RsaHybridCryptography {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
         String s = Objects.requireNonNull(ciphertext,"Expected string to decrypt");
         try {
-            StreamCryptographyResult<K, ByteArrayOutputStream> result =
-                    decrypt(pk,new ByteArrayInputStream(Base64.getDecoder().decode(s)),new ByteArrayOutputStream());
+            ByteCryptographyResult<K> result = decrypt(pk,Base64.getDecoder().decode(s));
 
             byte[] sessionKeyBytes = result.getSessionKey()
                     .orElseThrow(() -> new CryptographyException("Failed to access session key"));
             byte[] messageHash = result.getMessageHash()
                     .orElseGet(() -> null);
-            byte[] bytes = result.getStream().toByteArray();
+            byte[] bytes = result.getBytes();
 
             return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,messageHash,bytes,new String(bytes));
         } catch (CryptographyException e) {
             throw new CryptographyException("Failed to decrypt string",e);
         } catch (IllegalArgumentException e) {
             throw new CryptographyException("Failed to decode Base64 string",e);
+        }
+    }
+
+    /**
+     * Encrypts the string using the RSA algorithm with the given {@code
+     * publicKey}.
+     *
+     * @param publicKey the key with which to encrypt the string.
+     * @param bytes the bytes to be encrypted.
+     * @return a {@link ByteCryptographyResult} encapsulated ciphertext.
+     * @param <K> the type of key.
+     * @throws CryptographyException cryptography failure.
+     * @throws NullPointerException whenever parameters are null.
+     */
+    default <K extends PublicKey> ByteCryptographyResult<K> encrypt(final K publicKey, final byte[] bytes) {
+        K pk = Objects.requireNonNull(publicKey,"Expected public key");
+        byte[] b = Objects.requireNonNull(bytes,"Expected bytes to encrypt");
+        try {
+            StreamCryptographyResult<K, ByteArrayOutputStream> result =
+                    encrypt(pk,new ByteArrayInputStream(b),new ByteArrayOutputStream());
+
+            byte[] sessionKeyBytes = result.getSessionKey()
+                    .orElseThrow(() -> new CryptographyException("Failed to access session key"));
+            byte[] messageHash = result.getMessageHash()
+                    .orElseGet(() -> null);
+
+            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,messageHash,result.getStream().toByteArray(),null);
+        } catch (CryptographyException e) {
+            throw new CryptographyException("Failed to encrypt bytes",e);
+        }
+    }
+
+    /**
+     * Decrypts the {@code String} using RSA algorithm with the given {@code
+     * privateKey}.
+     *
+     * @param privateKey the key with which to decrypt the string.
+     * @param bytes the {@code String} to be decrypted.
+     *
+     * @return a {@link ByteCryptographyResult} encapsulated deciphered text.
+     * @param <K> the type of key.
+     * @throws CryptographyException cryptography failure.
+     * @throws NullPointerException whenever parameters are null.
+     */
+    default <K extends PrivateKey> ByteCryptographyResult<K> decrypt(final K privateKey, final byte[] bytes) {
+        K pk = Objects.requireNonNull(privateKey,"Expected private key");
+        byte[] b = Objects.requireNonNull(bytes,"Expected bytes to decrypt");
+        try {
+            StreamCryptographyResult<K, ByteArrayOutputStream> result =
+                    decrypt(pk,new ByteArrayInputStream(b),new ByteArrayOutputStream());
+
+            byte[] sessionKeyBytes = result.getSessionKey()
+                    .orElseThrow(() -> new CryptographyException("Failed to access session key"));
+            byte[] messageHash = result.getMessageHash()
+                    .orElseGet(() -> null);
+
+            return new ByteCryptographyResultImpl<>(pk,sessionKeyBytes,messageHash,result.getStream().toByteArray(),null);
+        } catch (CryptographyException e) {
+            throw new CryptographyException("Failed to decrypt string",e);
         }
     }
 

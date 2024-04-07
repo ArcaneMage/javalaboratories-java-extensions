@@ -18,7 +18,7 @@ package org.javalaboratories.core.cryptography;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Value;
-import org.javalaboratories.core.cryptography.transport.Message;
+import org.javalaboratories.core.cryptography.transport.SignedTransitMessage;
 
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -30,6 +30,7 @@ public class MessageAuthenticator {
 
     private static final String MESSAGE_NOT_SIGNABLE = "Encrypted data is not signable";
     private static final String DEFAULT_SIGNING_ALGORITHM = "SHA256withRSA";
+    private static final String DEFAULT_KEY_FACTORY_ALGORITHM = "RSA";
 
     MessageDigestAlgorithms algorithm;
     PrivateKey privateKey;
@@ -43,14 +44,23 @@ public class MessageAuthenticator {
         this.signable = CryptographyFactory.getSignableAsymmetricHybridCryptography(algorithm);
     }
 
-    public Message<String> encrypt(final PublicKey key, final  String s) {
+    public SignedTransitMessage<String> encrypt(final PublicKey key, final  String s) {
         ByteCryptographyResult<PublicKey> result = signable.encrypt(key,s);
         PublicKey signatureKey = getSignaturePublicKey();
         return result.getMessageHash()
             .map(this::sign)
-            .map(signature -> new Message<>(result.getBytesAsBase64(), Base64.getEncoder().encodeToString(signature),
+            .map(signed -> new SignedTransitMessage<>(result.getBytesAsBase64(), Base64.getEncoder().encodeToString(signed),
                     Base64.getEncoder().encodeToString(signatureKey.getEncoded())))
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
+    }
+
+    private PublicKey getSignaturePublicKey() {
+        try {
+            KeyFactory kf = KeyFactory.getInstance(DEFAULT_KEY_FACTORY_ALGORITHM);
+            return kf.generatePublic(new PKCS8EncodedKeySpec(privateKey.getEncoded()));
+        } catch (GeneralSecurityException e) {
+            throw new CryptographyException("Failed to generate public key from private key",e);
+        }
     }
 
     private byte[] sign(final byte[] bytes) throws CryptographyException {
@@ -61,15 +71,6 @@ public class MessageAuthenticator {
             return signature.sign();
         } catch (GeneralSecurityException e) {
             throw new CryptographyException(MESSAGE_NOT_SIGNABLE,e);
-        }
-    }
-
-    private PublicKey getSignaturePublicKey() {
-        try {
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            return kf.generatePublic(new PKCS8EncodedKeySpec(privateKey.getEncoded()));
-        } catch (GeneralSecurityException e) {
-            throw new CryptographyException("Failed to generate public key from private key",e);
         }
     }
 }
