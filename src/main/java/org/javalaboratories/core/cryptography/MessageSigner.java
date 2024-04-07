@@ -37,7 +37,7 @@ import java.util.Base64;
 import java.util.Objects;
 
 @Value
-public class MessageAuthenticator {
+public class MessageSigner {
 
     private static final int STREAM_BUFFER_SIZE = 4096;
 
@@ -52,11 +52,11 @@ public class MessageAuthenticator {
     @EqualsAndHashCode.Exclude
     RsaHybridCryptography signable;
 
-    public MessageAuthenticator(final PrivateKey key) {
+    public MessageSigner(final PrivateKey key) {
         this(key,MessageDigestAlgorithms.SHA256);
     }
 
-    public MessageAuthenticator(final PrivateKey key, MessageDigestAlgorithms algorithm) {
+    public MessageSigner(final PrivateKey key, MessageDigestAlgorithms algorithm) {
         this.privateKey = Objects.requireNonNull(key);
         this.algorithm = Objects.requireNonNull(algorithm);
         this.signable = CryptographyFactory.getSignableAsymmetricHybridCryptography(algorithm);

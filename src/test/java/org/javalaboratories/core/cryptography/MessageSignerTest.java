@@ -28,7 +28,7 @@ import java.security.PublicKey;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MessageAuthenticatorTest {
+public class MessageSignerTest {
 
     private static final String SIGNING_PRIVATE_KEY_FILE = "rsa-signing-private-key-pkcs8.pem";
     private static final String PUBLIC_KEY_FILE = "rsa-public-key.pem";
@@ -50,23 +50,23 @@ public class MessageAuthenticatorTest {
     private PrivateKey signingKey;
     private PublicKey publicKey;
 
-    private MessageAuthenticator authenticator;
+    private MessageSigner signer;
 
     @BeforeEach
     public void setup() throws URISyntaxException {
-        ClassLoader classLoader = MessageAuthenticatorTest.class.getClassLoader();
+        ClassLoader classLoader = MessageSignerTest.class.getClassLoader();
         File privateKeyfile = Paths.get(classLoader.getResource(SIGNING_PRIVATE_KEY_FILE).toURI()).toFile();
         File publicKeyfile = Paths.get(classLoader.getResource(PUBLIC_KEY_FILE).toURI()).toFile();
 
         signingKey = RsaKeys.getPrivateKeyFrom(privateKeyfile);
         publicKey = RsaKeys.getPublicKeyFrom(publicKeyfile);
 
-        authenticator = new MessageAuthenticator(signingKey);
+        signer = new MessageSigner(signingKey);
     }
 
     @Test
     public void testStringEncrypt_Pass() {
-       SignedTransitMessage<String> signedMessage =  authenticator.encrypt(publicKey,TEXT);
+       SignedTransitMessage<String> signedMessage =  signer.encrypt(publicKey,TEXT);
 
        assertNotNull(signedMessage.data());
        assertEquals(signedMessage.signature(),TEXT_SIGNATURE);
@@ -79,20 +79,20 @@ public class MessageAuthenticatorTest {
         File source = Paths.get(classLoader.getResource(AES_UNENCRYPTED_FILE).toURI()).toFile();
         File ciphertext = new File(STR."\{source.getAbsolutePath()}.enc");
 
-        boolean signed = authenticator.encrypt(publicKey,source,ciphertext);
+        boolean signed = signer.encrypt(publicKey,source,ciphertext);
 
         assertTrue(signed);
     }
 
     @Test
     public void testAuthenticatorState_Pass() {
-        assertEquals(MessageDigestAlgorithms.SHA256,authenticator.getAlgorithm());
-        assertEquals(signingKey,authenticator.getPrivateKey());
+        assertEquals(MessageDigestAlgorithms.SHA256, signer.getAlgorithm());
+        assertEquals(signingKey, signer.getPrivateKey());
     }
 
     @Test
     public void testAuthenticatorEquality_Pass() {
-        MessageAuthenticator authenticator2 = new MessageAuthenticator(signingKey);
-        assertEquals(authenticator2,authenticator);
+        MessageSigner authenticator2 = new MessageSigner(signingKey);
+        assertEquals(authenticator2, signer);
     }
 }
