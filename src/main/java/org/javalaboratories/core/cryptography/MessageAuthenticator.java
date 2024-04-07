@@ -17,9 +17,11 @@ package org.javalaboratories.core.cryptography;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Singular;
 import lombok.Value;
 import org.javalaboratories.core.cryptography.transport.SignedTransitMessage;
 
+import java.io.File;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
@@ -44,14 +46,31 @@ public class MessageAuthenticator {
         this.signable = CryptographyFactory.getSignableAsymmetricHybridCryptography(algorithm);
     }
 
-    public SignedTransitMessage<String> encrypt(final PublicKey key, final  String s) {
-        ByteCryptographyResult<PublicKey> result = signable.encrypt(key,s);
+    public SignedTransitMessage<String> encrypt(final PublicKey publicKey, final String string) {
+        PublicKey pk = Objects.requireNonNull(publicKey,"Expected public key");
+        String s = Objects.requireNonNull(string,"Expected string to encrypt and sign");
+
+        SignedTransitMessage<byte[]> result = encrypt(pk,s.getBytes());
+        return new SignedTransitMessage<> (
+                Base64.getEncoder().encodeToString(result.data()),
+                Base64.getEncoder().encodeToString(result.signature()),
+                Base64.getEncoder().encodeToString(result.publicKey())
+        );
+    }
+
+    public SignedTransitMessage<byte[]> encrypt(final PublicKey key, final  byte[] bytes) {
+        ByteCryptographyResult<PublicKey> result = signable.encrypt(key,bytes);
         PublicKey signatureKey = getSignaturePublicKey();
         return result.getMessageHash()
             .map(this::sign)
-            .map(signed -> new SignedTransitMessage<>(result.getBytesAsBase64(), Base64.getEncoder().encodeToString(signed),
-                    Base64.getEncoder().encodeToString(signatureKey.getEncoded())))
+            .map(signed -> new SignedTransitMessage<>(result.getBytes(),
+                    signed,
+                    signatureKey.getEncoded()))
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
+    }
+
+    public void encrypt(final PublicKey key, File source, File ciphertext) {
+
     }
 
     private PublicKey getSignaturePublicKey() {

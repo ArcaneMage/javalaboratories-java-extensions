@@ -96,10 +96,10 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
     @Override
     public <K extends PublicKey,T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K publicKey,
                                                                                               final InputStream inputStream,
-                                                                                              final T cipherStream) {
+                                                                                              final T ciphertext) {
         K pk = Objects.requireNonNull(publicKey,"Expected public key");
         try (InputStream is = getInputStream(Objects.requireNonNull(inputStream,"Expected input stream"));
-             T os = Objects.requireNonNull(cipherStream, "Expected cipher stream")) {
+             T os = Objects.requireNonNull(ciphertext, "Expected cipher stream")) {
             SymmetricSecretKey secretKey = SymmetricSecretKey.newInstance();
 
             // Encrypt session key with public key
@@ -129,14 +129,14 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
      */
     @Override
     public <K extends PrivateKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K privateKey,
-                                                                                               final InputStream cipherStream,
+                                                                                               final InputStream ciphertext,
                                                                                                T outputStream) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
-        try (InputStream is = Objects.requireNonNull(cipherStream,"Expected cipher stream");
+        try (InputStream is = Objects.requireNonNull(ciphertext,"Expected cipher stream");
              T os = getOutputStream(Objects.requireNonNull(outputStream,"Expected out stream"))) {
 
             // Read the RSA session key first, decrypt and derive AES secret key
-            byte[] encryptedSessionKey = readSessionKeyFromStream(cipherStream);
+            byte[] encryptedSessionKey = readSessionKeyFromStream(ciphertext);
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE,pk);
             byte[] sessionKeyBytes = cipher.doFinal(encryptedSessionKey);

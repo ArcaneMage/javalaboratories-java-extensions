@@ -36,7 +36,7 @@ public interface AesCryptography {
      * Decrypts {@link InputStream} that contains a stream of cipher data.
      *
      * @param key contains private key with which to decrypt the stream
-     * @param cipherStream a stream of encoded cipher data to be decrypted.
+     * @param ciphertext a stream of encoded cipher data to be decrypted.
      * @param outputStream a stream of decoded data.
      * @return a {@link StreamCryptographyResult} that encapsulate decoded
      * data.
@@ -45,7 +45,7 @@ public interface AesCryptography {
      * @see SymmetricSecretKey
      */
     <K extends SymmetricSecretKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K key,
-                                                                                                final InputStream cipherStream,
+                                                                                                final InputStream ciphertext,
                                                                                                 final T outputStream);
 
     /**
@@ -53,7 +53,7 @@ public interface AesCryptography {
      *
      * @param key with which to encrypt the {@link InputStream}.
      * @param inputStream a stream of data to be encrypted.
-     * @param cipherStream a stream of cipher data.
+     * @param ciphertext a stream of cipher data.
      * @return a {@link StreamCryptographyResult} object encapsulating encrypted
      * data.
      * @param <T> type of output stream.
@@ -62,7 +62,7 @@ public interface AesCryptography {
      */
     <K extends SymmetricSecretKey, T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K key,
                                                                                                  final InputStream inputStream,
-                                                                                                 final T cipherStream);
+                                                                                                 final T ciphertext);
 
     /**
      * Decrypts string ciphers with the given {@link SymmetricSecretKey} object.
@@ -90,15 +90,15 @@ public interface AesCryptography {
      * Decrypts string ciphers with the given {@link SymmetricSecretKey} object.
      *
      * @param key contains private key with which to decrypt the data.
-     * @param bytes the cipher text to be decrypted.
+     * @param ciphertext the cipher text to be decrypted.
      * @return a {@link ByteCryptographyResult} encapsulating encryption
      * key and deciphered string.
      * @throws NullPointerException when parameters are null.
      * @see SymmetricSecretKey
      */
-    default <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final byte[] bytes) {
+    default <K extends SymmetricSecretKey> ByteCryptographyResult<K> decrypt(final K key, final byte[] ciphertext) {
         K k = Objects.requireNonNull(key, "Expected key object");
-        byte[] b = Objects.requireNonNull(bytes, "Expected encrypted bytes");
+        byte[] b = Objects.requireNonNull(ciphertext, "Expected encrypted bytes");
         StreamCryptographyResult<K, ByteArrayOutputStream> result =
                 decrypt(k,new ByteArrayInputStream(b),new ByteArrayOutputStream());
         byte[] decryptedBytes = result.getStream().toByteArray();
@@ -150,18 +150,18 @@ public interface AesCryptography {
      *
      * @param key a key of the encrypted file.
      * @param source source file with which to encrypt.
-     * @param cipherFile encrypted file.
+     * @param ciphertext encrypted file.
      * @return a {@link FileCryptographyResult} encapsulating encrypted key and
      * file.
      * @throws NullPointerException when parameters are null.
      */
-    default <K extends SymmetricSecretKey> FileCryptographyResult<K> encrypt(final K key, final File source, final File cipherFile) {
+    default <K extends SymmetricSecretKey> FileCryptographyResult<K> encrypt(final K key, final File source, final File ciphertext) {
         try (InputStream is = new FileInputStream(Objects.requireNonNull(source,"Expected source file"));
-             OutputStream os = new FileOutputStream(Objects.requireNonNull(cipherFile,"Expected cipher file"))) {
+             OutputStream os = new FileOutputStream(Objects.requireNonNull(ciphertext,"Expected cipher file"))) {
             StreamCryptographyResult<K,OutputStream> result = encrypt(Objects.requireNonNull(key,
                     "Expected key object"), is, os);
 
-            return new FileCryptographyResultImpl<>(result.getKey(),cipherFile);
+            return new FileCryptographyResultImpl<>(result.getKey(),ciphertext);
         } catch (IOException e) {
             throw new CryptographyException("Failed to encrypt file",e);
         }
@@ -172,12 +172,12 @@ public interface AesCryptography {
      *
      * @param key a key of the encrypted file.
      * @param output decrypted file output.
-     * @param cipherFile encrypted file.
+     * @param ciphertext encrypted file.
      * @return a {@link FileCryptographyResult} encapsulating encrypted key and
      * output file.
      */
-    default <K extends SymmetricSecretKey> FileCryptographyResult<K> decrypt(final K key, final File cipherFile, final File output) {
-        try (InputStream is = new FileInputStream(Objects.requireNonNull(cipherFile,"Expected cipher file"));
+    default <K extends SymmetricSecretKey> FileCryptographyResult<K> decrypt(final K key, final File ciphertext, final File output) {
+        try (InputStream is = new FileInputStream(Objects.requireNonNull(ciphertext,"Expected cipher file"));
              OutputStream os = new FileOutputStream(Objects.requireNonNull(output,"Expected output file"))) {
             StreamCryptographyResult<K,OutputStream> result = decrypt(Objects.requireNonNull(key,
                     "Expected key object"), is, os);

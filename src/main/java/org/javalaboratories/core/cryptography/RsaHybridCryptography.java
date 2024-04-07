@@ -77,7 +77,7 @@ public interface RsaHybridCryptography {
      * privateKey}.
      *
      * @param privateKey the key with which to decrypt the {@code cipherStream}.
-     * @param cipherStream the {@code InputStream} to be decrypted, the {@code ciphertext}.
+     * @param ciphertext the {@code InputStream} to be decrypted, the {@code ciphertext}.
      * @param outputStream the output of the deciphered text/data.
      *
      * @return a {@link StreamCryptographyResult} encapsulated deciphered text.
@@ -86,7 +86,7 @@ public interface RsaHybridCryptography {
      * @throws NullPointerException whenever parameters are null.
      */
     <K extends PrivateKey, T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K privateKey,
-                                                                                         final InputStream cipherStream,
+                                                                                         final InputStream ciphertext,
                                                                                          final T outputStream);
 
     /**
@@ -177,16 +177,16 @@ public interface RsaHybridCryptography {
      * privateKey}.
      *
      * @param privateKey the key with which to decrypt the string.
-     * @param bytes the {@code String} to be decrypted.
+     * @param ciphertext the {@code String} to be decrypted.
      *
      * @return a {@link ByteCryptographyResult} encapsulated deciphered text.
      * @param <K> the type of key.
      * @throws CryptographyException cryptography failure.
      * @throws NullPointerException whenever parameters are null.
      */
-    default <K extends PrivateKey> ByteCryptographyResult<K> decrypt(final K privateKey, final byte[] bytes) {
+    default <K extends PrivateKey> ByteCryptographyResult<K> decrypt(final K privateKey, final byte[] ciphertext) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
-        byte[] b = Objects.requireNonNull(bytes,"Expected bytes to decrypt");
+        byte[] b = Objects.requireNonNull(ciphertext,"Expected bytes to decrypt");
         try {
             StreamCryptographyResult<K, ByteArrayOutputStream> result =
                     decrypt(pk,new ByteArrayInputStream(b),new ByteArrayOutputStream());
@@ -207,17 +207,17 @@ public interface RsaHybridCryptography {
      *
      * @param publicKey the key with which to encrypt the {@code source}.
      * @param source the source file to be RSA encrypted.
-     * @param cipherFile the output file of the {@code ciphertext}.
+     * @param ciphertext the output file of the {@code ciphertext}.
      *
      * @return a {@link FileCryptographyResult} encapsulated ciphertext.
      * @param <K> the type of key.
      * @throws CryptographyException cryptography failure.
      * @throws NullPointerException whenever parameters are null.
      */
-    default <K extends PublicKey> FileCryptographyResult<K> encrypt(final K publicKey, final File source, File cipherFile) {
+    default <K extends PublicKey> FileCryptographyResult<K> encrypt(final K publicKey, final File source, File ciphertext) {
         K pk = Objects.requireNonNull(publicKey,"Expected public key");
         try (InputStream is = new FileInputStream(Objects.requireNonNull(source,"Expected source file"));
-             OutputStream os = new FileOutputStream(Objects.requireNonNull(cipherFile,"Expected cipher file"))) {
+             OutputStream os = new FileOutputStream(Objects.requireNonNull(ciphertext,"Expected cipher file"))) {
             StreamCryptographyResult<K,OutputStream> result = encrypt(Objects.requireNonNull(pk, "Expected key object"), is, os);
 
             byte[] sessionKey = result.getSessionKey()
@@ -225,7 +225,7 @@ public interface RsaHybridCryptography {
             byte[] messageHash = result.getMessageHash()
                     .orElseGet(() -> null);
 
-            return new FileCryptographyResultImpl<>(result.getKey(),sessionKey,messageHash,cipherFile);
+            return new FileCryptographyResultImpl<>(result.getKey(),sessionKey,messageHash,ciphertext);
         } catch (IOException e) {
             throw new CryptographyException("Failed to encrypt file",e);
         }
@@ -235,7 +235,7 @@ public interface RsaHybridCryptography {
      * Decrypts the {@code File} using RSA algorithm with the given {@code privateKey}.
      *
      * @param privateKey the key with which to decrypt the {@code source}.
-     * @param cipherFile the input file of the {@code ciphertext}.
+     * @param ciphertext the input file of the {@code ciphertext}.
      * @param output the output of the deciphered text/data.
      *
      * @return a {@link FileCryptographyResult} encapsulated ciphertext.
@@ -244,9 +244,9 @@ public interface RsaHybridCryptography {
      * @throws NullPointerException whenever parameters are null.
      */
     default <K extends PrivateKey> FileCryptographyResult<K> decrypt(final K privateKey,
-                                                                     final File cipherFile, File output) {
+                                                                     final File ciphertext, File output) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
-        try (InputStream is = new FileInputStream(Objects.requireNonNull(cipherFile,"Expected cipher file"));
+        try (InputStream is = new FileInputStream(Objects.requireNonNull(ciphertext,"Expected cipher file"));
              OutputStream os = new FileOutputStream(Objects.requireNonNull(output,"Expected output file"))) {
             StreamCryptographyResult<K,OutputStream> result = decrypt(Objects.requireNonNull(pk,
                     "Expected key object"), is, os);

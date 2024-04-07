@@ -49,16 +49,16 @@ public final class DefaultAesCryptography implements AesCryptography {
      */
     @Override
     public <K extends SymmetricSecretKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K key,
-                                                                                                       final InputStream cipherStream,
+                                                                                                       final InputStream ciphertext,
                                                                                                        final T outputStream) {
         K k = Objects.requireNonNull(key,"Expected key object");
         try {
             // Read IV Header
-            IvParameterSpec iv = readIvHeader(cipherStream);
+            IvParameterSpec iv = readIvHeader(ciphertext);
 
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE,k,iv);
-            write(cipher,cipherStream,outputStream);
+            write(cipher, ciphertext,outputStream);
             return new StreamCryptographyResultImpl<>(k,outputStream);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to decrypt cipher text stream",e);
@@ -73,7 +73,7 @@ public final class DefaultAesCryptography implements AesCryptography {
     @Override
     public <K extends SymmetricSecretKey,T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K key,
                                                                                                        final InputStream inputStream,
-                                                                                                       final T cipherStream) {
+                                                                                                       final T ciphertext) {
         K k = Objects.requireNonNull(key, "Expected key object");
         try {
             IvParameterSpec iv = generateIvParameterSpec();
@@ -81,11 +81,11 @@ public final class DefaultAesCryptography implements AesCryptography {
             cipher.init(ENCRYPT_MODE,k,iv);
 
             // Write Prefix IV Header
-            Objects.requireNonNull(cipherStream)
+            Objects.requireNonNull(ciphertext)
                     .write(iv.getIV());
 
-            write(cipher,inputStream,cipherStream);
-            return new StreamCryptographyResultImpl<>(k,cipherStream);
+            write(cipher,inputStream, ciphertext);
+            return new StreamCryptographyResultImpl<>(k, ciphertext);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt stream",e);
         } catch (IOException e) {
