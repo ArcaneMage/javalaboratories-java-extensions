@@ -16,19 +16,30 @@
 package org.javalaboratories.core.cryptography;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Singular;
 import lombok.Value;
 import org.javalaboratories.core.cryptography.transport.SignedTransitMessage;
+import org.javalaboratories.core.util.Bytes;
 
 import java.io.File;
-import java.security.*;
-import java.security.spec.PKCS8EncodedKeySpec;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 import java.util.Objects;
 
 @Value
 public class MessageAuthenticator {
+
+    private static final int STREAM_BUFFER_SIZE = 4096;
 
     private static final String MESSAGE_NOT_SIGNABLE = "Encrypted data is not signable";
     private static final String DEFAULT_SIGNING_ALGORITHM = "SHA256withRSA";
@@ -38,7 +49,12 @@ public class MessageAuthenticator {
     PrivateKey privateKey;
 
     @Getter(AccessLevel.PRIVATE)
+    @EqualsAndHashCode.Exclude
     RsaHybridCryptography signable;
+
+    public MessageAuthenticator(final PrivateKey key) {
+        this(key,MessageDigestAlgorithms.SHA256);
+    }
 
     public MessageAuthenticator(final PrivateKey key, MessageDigestAlgorithms algorithm) {
         this.privateKey = Objects.requireNonNull(key);
@@ -69,14 +85,43 @@ public class MessageAuthenticator {
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
     }
 
-    public void encrypt(final PublicKey key, File source, File ciphertext) {
+    public boolean encrypt(final PublicKey key, final File source, final File ciphertext) {
+        PublicKey pk = Objects.requireNonNull(key,"Expected public key");
+        File file = Objects.requireNonNull(source,"Expected source file to encrypt");
+        File ct = Objects.requireNonNull(ciphertext,"Expected output file object");
 
+        FileCryptographyResult<PublicKey> result = signable.encrypt(pk,file,ct);
+        byte[] signed = result.getMessageHash()
+            .map(this::sign)
+            .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
+
+        PublicKey signatureKey = getSignaturePublicKey();
+        File tempfile = new File(STR."\{ciphertext.getAbsolutePath()}.tmp");
+        try (FileInputStream isstream = new FileInputStream(ciphertext);
+            FileOutputStream osstream = new FileOutputStream(tempfile)) {
+
+            // Write signature header to file
+            osstream.write(Bytes.toByteArray(signed.length));
+            osstream.write(signed);
+            osstream.write(Bytes.toByteArray(signatureKey.getEncoded().length));
+            osstream.write(signatureKey.getEncoded());
+
+            byte[] buffer = new byte[STREAM_BUFFER_SIZE];
+            int read;
+            while((read = isstream.read(buffer)) != -1)
+                osstream.write(buffer,0,read);
+
+            return ciphertext.delete() && tempfile.renameTo(ciphertext);
+        } catch (IOException e) {
+            throw new CryptographyException("Failed to sign encrypted file",e);
+        }
     }
 
     private PublicKey getSignaturePublicKey() {
         try {
             KeyFactory kf = KeyFactory.getInstance(DEFAULT_KEY_FACTORY_ALGORITHM);
-            return kf.generatePublic(new PKCS8EncodedKeySpec(privateKey.getEncoded()));
+            RSAPrivateCrtKey rsaPrivateKey = (RSAPrivateCrtKey) privateKey;
+            return kf.generatePublic(new RSAPublicKeySpec(rsaPrivateKey.getModulus(),rsaPrivateKey.getPublicExponent()));
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to generate public key from private key",e);
         }
