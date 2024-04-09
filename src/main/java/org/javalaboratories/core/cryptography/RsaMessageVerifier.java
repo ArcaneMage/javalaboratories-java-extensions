@@ -28,15 +28,15 @@ import java.util.Objects;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class MessageRsaVerifier extends MessageRsaAuthentication {
+public class RsaMessageVerifier extends MessageRsaAuthentication {
 
     PublicKey publicKey;
 
-    public MessageRsaVerifier(final PublicKey key) {
+    public RsaMessageVerifier(final PublicKey key) {
         this(key,MessageDigestAlgorithms.SHA256);
     }
 
-    public MessageRsaVerifier(final PublicKey key, final MessageDigestAlgorithms algorithm) {
+    public RsaMessageVerifier(final PublicKey key, final MessageDigestAlgorithms algorithm) {
         super(algorithm);
         this.publicKey = Objects.requireNonNull(key);
     }

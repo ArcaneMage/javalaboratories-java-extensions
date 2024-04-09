@@ -31,20 +31,19 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Base64;
 import java.util.Objects;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class MessageRsaSigner extends MessageRsaAuthentication {
+public class RsaMessageSigner extends MessageRsaAuthentication {
 
     PrivateKey privateKey;
 
-    public MessageRsaSigner(final PrivateKey key) {
+    public RsaMessageSigner(final PrivateKey key) {
         this(key,MessageDigestAlgorithms.SHA256);
     }
 
-    public MessageRsaSigner(final PrivateKey key, MessageDigestAlgorithms algorithm) {
+    public RsaMessageSigner(final PrivateKey key, MessageDigestAlgorithms algorithm) {
         super(algorithm);
         this.privateKey = Objects.requireNonNull(key);
     }

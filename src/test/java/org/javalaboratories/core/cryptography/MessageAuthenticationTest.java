@@ -16,7 +16,6 @@
 package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.RsaKeys;
-import org.javalaboratories.core.cryptography.transport.JsonHelper;
 import org.javalaboratories.core.cryptography.transport.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,8 +67,8 @@ public class MessageAuthenticationTest {
     private PublicKey publicKey;
     private PublicKey verifyingKey;
 
-    private MessageRsaSigner signer;
-    private MessageRsaVerifier verifier;
+    private RsaMessageSigner signer;
+    private RsaMessageVerifier verifier;
 
     @BeforeEach
     public void setup() throws URISyntaxException {
@@ -84,8 +83,8 @@ public class MessageAuthenticationTest {
         publicKey = RsaKeys.getPublicKeyFrom(publicKeyFile);
         privateKey = RsaKeys.getPrivateKeyFrom(privateKeyFile);
 
-        signer = new MessageRsaSigner(signingKey);
-        verifier = new MessageRsaVerifier(verifyingKey);
+        signer = new RsaMessageSigner(signingKey);
+        verifier = new RsaMessageVerifier(verifyingKey);
     }
 
     @Test
@@ -115,7 +114,7 @@ public class MessageAuthenticationTest {
 
     @Test
     public void testAuthenticatorEquality_Pass() {
-        MessageRsaSigner authenticator2 = new MessageRsaSigner(signingKey);
+        RsaMessageSigner authenticator2 = new RsaMessageSigner(signingKey);
         assertEquals(authenticator2, signer);
     }
 
@@ -126,7 +125,6 @@ public class MessageAuthenticationTest {
     @Test
     public void testStringDecrypt_Pass() {
         String s = verifier.decryptAsString(privateKey,TEXT_SIGNED);
-
         assertEquals(TEXT, s);
     }
 }
