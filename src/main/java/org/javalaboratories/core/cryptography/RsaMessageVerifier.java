@@ -41,9 +41,17 @@ public class RsaMessageVerifier extends MessageRsaAuthentication {
         this.publicKey = Objects.requireNonNull(key);
     }
 
+    public String decryptAsString(final PrivateKey key, final String ciphertext) {
+        return new String(decrypt(key,Objects.requireNonNull(ciphertext,"Expected ciphertext message string")));
+    }
+
+    public String decryptAsString(final PrivateKey key, final Message ciphertext) {
+        return new String(decrypt(key,Objects.requireNonNull(ciphertext,"Expected ciphertext message")));
+    }
+
     public byte[] decrypt(final PrivateKey key, final String ciphertext) {
         Message message = new Message(Base64.getDecoder().decode(Objects.requireNonNull(ciphertext,
-                "Expected ciphertext string")));
+                "Expected ciphertext string in base64 format")));
         return decrypt(key, message);
     }
 
@@ -51,18 +59,10 @@ public class RsaMessageVerifier extends MessageRsaAuthentication {
         return decrypt(key,new Message(Objects.requireNonNull(ciphertext,"Expected ciphertext bytes")));
     }
 
-    public String decryptAsString(final PrivateKey key, final String ciphertext) {
-        return new String(decrypt(key,Objects.requireNonNull(ciphertext,"Expected ciphertext message")));
-    }
-
-    public String decryptAsString(final PrivateKey key, final Message message) {
-        return new String(decrypt(key,Objects.requireNonNull(message,"Expected ciphertext message")));
-    }
-
-    public byte[] decrypt(final PrivateKey key, final Message message) {
+    public byte[] decrypt(final PrivateKey key, final Message ciphertext) {
         PrivateKey pk = Objects.requireNonNull(key,"Expected public key for verification");
-        Message m = Objects.requireNonNull(message,"Expected message");
-        ByteCryptographyResult<PrivateKey> result = signable().decrypt(pk,message.getData());
+        Message m = Objects.requireNonNull(ciphertext,"Expected message");
+        ByteCryptographyResult<PrivateKey> result = signable().decrypt(pk,ciphertext.getData());
         boolean validSignature = result.getMessageHash()
             .map(h -> verify(h,m))
             .filter(s -> s)

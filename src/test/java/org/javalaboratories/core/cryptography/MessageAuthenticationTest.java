@@ -26,6 +26,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,6 +66,7 @@ public class MessageAuthenticationTest {
     private PublicKey publicKey;
     private PublicKey verifyingKey;
 
+    private Message message;
     private RsaMessageSigner signer;
     private RsaMessageVerifier verifier;
 
@@ -80,6 +83,8 @@ public class MessageAuthenticationTest {
         verifyingKey = RsaKeys.getPublicKeyFrom(signingPublicKeyFile);
         publicKey = RsaKeys.getPublicKeyFrom(publicKeyFile);
         privateKey = RsaKeys.getPrivateKeyFrom(privateKeyFile);
+
+        message = new Message(Base64.getDecoder().decode(TEXT_SIGNED));
 
         signer = new RsaMessageSigner(signingKey);
         verifier = new RsaMessageVerifier(verifyingKey);
@@ -123,6 +128,23 @@ public class MessageAuthenticationTest {
     @Test
     public void testStringDecrypt_Pass() {
         String s = verifier.decryptAsString(privateKey,TEXT_SIGNED);
+
         assertEquals(TEXT, s);
     }
+
+    @Test
+    public void testMessageDecrypt_Pass() {
+        String s = verifier.decryptAsString(privateKey,message);
+
+        assertEquals(TEXT, s);
+    }
+
+    @Test
+    public void testMessageBytesDecrypt_Pass() {
+        byte[] b = verifier.decrypt(privateKey,message.getSignedAsBase64());
+
+        assertNotNull(b);
+        assertTrue(Arrays.equals(TEXT.getBytes(),b));
+    }
 }
+

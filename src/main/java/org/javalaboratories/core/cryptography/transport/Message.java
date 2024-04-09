@@ -18,6 +18,7 @@ package org.javalaboratories.core.cryptography.transport;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.javalaboratories.core.cryptography.CryptographyException;
+import org.javalaboratories.core.cryptography.MessageSignatureException;
 import org.javalaboratories.core.util.Arguments;
 import org.javalaboratories.core.util.Bytes;
 
@@ -26,6 +27,7 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Objects;
 
 @Value
 @EqualsAndHashCode
@@ -48,25 +50,27 @@ public class Message {
     }
 
     public Message(byte[] signed) {
-        this.signed = signed;
-
-        int publicKeySz = Bytes.fromBytes(Bytes.subBytes(signed,0,4));
-        byte[] publicKeyBytes = Bytes.subBytes(signed,4,4 + publicKeySz);
-
-        byte[] remainder = Bytes.trimLeft(signed,4 + publicKeySz);
-
-        int signatureKeySz = Bytes.fromBytes(Bytes.subBytes(remainder,0,4));
-        signature = Bytes.subBytes(remainder,4,4 + signatureKeySz);
-
-        remainder = Bytes.trimLeft(remainder,4 + signatureKeySz);
-        data = Bytes.subBytes(remainder,0,remainder.length);
-
+        Objects.requireNonNull(signed);
         try {
+            int publicKeySz = Bytes.fromBytes(Bytes.subBytes(signed, 0, 4));
+            byte[] publicKeyBytes = Bytes.subBytes(signed, 4, publicKeySz + 4);
+
+            byte[] remainder = Bytes.trimLeft(signed, publicKeySz + 4);
+
+            int signatureKeySz = Bytes.fromBytes(Bytes.subBytes(remainder, 0, 4));
+            this.signature = Bytes.subBytes(remainder, 4, signatureKeySz + 4);
+
+            remainder = Bytes.trimLeft(remainder, signatureKeySz + 4);
+            this.data = Bytes.subBytes(remainder, 0, remainder.length);
+
             X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
             KeyFactory kf = KeyFactory.getInstance(DEFAULT_SIGNING_ALGORITHM);
-            publicKey = kf.generatePublic(spec);
+            this.publicKey = kf.generatePublic(spec);
+            this.signed = signed;
         } catch (GeneralSecurityException e) {
-            throw new CryptographyException("Failed to decode public key",e);
+            throw new MessageSignatureException("Failed to decode public key", e);
+        } catch(IndexOutOfBoundsException e) {
+            throw new MessageSignatureException("Signed message does do not conform to signature format");
         }
     }
 

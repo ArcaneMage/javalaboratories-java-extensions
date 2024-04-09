@@ -20,4 +20,8 @@ public class MessageSignatureException extends CryptographyException {
     public MessageSignatureException(String message) {
         super(message);
     }
+
+    public MessageSignatureException(String message, Throwable e) {
+        super(message,e);
+    }
 }

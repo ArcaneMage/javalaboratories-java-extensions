@@ -66,6 +66,17 @@ public final class Bytes {
         return result;
     }
 
+    /**
+     * Returns a copy of sub-bytes from the source bytes, specified by supplied
+     * {@code beginIndex} and {@code endIndex -1}.
+     *
+     * @param source the source byte array.
+     * @param beginIndex starting index
+     * @param endIndex ending index -1.
+     * @return a copy of sub-bytes.
+     * @throws IndexOutOfBoundsException if beginIndex is negative;
+     * endIndex > source length; beginIndex > endIndex.
+     */
     public static byte[] subBytes(final byte[] source, final int beginIndex, final int endIndex) {
         if ( beginIndex < 0 || endIndex > source.length || beginIndex > endIndex)
             throw new IndexOutOfBoundsException();
