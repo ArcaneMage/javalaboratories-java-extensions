@@ -72,20 +72,20 @@ public class RsaMessageSigner extends MessageRsaAuthentication {
         File ct = Objects.requireNonNull(ciphertext,"Expected output file object");
 
         FileCryptographyResult<PublicKey> result = signable().encrypt(pk,file,ct);
-        byte[] signed = result.getMessageHash()
+        byte[] signature = result.getMessageHash()
             .map(this::sign)
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
 
-        PublicKey signatureKey = getSignaturePublicKey();
+        PublicKey publicKey = getSignaturePublicKey();
         File tempfile = new File(STR."\{ciphertext.getAbsolutePath()}.tmp");
         try (FileInputStream isstream = new FileInputStream(ciphertext);
             FileOutputStream osstream = new FileOutputStream(tempfile)) {
 
             // Write signature header to file
-            osstream.write(Bytes.toByteArray(signed.length));
-            osstream.write(signed);
-            osstream.write(Bytes.toByteArray(signatureKey.getEncoded().length));
-            osstream.write(signatureKey.getEncoded());
+            osstream.write(Bytes.toByteArray(publicKey.getEncoded().length));
+            osstream.write(publicKey.getEncoded());
+            osstream.write(Bytes.toByteArray(signature.length));
+            osstream.write(signature);
 
             byte[] buffer = new byte[STREAM_BUFFER_SIZE];
             int read;
