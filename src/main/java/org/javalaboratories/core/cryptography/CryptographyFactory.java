@@ -102,14 +102,14 @@ public final class CryptographyFactory {
     }
 
     /**
-     * Provides an interface for {@code SignedTransitMessage Digest} encryption.
+     * Provides an interface for {@code Message Digest} encryption.
      * <p>
      * This form of encryption is one way, meaning that the resultant cipher
      * text or hash cannot be decrypted. It is primarily used for password
      * hashing and file checksum redundancy checks.
      *
      * @return {@link HashCryptography} implementation is returned, encapsulating
-     * SignedTransitMessage Digest hashing/encryption.
+     * Message Digest hashing/encryption.
      */
     public static HashCryptography getHashCryptography() {
         return new DefaultHashCryptography();

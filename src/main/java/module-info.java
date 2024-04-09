@@ -14,10 +14,14 @@
  *    limitations under the License.
  */
 module javalaboratories.java.extensions {
+
+  requires com.google.gson;
   requires lombok;
   requires org.apache.commons.codec;
   requires org.apache.commons.lang3;
   requires org.slf4j;
+
+  opens org.javalaboratories.core.cryptography.transport;
 
   exports org.javalaboratories.core;
   exports org.javalaboratories.core.atomic;

@@ -82,4 +82,14 @@ public class BytesTest {
         assertEquals(0xFFFFFFFF,value2);
         assertEquals(0x00000002,value3);
     }
+
+    @Test
+    public void testSubBytes() {
+        byte[] bytes = new byte[]{0,1,2,3,4,5,6,7,8};
+        byte[] sub1 = Bytes.subBytes(bytes,1,3);
+        byte[] sub2 = Bytes.subBytes(bytes,5,9);
+
+        assertTrue(Arrays.equals(new byte[]{1,2}, sub1));
+        assertTrue(Arrays.equals(new byte[]{5,6,7,8}, sub2));
+    }
 }

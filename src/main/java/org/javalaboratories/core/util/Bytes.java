@@ -62,6 +62,15 @@ public final class Bytes {
     public static byte[] trimLeft(final byte[] source, int bytes) {
         byte[] result = new byte[source.length - bytes];
         System.arraycopy(source,bytes,result,0,source.length - bytes);
+        String s = "Hello";
+        return result;
+    }
+
+    public static byte[] subBytes(final byte[] source, final int beginIndex, final int endIndex) {
+        if ( beginIndex < 0 || endIndex > source.length || beginIndex > endIndex)
+            throw new IndexOutOfBoundsException();
+        byte[] result = new byte[endIndex - beginIndex];
+        System.arraycopy(source,beginIndex,result,0,endIndex - beginIndex);
         return result;
     }
 

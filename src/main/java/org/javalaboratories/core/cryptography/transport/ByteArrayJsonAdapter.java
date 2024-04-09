@@ -15,4 +15,20 @@
  */
 package org.javalaboratories.core.cryptography.transport;
 
-public record SignedTransitMessage<T> (T data, T signature, T publicKey) {}
+import com.google.gson.*;
+
+import java.lang.reflect.Type;
+import java.util.Base64;
+
+public final class ByteArrayJsonAdapter implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
+    @Override
+    public JsonElement serialize(byte[] bytes, Type type, JsonSerializationContext context) {
+        return new JsonPrimitive(Base64.getEncoder().encodeToString(bytes));
+    }
+
+    @Override
+    public byte[] deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
+        String s = jsonElement.getAsString();
+        return Base64.getDecoder().decode(s);
+    }
+}

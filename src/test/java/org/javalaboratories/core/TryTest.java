@@ -207,7 +207,7 @@ public class TryTest {
         LogCaptor logCaptor = LogCaptor.forClass(TryTest.class);
 
         // When
-        aTry1.onSuccess(t -> logger.error("SignedTransitMessage is: {}",t));
+        aTry1.onSuccess(t -> logger.error("Message is: {}",t));
 
         boolean message = logCaptor.getErrorLogs().stream()
                 .anyMatch(s -> s.contains("This is a test file with some text"));

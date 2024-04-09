@@ -15,4 +15,19 @@
  */
 package org.javalaboratories.core.cryptography.transport;
 
-public record TransitMessage<T>(T data) { }
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public final class JsonHelper {
+    public static String messageToJson(final Message message) {
+        return getCustomGson().toJson(message);
+    }
+
+    public static Message jsonToMessage(final String jsonMessage) {
+        return getCustomGson().fromJson(jsonMessage, Message.class);
+    }
+
+    private static Gson getCustomGson() {
+        return new GsonBuilder().registerTypeAdapter(byte[].class, new ByteArrayJsonAdapter()).create();
+    }
+}

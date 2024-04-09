@@ -17,7 +17,7 @@ package org.javalaboratories.core.cryptography;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.javalaboratories.core.cryptography.transport.SignedTransitMessage;
+import org.javalaboratories.core.cryptography.transport.Message;
 import org.javalaboratories.core.util.Bytes;
 
 import java.io.File;
@@ -36,7 +36,7 @@ import java.util.Objects;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class MessageRsaSigner extends MessageRsaAuthentication{
+public class MessageRsaSigner extends MessageRsaAuthentication {
 
     PrivateKey privateKey;
 
@@ -49,26 +49,21 @@ public class MessageRsaSigner extends MessageRsaAuthentication{
         this.privateKey = Objects.requireNonNull(key);
     }
 
-    public SignedTransitMessage<String> encrypt(final PublicKey publicKey, final String string) {
+    public Message encrypt(final PublicKey publicKey, final String string) {
         PublicKey pk = Objects.requireNonNull(publicKey,"Expected public key");
         String s = Objects.requireNonNull(string,"Expected string to encrypt and sign");
 
-        SignedTransitMessage<byte[]> result = encrypt(pk,s.getBytes());
-        return new SignedTransitMessage<> (
-                Base64.getEncoder().encodeToString(result.data()),
-                Base64.getEncoder().encodeToString(result.signature()),
-                Base64.getEncoder().encodeToString(result.publicKey())
-        );
+        return encrypt(pk,s.getBytes());
     }
 
-    public SignedTransitMessage<byte[]> encrypt(final PublicKey key, final  byte[] bytes) {
+    public Message encrypt(final PublicKey key, final  byte[] bytes) {
         ByteCryptographyResult<PublicKey> result = signable().encrypt(key,bytes);
-        PublicKey signatureKey = getSignaturePublicKey();
+        PublicKey publicKey = getSignaturePublicKey();
         return result.getMessageHash()
             .map(this::sign)
-            .map(signed -> new SignedTransitMessage<>(result.getBytes(),
-                    signed,
-                    signatureKey.getEncoded()))
+            .map(signature -> new Message(publicKey,
+                    signature,
+                    result.getBytes()))
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
     }
 
