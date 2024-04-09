@@ -67,7 +67,7 @@ public class MessageRsaVerifier extends MessageRsaAuthentication {
             .map(h -> verify(h,m))
             .filter(s -> s)
             .map(s -> result.getBytes())
-            .orElseThrow(() -> new CryptographyException("Failed to verify message"));
+            .orElseThrow(() -> new MessageSignatureException("Message signature is invalid"));
     }
 
     private boolean verify(final byte[] hash, final Message message) {

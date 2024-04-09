@@ -15,17 +15,9 @@
  */
 package org.javalaboratories.core.cryptography;
 
-public class CryptographyException extends RuntimeException {
+public class MessageSignatureException extends CryptographyException {
 
-    public CryptographyException() {
-        super();
-    }
-
-    public CryptographyException(String message) {
+    public MessageSignatureException(String message) {
         super(message);
-    }
-
-    public CryptographyException(String message, Throwable e) {
-        super(message,e);
     }
 }
