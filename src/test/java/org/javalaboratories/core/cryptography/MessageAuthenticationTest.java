@@ -21,6 +21,7 @@ import org.javalaboratories.core.cryptography.transport.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -33,6 +34,7 @@ public class MessageAuthenticationTest {
 
     private static final String SIGNING_PRIVATE_KEY_FILE = "rsa-signing-private-key-pkcs8.pem";
     private static final String PUBLIC_KEY_FILE = "rsa-public-key.pem";
+    private static final String PRIVATE_KEY_FILE = "rsa-private-key-pkcs8.pem";
 
     private static final String AES_UNENCRYPTED_FILE = "aes-unencrypted-file.txt";
 
@@ -54,15 +56,17 @@ public class MessageAuthenticationTest {
             "EAAQAAAQBdcdTMuX4nJenexUNEEDcEDIP4kcbeRhO6dCETvZ6m4VU9MUTrLKasaKjH/5l0jKF2ZSztggD5QjUk4lkUzT74B4Fv4SI6xnLHB" +
             "kWedJVxy3yut/0bX4WLmVhtIiynVdzrXK+eITAZhhg3/IfSMEZx2B1vPKvK3TRCXVkkQb+UHFON0fitEtKq3qEmzX/MIZRxR+966agx2jEg" +
             "NLe6eDa1olbrZicwhTwg4di729+K1b6RthZdMPW5SHgrwE1/Jvw/NP3qgu2MZXioHCU75Hh6DnudyI+G0+hBoF6CWF/Udq3v8OO7WEASts9" +
-            "HL10cEoEdtCouhopS2zKTRc0GBkFjAAABAGLOyjoYb/tpVI7FiDc+ucA6t5pLCY0f/Fjklrr0rgoE5Ayr3vqfVw91ez/S8RkXPxQ5ATPs+T" +
-            "sE64vo25kTL03XQWHLS5KaD+WXB0vyOi7KzpCQlDdOtjEIwJEv6w1qCB6l+NoqZHy+ab+osYf0NduRuO1Ii+XOQpZPlRkSvpFlEwTF4v//P" +
-            "6DeKEstsk2JaffHM7920DqKlultrrd9TF0WDI9p6kT9F7UdPW1qWbVcG++SLfWmyYKb9zBINlxmakAnXMZDcHszqPdTzHkllUlb8G/q57de" +
-            "Pn3wj89MxuyZUKffCAkv0/HK9ZQzLkYch55CorQcoBrPD+MGY/MCn3pRxpzcz84oXeKoMNKPSonK6kcYGF89nQM+27TgVkbFfoeFXfNRepY" +
-            "XYJBxBM7MElCBfzr+AxE197kXHUa/+ywZ+KMrDCHkRjzx/BP13KZIAbPnIONI2pQ/RLs8DjDbKX3FCkAf/mz/V9YKaf9aVBgp";
+            "HL10cEoEdtCouhopS2zKTRc0GBkFjAAABAC1LTS3xvi4qVmdL4xNBBeGLvWzmB/V8QC1j3m4pBRd9k2+8rNaa5Hre2FH4mGJJQ067XMkWDG" +
+            "LCiLSh6aNSw/qEa+c5xDHUah5QBO36fTvIb4rcn68zFtz4LasA2Eu8MSkPa95MDvuWwSPucc+WKUJs6NiExo8CCcUkjXcgu+5XH5JALUJ97" +
+            "3R1xJH6Gmv7hlB7rF0nuXIWHuFj1hwElVTJJSEeAlzv5zqOxmazUmla2UbgbW/EJu/MgKuehAqubz8jhWyP51VmOzQOky5p0kYRDOoNmbsz" +
+            "SC3qKrZMVI81oQs7Z9tiSrRrgIuoRKw9N9+nihCwW+lZI8wc7Spn2MhRk21pfPdBwbzXx4Uu+9X0dXDn4gNVL7BBV4v5tjObDR8zh5L4L++" +
+            "tWBXjyUyJVTQOchlSKpnJzDqsFVjz9YL2glN2JcnQrI1QjiqGaewjRXlCPVvV9GrY/oswSa/i5ziSKxRc15jcHgFl+bpOqGbZ";
     private static final String FILE_TEXT = "This is a test file with encrypted data -- TOP SECRET!";
 
     private PrivateKey signingKey;
+    private PrivateKey privateKey;
     private PublicKey publicKey;
+    private PublicKey verifyingKey;
 
     private MessageRsaSigner signer;
     private MessageRsaVerifier verifier;
@@ -70,17 +74,18 @@ public class MessageAuthenticationTest {
     @BeforeEach
     public void setup() throws URISyntaxException {
         ClassLoader classLoader = MessageAuthenticationTest.class.getClassLoader();
-        File privateKeyfile = Paths.get(classLoader.getResource(SIGNING_PRIVATE_KEY_FILE).toURI()).toFile();
-        File publicKeyfile = Paths.get(classLoader.getResource(PUBLIC_KEY_FILE).toURI()).toFile();
+        File signingPrivateKeyfile = Paths.get(classLoader.getResource(SIGNING_PRIVATE_KEY_FILE).toURI()).toFile();
+        File publicKeyFile = Paths.get(classLoader.getResource(PUBLIC_KEY_FILE).toURI()).toFile();
+        File privateKeyFile = Paths.get(classLoader.getResource(PRIVATE_KEY_FILE).toURI()).toFile();
 
-        signingKey = RsaKeys.getPrivateKeyFrom(privateKeyfile);
+        signingKey = RsaKeys.getPrivateKeyFrom(signingPrivateKeyfile);
 
-        // TODO: Derive verifying public key
-        verifyingKey = RsaKeys.getPublicKeyFrom()
-        publicKey = RsaKeys.getPublicKeyFrom(publicKeyfile);
+        verifyingKey = RsaKeys.getPublicKeyFrom(new ByteArrayInputStream(TEXT_SIGNATURE_PUBLIC_KEY.getBytes()));
+        publicKey = RsaKeys.getPublicKeyFrom(publicKeyFile);
+        privateKey = RsaKeys.getPrivateKeyFrom(privateKeyFile);
 
         signer = new MessageRsaSigner(signingKey);
-        verifier = new MessageRsaVerifier()
+        verifier = new MessageRsaVerifier(verifyingKey);
     }
 
     @Test
@@ -119,6 +124,8 @@ public class MessageAuthenticationTest {
 
     @Test
     public void testStringDecrypt_Pass() {
-        String s =
+        String s = verifier.decryptAsString(privateKey,TEXT_SIGNED);
+
+        assertEquals(TEXT, s);
     }
 }

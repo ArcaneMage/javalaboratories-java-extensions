@@ -51,6 +51,10 @@ public class MessageRsaVerifier extends MessageRsaAuthentication {
         return decrypt(key,new Message(Objects.requireNonNull(ciphertext,"Expected ciphertext bytes")));
     }
 
+    public String decryptAsString(final PrivateKey key, final String ciphertext) {
+        return new String(decrypt(key,Objects.requireNonNull(ciphertext,"Expected ciphertext message")));
+    }
+
     public String decryptAsString(final PrivateKey key, final Message message) {
         return new String(decrypt(key,Objects.requireNonNull(message,"Expected ciphertext message")));
     }

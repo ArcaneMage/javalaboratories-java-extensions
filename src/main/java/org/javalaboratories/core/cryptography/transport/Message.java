@@ -37,7 +37,7 @@ public class Message {
 
     byte[] signed;
 
-    private static final String DEFAULT_SIGNING_ALGORITHM = "AES";
+    private static final String DEFAULT_SIGNING_ALGORITHM = "RSA";
 
     public Message(PublicKey key, byte[] signature, byte[] data) {
         Arguments.requireNonNull("Message arguments cannot be null",data,signature,key);
@@ -51,14 +51,14 @@ public class Message {
         this.signed = signed;
 
         int publicKeySz = Bytes.fromBytes(Bytes.subBytes(signed,0,4));
-        byte[] publicKeyBytes = Bytes.subBytes(signed,4,publicKeySz);
+        byte[] publicKeyBytes = Bytes.subBytes(signed,4,4 + publicKeySz);
 
-        byte[] remainder = Bytes.trimLeft(signed,4+publicKeySz);
+        byte[] remainder = Bytes.trimLeft(signed,4 + publicKeySz);
 
         int signatureKeySz = Bytes.fromBytes(Bytes.subBytes(remainder,0,4));
-        signature = Bytes.subBytes(remainder,4,signatureKeySz);
+        signature = Bytes.subBytes(remainder,4,4 + signatureKeySz);
 
-        remainder = Bytes.trimLeft(remainder,4+signatureKeySz);
+        remainder = Bytes.trimLeft(remainder,4 + signatureKeySz);
         data = Bytes.subBytes(remainder,0,remainder.length);
 
         try {
