@@ -32,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MessageAuthenticationTest {
 
     private static final String SIGNING_PRIVATE_KEY_FILE = "rsa-signing-private-key-pkcs8.pem";
+    private static final String SIGNING_PUBLIC_KEY_FILE = "rsa-signing-public-key.pem";
+
     private static final String PUBLIC_KEY_FILE = "rsa-public-key.pem";
     private static final String PRIVATE_KEY_FILE = "rsa-private-key-pkcs8.pem";
 
@@ -42,11 +44,6 @@ public class MessageAuthenticationTest {
             "IA+UI1JOJZFM0++AeBb+EiOsZyxwZFnnSVcct8rrf9G1+Fi5lYbSIsp1Xc61yvniEwGYYYN/yH0jBGcdgdbzyryt00Ql1ZJEG/lBxTjdH4r" +
             "RLSqt6hJs1/zCGUcUfveumoMdoxIDS3ung2taJW62YnMIU8IOHYu9vfitW+kbYWXTD1uUh4K8BNfyb8PzT96oLtjGV4qBwlO+R4eg57nciP" +
             "htPoQaBeglhf1Hat7/Dju1hAErbPRy9dHBKBHbQqLoaKUtsyk0XNBgZBYw==";
-    private static final String TEXT_SIGNATURE_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAte8BEg5FfglzK8i" +
-            "qrLq4lZkUnT8+Q6tMYUFM5ciNSvzo54lrBjKjThCvR8DhMkeuvJ/eeGUw9bICPuZNSHHwGSTG9LSfSMYz8xYuuW3cVV6XUa4aUow2RXm4kT" +
-            "7/40/4L+XmPBB3fNYMgJjAQEQ533G6z0LByCMYRMJCEW1J3judAmWT0aJx68pKHVaOhssI5GBSEDxv3i6BNrNIdXMv1cKhU46I2go5eABnP" +
-            "6pc+74ELFsKDd9jVhZ4vxMmiYKje3fyn+P9OvJu2zDl2FuL87wI0c5iSrEdNlHexHQwL0JIKtLxbQXb2SnO8MwJWZ6KcP37Yp5zdUHaX3rC" +
-            "edgM6QIDAQAB";
 
     private static final String TEXT_SIGNED = "AAABJjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALXvARIORX4JcyvIqqy6uJWZF" +
             "J0/PkOrTGFBTOXIjUr86OeJawYyo04Qr0fA4TJHrryf3nhlMPWyAj7mTUhx8BkkxvS0n0jGM/MWLrlt3FVel1GuGlKMNkV5uJE+/+NP+C/l" +
@@ -73,13 +70,14 @@ public class MessageAuthenticationTest {
     @BeforeEach
     public void setup() throws URISyntaxException {
         ClassLoader classLoader = MessageAuthenticationTest.class.getClassLoader();
-        File signingPrivateKeyfile = Paths.get(classLoader.getResource(SIGNING_PRIVATE_KEY_FILE).toURI()).toFile();
+        File signingPrivateKeyFile = Paths.get(classLoader.getResource(SIGNING_PRIVATE_KEY_FILE).toURI()).toFile();
+        File signingPublicKeyFile = Paths.get(classLoader.getResource(SIGNING_PUBLIC_KEY_FILE).toURI()).toFile();
         File publicKeyFile = Paths.get(classLoader.getResource(PUBLIC_KEY_FILE).toURI()).toFile();
         File privateKeyFile = Paths.get(classLoader.getResource(PRIVATE_KEY_FILE).toURI()).toFile();
 
-        signingKey = RsaKeys.getPrivateKeyFrom(signingPrivateKeyfile);
+        signingKey = RsaKeys.getPrivateKeyFrom(signingPrivateKeyFile);
 
-        verifyingKey = RsaKeys.getPublicKeyFrom(new ByteArrayInputStream(TEXT_SIGNATURE_PUBLIC_KEY.getBytes()));
+        verifyingKey = RsaKeys.getPublicKeyFrom(signingPublicKeyFile);
         publicKey = RsaKeys.getPublicKeyFrom(publicKeyFile);
         privateKey = RsaKeys.getPrivateKeyFrom(privateKeyFile);
 
