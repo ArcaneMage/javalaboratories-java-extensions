@@ -93,6 +93,7 @@ public class MessageAuthenticationTest {
         Message message =  signer.encrypt(publicKey,TEXT);
 
         assertNotNull(message);
+        assertNotNull(message.getSigned());
     }
 
     @Test

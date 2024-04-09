@@ -63,11 +63,12 @@ public class MessageRsaVerifier extends MessageRsaAuthentication {
         PrivateKey pk = Objects.requireNonNull(key,"Expected public key for verification");
         Message m = Objects.requireNonNull(message,"Expected message");
         ByteCryptographyResult<PrivateKey> result = signable().decrypt(pk,message.getData());
-        return result.getMessageHash()
+        boolean validSignature = result.getMessageHash()
             .map(h -> verify(h,m))
             .filter(s -> s)
-            .map(s -> result.getBytes())
-            .orElseThrow(() -> new MessageSignatureException("Message signature is invalid"));
+            .orElse(false);
+        if (validSignature) return result.getBytes();
+        else throw new MessageSignatureException("Invalid message signature");
     }
 
     private boolean verify(final byte[] hash, final Message message) {
