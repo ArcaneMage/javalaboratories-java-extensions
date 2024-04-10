@@ -78,19 +78,19 @@ public class RsaMessageSigner extends MessageRsaAuthentication {
 
         PublicKey publicKey = getSignaturePublicKey();
         File tempfile = new File(STR."\{ciphertext.getAbsolutePath()}.tmp");
-        try (FileInputStream isstream = new FileInputStream(ciphertext);
-            FileOutputStream osstream = new FileOutputStream(tempfile)) {
+        try (FileInputStream fis = new FileInputStream(ciphertext);
+            FileOutputStream fos = new FileOutputStream(tempfile)) {
 
             // Write signature header to file
-            osstream.write(Bytes.toByteArray(publicKey.getEncoded().length));
-            osstream.write(publicKey.getEncoded());
-            osstream.write(Bytes.toByteArray(signature.length));
-            osstream.write(signature);
+            fos.write(Bytes.toByteArray(publicKey.getEncoded().length));
+            fos.write(publicKey.getEncoded());
+            fos.write(Bytes.toByteArray(signature.length));
+            fos.write(signature);
 
             byte[] buffer = new byte[STREAM_BUFFER_SIZE];
             int read;
-            while((read = isstream.read(buffer)) != -1)
-                osstream.write(buffer,0,read);
+            while((read = fis.read(buffer)) != -1)
+                fos.write(buffer,0,read);
 
             return ciphertext.delete() && tempfile.renameTo(ciphertext);
         } catch (IOException e) {

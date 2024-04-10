@@ -20,7 +20,6 @@ import org.javalaboratories.core.cryptography.transport.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -34,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MessageAuthenticationTest {
 
     private static final String SIGNING_PRIVATE_KEY_FILE = "rsa-signing-private-key-pkcs8.pem";
-    private static final String SIGNING_PUBLIC_KEY_FILE = "rsa-signing-public-key.pem";
 
     private static final String PUBLIC_KEY_FILE = "rsa-public-key.pem";
     private static final String PRIVATE_KEY_FILE = "rsa-private-key-pkcs8.pem";
@@ -64,7 +62,6 @@ public class MessageAuthenticationTest {
     private PrivateKey signingKey;
     private PrivateKey privateKey;
     private PublicKey publicKey;
-    private PublicKey verifyingKey;
 
     private Message message;
     private RsaMessageSigner signer;
@@ -74,20 +71,18 @@ public class MessageAuthenticationTest {
     public void setup() throws URISyntaxException {
         ClassLoader classLoader = MessageAuthenticationTest.class.getClassLoader();
         File signingPrivateKeyFile = Paths.get(classLoader.getResource(SIGNING_PRIVATE_KEY_FILE).toURI()).toFile();
-        File signingPublicKeyFile = Paths.get(classLoader.getResource(SIGNING_PUBLIC_KEY_FILE).toURI()).toFile();
         File publicKeyFile = Paths.get(classLoader.getResource(PUBLIC_KEY_FILE).toURI()).toFile();
         File privateKeyFile = Paths.get(classLoader.getResource(PRIVATE_KEY_FILE).toURI()).toFile();
 
         signingKey = RsaKeys.getPrivateKeyFrom(signingPrivateKeyFile);
 
-        verifyingKey = RsaKeys.getPublicKeyFrom(signingPublicKeyFile);
         publicKey = RsaKeys.getPublicKeyFrom(publicKeyFile);
         privateKey = RsaKeys.getPrivateKeyFrom(privateKeyFile);
 
         message = new Message(Base64.getDecoder().decode(TEXT_SIGNED));
 
         signer = new RsaMessageSigner(signingKey);
-        verifier = new RsaMessageVerifier(verifyingKey);
+        verifier = new RsaMessageVerifier();
     }
 
     @Test
