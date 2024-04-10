@@ -78,10 +78,10 @@ public final class Bytes {
      * endIndex > source length; beginIndex > endIndex.
      */
     public static byte[] subBytes(final byte[] source, final int beginIndex, final int endIndex) {
-        if ( beginIndex < 0 || endIndex > source.length || beginIndex > endIndex)
-            throw new IndexOutOfBoundsException();
-        byte[] result = new byte[endIndex - beginIndex];
-        System.arraycopy(source,beginIndex,result,0,endIndex - beginIndex);
+        byte[] src = Objects.requireNonNull(source);
+        int fromIndex = Objects.checkFromToIndex(beginIndex,endIndex,src.length);
+        byte[] result = new byte[endIndex - fromIndex];
+        System.arraycopy(src,fromIndex,result,0,endIndex - fromIndex);
         return result;
     }
 

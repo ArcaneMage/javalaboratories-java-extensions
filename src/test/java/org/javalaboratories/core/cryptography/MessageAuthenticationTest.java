@@ -21,12 +21,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -140,6 +143,26 @@ public class MessageAuthenticationTest {
 
         assertNotNull(b);
         assertTrue(Arrays.equals(TEXT.getBytes(),b));
+    }
+
+    @Test
+    public void testFileDecrypt_Pass() throws URISyntaxException, IOException {
+        ClassLoader classLoader = RsaHybridCryptographyTest.class.getClassLoader();
+        File source = Paths.get(classLoader.getResource(AES_UNENCRYPTED_FILE).toURI()).toFile();
+        File ciphertext = new File(STR."\{source.getAbsolutePath()}.enc");
+
+        File output = new File(STR."\{source.getAbsolutePath()}.decrypted");
+        try {
+            boolean decrypted = verifier.decrypt(privateKey, ciphertext, output);
+
+            String s = Files.lines(output.toPath())
+                    .collect(Collectors.joining());
+
+            assertEquals(FILE_TEXT, s);
+            assertTrue(decrypted);
+        } finally {
+            output.delete();
+        }
     }
 }
 
