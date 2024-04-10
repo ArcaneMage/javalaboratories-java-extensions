@@ -22,6 +22,7 @@ import javax.crypto.Cipher;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.security.*;
 import java.util.Objects;
 
@@ -179,15 +180,10 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
     }
 
     private byte[] readSessionKeyFromStream(InputStream stream) throws IOException {
-        byte[] b = new byte[4]; // 32bit number encoded
-        if (stream.read(b) == -1)
-            throw new IOException("Failed to read session key size in stream");
-        int sessionKeySize = Bytes.fromBytes(b);
-        if (sessionKeySize < 128 || sessionKeySize > 1024)
+        try {
+            return new StreamHeaderBlock(stream).read(b -> b < 128 || b > 1024);
+        } catch (IOException e) {
             throw new IOException("Failed to read session key: corrupted");
-        byte[] result = new byte[sessionKeySize];
-        if (stream.read(result) == -1)
-            throw new IOException("Failed to read encrypted session key in stream");
-        return result;
+        }
     }
 }

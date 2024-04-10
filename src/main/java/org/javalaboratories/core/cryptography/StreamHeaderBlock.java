@@ -20,6 +20,7 @@ import org.javalaboratories.core.util.Bytes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 class StreamHeaderBlock {
 
@@ -30,10 +31,16 @@ class StreamHeaderBlock {
     }
 
     public byte[] read() throws IOException {
+        return read(null);
+    }
+
+    public byte[] read(final Predicate<Integer> validate) throws IOException {
         byte[] b = new byte[4]; // 32bit number: encoded size of block
         if (stream.read(b) == -1)
             throw new IOException("Failed to read block from stream: cannot determine size");
         int blockSize = Bytes.fromBytes(b);
+        if (validate != null && validate.test(blockSize))
+            throw new IOException("Invalid block size encountered");
         byte[] block = new byte[blockSize];
         if (stream.read(block) == -1)
             throw new IOException("Failed to read block from stream: not enough content");
