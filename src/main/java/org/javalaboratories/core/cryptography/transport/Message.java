@@ -17,7 +17,6 @@ package org.javalaboratories.core.cryptography.transport;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.javalaboratories.core.cryptography.CryptographyException;
 import org.javalaboratories.core.cryptography.MessageSignatureException;
 import org.javalaboratories.core.util.Arguments;
 import org.javalaboratories.core.util.Bytes;
@@ -29,6 +28,20 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Objects;
 
+/**
+ * Message value object represents encapsulated encrypted data, ready for
+ * serialisation.
+ * <p>
+ * Class has the ability to decode header blocks as well as encoding them. The
+ * behind is that verification public key, signature and data are all packaged
+ * together ready for serialisation; it has ability to decode signed blocks.
+ * The structure of the messages is as follows:
+ * <pre>
+ *     {@code
+ *          [public-key][rsa-signature][rsa-hybrid-message]
+ *     }
+ * </pre>
+ */
 @Value
 @EqualsAndHashCode
 public class Message {
@@ -41,6 +54,14 @@ public class Message {
 
     private static final String DEFAULT_SIGNING_ALGORITHM = "RSA";
 
+    /**
+     * Creates an instance of this value object with the given public key,
+     * signature and RSA/AES encrypted data.
+     *
+     * @param key the public key
+     * @param signature the message signature
+     * @param data encrypted data, RSA/AES hybrid encrypted data.
+     */
     public Message(PublicKey key, byte[] signature, byte[] data) {
         Arguments.requireNonNull("Message arguments cannot be null",data,signature,key);
         this.publicKey = key;
@@ -49,6 +70,20 @@ public class Message {
         signed = encodeSign();
     }
 
+    /**
+     * Creates an instance of this value object with the given signed, encrypted
+     * data.
+     * <p>
+     * The signed data must confirm the proprietary format describe here: {@link
+     * Message}. It would've originated from the {@link Message#getSigned()}}
+     * method of the the message sender. Primarily, this method is used on the
+     * recipient's side, i.e. within the {@code RsaMessageVerifier}.
+     *
+     * @param signed the signed data
+     *
+     * @see Message#getSigned()
+     * @see Message#getSignedAsBase64()
+     */
     public Message(byte[] signed) {
         Objects.requireNonNull(signed);
         try {
@@ -74,10 +109,37 @@ public class Message {
         }
     }
 
+    /**
+     * Returns entire message structure encoding public key, signature and
+     * message block in byte form.
+     * <p>
+     * The message structure is illustrated below:
+     * <pre>
+     *     {@code
+     *          [public-key][rsa-signature][rsa-hybrid-message]
+     *     }
+     * </pre>
+     * A copy is returned to maintain immutability of this object.
+     *
+     * @return a copy of the message structure in bytes array.
+     */
     public byte[] getSigned() {
         return Bytes.copy(signed);
     }
 
+    /**
+     * Returns entire message structure encoding public key, signature and
+     * message block as string in Base64 format.
+     * <p>
+     * The message structure is illustrated below:
+     * <pre>
+     *     {@code
+     *          [public-key][rsa-signature][rsa-hybrid-message]
+     *     }
+     * </pre>
+     *
+     * @return a copy of the message structure in Base64 format.
+     */
     public String getSignedAsBase64() {
         return Base64.getEncoder().encodeToString(signed);
     }
