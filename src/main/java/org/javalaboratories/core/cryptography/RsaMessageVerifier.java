@@ -141,9 +141,10 @@ public class RsaMessageVerifier extends MessageRsaAuthentication {
      * @param ciphertext the ciphertext in bytes that adheres to the
      *                   message structure described above.
      * @return decrypted bytes
+     * @see Message
      */
     public byte[] decrypt(final PrivateKey key, final byte[] ciphertext) {
-        return decrypt(key,new Message(Objects.requireNonNull(ciphertext,"Expected ciphertext signed bytes")));
+        return decrypt(key,new Message(Objects.requireNonNull(ciphertext,"Expected signed ciphertext bytes")));
     }
 
     /**

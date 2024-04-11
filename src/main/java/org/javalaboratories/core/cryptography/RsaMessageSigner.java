@@ -84,7 +84,7 @@ public class RsaMessageSigner extends MessageRsaAuthentication {
      * @param algorithm the algorithm with which to sign the ciphertext.
      * @throws NullPointerException when parameters are null.
      */
-    public RsaMessageSigner(final PrivateKey key, MessageDigestAlgorithms algorithm) {
+    public RsaMessageSigner(final PrivateKey key, final MessageDigestAlgorithms algorithm) {
         super(algorithm);
         this.privateKey = Objects.requireNonNull(key);
     }

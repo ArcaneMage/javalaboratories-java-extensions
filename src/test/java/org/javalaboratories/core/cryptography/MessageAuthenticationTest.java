@@ -138,8 +138,16 @@ public class MessageAuthenticationTest {
     }
 
     @Test
-    public void testMessageBytesDecrypt_Pass() {
+    public void testBytes64Decrypt_Pass() {
         byte[] b = verifier.decrypt(privateKey,message.getSignedAsBase64());
+
+        assertNotNull(b);
+        assertTrue(Arrays.equals(TEXT.getBytes(),b));
+    }
+
+    @Test
+    public void testBytesDecrypt_Pass() {
+        byte[] b = verifier.decrypt(privateKey,message.getSigned());
 
         assertNotNull(b);
         assertTrue(Arrays.equals(TEXT.getBytes(),b));
