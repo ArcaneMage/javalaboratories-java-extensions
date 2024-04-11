@@ -33,21 +33,69 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Objects;
 
+
+/**
+ * Signs and encrypts messages.
+ * <p>
+ * The created ciphertext has to be verified decrypted by {@link
+ * RsaMessageVerifier} which compliments this class. This encapsulates the
+ * hybrid encryption functionality provided in the {@link RsaHybridCryptography}
+ * objects but additionally supplies signing capability.
+ * <p>
+ * For bytes, string and files, the header block structure created by this
+ * class is the same. It is designed to package the ciphertext with its
+ * verification public key, signature and encrypted data altogether. The {@link
+ * RsaMessageVerifier} decrypts and verifies the ciphertext. The structure
+ * of the ciphertext looks something like the following:
+ * <pre>
+ *     {@code
+ *          [public-key][rsa-signature][rsa-hybrid-message]
+ *     }
+ * </pre>
+ * This block structure is understood by this class. As the {@code signer}
+ * bundles the public key in the header, there is no need for recipient to supply
+ * the public key, this is automatically managed. However, the {@code private
+ * key} is required to decrypt the message.
+ */
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class RsaMessageSigner extends MessageRsaAuthentication {
 
     PrivateKey privateKey;
 
+    /**
+     * Default constructor
+     * <p>
+     * Constructs this object with the provided {@link PublicKey} which the
+     * {@link RsaMessageSigner} uses to sign the ciphertext.
+     * <p>
+     * SHA-256 is the default signing algorithm.
+     * @param key the private key
+     */
     public RsaMessageSigner(final PrivateKey key) {
         this(key,MessageDigestAlgorithms.SHA256);
     }
 
+    /**
+     * Constructs an instance of this class with the given {@link PrivateKey}
+     * and signing {@link MessageDigestAlgorithms} algorithm.
+     *
+     * @param key the private key with which to sign the ciphertext.
+     * @param algorithm the algorithm with which to sign the ciphertext.
+     * @throws NullPointerException when parameters are null.
+     */
     public RsaMessageSigner(final PrivateKey key, MessageDigestAlgorithms algorithm) {
         super(algorithm);
         this.privateKey = Objects.requireNonNull(key);
     }
 
+    /**
+     * Encrypts the string with the given recipient's {@link PublicKey}.
+     *
+     * @param publicKey recipient's public key.
+     * @param string the string data to encrypt.
+     * @return a {@link Message} object encapsulating encrypted data.
+     */
     public Message encrypt(final PublicKey publicKey, final String string) {
         PublicKey pk = Objects.requireNonNull(publicKey,"Expected public key");
         String s = Objects.requireNonNull(string,"Expected string to encrypt and sign");
@@ -55,6 +103,13 @@ public class RsaMessageSigner extends MessageRsaAuthentication {
         return encrypt(pk,s.getBytes());
     }
 
+    /**
+     * Encrypts the string with the given recipient's {@link PublicKey}.
+     *
+     * @param key the recipient's public key.
+     * @param bytes the data to be encrypted.
+     * @return a {@link Message} object encapsulating encrypted data.
+     */
     public Message encrypt(final PublicKey key, final  byte[] bytes) {
         ByteCryptographyResult<PublicKey> result = signable().encrypt(key,bytes);
         PublicKey publicKey = getSignaturePublicKey();
@@ -66,6 +121,15 @@ public class RsaMessageSigner extends MessageRsaAuthentication {
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
     }
 
+    /**
+     * Encrypts {@code source} datafile and generates {@code ciphertext} file with
+     * given recipient's {@link PublicKey}.
+     *
+     * @param key recipient's private key.
+     * @param source source file to be encrypted.
+     * @param ciphertext ciphertext datafile containing encrypted data.
+     * @return true to indicate encryption was successful.
+     */
     public boolean encrypt(final PublicKey key, final File source, final File ciphertext) {
         PublicKey pk = Objects.requireNonNull(key,"Expected public key");
         File file = Objects.requireNonNull(source,"Expected source file to encrypt");
