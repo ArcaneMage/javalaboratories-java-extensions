@@ -18,9 +18,13 @@ package org.javalaboratories.core.cryptography.transport;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.javalaboratories.core.cryptography.MessageSignatureException;
+import org.javalaboratories.core.cryptography.StreamHeaderBlock;
 import org.javalaboratories.core.util.Arguments;
 import org.javalaboratories.core.util.Bytes;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
@@ -53,6 +57,7 @@ public class Message {
     byte[] signed;
 
     private static final String DEFAULT_SIGNING_ALGORITHM = "RSA";
+    private static final int STREAM_BUFFER_SIZE = 4096;
 
     /**
      * Creates an instance of this value object with the given public key,
@@ -76,7 +81,7 @@ public class Message {
      * <p>
      * The signed data must confirm the proprietary format describe here: {@link
      * Message}. It would've originated from the {@link Message#getSigned()}}
-     * method of the the message sender. Primarily, this method is used on the
+     * method of the message sender. Primarily, this method is used on the
      * recipient's side, i.e. within the {@code RsaMessageVerifier}.
      *
      * @param signed the signed data
@@ -86,17 +91,16 @@ public class Message {
      */
     public Message(byte[] signed) {
         Objects.requireNonNull(signed);
-        try {
-            int publicKeySz = Bytes.fromBytes(Bytes.subBytes(signed, 0, 4));
-            byte[] publicKeyBytes = Bytes.subBytes(signed, 4, publicKeySz + 4);
-
-            byte[] remainder = Bytes.trimLeft(signed, publicKeySz + 4);
-
-            int signatureKeySz = Bytes.fromBytes(Bytes.subBytes(remainder, 0, 4));
-            this.signature = Bytes.subBytes(remainder, 4, signatureKeySz + 4);
-
-            remainder = Bytes.trimLeft(remainder, signatureKeySz + 4);
-            this.data = Bytes.subBytes(remainder, 0, remainder.length);
+        try (ByteArrayInputStream is = new ByteArrayInputStream(signed)) {
+            StreamHeaderBlock block = new StreamHeaderBlock(is);
+            byte[] publicKeyBytes = block.read();
+            signature = block.read();
+            final byte[] b = new byte[STREAM_BUFFER_SIZE];
+            byte[] tempbuf = new byte[0];
+            int read;
+            while ((read = is.read(b)) != -1)
+                tempbuf = Bytes.concat(tempbuf, b, read);
+            data = tempbuf;
 
             X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
             KeyFactory kf = KeyFactory.getInstance(DEFAULT_SIGNING_ALGORITHM);
@@ -104,7 +108,7 @@ public class Message {
             this.signed = signed;
         } catch (GeneralSecurityException e) {
             throw new MessageSignatureException("Failed to decode public key", e);
-        } catch(IndexOutOfBoundsException e) {
+        } catch (IOException e) {
             throw new MessageSignatureException("Signed message does do not conform to signature format");
         }
     }

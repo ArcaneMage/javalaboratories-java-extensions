@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-class StreamHeaderBlock {
+public class StreamHeaderBlock {
 
     private final InputStream stream;
 

@@ -15,8 +15,6 @@
  */
 package org.javalaboratories.core.util;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.util.Objects;
 
 /**
@@ -33,9 +31,25 @@ public final class Bytes {
      * @return combined byte array.
      */
     public static byte[] concat(final byte[] first, final byte[] second) {
-        byte[] result = new byte[first.length + second.length];
+        return Bytes.concat(first,second,second.length);
+    }
+
+    /**
+     * Concatenates first and second byte arrays and returns a new combined
+     * byte array.
+     *
+     * @param first array of bytes
+     * @param second array of bytes
+     * @param length number of bytes to concatenate. This must be greater than 0
+     *              and less than or equal to length of second parameter.
+     * @return combined byte array.
+     */
+    public static byte[] concat(final byte[] first, final byte[] second, final int length) {
+        Objects.requireNonNull(first);
+        int l = Objects.checkIndex(length,Objects.requireNonNull(second).length + 1);
+        byte[] result = new byte[first.length + l];
         System.arraycopy(first,0,result,0,first.length);
-        System.arraycopy(second,0,result,first.length,second.length);
+        System.arraycopy(second,0,result,first.length,l);
         return result;
     }
 
