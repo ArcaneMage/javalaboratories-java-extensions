@@ -25,38 +25,41 @@ Alternatively, for `Gradle` users, amend the `build.gradle` file with the follow
 ```
 ### CryptographyFactory
 Use the `CryptographyFactory` class to gain access to both symmetric and asymmetric cryptography objects. It provides
-a simple abstraction over the `Java Cryptography Extension (JCE)`. Also, an abstraction of the `KeyStore` class has been 
-introduced to simplify `PublicKey` and `SecretKey` usage with the cryptography objects. Here are a couple of decryption
-examples that use symmetric keys. Note: assume that the encrypted data in the examples was encrypted with the same
-key:
+a simple abstraction over the `Java Cryptography Archetecture (JCA)`. It provides not just decryption and encryption
+functionality but also includes signing and verification. In the case of RSA encryption that is not capable of 
+encrypting large data, a hybrid approach is introduced to enable RSA encryption/decryption of large amounts of data. 
+Explore the package but here's an example of usage of the library:
 ```
-        // Decrypt with a SecretKey sourced from a KeyStore. Note: the encrypted data must've been encrypted with the 
-        // same key.
-        secretKeyStore = SecretKeyStore.builder()
-                .keyStoreStream(new FileInputStream(KEYSTORE_JCEJKS_FILE)
-                .storePassword("changeit")
-                .build();
-                
-        SymmetricCryptography cryptography = CryptographyFactory.getSunSymmetricCryptography();
-        SecretKey key = secretKeyStore.getKey(SECRET_KEY_ALIAS,SECRET_KEY_PASSWORD);
-        
-        byte[] result = cryptography.decrypt(key, encryptedData);
-        
-        System.out.println(new String(result));
-        
-        ...
-        ...
-        
-        // ...Or decrypt with a String key. Note: the encrypted data must've been encrypted with the same key.
-        SymmetricCryptography cryptography = CryptographyFactory.getSunSymmetricCryptography();
-        
-        byte[] result = cryptography.decrypt("012345", encryptedData);
-        
-        String data = new String(result);
-        
-        System.out.println(new String(result));
+       // Symmetric cryptography
+       AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+       ByteCryptographyResult<SymmetricSecretKey> result = cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), TEXT);
+       String encrypted = result.getBytesAsBase64();
+
+       ByteCryptographyResult<SymmetricSecretKey> stringResult = cryptography.decrypt(SymmetricSecretKey.from(PASSWORD),encrypted);
+       assertEquals(TEXT, stringResult.getString().orElseThrow());
+       
+       // Asymmetric cryptography
+       RsaHybridCryptography cryptography = CryptographyFactory.getAsymmetricHybridCryptography();
+       ByteCryptographyResult<PublicKey> result = cryptography.encrypt(publicKey,TEXT);
+
+       ByteCryptographyResult<PrivateKey> stringResult = cryptography.decrypt(privateKey, result.getBytesAsBase64());
+
+       assertNotNull(result.getKey());
+       assertEquals(TEXT, stringResult.getString().orElseThrow());
+       
+       // Signing / Verfication
+       RsaMessageSigner signer = CryptographyFactory.getMessageSigner(prvateKey);
+       Message message = signer.encrypt(publicKey,TEXT);
+       
+       // Note that verification does not require a public key, this is "transmitted" in the ciphertext
+       // and decoded at the recipient's end and used to verify the message.
+       RsaMessageVerifier verifier = CryptographyFactory.getMessageVerifier();
+       String s = verifier.decryptAsString(privateKey,message.getSignedAsBase64());
+
+       assertEquals(TEXT, s);
 ```
-Review the factory and other related classes for more information in the cryptography package.
+The `PublicKey` and `PrivateKey` require the use of the `KeyFactory` or `openssl`. Review the factory and other related
+classes for more information in the cryptography package.
 ### Either
 `Either` class is a container, similar to the `Maybe` and `Optional` classes, that represents one of two possible values
 (a disjoint union). Application and/or sub-routines often have one of two possible outcomes, a successful completion or
