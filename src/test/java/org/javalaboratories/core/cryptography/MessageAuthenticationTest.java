@@ -84,8 +84,8 @@ public class MessageAuthenticationTest {
 
         message = new Message(Base64.getDecoder().decode(TEXT_SIGNED));
 
-        signer = new RsaMessageSigner(signingKey);
-        verifier = new RsaMessageVerifier();
+        signer = CryptographyFactory.getMessageSigner(signingKey);
+        verifier = CryptographyFactory.getMessageVerifier();
     }
 
     @Test
@@ -115,7 +115,7 @@ public class MessageAuthenticationTest {
 
     @Test
     public void testAuthenticatorEquality_Pass() {
-        RsaMessageSigner authenticator2 = new RsaMessageSigner(signingKey);
+        RsaMessageSigner authenticator2 = new DefaultRsaMessageSigner(signingKey);
         assertEquals(authenticator2, signer);
     }
 

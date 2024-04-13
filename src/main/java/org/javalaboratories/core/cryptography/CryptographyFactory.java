@@ -17,6 +17,9 @@ package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
 /**
  * This cryptographic factory creates AES, MD5 and other cryptographic objects.
  * <p>
@@ -83,7 +86,7 @@ public final class CryptographyFactory {
      * @return {@link RsaHybridCryptography} object is returned, encapsulating
      * RSA encryption/decryption standard.
      */
-    public static RsaHybridCryptography getSignableAsymmetricHybridCryptography(MessageDigestAlgorithms algorithm) {
+    public static RsaHybridCryptography getSignableAsymmetricHybridCryptography(final MessageDigestAlgorithms algorithm) {
         return new DefaultRsaHybridCryptography(algorithm);
     }
 
@@ -113,6 +116,58 @@ public final class CryptographyFactory {
      */
     public static HashCryptography getHashCryptography() {
         return new DefaultHashCryptography();
+    }
+
+    /**
+     * Provides an interface for {@code message} signing with the given {@link
+     * PrivateKey}.
+     *
+     * @param key the private key with which to sign the encrypted message.
+     *
+     * @return {@link RsaMessageSigner} interface implementation.
+     */
+    public static RsaMessageSigner getMessageSigner(final PrivateKey key) {
+        return new DefaultRsaMessageSigner(key);
+    }
+
+    /**
+     * Provides an interface for {@code message} signing with the given {@link
+     * PrivateKey} and {@link MessageDigestAlgorithms} algorithm.
+     *
+     * @param key the private key with which to sign the encrypted message.
+     * @param algorithm the algorithm with which to sign the message.
+     *
+     * @return {@link RsaMessageSigner} interface implementation.
+     */
+    public static RsaMessageSigner getMessageSigner(final PrivateKey key, final MessageDigestAlgorithms algorithm) {
+        return new DefaultRsaMessageSigner(key, algorithm);
+    }
+
+    /**
+     * Provides an interface for {@code message} verification.
+     * <p>
+     * The verification does not require a {@link PublicKey} -- it is extracted
+     * from the message structure.
+     * <p>
+     * The default algorithm used for signing is {@code SHA-256}.
+     * @return {@link RsaMessageSigner} interface implementation.
+     */
+    public static RsaMessageVerifier getMessageVerifier() {
+        return new DefaultRsaMessageVerifier();
+    }
+
+    /**
+     * Provides an interface for {@code message} verification with the given
+     * {@code algorithm}
+     * <p>
+     * The verification does not require a {@link PublicKey} -- it is extracted
+     * from the message structure.
+     *
+     * @param algorithm the algorithm with which to verify the message.
+     * @return {@link RsaMessageSigner} interface implementation.
+     */
+    public static RsaMessageVerifier getMessageVerifier(final MessageDigestAlgorithms algorithm) {
+        return new DefaultRsaMessageVerifier(algorithm);
     }
 
     private CryptographyFactory() {}
