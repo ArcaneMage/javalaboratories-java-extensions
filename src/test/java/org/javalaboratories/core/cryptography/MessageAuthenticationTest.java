@@ -22,17 +22,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
+import java.security.*;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
@@ -53,7 +49,7 @@ public class MessageAuthenticationTest {
     private static final String INVALID_FILE = "aes-encrypted-file-does-not-exist.tmp";
 
     private static final String TEXT = "The quick brown fox jumped over the fence and then back again, just for a laugh.";
-    private static final String TEXT_SIGNATURE = "XXHUzLl+JyXp3sVDRBA3BAyD+JHG3kYTunQhE72epuFVPTFE6yymrGiox/+ZdIyhdmUs7Y" +
+    private static final String TEXT_BAD_SIGNATURE = "YXHUzLl+JyXp3sVDRBA3BAyD+JHG3kYTunQhE72epuFVPTFE6yymrGiox/+ZdIyhdmUs7Y" +
             "IA+UI1JOJZFM0++AeBb+EiOsZyxwZFnnSVcct8rrf9G1+Fi5lYbSIsp1Xc61yvniEwGYYYN/yH0jBGcdgdbzyryt00Ql1ZJEG/lBxTjdH4r" +
             "RLSqt6hJs1/zCGUcUfveumoMdoxIDS3ung2taJW62YnMIU8IOHYu9vfitW+kbYWXTD1uUh4K8BNfyb8PzT96oLtjGV4qBwlO+R4eg57nciP" +
             "htPoQaBeglhf1Hat7/Dju1hAErbPRy9dHBKBHbQqLoaKUtsyk0XNBgZBYw==";
@@ -129,6 +125,34 @@ public class MessageAuthenticationTest {
         assertEquals(authenticator2, signer);
     }
 
+    @Test
+    public void testSignerToString_Pass() {
+        assertEquals("[RsaMessageSigner,SHA256]",signer.toString());
+    }
+
+    @Test
+    public void testFileEncrypt_withBadFile_Fail() {
+        assertThrows(CryptographyException.class, () -> signer.encrypt(publicKey, new File(INVALID_FILE), new File(INVALID_FILE)));
+    }
+
+    @Test
+    void testStringEncrypt_withBadAlgorithm_Fail() {
+        try (MockedStatic<KeyFactory> keyFactory = Mockito.mockStatic(KeyFactory.class)) {
+            keyFactory.when(() -> KeyFactory.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
+
+            assertThrows(CryptographyException.class,() -> signer.encrypt(publicKey,TEXT));
+        }
+    }
+
+    @Test
+    void testStringEncrypt_withBadSigningAlgorithm_Fail() {
+        try (MockedStatic<Signature> signature = Mockito.mockStatic(Signature.class)) {
+            signature.when(() -> Signature.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
+
+            assertThrows(CryptographyException.class,() -> signer.encrypt(publicKey,TEXT));
+        }
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     //------------------ Decryption Unit Tests
     //------------------------------------------------------------------------------------------------------------------
@@ -151,13 +175,10 @@ public class MessageAuthenticationTest {
 
     @Test
     void testStringDecrypt_withBadSignature_Fail() {
-        Message spyCorruptedMessage = spy(new Message(Base64.getDecoder().decode(TEXT_SIGNED)));
-        doReturn(255).when(spyCorruptedMessage).getSignature();
+        Message spyMessage = spy(new Message(Base64.getDecoder().decode(TEXT_SIGNED)));
+        doReturn(Base64.getDecoder().decode(TEXT_BAD_SIGNATURE)).when(spyMessage).getSignature();
 
-        String s = verifier.decryptAsString(privateKey, spyCorruptedMessage);
-
-
-        assertEquals(TEXT, s);
+        assertThrows(MessageSignatureException.class, () -> verifier.decryptAsString(privateKey, spyMessage));
     }
 
     @Test
@@ -225,5 +246,9 @@ public class MessageAuthenticationTest {
         assertEquals(authenticator2, verifier);
     }
 
+    @Test
+    public void testVerifierToString_Pass() {
+        assertEquals("[RsaMessageVerifier,SHA256]",verifier.toString());
+    }
 }
 

@@ -43,5 +43,4 @@ public class MessageRsaAuthentication {
     protected RsaHybridCryptography signable() {
         return this.signable;
     }
-
 }

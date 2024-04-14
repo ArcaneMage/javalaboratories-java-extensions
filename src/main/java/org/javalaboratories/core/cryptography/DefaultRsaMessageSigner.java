@@ -99,7 +99,7 @@ public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements
     @Override
     public Message encrypt(final PublicKey key, final byte[] bytes) {
         ByteCryptographyResult<PublicKey> result = signable().encrypt(key,bytes);
-        PublicKey publicKey = getSignaturePublicKey();
+        PublicKey publicKey = getPublicKey();
         return result.getMessageHash()
             .map(this::sign)
             .map(signature -> new Message(publicKey,
@@ -119,7 +119,7 @@ public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements
             .map(this::sign)
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
 
-        PublicKey publicKey = getSignaturePublicKey();
+        PublicKey publicKey = getPublicKey();
         File tempfile = new File(STR."\{ciphertext.getAbsolutePath()}.tmp");
         try (FileInputStream fis = new FileInputStream(ciphertext);
             FileOutputStream fos = new FileOutputStream(tempfile)) {
@@ -140,8 +140,12 @@ public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements
             throw new CryptographyException("Failed to sign encrypted file",e);
         }
     }
+    @Override
+    public String toString() {
+        return STR."[RsaMessageSigner,\{getAlgorithm()}]";
+    }
 
-    private PublicKey getSignaturePublicKey() {
+    private PublicKey getPublicKey() {
         try {
             KeyFactory kf = KeyFactory.getInstance(DEFAULT_KEY_FACTORY_ALGORITHM);
             RSAPrivateCrtKey rsaPrivateKey = (RSAPrivateCrtKey) privateKey;

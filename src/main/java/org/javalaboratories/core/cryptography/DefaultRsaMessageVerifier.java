@@ -131,6 +131,11 @@ public class DefaultRsaMessageVerifier extends MessageRsaAuthentication implemen
         }
     }
 
+    @Override
+    public String toString() {
+        return STR."[RsaMessageVerifier,\{getAlgorithm()}]";
+    }
+
     private PublicKey readPublicKeyFrom(final InputStream fis) throws IOException {
         StreamHeaderBlock block = new StreamHeaderBlock(fis);
         return RsaKeys.getPublicKeyFrom(block.read());
