@@ -53,7 +53,6 @@ public class Message {
 
     transient byte[] signed;
 
-    private static final String DEFAULT_SIGNING_ALGORITHM = "RSA";
     private static final int STREAM_BUFFER_SIZE = 4096;
 
     /**
@@ -142,7 +141,9 @@ public class Message {
 
     @Override
     public String toString() {
-        return STR."[\{publicKey}], [\{signature}], [\{data}], [\{signed == null ? "Unassigned": signed}]";
+        boolean signature = this.signature != null;
+        boolean signedHeaderBlock = this.signed != null;
+        return STR."[signature=\{signature},signedHeaderBlock=\{signedHeaderBlock}]";
     }
 
     private byte[] encodeSign() {
