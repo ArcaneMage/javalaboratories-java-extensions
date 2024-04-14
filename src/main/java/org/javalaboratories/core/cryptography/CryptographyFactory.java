@@ -153,7 +153,7 @@ public final class CryptographyFactory {
      * @return {@link RsaMessageSigner} interface implementation.
      */
     public static RsaMessageVerifier getMessageVerifier() {
-        return new DefaultRsaMessageVerifier();
+        return getMessageVerifier(MessageDigestAlgorithms.SHA256);
     }
 
     /**

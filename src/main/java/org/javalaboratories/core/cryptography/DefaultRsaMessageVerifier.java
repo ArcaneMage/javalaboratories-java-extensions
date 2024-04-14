@@ -133,11 +133,7 @@ public class DefaultRsaMessageVerifier extends MessageRsaAuthentication implemen
 
     private PublicKey readPublicKeyFrom(final InputStream fis) throws IOException {
         StreamHeaderBlock block = new StreamHeaderBlock(fis);
-        try {
-            return RsaKeys.getPublicKeyFrom(block.read());
-        } catch (CryptographyException e) {
-            throw new CryptographyException("Failed to decode public key from stream",e);
-        }
+        return RsaKeys.getPublicKeyFrom(block.read());
     }
 
     private boolean verify(final PublicKey publicKey, final byte[] signature, final byte[] hash) {

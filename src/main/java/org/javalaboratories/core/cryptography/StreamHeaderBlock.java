@@ -63,7 +63,7 @@ public class StreamHeaderBlock {
      * <p>
      * Supply the predicate function to validate the block size. If false is
      * returned the current block will throw an {@link IOException} exception.
-     * <p>
+     *
      * @param validate a function to validate block size.
      * @return a block of data in a byte array.
      * @throws IOException if attempted to read pass end-of-file.

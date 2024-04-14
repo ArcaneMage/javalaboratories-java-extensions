@@ -20,19 +20,26 @@ import org.javalaboratories.core.cryptography.transport.JsonHelper;
 import org.javalaboratories.core.cryptography.transport.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Arrays;
+import java.security.Signature;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 public class MessageAuthenticationTest {
 
@@ -42,6 +49,8 @@ public class MessageAuthenticationTest {
     private static final String PRIVATE_KEY_FILE = "rsa-private-key-pkcs8.pem";
 
     private static final String AES_UNENCRYPTED_FILE = "aes-unencrypted-file.txt";
+
+    private static final String INVALID_FILE = "aes-encrypted-file-does-not-exist.tmp";
 
     private static final String TEXT = "The quick brown fox jumped over the fence and then back again, just for a laugh.";
     private static final String TEXT_SIGNATURE = "XXHUzLl+JyXp3sVDRBA3BAyD+JHG3kYTunQhE72epuFVPTFE6yymrGiox/+ZdIyhdmUs7Y" +
@@ -61,6 +70,7 @@ public class MessageAuthenticationTest {
             "3R1xJH6Gmv7hlB7rF0nuXIWHuFj1hwElVTJJSEeAlzv5zqOxmazUmla2UbgbW/EJu/MgKuehAqubz8jhWyP51VmOzQOky5p0kYRDOoNmbsz" +
             "SC3qKrZMVI81oQs7Z9tiSrRrgIuoRKw9N9+nihCwW+lZI8wc7Spn2MhRk21pfPdBwbzXx4Uu+9X0dXDn4gNVL7BBV4v5tjObDR8zh5L4L++" +
             "tWBXjyUyJVTQOchlSKpnJzDqsFVjz9YL2glN2JcnQrI1QjiqGaewjRXlCPVvV9GrY/oswSa/i5ziSKxRc15jcHgFl+bpOqGbZ";
+
     private static final String FILE_TEXT = "This is a test file with encrypted data -- TOP SECRET!";
 
     private PrivateKey signingKey;
@@ -114,7 +124,7 @@ public class MessageAuthenticationTest {
     }
 
     @Test
-    public void testAuthenticatorEquality_Pass() {
+    public void testSignerEquality_Pass() {
         RsaMessageSigner authenticator2 = new DefaultRsaMessageSigner(signingKey);
         assertEquals(authenticator2, signer);
     }
@@ -131,6 +141,26 @@ public class MessageAuthenticationTest {
     }
 
     @Test
+    void testStringDecrypt_withBadAlgorithm_Fail() {
+        try (MockedStatic<Signature> signature = Mockito.mockStatic(Signature.class)) {
+            signature.when(() -> Signature.getInstance(anyString())).thenThrow(NoSuchAlgorithmException.class);
+
+            assertThrows(CryptographyException.class,() -> verifier.decryptAsString(privateKey,TEXT_SIGNED));
+        }
+    }
+
+    @Test
+    void testStringDecrypt_withBadSignature_Fail() {
+        Message spyCorruptedMessage = spy(new Message(Base64.getDecoder().decode(TEXT_SIGNED)));
+        doReturn(255).when(spyCorruptedMessage).getSignature();
+
+        String s = verifier.decryptAsString(privateKey, spyCorruptedMessage);
+
+
+        assertEquals(TEXT, s);
+    }
+
+    @Test
     public void testMessageDecrypt_Pass() {
         String s = verifier.decryptAsString(privateKey,message);
 
@@ -142,7 +172,7 @@ public class MessageAuthenticationTest {
         byte[] b = verifier.decrypt(privateKey,message.getSignedAsBase64());
 
         assertNotNull(b);
-        assertTrue(Arrays.equals(TEXT.getBytes(),b));
+        assertArrayEquals(TEXT.getBytes(), b);
     }
 
     @Test
@@ -150,7 +180,7 @@ public class MessageAuthenticationTest {
         byte[] b = verifier.decrypt(privateKey,message.getSigned());
 
         assertNotNull(b);
-        assertTrue(Arrays.equals(TEXT.getBytes(),b));
+        assertArrayEquals(TEXT.getBytes(), b);
     }
 
     @Test
@@ -158,7 +188,7 @@ public class MessageAuthenticationTest {
         String json = JsonHelper.messageToJson(message);
 
         byte[] b = verifier.decryptJson(privateKey,json);
-        assertTrue(Arrays.equals(TEXT.getBytes(),b));
+        assertArrayEquals(TEXT.getBytes(), b);
     }
 
     @Test
@@ -169,6 +199,8 @@ public class MessageAuthenticationTest {
 
         File output = new File(STR."\{source.getAbsolutePath()}.decrypted");
         try {
+            signer.encrypt(publicKey,source,ciphertext);
+
             boolean decrypted = verifier.decrypt(privateKey, ciphertext, output);
 
             String s = Files.lines(output.toPath())
@@ -178,7 +210,20 @@ public class MessageAuthenticationTest {
             assertTrue(decrypted);
         } finally {
             output.delete();
+            ciphertext.delete();
         }
     }
+
+    @Test
+    public void testFileDecrypt_withBadFile_Fail() {
+        assertThrows(CryptographyException.class, () -> verifier.decrypt(privateKey, new File(INVALID_FILE), new File(INVALID_FILE)));
+    }
+
+    @Test
+    public void testVerifierEquality_Pass() {
+        RsaMessageVerifier authenticator2 = new DefaultRsaMessageVerifier();
+        assertEquals(authenticator2, verifier);
+    }
+
 }
 

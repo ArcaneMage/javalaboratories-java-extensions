@@ -121,7 +121,7 @@ public final class RsaKeys {
             X509EncodedKeySpec spec = new X509EncodedKeySpec(encoded);
             return factory.generatePublic(spec);
         } catch (GeneralSecurityException e) {
-            throw new CryptographyException("Failed to create private key",e);
+            throw new CryptographyException("Failed to create public key",e);
         }
     }
 
