@@ -19,7 +19,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Objects;
 
 /**
