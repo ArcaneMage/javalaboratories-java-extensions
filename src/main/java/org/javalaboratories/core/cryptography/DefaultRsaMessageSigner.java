@@ -121,7 +121,7 @@ public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements
 
         PublicKey publicKey = getPublicKey();
         File tempfile = new File(STR."\{ciphertext.getAbsolutePath()}.tmp");
-        try (FileInputStream fis = new FileInputStream(ciphertext);
+        try (FileInputStream fis = new FileInputStream(ct);
             FileOutputStream fos = new FileOutputStream(tempfile)) {
 
             // Write signature header to file
