@@ -103,11 +103,23 @@ public final class RsaKeys {
         InputStream is = Objects.requireNonNull(inputStream);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             byte[] bytes = keyDataToBytes(reader);
-            KeyFactory factory = KeyFactory.getInstance(ALGORITHM);
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(bytes);
-            return factory.generatePublic(spec);
+            return getPublicKeyFrom(bytes);
         } catch(IOException e) {
-            throw new CryptographyException("Failed to read input stream",e);
+            throw new CryptographyException("Failed to read input stream", e);
+        }
+    }
+
+    /**
+     * Reads encode public RSA key from given encoded bytes.
+     *
+     * @param encoded public key encoded into bytes.
+     * @return the public key object.
+     */
+    public static PublicKey getPublicKeyFrom(final byte[] encoded) {
+        try {
+            KeyFactory factory = KeyFactory.getInstance(ALGORITHM);
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(encoded);
+            return factory.generatePublic(spec);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to create private key",e);
         }

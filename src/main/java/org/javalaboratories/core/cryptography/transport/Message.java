@@ -19,16 +19,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.javalaboratories.core.cryptography.MessageSignatureException;
 import org.javalaboratories.core.cryptography.StreamHeaderBlock;
+import org.javalaboratories.core.cryptography.keys.RsaKeys;
 import org.javalaboratories.core.util.Arguments;
 import org.javalaboratories.core.util.Bytes;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Objects;
 
@@ -50,11 +47,11 @@ import java.util.Objects;
 @EqualsAndHashCode
 public class Message {
 
-    transient PublicKey publicKey;
-    transient byte[] signature;
-    transient byte[] data;
+    PublicKey publicKey;
+    byte[] signature;
+    byte[] data;
 
-    byte[] signed;
+    transient byte[] signed;
 
     private static final String DEFAULT_SIGNING_ALGORITHM = "RSA";
     private static final int STREAM_BUFFER_SIZE = 4096;
@@ -101,13 +98,8 @@ public class Message {
             while ((read = is.read(b)) != -1)
                 tempbuf = Bytes.concat(tempbuf, b, read);
             data = tempbuf;
-
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
-            KeyFactory kf = KeyFactory.getInstance(DEFAULT_SIGNING_ALGORITHM);
-            this.publicKey = kf.generatePublic(spec);
+            this.publicKey = RsaKeys.getPublicKeyFrom(publicKeyBytes);
             this.signed = signed;
-        } catch (GeneralSecurityException e) {
-            throw new MessageSignatureException("Failed to decode public key", e);
         } catch (IOException e) {
             throw new MessageSignatureException("Signed message does do not conform to signature format");
         }
@@ -146,6 +138,11 @@ public class Message {
      */
     public String getSignedAsBase64() {
         return Base64.getEncoder().encodeToString(signed);
+    }
+
+    @Override
+    public String toString() {
+        return STR."[\{publicKey}], [\{signature}], [\{data}], [\{signed == null ? "Unassigned": signed}]";
     }
 
     private byte[] encodeSign() {

@@ -16,6 +16,7 @@
 package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.RsaKeys;
+import org.javalaboratories.core.cryptography.transport.JsonHelper;
 import org.javalaboratories.core.cryptography.transport.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,8 +110,7 @@ public class MessageAuthenticationTest {
 
     @Test
     public void testAuthenticatorState_Pass() {
-        assertEquals(MessageDigestAlgorithms.SHA256, signer.getAlgorithm());
-        assertEquals(signingKey, signer.getPrivateKey());
+        assertEquals(MessageDigestAlgorithms.SHA256, ((MessageRsaAuthentication) signer).getAlgorithm());
     }
 
     @Test
@@ -150,6 +150,14 @@ public class MessageAuthenticationTest {
         byte[] b = verifier.decrypt(privateKey,message.getSigned());
 
         assertNotNull(b);
+        assertTrue(Arrays.equals(TEXT.getBytes(),b));
+    }
+
+    @Test
+    public void testJsonDecrypt_Pass() {
+        String json = JsonHelper.messageToJson(message);
+
+        byte[] b = verifier.decryptJson(privateKey,json);
         assertTrue(Arrays.equals(TEXT.getBytes(),b));
     }
 

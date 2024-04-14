@@ -1,5 +1,6 @@
 package org.javalaboratories.core.cryptography;
 
+import org.javalaboratories.core.cryptography.transport.JsonHelper;
 import org.javalaboratories.core.cryptography.transport.Message;
 
 import java.io.File;
@@ -74,7 +75,7 @@ public interface RsaMessageVerifier {
     }
 
     /**
-     * Decrypts and verifies {@link Message }ciphertext with given {@link
+     * Decrypts and verifies {@link Message} ciphertext with given {@link
      * PrivateKey}
      *
      * @param key        the private key with which to decrypt the message.
@@ -119,5 +120,23 @@ public interface RsaMessageVerifier {
      */
     default byte[] decrypt(PrivateKey key, byte[] ciphertext) {
         return decrypt(key, new Message(Objects.requireNonNull(ciphertext, "Expected signed ciphertext bytes")));
+    }
+
+    /**
+     * Decrypts and verifies JSON ciphertext with given {@link PrivateKey}
+     * <p>
+     * The ciphertext string is a serialised JSON string, originally generated
+     * by {@link JsonHelper#messageToJson(Message)}.
+     *
+     * @param key        the private key with which to decrypt the message.
+     * @param ciphertext the ciphertext encapsulated in a JSON string that
+     *                   adheres to the message structure described above.
+     * @return decrypted bytes
+     *
+     * @see Message
+     * @see JsonHelper
+     */
+    default byte[] decryptJson(PrivateKey key, String ciphertext) {
+        return decrypt(key, JsonHelper.jsonToMessage(Objects.requireNonNull(ciphertext, "Expected signed ciphertext bytes")));
     }
 }

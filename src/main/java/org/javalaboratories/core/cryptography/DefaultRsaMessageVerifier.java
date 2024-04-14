@@ -17,6 +17,7 @@ package org.javalaboratories.core.cryptography;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import org.javalaboratories.core.cryptography.keys.RsaKeys;
 import org.javalaboratories.core.cryptography.transport.Message;
 
 import java.io.File;
@@ -26,11 +27,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Objects;
 
 /**
@@ -111,7 +110,7 @@ public class DefaultRsaMessageVerifier extends MessageRsaAuthentication implemen
         // Calculate file hash first and validate signature
         try (FileInputStream is = new FileInputStream(ct);
              OutputStream os = OutputStream.nullOutputStream()) {
-            PublicKey publicKey = readSignaturePublicKeyFrom(is);
+            PublicKey publicKey = readPublicKeyFrom(is);
             byte[] signature = new StreamHeaderBlock(is).read();
             StreamCryptographyResult<PrivateKey,OutputStream> result = signable().decrypt(pk,is,os);
             boolean validSignature = result.getMessageHash()
@@ -132,14 +131,12 @@ public class DefaultRsaMessageVerifier extends MessageRsaAuthentication implemen
         }
     }
 
-    private PublicKey readSignaturePublicKeyFrom(final InputStream fis) throws IOException {
+    private PublicKey readPublicKeyFrom(final InputStream fis) throws IOException {
         StreamHeaderBlock block = new StreamHeaderBlock(fis);
         try {
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(block.read());
-            KeyFactory kf = KeyFactory.getInstance(DEFAULT_KEY_FACTORY_ALGORITHM);
-            return kf.generatePublic(spec);
-        } catch (GeneralSecurityException e) {
-            throw new CryptographyException("Failed to decode public key",e);
+            return RsaKeys.getPublicKeyFrom(block.read());
+        } catch (CryptographyException e) {
+            throw new CryptographyException("Failed to decode public key from stream",e);
         }
     }
 

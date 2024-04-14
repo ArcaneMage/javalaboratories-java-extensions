@@ -18,16 +18,40 @@ package org.javalaboratories.core.cryptography.transport;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Objects;
+
+/**
+ * A utility class that provides methods to transform JSON objects to and from
+ * {@link Message}.
+ */
 public final class JsonHelper {
+
+    /**
+     * Serializes Message objects into JSON string form.
+     *
+     * @param message the message object.
+     * @return A JSON string encapsulating the message.
+     */
     public static String messageToJson(final Message message) {
-        return getCustomGson().toJson(message);
+        return getCustomGson().toJson(Objects.requireNonNull(message));
     }
 
+    /**
+     * Deserializes JSON message into a Message object.
+     *
+     * @param jsonMessage the JSON string message object.
+     * @return Message object encapsulating the message.
+     */
     public static Message jsonToMessage(final String jsonMessage) {
-        return getCustomGson().fromJson(jsonMessage, Message.class);
+        return getCustomGson().fromJson(Objects.requireNonNull(jsonMessage), Message.class);
     }
 
     private static Gson getCustomGson() {
-        return new GsonBuilder().registerTypeAdapter(byte[].class, new ByteArrayJsonAdapter()).create();
+        return new GsonBuilder()
+                .registerTypeAdapter(byte[].class, new ByteArrayJsonAdapter())
+                .registerTypeHierarchyAdapter(PublicKey.class,new PublicKeyJsonAdapter())
+                .create();
     }
 }
