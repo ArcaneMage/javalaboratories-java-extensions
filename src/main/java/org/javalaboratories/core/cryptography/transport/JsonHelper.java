@@ -32,6 +32,7 @@ public final class JsonHelper {
      *
      * @param message the message object.
      * @return A JSON string encapsulating the message.
+     * @throws NullPointerException if message reference is null.
      */
     public static String messageToJson(final Message message) {
         return getCustomGson().toJson(Objects.requireNonNull(message));
@@ -42,6 +43,7 @@ public final class JsonHelper {
      *
      * @param jsonMessage the JSON string message object.
      * @return Message object encapsulating the message.
+     * @throws NullPointerException if message reference is null.
      */
     public static Message jsonToMessage(final String jsonMessage) {
         return getCustomGson().fromJson(Objects.requireNonNull(jsonMessage), Message.class);

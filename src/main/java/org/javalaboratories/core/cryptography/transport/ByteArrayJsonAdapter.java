@@ -26,14 +26,19 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import java.util.Base64;
 
+/**
+ * Serializes and deserializes byte arrays, turning bytes to and from Base64
+ * data format.
+ */
 public final class ByteArrayJsonAdapter implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
     @Override
-    public JsonElement serialize(byte[] bytes, Type type, JsonSerializationContext context) {
+    public JsonElement serialize(final byte[] bytes, final Type type, final JsonSerializationContext context) {
         return new JsonPrimitive(Base64.getEncoder().encodeToString(bytes));
     }
 
     @Override
-    public byte[] deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
+    public byte[] deserialize(final JsonElement jsonElement, final Type type, final JsonDeserializationContext context)
+            throws JsonParseException {
         String s = jsonElement.getAsString();
         return Base64.getDecoder().decode(s);
     }

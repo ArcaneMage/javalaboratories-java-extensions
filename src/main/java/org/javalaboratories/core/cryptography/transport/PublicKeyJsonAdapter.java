@@ -28,14 +28,19 @@ import java.lang.reflect.Type;
 import java.security.PublicKey;
 import java.util.Base64;
 
+/**
+ * Serializes adn deserializes PublicKey objects in objects, turning encoded bytes
+ * to and from Base64 data format.
+ */
 public final class PublicKeyJsonAdapter implements JsonSerializer<PublicKey>, JsonDeserializer<PublicKey> {
     @Override
-    public JsonElement serialize(PublicKey key, Type type, JsonSerializationContext context) {
+    public JsonElement serialize(final PublicKey key, final Type type, final JsonSerializationContext context) {
         return new JsonPrimitive(Base64.getEncoder().encodeToString(key.getEncoded()));
     }
 
     @Override
-    public PublicKey deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
+    public PublicKey deserialize(final JsonElement jsonElement, final Type type, final JsonDeserializationContext context)
+            throws JsonParseException {
         String s = jsonElement.getAsString();
         return RsaKeys.getPublicKeyFrom(Base64.getDecoder().decode(s));
     }
