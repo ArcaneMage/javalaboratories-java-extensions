@@ -114,7 +114,7 @@ public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements
         File file = Objects.requireNonNull(source,"Expected source file to encrypt");
         File ct = Objects.requireNonNull(ciphertext,"Expected output file object");
 
-        FileCryptographyResult<PublicKey> result = signable().encrypt(pk,file,ct);
+        SignableMessage result = signable().encrypt(pk,file,ct);
         byte[] signature = result.getMessageHash()
             .map(this::sign)
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));

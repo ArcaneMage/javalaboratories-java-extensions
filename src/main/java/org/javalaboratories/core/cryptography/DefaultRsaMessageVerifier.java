@@ -112,7 +112,7 @@ public class DefaultRsaMessageVerifier extends MessageRsaAuthentication implemen
              OutputStream os = OutputStream.nullOutputStream()) {
             PublicKey publicKey = readPublicKeyFrom(is);
             byte[] signature = new StreamHeaderBlock(is).read();
-            StreamCryptographyResult<PrivateKey,OutputStream> result = signable().decrypt(pk,is,os);
+            SignableMessage result = signable().decrypt(pk,is,os);
             boolean validSignature = result.getMessageHash()
                 .map(h -> verify(publicKey,signature,h))
                 .filter(s -> s)
