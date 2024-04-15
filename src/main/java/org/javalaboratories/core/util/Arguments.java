@@ -64,6 +64,8 @@ public final class Arguments {
     public static <E extends Exception> void requireNonNull(final Supplier<? extends E> supplier, final Object... arguments) throws E {
         Objects.requireNonNull(supplier,"Expected supplier?");
         Objects.requireNonNull(arguments,"Expected arguments?");
+        if (arguments.length == 0)
+            throw supplier.get();
         for (Object o : arguments) {
             if (o == null)
                 throw supplier.get();

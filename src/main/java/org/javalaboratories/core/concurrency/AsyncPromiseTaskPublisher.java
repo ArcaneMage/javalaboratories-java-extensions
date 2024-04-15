@@ -16,6 +16,7 @@
 package org.javalaboratories.core.concurrency;
 
 import org.javalaboratories.core.Maybe;
+import org.javalaboratories.core.concurrency.PromiseEvent.Actions;
 import org.javalaboratories.core.event.Event;
 import org.javalaboratories.core.event.EventBroadcaster;
 import org.javalaboratories.core.event.EventPublisher;
@@ -33,9 +34,6 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
-import static org.javalaboratories.core.concurrency.PromiseEvents.PRIMARY_ACTION_EVENT;
-import static org.javalaboratories.core.concurrency.PromiseEvents.TASK_ACTION_EVENT;
-import static org.javalaboratories.core.concurrency.PromiseEvents.TRANSMUTE_ACTION_EVENT;
 
 /**
  * Class implements the {@link Promise} interface.
@@ -50,12 +48,6 @@ import static org.javalaboratories.core.concurrency.PromiseEvents.TRANSMUTE_ACTI
  * {@link PromiseEventSubscriber} interface and provide a {@link List}
  * collection of them.
  * <p>
- * There are three types of events all subscribers are notified on:
- * <ol>
- *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
- *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
- *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
- * </ol>
  * <u>Notification Policy</u>
  * <p>
  * There is no limit to the number of subscribers that can be assigned to this
@@ -79,6 +71,12 @@ import static org.javalaboratories.core.concurrency.PromiseEvents.TRANSMUTE_ACTI
  * {@code subscribers}, but it does guarantee to eventually inform all the
  * {@code subscribers} of the current {@link Event}.
  * <p>
+ * It is challenging to enforce the type-safety of the event {@code value type}
+ * for any given transformation that may have occurred, and so it is for this
+ * reason the {@code value type} of the event is a wildcard. This design is
+ * likely to change to enforce type-safety for all {@link PromiseEvent} action
+ * types.
+ * <p>
  * Constructor in this class is package-access only, use the factory methods
  * provided in the {@link Promises} class.
  *
@@ -88,7 +86,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
 
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);
 
-    private final EventPublisher<EventState<?>> publisher;
+    private final EventPublisher<PromiseEvent<?>,PromiseEventSubscriber<?>> publisher;
 
     /**
      * Constructs this event-driven {@link Promise} object
@@ -96,19 +94,17 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * Use the {@link Promises} factory method to construct this object.
      *
      * @param service the thread pool service
-     * @param action the action of this object to processed
-     *               asynchronously.
+     * @param action the action of this object to be processed asynchronously.
      * @param subscribers collection of subscribers/listeners of promise
      *                    objects.
      * @throws NullPointerException if service or action is null.
      */
-    AsyncPromiseTaskPublisher(final ManagedPoolService service, final PrimaryAction<T> action,
-                              final List<? extends PromiseEventSubscriber> subscribers) {
+    AsyncPromiseTaskPublisher(final ManagedPromiseService service, final PrimaryAction<T> action,
+                              final List<? extends PromiseEventSubscriber<? super T>> subscribers) {
         super(service,action);
         Arguments.requireNonNull(() -> new IllegalArgumentException("Arguments null?"),service,action,subscribers);
-        this.publisher = new EventBroadcaster<>(this);
-        subscribers.forEach(s -> publisher.subscribe(s,PRIMARY_ACTION_EVENT, TASK_ACTION_EVENT,
-                TRANSMUTE_ACTION_EVENT));
+        this.publisher =  new EventBroadcaster<>(this);
+        subscribers.forEach(publisher::subscribe);
     }
 
     /**
@@ -116,7 +112,7 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * {@link Promise} object to represent encapsulated {@code CompletableFuture}
      * and {@code publisher}.
      * <p>
-     * Preferably use {@link AsyncPromiseTaskPublisher(ManagedPoolService,
+     * Preferably use {@link AsyncPromiseTaskPublisher( ManagedPromiseService ,
      * PrimaryAction, List)} constructor or the {@link Promises} factory method.
      *
      * @param service the thread pool service.
@@ -127,8 +123,8 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @param publisher underlying event publisher.
      * @throws NullPointerException if service or action or future or promise is null.
      */
-     AsyncPromiseTaskPublisher(final ManagedPoolService service, final Action<T> action,
-                              final CompletableFuture<T> future, final EventPublisher<EventState<?>> publisher) {
+     AsyncPromiseTaskPublisher(final ManagedPromiseService service, final Action<T> action, final CompletableFuture<T> future,
+                               final EventPublisher<PromiseEvent<?>,PromiseEventSubscriber<?>> publisher) {
         super(service,action,future);
         Objects.requireNonNull(publisher);
         this.publisher = publisher;
@@ -151,13 +147,12 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * {@inheritDoc}
      * <p>
      * Asynchronously notifies {@link PromiseEventSubscriber} subscribers of
-     * the {@link PromiseEvents#TASK_ACTION_EVENT} when the promise is
-     * complete.
+     * the {@link PromiseEvent} when the promise is complete.
      */
     public Promise<T> then(final TaskAction<T> action) {
-        Promise<T> result = super.then(action);
-        notify(() -> notifyEvent(result,TASK_ACTION_EVENT));
-        CompletableFuture<T> future = ((AsyncPromiseTask<T>) result).getFuture();
+        Promise<T> promise = super.then(action);
+        async(() -> notifyEvent(promise,Actions.TASK_ACTION));
+        CompletableFuture<T> future = ((AsyncPromiseTask<T>) promise).getFuture();
         return new AsyncPromiseTaskPublisher<>(getService(),action,future,publisher);
     }
 
@@ -165,12 +160,12 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * {@inheritDoc}
      * <p>
      * Asynchronously notifies {@link PromiseEventSubscriber} subscribers of
-     * the {@link PromiseEvents#TRANSMUTE_ACTION_EVENT} when the promise is
+     * the {@link PromiseEvent} when the promise is
      * complete.
      */
     public final <R> Promise<R> then(final TransmuteAction<T,R> action) {
         Promise<R> result = super.then(action);
-        notify(() -> notifyEvent(result,TRANSMUTE_ACTION_EVENT));
+        async(() -> notifyEvent(result,Actions.TRANSMUTE_ACTION));
         CompletableFuture<R> future = ((AsyncPromiseTask<R>) result).getFuture();
         return new AsyncPromiseTaskPublisher<>(getService(),action,future,publisher);
     }
@@ -179,14 +174,13 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * {@inheritDoc}
      * <p>
      * Asynchronously notifies {@link PromiseEventSubscriber} subscribers of
-     * the {@link PromiseEvents#PRIMARY_ACTION_EVENT} when the promise is
-     * complete.
+     * the {@link PromiseEvent} when the promise is complete.
      *
      * @throws NullPointerException if action is null
      */
-    CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
-        CompletableFuture<T> future = super.invokePrimaryActionAsync(action);
-        notify(() -> notifyEvent(future,PRIMARY_ACTION_EVENT));
+    protected CompletableFuture<T> invokeAsync(final PrimaryAction<T> action) {
+        CompletableFuture<T> future = super.invokeAsync(action);
+        async(() -> notifyEvent(future, Actions.PRIMARY_ACTION));
         return future;
     }
 
@@ -200,34 +194,31 @@ class AsyncPromiseTaskPublisher<T> extends AsyncPromiseTask<T> implements EventS
      * @throws NullPointerException if broadcaster parameter is null.
      */
     @SuppressWarnings("UnusedReturnValue")
-    final CompletableFuture<Void> notify(final Runnable runnable) {
-        Objects.requireNonNull(publisher,"Expected publisher?");
+    private CompletableFuture<Void> async(final Runnable runnable) {
+        Runnable r = Objects.requireNonNull(runnable,"Expected runnable?");
         CompletableFuture<Void> result = CompletableFuture
-                .runAsync(runnable,getService())
+                .runAsync(r,getService())
                 .whenComplete(this::handleNotifyComplete);
         logger.debug("Promise [{}] notifying subscribers",getIdentity());
         return result;
     }
 
     @SuppressWarnings("SameParameterValue")
-    private <U> void notifyEvent(final Future<U> future, final Event event) {
-        Arguments.requireNonNull(future,event);
+    private void notifyEvent(final Future<T> future, final Actions action) {
+        Arguments.requireNonNull(future);
         try {
-            EventState<U> state = new EventState<>(future.get());
-            publisher.publish(event, state);
+            PromiseEvent<T> event = new PromiseEvent<>(action,future.get());
+            publisher.publish(event);
         } catch (CancellationException | ExecutionException | InterruptedException e) {
             // Ignore, return optional object instead.
         }
     }
 
-    private <U> void notifyEvent(final Promise<U> promise, final Event event) {
-        Arguments.requireNonNull(promise,event);
+    private <U> void notifyEvent(final Promise<U> promise, final Actions action) {
+        Arguments.requireNonNull(promise);
         Maybe<U> value = promise.getResult();
         if (promise.getState() == FULFILLED) {
-            if (value.isEmpty()) {
-                publisher.publish(event, new EventState<>(null));
-            }
-            value.ifPresent(v -> publisher.publish(event, new EventState<>(v)));
+            publisher.publish(new PromiseEvent<>(action,value.orElse(null)));
         }
     }
 }

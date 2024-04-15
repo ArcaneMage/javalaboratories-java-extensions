@@ -48,6 +48,8 @@ public interface Monad<T> extends Functor<T> {
      * @param mapper function to perform transformation.
      * @param <U> Type of transformed value.
      * @return new monad containing transformed value.
+     * @throws ClassCastException when the resultant {@code Monad} is not
+     * castable to this {@code Monad}
      */
     default <U> Monad<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
         Objects.requireNonNull(mapper,"Expected mapper function");
@@ -60,22 +62,12 @@ public interface Monad<T> extends Functor<T> {
      * <p>
      * If {@code this} contains a {@link Monad} value, it is returned, otherwise
      * {@code this} is returned.
-     * <p>
+     *
      * @param <U> Type of value within {@code nested} {@link Monad} object.
      * @return flattened {@link Monad} object.
      */
     default <U> Monad<U> flatten() {
         Function<? super T,? extends Monad<U>> f = Monad.class::cast;
-
-        @SuppressWarnings("unchecked")
-        Monad<U> self = (Monad<U>) this;
-
-        // Attempt to return flattened value. If not possible, this monad is
-        // returned instead.
-        try {
-            return flatMap(f);
-        } catch (ClassCastException e) {
-            return self;
-        }
+        return flatMap(f);
     }
 }

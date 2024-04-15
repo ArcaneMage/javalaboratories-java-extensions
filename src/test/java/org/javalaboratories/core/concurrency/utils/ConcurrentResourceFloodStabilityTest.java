@@ -65,7 +65,7 @@ public class ConcurrentResourceFloodStabilityTest extends AbstractResourceFloodS
         SingleThreadedFloodgate<Integer> floodgate2 = new SingleThreadedFloodgate<>(UnsafeStatistics.class,5,() -> unsafe.add(10));
 
         // Then
-        assertFalse(floodgate1.equals(floodgate2));
+        assertNotEquals(floodgate1, floodgate2);
     }
 
     @Test

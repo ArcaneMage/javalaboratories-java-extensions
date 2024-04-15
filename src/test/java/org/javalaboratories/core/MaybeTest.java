@@ -160,8 +160,8 @@ public class MaybeTest {
 
     @Test
     public void testGetOrElse_Pass() {
-        assertEquals("Hello World", maybe.getOrElse("Hello Mars"));
-        assertEquals("Hello Mars", empty.getOrElse("Hello Mars"));
+        assertEquals("Hello World", maybe.orElse("Hello Mars"));
+        assertEquals("Hello Mars", empty.orElse("Hello Mars"));
     }
 
     @Test
@@ -261,7 +261,6 @@ public class MaybeTest {
     public void testOrElse_Pass() {
         assertEquals("Hello World", maybe.orElse("Hello Mars"));
         assertEquals("Hello Mars", empty.orElse("Hello Mars"));
-
     }
 
     @Test
@@ -457,6 +456,18 @@ public class MaybeTest {
 
         // Then
         assertEquals(Maybe.of(5),maybe);
+    }
+
+    @Test
+    public void testMaybeComparable_Pass() {
+        List<Maybe<Integer>> list = Arrays.asList(Maybe.of(9),Maybe.of(5),Maybe.of(3),Maybe.of(8));
+
+        String sorted = list.stream()
+                .sorted()
+                .map(m -> m.fold("",String::valueOf))
+                .collect(Collectors.joining(","));
+
+        assertEquals("3,5,8,9",sorted);
     }
 
     // Some contrived use case for flatMap

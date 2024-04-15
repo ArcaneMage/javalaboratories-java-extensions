@@ -14,16 +14,22 @@
  *    limitations under the License.
  */
 module javalaboratories.java.extensions {
+
+  requires com.google.gson;
   requires lombok;
   requires org.apache.commons.codec;
   requires org.apache.commons.lang3;
   requires org.slf4j;
 
+  opens org.javalaboratories.core.cryptography.transport;
+
   exports org.javalaboratories.core;
+  exports org.javalaboratories.core.atomic;
   exports org.javalaboratories.core.collection;
   exports org.javalaboratories.core.concurrency;
   exports org.javalaboratories.core.concurrency.utils;
   exports org.javalaboratories.core.cryptography;
+  exports org.javalaboratories.core.cryptography.transport;
   exports org.javalaboratories.core.cryptography.keys;
   exports org.javalaboratories.core.event;
   exports org.javalaboratories.core.function;
@@ -31,4 +37,5 @@ module javalaboratories.java.extensions {
   exports org.javalaboratories.core.statistics;
   exports org.javalaboratories.core.tuple;
   exports org.javalaboratories.core.util;
+  exports org.javalaboratories.core.holders;
 }

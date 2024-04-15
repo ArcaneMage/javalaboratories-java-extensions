@@ -17,7 +17,6 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.util.Generics;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -44,10 +43,10 @@ import java.util.function.Consumer;
  */
 @EqualsAndHashCode(callSuper=false)
 public final class TaskAction<T> extends AbstractAction<T> {
-    private final Consumer<? super T> task;
+    private final Consumer<T> task;
 
     /**
-     * Constructor to setup internal handlers.
+     * Constructor to set up internal handlers.
      * <p>
      * Recommended to use factory methods for creation.
      * @param task main task handler that will be executed asynchronously.
@@ -70,12 +69,12 @@ public final class TaskAction<T> extends AbstractAction<T> {
      */
     private TaskAction(final Consumer<? super T> task, final BiConsumer<? super T,Throwable> completionHandler) {
         super(completionHandler);
-        this.task = Objects.requireNonNull(task,"No task?");
+        this.task = Objects.requireNonNull(task::accept,"No task?");
     }
 
     /**
      * Factory method to construct this {@link TaskAction} object,
-     * <p>
+     *
      * @param task main task handler that will be executed asynchronously.
      * @param <T> Type of the object to be processed by the task.
      * @return an instance of {@link TaskAction}
@@ -90,14 +89,14 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * <p>
      * Note: There is no return value from the {@code task}, hence the
      * {@code completionHandler} resultant value will be {@code null}.
-     * <p>
+     *
      * @param task main task handler that will be executed asynchronously.
      * @param completionHandler to handle task completion -- this is optional.
      * @param <T> Type of the object to be processed by the task.
      * @return an instance of {@link TaskAction}
      * @throws NullPointerException if task parameter is null.
      */
-    public static <T> TaskAction<T> of(Consumer<? super T> task, BiConsumer<T,Throwable> completionHandler) {
+    public static <T> TaskAction<T> of(Consumer<? super T> task, BiConsumer<? super T,Throwable> completionHandler) {
         return new TaskAction<>(task, completionHandler);
     }
 
@@ -105,6 +104,6 @@ public final class TaskAction<T> extends AbstractAction<T> {
      * @return this {@link TaskAction} task handler.
      */
     public Maybe<Consumer<T>> getTask() {
-        return Generics.unchecked(Maybe.ofNullable(task));
+        return Maybe.ofNullable(task);
     }
 }

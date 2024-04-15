@@ -17,7 +17,6 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +43,13 @@ import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
  * @see Promise for full contract details and usage.
  */
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
+class AsyncPromiseTask<T> implements Promise<T> {
 
     private static final Consumer<Throwable> INERT_HANDLER = e -> {};
     private static final Logger logger = LoggerFactory.getLogger(Promise.class);
 
     private final Action<T> action;
-    private final ManagedPoolService service;
+    private final ManagedPromiseService service;
     @EqualsAndHashCode.Include
     private final String identity;
     private CompletableFuture<T> future;
@@ -68,7 +67,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      *               asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    AsyncPromiseTask(final ManagedPoolService service, final PrimaryAction<T> action) {
+    AsyncPromiseTask(final ManagedPromiseService service, final PrimaryAction<T> action) {
         this(service,action,null);
     }
 
@@ -87,7 +86,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      *               action asynchronously.
      * @throws NullPointerException if service or action is null.
      */
-    AsyncPromiseTask(final ManagedPoolService service, final Action<T> action, final CompletableFuture<T> future) {
+    AsyncPromiseTask(final ManagedPromiseService service, final Action<T> action, final CompletableFuture<T> future) {
         this.service = Objects.requireNonNull(service,"No service?");
         this.action = Objects.requireNonNull(action,"No action object?");
         this.future = future;
@@ -111,20 +110,21 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
         CompletableFuture<Void> future = this.future.thenAcceptAsync(actionable,service)
                 .whenComplete((value,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(null, exception)));
-
-        return new AsyncPromiseTask<>(service,action,Generics.unchecked(future));
+        // This is okay for now, need to revisit.
+        @SuppressWarnings("unchecked")
+        CompletableFuture<T> f =  (CompletableFuture<T>) future;
+        return new AsyncPromiseTask<>(service,action,f);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public  <R> Promise<R> then(final TransmuteAction<T,R> action) {
+    public <R> Promise<R> then(final TransmuteAction<T,R> action) {
         Function<T,R> transmutable = doMakeTransmutable(action);
         CompletableFuture<R> future = this.future.thenApplyAsync(transmutable,service)
                 .whenComplete((newValue,exception) -> action.getCompletionHandler()
                         .ifPresent(result -> result.accept(newValue, exception)));
-
         return new AsyncPromiseTask<>(service,action,future);
     }
 
@@ -184,8 +184,8 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      * {@inheritDoc}
      */
     @Override
-    public final boolean invokeAction(final PrimaryAction<T> action) {
-        future = invokePrimaryActionAsync(Objects.requireNonNull(action,"No action?"));
+    public final boolean invoke(final PrimaryAction<T> action) {
+        future = invokeAsync(Objects.requireNonNull(action,"No action?"));
         logger.debug("Promise [{}] invoked action asynchronously successfully",getIdentity());
         return true;
     }
@@ -208,7 +208,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
     /**
      * @return main thread pool service for all promises.
      */
-    ManagedPoolService getService() {
+    ManagedPromiseService getService() {
         return service;
     }
 
@@ -223,7 +223,7 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
      * @return the underlying future that executes the primary action.
      * @throws NullPointerException if action is null
      */
-    CompletableFuture<T> invokePrimaryActionAsync(final PrimaryAction<T> action) {
+    protected CompletableFuture<T> invokeAsync(final PrimaryAction<T> action) {
         Supplier<T> actionable = doMakePrimaryActionable(action);
         return CompletableFuture.supplyAsync(actionable,service)
                 .whenComplete((value,exception) -> action.getCompletionHandler()
@@ -247,10 +247,10 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
         };
     }
 
-    private Consumer<T> doMakeActionable(final TaskAction<T> action) {
+    private Consumer<T> doMakeActionable(final TaskAction<? super T> action) {
         Objects.requireNonNull(action);
         return (value) -> {
-            Consumer<T> result = action.getTask().orElseThrow();
+            Consumer<? super T> result = action.getTask().orElseThrow();
             try {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Promise [{}] starting task of TaskAction object",getIdentity());
@@ -264,10 +264,10 @@ class AsyncPromiseTask<T> implements Promise<T>, Invocable<T> {
         };
     }
 
-    private <R> Function<T,R> doMakeTransmutable(final TransmuteAction<T,R> action) {
+    private <R> Function<T,R> doMakeTransmutable(final TransmuteAction<? super T,? extends R> action) {
         Objects.requireNonNull(action);
         return (value) -> {
-            Function<T,R> result = action.getTask().orElseThrow();
+            Function<? super T,? extends R> result = action.getTask().orElseThrow();
             try {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Promise [{}] starting transmutation task of TransmuteAction object",getIdentity());

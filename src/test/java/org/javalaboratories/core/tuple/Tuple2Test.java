@@ -1,8 +1,7 @@
 package org.javalaboratories.core.tuple;
 
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.util.Holder;
-import org.javalaboratories.core.util.Holders;
+import org.javalaboratories.core.holders.Holder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,8 +70,7 @@ public class Tuple2Test {
 
     @Test
     public void testMatch_Pass() {
-        Holder<Integer> found = Holders.writableHolder();
-        found.set(0);
+        Holder<Integer> found = Holder.of(0);
         tuple
             .match(Matcher.allOf("Adrian","Wall"), (a, b) -> {
                 logger.info("Matched on \"Adrian,Wall\" tuple -- should not match");
@@ -101,7 +99,7 @@ public class Tuple2Test {
 
         tuple_2
             .match(Matcher.allOf(1,2), (a, b) -> {
-                logger.info("Mathed on \"1,2\" tuple");
+                logger.info("Matched on \"1,2\" tuple");
                 found.set(found.get()+1);
             })
             .match(Matcher.allOf(1), (a, b) -> {

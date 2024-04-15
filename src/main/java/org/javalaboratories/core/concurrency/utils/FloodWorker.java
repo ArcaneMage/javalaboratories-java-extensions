@@ -57,7 +57,7 @@ public final class FloodWorker<V> extends FutureTask<V> implements Comparable<Fl
 
     /**
      * Default constructor.
-     * <p>
+     *
      * @param callable asynchronous task to perform
      * @param priority of this {@code flood worker}
      */

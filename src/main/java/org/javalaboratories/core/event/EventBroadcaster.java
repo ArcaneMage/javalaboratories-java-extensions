@@ -15,12 +15,19 @@
  */
 package org.javalaboratories.core.event;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.javalaboratories.core.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -34,8 +41,7 @@ import java.util.stream.Collectors;
  * <p>
  * To complete the observer design pattern, implement the {@link EventSubscriber}
  * interface and introduce {@code event} types by subclassing {@link AbstractEvent}
- * class and/or use the out-of-the-box {@link Event} objects defined in the
- * {@link CommonEvents} class.
+ * class.
  * <p>
  * The implementation is considered thread-safe, and so subscribing and/or
  * unsubscribing is permitted during {@code subscriber} notification. However
@@ -59,14 +65,15 @@ import java.util.stream.Collectors;
  * and maintain reasonable concurrency in an multi-threaded context.
  *
  * @param <T> Type of source in which the event originated.
- * @param <V> Type of value and/or state forwarded to the {@code subscribers}
+ * @param <U> Type of event
+ * @param <V> Type of event subscriber
  *
  * @see Event
  * @see AbstractEvent
- * @see CommonEvents
  * @see EventSubscriber
  */
-public class EventBroadcaster<T extends EventSource,V> implements EventPublisher<V>, EventSource {
+public class EventBroadcaster<T extends EventSource,U extends Event, V extends EventSubscriber<U>>
+        implements EventPublisher<U,V>, EventSource {
 
     private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
@@ -74,20 +81,19 @@ public class EventBroadcaster<T extends EventSource,V> implements EventPublisher
     // should not be obstructed by the main Lock object.
     private static int uniqueIdentity = 0;
 
-    private final Object mainLock;
-    private final Map<String,Subscription> subscriptions;
+    private final ReentrantLock mainLock;
+    private final Map<String,Subscription<U,V>> subscriptions;
     private final T source;
 
     @Getter
     @AllArgsConstructor
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-    private class Subscription {
-        private final Object lock = new Object();
+    private static class Subscription<E extends Event, F extends EventSubscriber<E>> {
+        private final ReentrantLock lock = new ReentrantLock();
         @EqualsAndHashCode.Include
         private final String identity;
 
-        private final EventSubscriber<V> subscriber;
-        private final Set<Event> captureEvents;
+        private final F subscriber;
         private boolean canceled;
     }
 
@@ -114,63 +120,66 @@ public class EventBroadcaster<T extends EventSource,V> implements EventPublisher
     public EventBroadcaster(final T source) {
         this.source = source;
         this.subscriptions = new LinkedHashMap<>();
-        this.mainLock = new Object();
+        this.mainLock = new ReentrantLock();
     }
 
     @Override
-    public void publish(final Event event, final V value) {
-        Event anEvent = Objects.requireNonNull(event,"No event?")
+    public void publish(final U event) {
+        @SuppressWarnings("unchecked")
+        U anEvent = (U) Objects.requireNonNull(event,"No event?")
                 .assign(source);
 
-        Set<Subscription> observers;
-        synchronized(mainLock) {
+        Set<Subscription<U,V>> observers;
+        mainLock.lock();
+        try {
             observers = new HashSet<>(subscriptions.values());
+        } finally {
+            mainLock.unlock();
         }
 
         observers.forEach(subscription -> {
-            if (subscription.getCaptureEvents().contains(anEvent)) {
-                EventSubscriber<V> subscriber = subscription.getSubscriber();
-                synchronized (subscription.lock) {
+            V subscriber = subscription.getSubscriber();
+            subscription.getLock().lock();
+            try {
                     try {
                         if (!subscription.canceled)
-                            subscriber.notify(anEvent, value);
+                            subscriber.notify(anEvent);
                     } catch (Throwable e) {
                         logger.error("Subscriber raised an uncaught exception -- canceled subscription", e);
                         subscription.canceled = true;
                         unsubscribe(subscriber);
                     }
-                }
+            } finally {
+                subscription.getLock().unlock();
             }
         });
     }
 
     @Override
-    public void subscribe(final EventSubscriber<V> subscriber, final Event... captureEvents) {
-        EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
-
-        if ( captureEvents == null || captureEvents.length < 1 )
-            throw new IllegalArgumentException("No events to capture");
-
-        synchronized(mainLock) {
+    public void subscribe(final V subscriber) {
+        V aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
+        mainLock.lock();
+        try {
             subscriptions.values().stream()
-                .filter(s -> s.getSubscriber().equals(subscriber))
-                .findAny()
-                .ifPresent(s -> {
-                    throw new EventException("Subscriber exists -- unsubscribe first");
-                });
+                    .filter(s -> s.getSubscriber().equals(subscriber))
+                    .findAny()
+                    .ifPresent(s -> {
+                        throw new EventException("Subscriber exists -- unsubscribe first");
+                    });
 
-            Subscription subscription = new Subscription(getUniqueIdentity(), aSubscriber,
-                    Collections.unmodifiableSet(new HashSet<>(Arrays.asList(captureEvents))),false);
+            Subscription<U,V> subscription = new Subscription<>(getUniqueIdentity(), aSubscriber,false);
 
             subscriptions.put(subscription.getIdentity(), subscription);
+        } finally {
+            mainLock.unlock();
         }
     }
 
     @Override
-    public boolean unsubscribe(final EventSubscriber<V> subscriber) {
-        EventSubscriber<V> aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
-
-        synchronized(mainLock) {
+    public boolean unsubscribe(final V subscriber) {
+        V aSubscriber = Objects.requireNonNull(subscriber,"No subscriber?");
+        mainLock.lock();
+        try {
             // Derive subscription identity
             String identity = subscriptions.values().stream()
                     .filter(s -> s.getSubscriber().equals(aSubscriber))
@@ -179,6 +188,8 @@ public class EventBroadcaster<T extends EventSource,V> implements EventPublisher
 
             // Remove subscription
             return subscriptions.remove(identity) != null;
+        } finally {
+            mainLock.unlock();
         }
     }
 
@@ -186,20 +197,27 @@ public class EventBroadcaster<T extends EventSource,V> implements EventPublisher
     public String toString() {
         String source = this.source.getClass().getSimpleName();
         source = source.isEmpty() ? "UNKNOWN" : source;
-        synchronized (mainLock) {
+        mainLock.lock();
+        try {
             return String.format("[subscribers=%s,source=%s]", subscriptions.size(), source);
+        } finally {
+            mainLock.unlock();
         }
     }
 
     @Override
     public int subscribers() {
-        synchronized(mainLock) {
+        mainLock.lock();
+        try {
             return subscriptions.size();
+        } finally {
+            mainLock.unlock();
         }
     }
 
     private String getUniqueIdentity() {
-         Observable j;
+        // This intrinsic lock is okay: cannot imagine it causing issues with
+        // virtual threads.
         synchronized (EventBroadcaster.class) {
             return String.format("{subscription-%s}",uniqueIdentity++);
         }

@@ -42,7 +42,7 @@ public interface TupleElementMatcher {
     /**
      * Each element in the {@link MatchableTuple} is tested against all the
      * {@link Tuple} elements.
-     * <p>
+     *
      * @param tuple the {@link Tuple} to match.
      * @param <T> type of {@link Tuple}
      * @return {@code True} for a match; {@code False} for a non-match.

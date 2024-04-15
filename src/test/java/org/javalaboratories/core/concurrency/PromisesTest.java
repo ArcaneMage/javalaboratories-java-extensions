@@ -26,7 +26,7 @@ public class PromisesTest extends AbstractConcurrencyTest {
         promise.getResult().orElseThrow();
         assertNotNull(promise);
         assertEquals(FULFILLED,promise.getState());
-        assertTrue(promise.toString().matches("^\\[identity=\\{.*},state=FULFILLED,service=\\[capacity=\\d*,state=ACTIVE,shutdownHook=NEW]]"));
+        assertTrue(promise.toString().matches("^\\[identity=\\{.*},state=FULFILLED,service=\\[capacity=\\d*,state=ACTIVE,shutdownHook=enabled]]"));
     }
 
     @Test
@@ -45,7 +45,7 @@ public class PromisesTest extends AbstractConcurrencyTest {
                 .then(TaskAction.of(results -> results.forEach(result -> logger.info("Promise states of tasks: {}",result.getState()))));
 
         // Then
-        wait("testAll_Promises_Pass");
+        waitMessage("testAll_Promises_Pass");
         promise.await();
         assertEquals(FULFILLED,promise.getState());
     }

@@ -86,7 +86,7 @@ public class EitherTest {
         assertTrue(either2.isPresent());
         assertTrue(either3.isEmpty());
 
-        either2.ifPresent(value -> assertEquals(100,value.getOrElse(-1)));
+        either2.ifPresent(value -> assertEquals(100,value.orElse(-1)));
     }
 
     @Test
@@ -133,7 +133,7 @@ public class EitherTest {
         String rresult = right
                 .flatMap(value -> parser.parse(String.format("[%d] Kevin",value)))
                 .map(value -> value + " Henry")
-                .getOrElse(null);
+                .orElse("");
 
         String lresult = left
                 .flatMap(value -> left(new Exception("Something else")))
@@ -196,8 +196,8 @@ public class EitherTest {
         // Given (setup)
 
         // When
-        int lvalue = left.getOrElse(17);
-        int rvalue = right.getOrElse(23);
+        int lvalue = left.orElse(17);
+        int rvalue = right.orElse(23);
 
         // Then
         assertEquals(17, lvalue);
@@ -233,7 +233,7 @@ public class EitherTest {
 
         // Then
         assertEquals("Something has gone wrong",left.fold(functionA,functionB));
-        assertEquals(2500,right.getOrElse(-1));
+        assertEquals(2500,right.orElse(-1));
     }
 
     @Test
@@ -254,8 +254,8 @@ public class EitherTest {
         Either<Exception,Integer> right = this.right.orElse(right(255));
 
         // Then
-        assertEquals(255,left.getOrElse(-1));
-        assertEquals(100,right.getOrElse(-1));
+        assertEquals(255,left.orElse(-1));
+        assertEquals(100,right.orElse(-1));
     }
 
     @Test
@@ -267,8 +267,8 @@ public class EitherTest {
         Either<Exception,Integer> right = this.right.orElseGet(() -> right(255));
 
         // Then
-        assertEquals(255,left.getOrElse(-1));
-        assertEquals(100,right.getOrElse(-1));
+        assertEquals(255,left.orElse(-1));
+        assertEquals(100,right.orElse(-1));
     }
 
     @Test
@@ -277,7 +277,7 @@ public class EitherTest {
 
         // Then
         assertThrows(IllegalArgumentException.class,() -> this.left.orElseThrow(IllegalArgumentException::new));
-        assertEquals(100,this.right.orElseThrow(IllegalArgumentException::new).getOrElse(-1));
+        assertEquals(100,this.right.orElseThrow(IllegalArgumentException::new).orElse(-1));
     }
 
     @Test

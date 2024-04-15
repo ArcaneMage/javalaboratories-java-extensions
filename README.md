@@ -2,10 +2,10 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions)
 
-This is a library of utilities to encourage functional programming in Java, particularly for Java-8 developers but not
- exclusively. With inspiration from functional programming articles and languages like Haskell and Scala, new monads and
- enhancements to existing ones have been introduced. This page provides a brief description of the objects in the library,
-  but it is encouraged to review the javadoc documentation for additional information and examples. 
+This is a library of utilities to encourage and support functional programming in Java, With inspiration from functional 
+programming articles and languages like Haskell and Scala, new monads and enhancements to existing ones have been introduced.
+This page provides a brief description of the objects in the library, but it is encouraged to review the javadoc 
+documentation for additional information and examples. 
 
 ### Maven Central Repository
 The library is now available for download from Maven Central Repository. In the POM file add the maven dependency 
@@ -25,38 +25,41 @@ Alternatively, for `Gradle` users, amend the `build.gradle` file with the follow
 ```
 ### CryptographyFactory
 Use the `CryptographyFactory` class to gain access to both symmetric and asymmetric cryptography objects. It provides
-a simple abstraction over the `Java Cryptography Extension (JCE)`. Also, an abstraction of the `KeyStore` class has been 
-introduced to simplify `PublicKey` and `SecretKey` usage with the cryptography objects. Here are a couple of decryption
-examples that use symmetric keys. Note: assume that the encrypted data in the examples was encrypted with the same
-key:
+a simple abstraction over the `Java Cryptography Archetecture (JCA)`. It provides not just decryption and encryption
+functionality but also includes signing and verification. In the case of RSA encryption that is not capable of 
+encrypting large data, a hybrid approach is introduced to enable RSA encryption/decryption of large amounts of data. 
+Explore the package but here's an example of usage of the library:
 ```
-        // Decrypt with a SecretKey sourced from a KeyStore. Note: the encrypted data must've been encrypted with the 
-        // same key.
-        secretKeyStore = SecretKeyStore.builder()
-                .keyStoreStream(new FileInputStream(KEYSTORE_JCEJKS_FILE)
-                .storePassword("changeit")
-                .build();
-                
-        SymmetricCryptography cryptography = CryptographyFactory.getSunSymmetricCryptography();
-        SecretKey key = secretKeyStore.getKey(SECRET_KEY_ALIAS,SECRET_KEY_PASSWORD);
-        
-        byte[] result = cryptography.decrypt(key, encryptedData);
-        
-        System.out.println(new String(result));
-        
-        ...
-        ...
-        
-        // ...Or decrypt with a String key. Note: the encrypted data must've been encrypted with the same key.
-        SymmetricCryptography cryptography = CryptographyFactory.getSunSymmetricCryptography();
-        
-        byte[] result = cryptography.decrypt("012345", encryptedData);
-        
-        String data = new String(result);
-        
-        System.out.println(new String(result));
+       // Symmetric cryptography
+       AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
+       ByteCryptographyResult<SymmetricKey> result = cryptography.encrypt(SymmetricKey.from(PASSWORD), TEXT);
+       String encrypted = result.getBytesAsBase64();
+
+       ByteCryptographyResult<SymmetricKey> stringResult = cryptography.decrypt(SymmetricKey.from(PASSWORD),encrypted);
+       assertEquals(TEXT, stringResult.getString().orElseThrow());
+       
+       // Asymmetric cryptography
+       RsaHybridCryptography cryptography = CryptographyFactory.getAsymmetricHybridCryptography();
+       ByteCryptographyResult<PublicKey> result = cryptography.encrypt(publicKey,TEXT);
+
+       ByteCryptographyResult<PrivateKey> stringResult = cryptography.decrypt(privateKey, result.getBytesAsBase64());
+
+       assertNotNull(result.getKey());
+       assertEquals(TEXT, stringResult.getString().orElseThrow());
+       
+       // Signing / Verfication
+       RsaMessageSigner signer = CryptographyFactory.getMessageSigner(prvateKey);
+       Message message = signer.encrypt(publicKey,TEXT);
+       
+       // Note that verification does not require a public key, this is "transmitted" in the ciphertext
+       // and decoded at the recipient's end and then used to verify the message.
+       RsaMessageVerifier verifier = CryptographyFactory.getMessageVerifier();
+       String s = verifier.decryptAsString(privateKey,message.getSignedAsBase64());
+
+       assertEquals(TEXT, s);
 ```
-Review the factory and other related classes for more information in the cryptography package.
+The `PublicKey` and `PrivateKey` require the use of the `KeyFactory` or `openssl`. Review the factory and other related
+classes for more information in the cryptography package.
 ### Either
 `Either` class is a container, similar to the `Maybe` and `Optional` classes, that represents one of two possible values
 (a disjoint union). Application and/or sub-routines often have one of two possible outcomes, a successful completion or
@@ -197,8 +200,7 @@ target object. Review the javadoc for more information.
 
         torrent.open();
         torrent.flood();
-```
- 
+``` 
 ### Handlers
 Handlers class provides a broad set of wrapper methods to handle checked exceptions within lambda expressions. Lambdas 
 are generally short and concise, but checked exceptions can sometimes cause the lambda expression to look unwieldy. 
@@ -224,6 +226,55 @@ For example, here is an example of a method performing file input/output:
         // But using the Handlers class, the expression becomes :-
  
         Consumer<String> consumer = Handlers.consumer(s -> writeFile(s));
+```
+### Holders
+In cases where it may be necessary to capture and manipulate values from or in lambdas, often containers are used, such as
+Atomic wrappers. This library now has new and improved Holders that are themselves applicatives, monads and functors, which
+means `map`, `flatMap` and others are available for operations on the contained value. The most basic operations include
+the `get` and `set` methods to read or mutate the contained value. Although they are mutable, holder objects are thread-safe, 
+in that the reference to the contained value cannot be changed by more than one thread. Ensure the contained value is 
+itself thread-safe to guarantee complete thread safety. Factory methods are provided to create both mutable immutable
+holders. Below, are examples of usage:
+```
+        // This example demenstrates side-effects where the Holder object
+        // captures the subtotal of the even numbers. Although it is mutated
+        // it is thread-safe.
+        Holder<Double> total = Holder.of(0.0);
+        IntStream
+                .range(0,1000)
+                .parallel()
+                .filter(n -> n % 2 == 0)
+                .forEach(n -> total.setGet(v -> v + n));;
+
+        assertEquals(249500.0, total.get());
+
+        ...
+        ...
+                
+        // In this example, the Holder object is created and mutated within the 
+        // context of the reducer.
+        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
+        String result = numbers.parallelStream()
+                .filter(n -> n % 2 == 0)
+                .reduce(Holder.of(0.0),(h,v) -> h.map(n -> n + v),(a,b) -> a.map(n -> n + b.fold(0.0,v -> v)))
+                .map(n -> n / 2)
+                .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+
+        assertEquals("Mean of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+```
+In addition to the above, Holder objects come supplied with helper classes to perform operations such as `sum`, `max` and 
+`min` within streams. Explore the `Holders` package for more information:
+```
+        List<Integer> numbers = Arrays.asList(5,6,7,8,9,10,1,2,3,4);
+        String result = numbers.parallelStream()
+               .filter(n -> n % 2 == 0)
+               .map(Double::valueOf)
+               .collect(DoubleHolders.summing())
+               .map(n -> n / 2)
+               .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+
+        assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
+        logger.info(result);
 ```
 ### Maybe
 The library introduces `Maybe` class, which is a "drop-in" replacement for `Optional`. It has features that are only 
@@ -265,8 +316,7 @@ There's a lot more to discover about `Promise` objects -- review the source's Ja
 functional programming within a stream context. Many of the `Collectors` methods have been implemented in `Reducers` class, 
 again as a possible "drop-in" replacement for `Collectors` class. `Reducers` also support a comprehensive set of statistical
 calculations such as mean, median, mode, standard deviation and much more. Expect to see an expansion of statistical 
-functions in this area over the coming days.  
-
+functions in this area over the coming days.
 ```
         List<String> strings = Arrays.asList("9","7","5","76","2","40","101");
 
@@ -344,7 +394,6 @@ collections and persistable. Here are some examples of usage:
         tupleEarth.match(allOf("^Earth$"),(a,b,c) -> logger.info("Earth's distance from Sun {}",c));
         // Outputs: "Earth's distance from Sun 92955807"
 ```
-
 ### Try
 `Try` is another class that represents a computation/operation that may either result in an exception or a success.
 It is similar to the `Either` class type, but it dynamically decides the success/failure state. The implementation of the

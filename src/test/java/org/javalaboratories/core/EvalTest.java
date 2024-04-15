@@ -18,7 +18,9 @@ package org.javalaboratories.core;
 import nl.altindag.log.LogCaptor;
 import org.javalaboratories.core.concurrency.AbstractConcurrencyTest;
 import org.javalaboratories.core.concurrency.AsyncEval;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -52,6 +55,12 @@ public class EvalTest extends AbstractConcurrencyTest {
         laterR = Eval.laterRecursive(fibonacci(10));
         asyncEval = AsyncEval.asyncLater(() -> doLongRunningTask("Eval.asyncLater()"));
         asyncFailure = AsyncEval.asyncLater(() -> 100 / 0);
+    }
+
+    @AfterEach
+    public void teardown() {
+        asyncEval.resolve();
+        //asyncFailure.resolve();
     }
 
     @Test
@@ -381,8 +390,8 @@ public class EvalTest extends AbstractConcurrencyTest {
 
         // Then
         assertTrue(verifyFunctorLaws(eagerEval));
-       // TODO:  assertTrue(verifyFunctorLaws(laterEval.resolve()));
-       // ToDO:  assertTrue(verifyFunctorLaws(alwaysEval.resolve()));
+        assertTrue(verifyFunctorLaws(laterEval));
+        assertTrue(verifyFunctorLaws(alwaysEval));
     }
 
     @Test
@@ -429,6 +438,32 @@ public class EvalTest extends AbstractConcurrencyTest {
     }
 
     @Test
+    public void testEval_Comparable_Pass() {
+        List<Eval<Integer>> list = Arrays.asList(Eval.eager(9),Eval.eager(5),Eval.eager(3),Eval.eager(8));
+
+        String sorted = list.stream()
+                .sorted()
+                .peek(c -> logger.info(String.valueOf(c)))
+                .map(e -> e.fold("",String::valueOf))
+                .collect(Collectors.joining(","));
+
+        assertEquals("3,5,8,9",sorted);
+    }
+
+    @Test
+    public void testEval_ComparableWithMixedStrategies_Pass() {
+        List<Eval<Integer>> list = Arrays.asList(Eval.later(() -> 9),Eval.eager(5),Eval.later(() -> 3),Eval.always(() -> 8));
+
+        String sorted = list.stream()
+                .sorted()
+                .peek(c -> logger.info(String.valueOf(c)))
+                .map(e -> e.fold("",String::valueOf))
+                .collect(Collectors.joining(","));
+
+        assertEquals("3,5,8,9",sorted);
+    }
+
+    @Test
     public void testEval_Applicative_Pass() {
         // When
         Eval<Integer> number1 = Eval.later(() -> 0);
@@ -470,7 +505,7 @@ public class EvalTest extends AbstractConcurrencyTest {
                 && value.map(x -> (x + 1) * 2).equals(value.map(x -> x + 1).map(x -> x * 2));
     }
 
-    private Trampoline<Integer> fibonacci(int count) {
+    private Trampoline<Integer>  fibonacci(int count) {
         return fibonacci(count,0,1);
     }
 

@@ -11,7 +11,10 @@ import java.util.function.BiConsumer;
 
 import static org.javalaboratories.core.concurrency.Promise.States.FULFILLED;
 import static org.javalaboratories.core.concurrency.Promise.States.REJECTED;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("WeakerAccess")
 public class PromiseTest extends AbstractConcurrencyTest {
@@ -37,7 +40,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testNew_PrimaryAction_Pass")));
 
         // Then
-        wait("testNew_PrimaryAction_Pass");
+        waitMessage("testNew_PrimaryAction_Pass");
         int value  = promise.getResult().orElseThrow();
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,value);
@@ -49,7 +52,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTask("testNew_PrimaryActionCompleteHandler_Pass"), intResponse));
 
         // Then
-        wait("testNew_PrimaryActionCompleteHandler_Pass");
+        waitMessage("testNew_PrimaryActionCompleteHandler_Pass");
         int value = promise.getResult().orElseThrow();
         assertEquals(FULFILLED,promise.getState());
         assertEquals(127,value);
@@ -61,7 +64,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
         Promise<Integer> promise = Promises.newPromise(PrimaryAction.of(() -> doLongRunningTaskWithException("testNew_PrimaryActionCompleteHandlerException_Pass"),intResponse));
 
         // Then
-        wait("testNew_PrimaryActionCompleteHandlerException_Pass");
+        waitMessage("testNew_PrimaryActionCompleteHandlerException_Pass");
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
         assertEquals(REJECTED,promise.getState());
     }
@@ -91,7 +94,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 .thenAccept(value -> getValue(received, () -> value));
 
         // When
-        wait("testThenAccept_Consumer_Pass");
+        waitMessage("testThenAccept_Consumer_Pass");
         promise.await();
 
         // Then
@@ -107,7 +110,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 .thenApply(value -> getValue(received, () -> value + 1));
 
         // When
-        wait("testThenApply_Function_Pass");
+        waitMessage("testThenApply_Function_Pass");
         promise.await();
 
         // Then
@@ -124,7 +127,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 .then(TaskAction.of(value -> getValue(received, () -> value)));
 
         // When
-        wait("testThen_TaskAction_Pass");
+        waitMessage("testThen_TaskAction_Pass");
         promise.await();
 
         // Then
@@ -140,7 +143,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 .then(TaskAction.of(value -> getValue(received, () -> value),intResponse));
 
         // When
-        wait("testThen_TaskActionCompleteHandler_Pass");
+        waitMessage("testThen_TaskActionCompleteHandler_Pass");
         promise.await();
 
         // Then
@@ -156,7 +159,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 .then(TaskAction.of(value -> getValue(received, () -> value / 0),intResponse));
 
         // When
-        wait("testThen_TaskActionCompleteHandlerException_Pass");
+        waitMessage("testThen_TaskActionCompleteHandlerException_Pass");
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
 
         // Then
@@ -173,7 +176,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 .then(TransmuteAction.of(value -> getValue(received, () -> value + 1)));
 
         // When
-        wait("testThen_TransmuteAction_Pass");
+        waitMessage("testThen_TransmuteAction_Pass");
         promise.await();
 
         // Then
@@ -190,7 +193,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 .then(TransmuteAction.of(value -> getValue(received, () -> (value + 1) / 0),intResponse));
 
         // When
-        wait("testThen_TransmuteActionCompleteHandlerException_Pass");
+        waitMessage("testThen_TransmuteActionCompleteHandlerException_Pass");
         promise.await();
 
         // Then
@@ -206,7 +209,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 .then(TransmuteAction.of(value -> getValue(received, () -> value + 1),intResponse));
 
         // When
-        wait("testThen_TransmuteActionCompleteHandler_Pass");
+        waitMessage("testThen_TransmuteActionCompleteHandler_Pass");
         promise.await();
 
         // Then
@@ -260,7 +263,7 @@ public class PromiseTest extends AbstractConcurrencyTest {
                 .then(TaskAction.of(value -> getValue(received, () -> value)));
 
         // Then
-        wait("testAwait_Promises_Pass");
+        waitMessage("testAwait_Promises_Pass");
         promise.await();
 
         // Given
@@ -288,7 +291,8 @@ public class PromiseTest extends AbstractConcurrencyTest {
 
         // Then
         assertThrows(NoSuchElementException.class, () -> promise.getResult().orElseThrow());
-        assertTrue(promise.toString().contains("state=ACTIVE,shutdownHook=NEW"));
+        assertTrue(promise.toString().contains("state=ACTIVE,shutdownHook=enabled"));
         assertEquals(FULFILLED,promise.getState());
     }
+
 }

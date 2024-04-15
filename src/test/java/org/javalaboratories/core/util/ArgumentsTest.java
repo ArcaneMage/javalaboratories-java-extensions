@@ -54,9 +54,6 @@ public final class ArgumentsTest {
     @Test
     public void testRequireNonNull_ValidateArguments_Pass() {
         String argument = "Hello World";
-        Arguments.requireNonNull(argument);
-
-        String argument2 = "Hello World2";
-        Arguments.requireNonNull(argument,argument2);
+        Arguments.requireNonNull("Expected argument",argument);
     }
 }

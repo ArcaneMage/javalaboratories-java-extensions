@@ -20,7 +20,7 @@ import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple;
 import org.javalaboratories.core.util.Arguments;
 
-import java.io.Serializable;
+import java.io.Serial;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -116,8 +116,8 @@ import java.util.stream.Stream;
  * @author Kevin H, Java Laboratories
  */
 @EqualsAndHashCode(callSuper=false)
-public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
-
+public final class Maybe<T> extends CoreApplicative<T> implements Monad<T>, Exportable<T> {
+    @Serial
     private static final long serialVersionUID = 3472763754156966484L;
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<T> delegate;
@@ -171,7 +171,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      * method will provide a {@code Maybe} instance with an {@code empty}
      * value, otherwise a {@code Maybe} object is returned with the
      * encapsulated {@code value}.
-     * <p>
+     *
      * @param value represented by {@code Maybe} object.
      * @param <T> Type of value.
      * @return a {@code Maybe} encapsulating {@code value}
@@ -238,10 +238,10 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     public static <K,V> Map<K,List<V>> groupBy(final Iterable<Maybe<V>> maybes,final Function<? super V,? extends K> partition) {
         Arguments.requireNonNull("Requires maybes,partition",maybes,partition);
 
-        HashMap<K,List<V>> result = fold(maybes,new HashMap<>(),(map,value) -> {
+        Map<K,List<V>> result = fold(maybes,new HashMap<>(),(m,value) -> {
             K key = partition.apply(value);
-            map.computeIfAbsent(key,k -> new ArrayList<>()).add(value);
-            return map;
+            m.computeIfAbsent(key,k -> new ArrayList<>()).add(value);
+            return m;
         });
         // Seal all partitions, then return map.
         result.replaceAll((k,v) -> Collections.unmodifiableList(v));
@@ -250,7 +250,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
 
     /**
      * Determines whether {@code this} contains the {@code element}.
-     * <p>
+     *
      * @param element with which to test equality with this {@link Maybe} {@code
      * value}
      * @return true when {@code element} equals the encapsulated {@code value}.
@@ -353,13 +353,13 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      * <p>
      * If {@code this} contains a {@link Maybe} value, it is returned, otherwise
      * {@code this} is returned.
-     * <p>
+     *
      * @param <U> Type of value within {@code nested} {@link Maybe} object.
      * @return flattened {@link Maybe} object.
      */
     @Override
     public <U> Maybe<U> flatten() {
-        return (Maybe<U>) Monad.super.flatten();
+        return  (Maybe<U>) Monad.super.<U>flatten();
     }
 
     /**
@@ -387,18 +387,6 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public T get() {
         return delegate.get();
-    }
-
-    /**
-     * Returns {@code value} of {@code this} object if available, otherwise the
-     * {@code other} value is returned.
-     *
-     * @deprecated Consider using the {@link Maybe#orElse(Object)} instead.
-     */
-    @Deprecated
-    @Override
-    public T getOrElse(final T other) {
-        return orElse(other);
     }
 
     /**
@@ -461,15 +449,13 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      * @throws NullPointerException if {@code supplier} is {@code null} or resultant
      * {@link Maybe} returned from {@code supplier} function.
      */
-    public Maybe<T> or(final Supplier<? extends Maybe<? super T>> supplier) {
+    public Maybe<T> or(final Supplier<? extends Maybe<T>> supplier) {
         Objects.requireNonNull(supplier);
         T value = value();
         if (value != null) {
             return this;
         } else {
-            @SuppressWarnings("unchecked")
-            Maybe<T> result = (Maybe<T>) Objects.requireNonNull(supplier.get());
-            return result;
+            return Objects.requireNonNull(supplier.get());
         }
     }
 
@@ -599,7 +585,7 @@ public final class Maybe<T> extends Applicative<T> implements Monad<T>, Exportab
      * @return true if {@code this} {@code value} is null.
      */
     public boolean isEmpty() {
-        return !delegate.isPresent();
+        return delegate.isEmpty();
     }
 
     /**

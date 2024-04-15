@@ -27,21 +27,19 @@ import java.util.EventListener;
  * the {@link EventPublisher} but did not register for a particular {@link Event},
  * it will NOT be notified of that {@code Event}.
  *
- * @param <V> Type of value and/or state forwarded to the {@code subscribers}
- *
+ * @param <T>  type of event.
  * @see Event
  * @see EventBroadcaster
  * @see EventPublisher
  */
 @FunctionalInterface
-public interface EventSubscriber<V> extends EventListener {
+public interface EventSubscriber<T extends Event> extends EventListener {
 
     /**
      * This method is invoked to notify this object that a state change occurred in
      * the source of the {@code Event}.
-     * <p>
+     *
      * @param event the object event sent from the {@link EventPublisher}.
-     * @param value the state or value received from the {@link EventPublisher}
      */
-    void notify(final Event event, V value);
+    void notify(final T event);
 }

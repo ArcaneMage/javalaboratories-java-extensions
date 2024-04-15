@@ -28,7 +28,7 @@ public interface TupleElement {
 
     /**
      * Returns value of the element.
-     * <p>
+     *
      * @param <T> type of element.
      * @return value of element. The method will attempt to cast to the recipient
      * object.
@@ -38,6 +38,7 @@ public interface TupleElement {
     /**
      * {@link TupleElementMatcher} objects use this property to decide whether to
      * apply pattern matching.
+     *
      * @return {@code True} if the the element is a {@link String} object type.
      */
     boolean isString();
@@ -45,6 +46,7 @@ public interface TupleElement {
     /**
      * Returns the {@link Tuple} object that this {@link TupleElement} object
      * belongs to.
+     *
      * @param <T> type of {@link TupleContainer} object.
      * @return instance of tuple the element pertains to.
      */

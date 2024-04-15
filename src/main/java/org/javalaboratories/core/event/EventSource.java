@@ -26,8 +26,7 @@ public interface EventSource {
 
     /**
      * Generally used for scenarios where the {@link EventSource} object is
-     * not determinable, for example events declared in the {@link CommonEvents}
-     * class.
+     * not determinable.
      */
     EventSource EVENT_SOURCE_UNKNOWN = new EventSource() {};
 }

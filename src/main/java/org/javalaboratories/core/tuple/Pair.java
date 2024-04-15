@@ -22,7 +22,7 @@ package org.javalaboratories.core.tuple;
  * This interface can be implemented for any scenario that requires to group
  * related elements together, but they do not have to be related in terms of
  * type.
- * <p>
+ *
  * @param <A> Type of first element.
  * @param <B> Type of second element.
  */

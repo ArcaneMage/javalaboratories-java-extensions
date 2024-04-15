@@ -98,7 +98,7 @@ public abstract class AbstractConcurrentResourceFloodStability<T> extends Abstra
 
     /**
      * Constructs an instance of this {@link ConcurrentResourceFloodStability} object.
-     * <p>
+     *
      * @param clazz class of {@link ResourceFloodStability.Target} undergoing test.
      * @param tag a meaningful name of the resource under test.
      * @param threads number of active threads tasked with sending requests
@@ -115,7 +115,7 @@ public abstract class AbstractConcurrentResourceFloodStability<T> extends Abstra
 
     /**
      * Constructs an instance of this {@link ConcurrentResourceFloodStability} object.
-     * <p>
+     *
      * @param clazz class of {@link ResourceFloodStability.Target} undergoing test.
      * @param tag a meaningful name of the resource under test.
      * @param threads number of active threads tasked with sending requests

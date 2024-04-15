@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core.collection;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -29,7 +30,7 @@ import java.util.function.BiFunction;
  * @param <V> type of Value
  */
 public class LRUCacheMap<K,V> extends AbstractMap<K,V> implements Cloneable, Serializable {
-
+    @Serial
     private static final long serialVersionUID = 2605224651817155131L;
 
     public static final int DEFAULT_CAPACITY = 16;

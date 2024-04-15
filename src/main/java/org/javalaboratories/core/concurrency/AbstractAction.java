@@ -15,6 +15,7 @@
  */
 package org.javalaboratories.core.concurrency;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.javalaboratories.core.Maybe;
 
 import java.util.function.BiConsumer;
@@ -39,9 +40,7 @@ public abstract class AbstractAction<T> implements Action<T>  {
     private final BiConsumer<T,Throwable> completionHandler;
 
     public AbstractAction(BiConsumer<? super T, Throwable> completionHandler) {
-        @SuppressWarnings("unchecked")
-        BiConsumer<T,Throwable> handler = (BiConsumer<T,Throwable>) completionHandler;
-        this.completionHandler = handler;
+        this.completionHandler = completionHandler != null ? completionHandler::accept : null;
     }
 
     @Override

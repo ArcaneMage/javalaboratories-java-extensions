@@ -17,10 +17,18 @@ package org.javalaboratories.core;
 
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.util.Arguments;
-import org.javalaboratories.core.util.Holder;
+import org.javalaboratories.core.holders.Holder;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -44,8 +52,8 @@ import java.util.function.Supplier;
  *
  * @param <T> Type of evaluated value encapsulated with in {@link Eval}.
  */
-public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
-
+public abstract class Eval<T> extends CoreApplicative<T> implements Monad<T>, Exportable<T> {
+    @Serial
     private static final long serialVersionUID = 1372673159914117700L;
 
     /**
@@ -243,23 +251,15 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      */
     @Override
     public<U> Eval<U> flatten() {
-        return (Eval<U>) Monad.super.flatten();
+        return (Eval<U>) Monad.super.<U>flatten();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public T getOrElse(T other) {
+    public T get() {
         return value();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterator<T> iterator() {
-        return toList().iterator();
     }
 
     /**
@@ -306,7 +306,6 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
 
     /**
      * Returns an immutable list of containing {@code this} {@code value}.
-     * <p>
      *
      * @return a {@link List} object containing a {@code value} from {@code
      * this} object.
@@ -371,10 +370,10 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      */
     @EqualsAndHashCode(callSuper=false,onlyExplicitlyIncluded=true)
     public static class Always<T> extends Eval<T> implements Serializable {
-
+        @Serial
         private static final long serialVersionUID = 518963023579340195L;
 
-        transient final Object lock = new Object();
+        transient final ReentrantLock lock = new ReentrantLock();
         private transient final Trampoline<T> evaluate;
 
         @EqualsAndHashCode.Include
@@ -455,7 +454,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          */
         @Override
         protected <U> Always<U> pure(final U value) {
-            return (Always<U>) Eval.always(() -> value);
+            return (Always<U>) Eval.always(() -> value).resolve();
         }
 
         /**
@@ -474,13 +473,16 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          * conclude}.
          */
         protected T value() {
-            synchronized(lock) {
+            lock.lock();
+            try {
                 T value = this.value.setGet(evaluate.result());
                 if (value instanceof Trampoline) {
                     throw new IllegalStateException("Trampoline unresolvable -- " +
                             "review recursion logic");
                 }
                 return value;
+            } finally {
+                lock.unlock();
             }
         }
     }
@@ -495,7 +497,10 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      */
     @EqualsAndHashCode(callSuper=true)
     public static class Later<T> extends Always<T> {
+        @Serial
         private static final long serialVersionUID = -8848701870767131627L;
+
+        transient private final ReentrantLock lock = new ReentrantLock();
 
         /**
          * Constructs implementation of {@link Eval} with the {@code Later}
@@ -526,7 +531,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          */
         @Override
         protected <U> Later<U> pure(final U value) {
-            return (Later<U>) Eval.later(() -> value);
+            return (Later<U>) Eval.later(() -> value).resolve();
         }
 
         /**
@@ -534,8 +539,11 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
          */
         @Override
         protected T value() {
-            synchronized(this) {
+            lock.lock();
+            try {
                 return this.value.isEmpty() ? super.value() : this.value.get();
+            } finally {
+                lock.unlock();
             }
         }
     }
@@ -549,6 +557,7 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
      */
     @EqualsAndHashCode(callSuper=true)
     public static final class Eager<T> extends Later<T> {
+        @Serial
         private static final long serialVersionUID = -4956876354953747651L;
 
         Eager(final T value) {
@@ -577,38 +586,51 @@ public abstract class Eval<T> extends Applicative<T> implements Monad<T>, Export
  */
 @EqualsAndHashCode()
 final class EvalValue<E> implements Serializable {
+    @Serial
     private static final long serialVersionUID = -797325625285441119L;
 
     private E element;
     private final boolean caching;
 
     @EqualsAndHashCode.Exclude
+    transient private final ReentrantLock lock;
+
+    @EqualsAndHashCode.Exclude
     private final List<Consumer<E>> modes =
-            Arrays.asList(value -> {if (element == null) element = value;},
-                    value -> element = value);
+            Arrays.asList(
+                    value -> {if (element == null) element = value;},
+                    value -> element = value
+            );
     /**
      * Constructs this {@code value}
-     * <p>
+     *
      * @param caching set to {@code true} to enable "caching" (write once).
      */
     public EvalValue(boolean caching) {
         element = null;
         this.caching = caching;
+        this.lock = new ReentrantLock();
     }
 
     /**
      * Sets this {@code value}
      */
     public E setGet(final E e) {
-        synchronized(this) {
+        lock.lock();
+        try {
             modes.get(caching ? 0 : 1).accept(e);
             return element;
+        } finally {
+            lock.unlock();
         }
     }
 
     public E get() {
-        synchronized(this) {
+        lock.lock();
+        try {
             return element;
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -616,14 +638,20 @@ final class EvalValue<E> implements Serializable {
      * @return {@code true} if container is occupied.
      */
     public boolean isEmpty() {
-        synchronized (this) {
+        lock.lock();
+        try {
             return element == null;
+        } finally {
+            lock.unlock();
         }
     }
     @Override
     public String toString() {
-        synchronized (this) {
+        lock.lock();
+        try {
             return isEmpty() ? "unset" : String.valueOf(this.element);
+        } finally {
+            lock.unlock();
         }
     }
 }

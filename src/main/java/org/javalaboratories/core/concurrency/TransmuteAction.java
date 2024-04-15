@@ -17,7 +17,6 @@ package org.javalaboratories.core.concurrency;
 
 import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.util.Generics;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -45,12 +44,13 @@ import java.util.function.Function;
  */
 @EqualsAndHashCode(callSuper=false)
 public final class TransmuteAction<T,R> extends AbstractAction<R> {
-    private final Function<? super T,? extends R> task;
+    private final Function<T,R> task;
 
     /**
      * Constructor to setup internal handlers.
      * <p>
      * Recommended to use factory methods for creation.
+     *
      * @param task main transmute task handler that will be executed
      *             asynchronously.
      * @throws NullPointerException if task parameter is null.
@@ -71,12 +71,12 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
     private TransmuteAction(final Function<? super T,? extends R> task,
                             final BiConsumer<? super R,Throwable> completionHandler) {
         super(completionHandler);
-        this.task = Objects.requireNonNull(task,"No task?");
+        this.task = Objects.requireNonNull(task::apply,"No task?");
     }
 
     /**
      * Factory method to construct this {@link TaskAction} object,
-     * <p>
+     *
      * @param task main transmute task handler that will be executed
      *             asynchronously.
      * @param <T> type of object to be transmuted.
@@ -90,7 +90,7 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
 
     /**
      * Factory method to construct this {@link TaskAction} object,
-     * <p>
+     *
      * @param task main transmute task handler that will be executed
      *             asynchronously.
      * @param completionHandler to handle task completion -- this is optional.
@@ -100,7 +100,7 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
      * @throws NullPointerException if task parameter is null.
      */
     public static <T,R> TransmuteAction<T,R> of(final Function<? super T,? extends R> task,
-                                                final BiConsumer<R,Throwable> completionHandler) {
+                                                final BiConsumer<? super R,Throwable> completionHandler) {
         return new TransmuteAction<>(task,completionHandler);
     }
 
@@ -108,6 +108,6 @@ public final class TransmuteAction<T,R> extends AbstractAction<R> {
      * @return this {@link TaskAction} task handler.
      */
     public Maybe<Function<T,R>> getTask() {
-        return Generics.unchecked(Maybe.ofNullable(task));
+        return Maybe.ofNullable(task);
     }
 }

@@ -25,28 +25,27 @@ import java.util.function.Function;
  * containers and implement this interface.
  * <p>
  * Container value(s) are "safely" extractable via the {@link #fold(Object,
- * Function)} or the {@link #getOrElse(Object)} method.
+ * Function)} or the {@link #orElse(Object)} method.
  *
  * @param <T> Type of value in the container.
  */
 public interface Context<T> {
 
     /**
-     * Safely extracts the contained value.
+     * Returns {@code value} from this container.
      * <p>
-     * If the contained {@code value} exists or available, it is returned
-     * otherwise {@code other} is returned instead.
+     * However, if the {@code value} is unavailable, then {@code null} is
+     * returned. Managing the possible empty values can be achieved with the
+     * alternate methods {@link #fold} and {@link #orElse}.
      *
-     * @param other value to return if contained {@code value} is not available.
-     * @return contained {@code value} or {@code other} if {@code value} is
-     * unavailable.
+     * @return contained value.
      */
-    T getOrElse(final T other);
+    T get();
 
     /**
      * Retrieves {@code value} from this container.
      * <p>
-     * If the {@code value} is unretrievable (is empty) then the {@code identity}
+     * If the {@code value} is irretrievable (is empty) then the {@code identity}
      * or initial value is returned, otherwise the {@code function} performs a
      * transformation/reduction on the container {@code value}.
      *
@@ -70,15 +69,17 @@ public interface Context<T> {
     }
 
     /**
-     * Returns {@code value} from this container.
+     * Safely extracts the contained value.
      * <p>
-     * However, if the {@code value} is unavailable, then {@code null} is
-     * returned. Managing the possible empty values can be achieved with the
-     * alternate methods {@link #fold} and {@link #getOrElse}.
+     * If the contained {@code value} exists or available, it is returned
+     * otherwise {@code other} is returned instead.
      *
-     * @return contained value.
+     * @param other value to return if contained {@code value} is not available.
+     * @return contained {@code value} or {@code other} if {@code value} is
+     * unavailable.
      */
-    default T get() {
-        return getOrElse(null);
+    default T orElse(final T other) {
+        T value = get();
+        return value == null ? other : value;
     }
 }

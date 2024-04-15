@@ -17,21 +17,21 @@ import java.util.function.Consumer;
 public interface StatisticalCalculator<T,R> extends Consumer<T> {
     /**
      * Add the data to the calculator for processing.
-     * <p>
+     *
      * @param data sample data.
      */
     void accept(T data);
 
     /**
      * Returns sample data that the calculation is performed on.
-     * <p>
+     *
      * @return a list of the sample data.
      */
     List<T> getData();
 
     /**
      * Returns the calculated result on the sample data.
-     * <p>
+     *
      * @throws InsufficientPopulationException all there is not enough data to
      * perform the calculation.
      * @return result of calculation.

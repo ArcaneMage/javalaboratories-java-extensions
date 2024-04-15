@@ -17,6 +17,7 @@ package org.javalaboratories.core.tuple;
 
 import org.javalaboratories.core.collection.SmartLinkedList;
 
+import java.io.Serial;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -49,7 +50,7 @@ import java.util.function.Function;
  */
 @SuppressWarnings("WeakerAccess")
 public abstract class AbstractTupleContainer implements TupleContainer {
-
+    @Serial
     public static final long serialVersionUID = -8849025043951429993L;
 
     private final SmartLinkedList<Object> adaptee;

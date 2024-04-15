@@ -15,6 +15,9 @@
  */
 package org.javalaboratories.core;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -30,7 +33,7 @@ import java.util.function.Function;
  *
  * @param <T> Type of this {@code applicable container}
  */
-public abstract class Applicative<T> implements Functor<T> {
+public abstract class Applicative<T> implements Functor<T>, Iterable<T>, Serializable {
 
     /**
      * Returns a new {@code applicable functor} containing the {@code value}.
@@ -40,6 +43,14 @@ public abstract class Applicative<T> implements Functor<T> {
      * @return new {@code applicable} container.
      */
     protected abstract <U> Applicative<U> pure(final U value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Iterator<T> iterator() {
+        return Collections.singletonList(get()).iterator();
+    }
 
     /**
      * {@inheritDoc}

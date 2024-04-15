@@ -15,13 +15,11 @@
  */
 package org.javalaboratories.core.concurrency;
 
-import org.javalaboratories.core.Maybe;
-import org.javalaboratories.core.util.Generics;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -29,8 +27,8 @@ import java.util.function.Supplier;
 /**
  * This is a factory for creating {@link Promise} objects.
  * <p>
- * Its role is to ensure {@link PromisePoolServiceFactory},
- * {@link ManagedPoolService} and other objects are properly initialised and
+ * Its role is to ensure {@link ManagedPromiseServiceFactory},
+ * {@link ManagedPromiseService} and other objects are properly initialised and
  * ready for the production of {@link Promise} objects. For flexibility, the
  * thread pool service can be swapped out for an alternative executor -- configure
  * the concrete implementation in the "{@code promise-configuration.properties}"
@@ -58,10 +56,11 @@ import java.util.function.Supplier;
  *          public static class PromiseEventListener implements PromiseEventSubscriber {
  *              ...
  *              ...
- *              public void notify (Event event, EventState<?> value {
- *                   if (event.isAny(PRIMARY_ACTION_EVENT,TASK_ACTION_EVENT,TRANSMUTE_ACTION_EVENT)) {
- *                      logger.info("Received event {}, state {}",event.getEventId(),value.getValue());
- *                   }
+ *              public void notify(final PromiseEvent<T> event) {
+ *                  if (event.isAny(PRIMARY_ACTION,TASK_ACTION,TRANSMUTE_ACTION)) {
+ *                      logger.info("Listener {} received event={}, state={}",name,event.getEventId(),event.getValue());
+ *                      events++;
+ *                  }
  *              }
  *          }
  *          ...
@@ -76,20 +75,21 @@ import java.util.function.Supplier;
  * </pre>
  * The above example illustrates the ability to not only define your {@link
  * Action} handlers but also notify {@code listeners/subscribers} of {@link
- * PromiseEvents} -- there is no limit to the number of listeners, and to avoid
+ * PromiseEvent} -- there is no limit to the number of listeners, and to avoid
  * blocking, they are notified asynchronously.
  */
 @SuppressWarnings("WeakerAccess")
 public final class Promises {
 
-    private final static ManagedPoolService managedPoolService;
+    private static ManagedPromiseService managedService;
+    private final static ReentrantLock lock = new ReentrantLock();
 
     /*
-     * Instantiate and configure ManagedPromisePool object for Promise objects.
+     * Instantiate and configure ManagedPromiseService object for Promise objects.
      */
     static {
-        PromisePoolServiceFactory<ManagedPoolService> factory = new PromisePoolServiceFactory<>(new PromiseConfiguration());
-        managedPoolService = factory.newPoolService();
+        ManagedPromiseServiceFactory<ManagedPromiseService> factory = new ManagedPromiseServiceFactory<>(new PromiseConfiguration());
+        Promises.setManagedService(factory.newService());
     }
 
     /**
@@ -98,7 +98,7 @@ public final class Promises {
      * <p>
      * Internal worker threads process all {@link PrimaryAction} objects, the
      * number of simultaneous tasks could reach total {@code capacity}
-     * of the worker threads in {@link ManagedPoolService}. If this is the
+     * of the worker threads in {@link ManagedPromiseService}. If this is the
      * case, an {@code action} task object will remain in the queue until a worker
      * becomes available.
      * <p>
@@ -108,7 +108,6 @@ public final class Promises {
      * fail, the first rejection encountered will be returned encapsulated as a
      * {@link Promise} object. Use the {@link Promise#handle(Consumer)} to catch
      * or handle the exception thrown asynchronously.
-     * <p>
      *
      * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
      * @param <T> Type of value returned from asynchronous task.
@@ -126,14 +125,13 @@ public final class Promises {
      * <p>
      * Internal worker threads process all {@link PrimaryAction} objects, the
      * number of simultaneous tasks could reach total {@code capacity}
-     * of the worker threads in {@link ManagedPoolService}. If this is the
+     * of the worker threads in {@link ManagedPromiseService}. If this is the
      * case, an {@code action} task object will remain in the queue until a worker
      * becomes available.
      * <p>
      * A {@link Promise} object is immediately returned, providing a reference
      * to an asynchronous process that is currently waiting completion of the all
      * the {@code actions} objects.
-     * <p>
      *
      * @param actions a {@link List} of {@link PrimaryAction} objects to be queued
      * @param settle {@code true} all promises will either resolve or reject, but
@@ -147,7 +145,7 @@ public final class Promises {
      */
     public static <T> Promise<List<Promise<T>>> all(final List<PrimaryAction<T>> actions, boolean settle) {
 
-        List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncPromiseTask<>(managedPoolService,action));
+        List<Promise<T>> promises = all(actions,(action) -> () -> new AsyncPromiseTask<>(managedService,action));
 
         // Start new thread process that will wait on aforementioned asynchronous
         // processes
@@ -159,7 +157,7 @@ public final class Promises {
             return promises;
         });
 
-        return newPromise(action,() -> new AsyncPromiseTask<>(managedPoolService,action));
+        return (Promise<List<Promise<T>>>) newInvocable(action,() -> new AsyncPromiseTask<>(managedService,action));
     }
 
     /**
@@ -195,7 +193,7 @@ public final class Promises {
      * @see AsyncPromiseTask
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action) {
-        return newPromise(action, () -> new AsyncPromiseTask<>(managedPoolService,action));
+        return (Promise<T>) newInvocable(action, () -> new AsyncPromiseTask<>(managedService,action));
     }
     /**
      * Factory method to create instances of event-driven {@link Promise}
@@ -206,13 +204,8 @@ public final class Promises {
      * returned to the client.
      * <p>
      * This implementation of a {@link Promise} object has the ability to publish
-     * events to its {@code subscribers}. There are three types of events all
-     * subscribers are notified on:
-     * <ol>
-     *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
-     *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
-     *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
-     * </ol>
+     * events to its {@code subscribers}.
+     * <p>
      * There is no limit to the number of {@code subscribers}, but if a
      * {@code subscriber} is considered "toxic" (unhandled exception raised),
      * the {@code subscriber} will be banned from event notification.
@@ -228,8 +221,8 @@ public final class Promises {
      * @throws NullPointerException if {@code action} is null
      * @see AsyncPromiseTaskPublisher
      */
-    public static <T> Promise<T> newPromise(final Supplier<? extends T> supplier,
-                                            final List<? extends PromiseEventSubscriber> subscribers) {
+    public static <T> Promise<T> newPromise(final Supplier<T> supplier,
+                                            final List<? extends PromiseEventSubscriber<T>> subscribers) {
         return newPromise(PrimaryAction.of(supplier),subscribers);
     }
 
@@ -242,13 +235,8 @@ public final class Promises {
      * {@link Promise} returned to the client.
      * <p>
      * This implementation of a {@link Promise} object has the ability to publish
-     * events to its {@code subscribers}. There are three types of events all
-     * subscribers are notified on:
-     * <ol>
-     *     <li>{@link PromiseEvents#PRIMARY_ACTION_EVENT}</li>
-     *     <li>{@link PromiseEvents#TASK_ACTION_EVENT}</li>
-     *     <li>{@link PromiseEvents#TRANSMUTE_ACTION_EVENT}</li>
-     * </ol>
+     * events to its {@code subscribers}.
+     * <p>
      * There is no limit to the number of {@code subscribers}, but if a
      * {@code subscriber} is considered "toxic" (unhandled exception raised),
      * the {@code subscriber} will be banned from event notification.
@@ -265,8 +253,8 @@ public final class Promises {
      * @see AsyncPromiseTaskPublisher
      */
     public static <T> Promise<T> newPromise(final PrimaryAction<T> action,
-                                            final List<? extends PromiseEventSubscriber> subscribers) {
-        return newPromise(action, () -> new AsyncPromiseTaskPublisher<>(managedPoolService,action,subscribers));
+                                            final List<? extends PromiseEventSubscriber<T>> subscribers) {
+        return (Promise<T>) newInvocable(action, () -> new AsyncPromiseTaskPublisher<>(managedService,action,subscribers));
     }
 
     /**
@@ -275,7 +263,7 @@ public final class Promises {
      * <p>
      * Internal worker threads process all {@link PrimaryAction} objects, the
      * number of simultaneous tasks could reach total {@code capacity}
-     * of the worker threads in {@link ManagedPromisePoolExecutor}. If this is the
+     * of the worker threads in {@link ManagedThreadPoolPromiseExecutor}. If this is the
      * case, an {@code action} object will remain in the queue until a worker
      * becomes available.
      * <p>
@@ -305,60 +293,49 @@ public final class Promises {
         // Start asynchronous processes with custom promise implementation
         List<Promise<T>> promises = new ArrayList<>();
         list.forEach(action -> {
-            Promise<T> promise = newPromise(action,factory.apply(action));
+            Promise<T> promise = (Promise<T>) newInvocable(action,factory.apply(action));
             promises.add(promise);
         });
         return Collections.unmodifiableList(promises);
     }
 
     /**
-     * Factory method to create instances of {@link Promise} objects with
-     * a specified implementation of {@link Promise}.
+     * Factory method to create instances of {@link Invocable} objects with
+     * a specified implementation of {@link Invocable}.
      * <p>
-     * Not only is the {@link Promise} object created, but post creation, the
+     * Not only is the {@link Invocable} object created, but post creation,
      * the {@link PrimaryAction} task is executed asynchronously and the
      * {@link Promise} returned to the client.
      * <p>
      * This factory method is really provided for further development purposes,
-     * a mechanism to create an alternative implementation of {@link Promise}
+     * a mechanism to create an alternative implementation of {@link Invocable}
      * objects. Therefore, it is recommended to use
      * {@link Promises#newPromise(PrimaryAction)} instead, as this method
      * provides the default implementation.
      *
      * @param action a {@link PrimaryAction} encapsulating the task to be
      *        executed asynchronously.
-     * @param supplier supplies an implementation of {@link Promise}
+     * @param supplier supplies an implementation of {@link Invocable}
      * @param <T> Type of value returned from asynchronous task.
-     * @return a new {@link Promise} object.
+     * @return a new {@link Invocable} object.
      * @throws NullPointerException if {@code action} is null
      */
-    private static <T, U extends Promise<T>> Promise<T> newPromise(final PrimaryAction<T> action,
-                                                                   final Supplier<U> supplier) {
+    private static <T,U extends Invocable<T>> Invocable<T> newInvocable(final PrimaryAction<T> action,
+                                                                        final Supplier<? extends U> supplier) {
         PrimaryAction<T> a = Objects.requireNonNull(action,"Cannot keep promise -- no action?");
         U result = Objects.requireNonNull(supplier).get();
-
-        Invocable<T> invocable = asInvocable(result)
-                .orElseThrow(() -> new IllegalArgumentException("Promise object is not invocable -- promise unkept"));
-        invocable.invokeAction(a);
+        result.invoke(a);
         return result;
     }
 
-    /**
-     * Returns the {@link Promise} object as an {@link Invocable}, if possible.
-     * <p>
-     * @param promise the {@link Promise} object that implements {@link Invocable}
-     * @param <T> The type of the resultant value returned from the asynchronous
-     *           task.
-     * @return {@link Maybe} encapsulates {@link Invocable} implementation.
-     */
-    private static <T> Maybe<Invocable<T>> asInvocable(final Promise<T> promise) {
-        Maybe<Invocable<T>> result;
+    static void setManagedService(final ManagedPromiseService managedService) {
+        ManagedPromiseService service = Objects.requireNonNull(managedService);
         try {
-            result = Generics.unchecked(Maybe.of(Objects.requireNonNull(promise)));
-        } catch (ClassCastException e) {
-            result = Maybe.empty();
+            lock.lock();
+            Promises.managedService = service;
+        } finally {
+            lock.unlock();
         }
-        return result;
     }
 
     private Promises() {}

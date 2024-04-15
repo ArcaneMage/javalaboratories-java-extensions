@@ -25,7 +25,7 @@ package org.javalaboratories.core.tuple;
 public interface JoinableTuple<T extends Tuple> {
     /**
      * Joins this tuple with {@code that} tuple object.
-     * <p>
+     *
      * @param that tuple to join with this object.
      * @param <R> type of this tuple.
      * @return instance of newly joined tuple.

@@ -20,6 +20,7 @@ import org.javalaboratories.core.Eval;
 import org.javalaboratories.core.Maybe;
 
 import java.util.NoSuchElementException;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 /**
@@ -36,7 +37,7 @@ public class AsyncEval<T> extends Eval<T> {
 
     private transient final Promise<T> promise;
     private final Eval<T> delegate;
-    private final Object lock = new Object();
+    private final ReentrantLock lock = new ReentrantLock();
     private Exception exception;
 
     /**
@@ -86,8 +87,11 @@ public class AsyncEval<T> extends Eval<T> {
     }
 
     public Maybe<Exception> getException() {
-        synchronized (lock) {
+        lock.lock();
+        try {
             return Maybe.ofNullable(exception);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -141,8 +145,11 @@ public class AsyncEval<T> extends Eval<T> {
 
 
     private void handle(final T value, final Throwable e) {
-        synchronized(lock) {
+        lock.lock();
+        try {
             exception = (Exception) e;
+        } finally {
+            lock.unlock();
         }
     }
 }

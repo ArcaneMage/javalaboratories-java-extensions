@@ -107,7 +107,7 @@ public interface ResourceFloodStability<T> {
      * </pre>
      * Initially, {@link ResourceFloodStability} objects starts with the
      * {@code CLOSED} state.
-     * <p>
+     *
      * @return current state of this object.
      */
     States getState();

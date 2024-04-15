@@ -2,6 +2,7 @@ package org.javalaboratories.core.tuple;
 
 import org.javalaboratories.core.Maybe;
 
+import java.io.Serial;
 import java.util.*;
 import java.util.function.Function;
 
@@ -14,7 +15,7 @@ import java.util.function.Function;
  * However, it is possible to perform joins on this tuple.
  */
 public final class Tuple0 implements Tuple {
-
+    @Serial
     public static final long serialVersionUID = -1202062103023587399L;
 
     public Tuple0() { }

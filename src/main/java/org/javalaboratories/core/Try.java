@@ -19,6 +19,7 @@ import lombok.EqualsAndHashCode;
 import org.javalaboratories.core.handlers.ThrowableSupplier;
 import org.javalaboratories.core.util.Arguments;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
@@ -49,14 +50,14 @@ import java.util.stream.Stream;
  *
  *         // Using orElse to recover: result2="Result2=2500"
  *         String result2 = Try.of(() -> 100 / 0)
- *                             .orElse(100)
+ *                             .or(100)
  *                             .map(n -> n * 25)
  *                             .filter(n -> n > 500)
  *                             .fold("",n -> "Result2="+n);
  *
  *         // IOExceptions are handled gracefully too: result3=0
  *         int result3 = Try.of(() -> new String(Files.readAllBytes(Paths.get("does-not-exist.txt"))))
- *                             .orElse("")
+ *                             .or("")
  *                             .map(String::length)
  *                             .fold(-1,Function.identity());
  *     }
@@ -68,7 +69,7 @@ import java.util.stream.Stream;
  * @param <T> resultant type of computation/operation
  */
 public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exportable<T>, Iterable<T>, Serializable {
-
+    @Serial
     private static final long serialVersionUID = -7806171225526615129L;
 
     private static final IllegalStateException FAILED_TO_RETRIEVE_EXCEPTION = new IllegalStateException("Failed to retrieve exception from Try object");
@@ -137,7 +138,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * {@inheritDoc}
      */
     @Override
-    public T getOrElse(final T value) {
+    public T orElse(final T value) {
         return isSuccess() ? get() : value;
     }
 
@@ -211,11 +212,11 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
     @Override
     public <U> Try<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
         Objects.requireNonNull(mapper, "Function expected");
-        @SuppressWarnings("unchecked")
-        Try<U> self = (Try<U>) this;
+        Function<? super T,? extends Monad<U>> self = v -> Try.failure((Throwable)v);
+
         return isSuccess()
                 ? (Try<U>) Monad.super.flatMap(mapper)
-                : self;
+                : (Try<U>) self.apply(get());
     }
 
     /**
@@ -223,7 +224,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      */
     @Override
     public <U> Try<U> flatten() {
-        return (Try<U>) Monad.super.flatten();
+        return (Try<U>) Monad.super.<U>flatten();
     }
 
     /**
@@ -260,14 +261,6 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * {@code false}.
      */
     public abstract boolean isSuccess();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterator<T> iterator() {
-        return toList().iterator();
-    }
 
     /**
      * {@inheritDoc}
@@ -325,7 +318,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * @param other default value if this is a {@link Failure}
      * @return {@link Try} object.
      */
-    public Try<T> orElse(final T other) {
+    public Try<T> or(final T other) {
         Try<T> result =  this;
         if (!isSuccess()) {
             result = success(other);
@@ -406,7 +399,6 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
     /**
      * Returns an immutable list of containing {@code this} nonempty, {@code
      * value}.
-     * <p>
      *
      * @return a {@link List} object containing a {@code value} from {@code
      * this} object, if available. Otherwise, an {@code empty} {@code List} is
@@ -461,16 +453,13 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
                 : Collections.emptySet();
     }
 
-    private <U extends Throwable> Maybe<U> getThrowableValue() {
-        Maybe<U> result = Maybe.empty();
+    private Maybe<Throwable> getThrowableValue() {
+        Maybe<Throwable> result = Maybe.empty();
         Try<T> context = this;
         try {
             context.get();
         } catch (Throwable t) {
-            // All exceptions are encased in RuntimeException object so they
-            // need to be 'unpacked' for analysis.
-            @SuppressWarnings("unchecked")
-            U value = (U) t.getCause();
+            Throwable value = t.getCause();
             result = Maybe.of(value);
         }
         return result;
@@ -483,7 +472,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      */
     @EqualsAndHashCode(callSuper = false)
     public final static class Failure<T> extends Try<T> {
-
+        @Serial
+        private static final long serialVersionUID = 5548678031175929338L;
         private final Throwable throwable;
 
         private Failure(Throwable throwable) {
@@ -533,6 +523,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      */
     @EqualsAndHashCode(callSuper = false)
     public final static class Success<T> extends Try<T> {
+        @Serial
+        private static final long serialVersionUID = -5291261458950855254L;
         private final T value;
 
         private Success(T value) {

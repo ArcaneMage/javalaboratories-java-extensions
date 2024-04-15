@@ -15,6 +15,8 @@
  */
 package org.javalaboratories.core.concurrency;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.ToString;
 import lombok.Value;
 
@@ -23,6 +25,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 /**
@@ -34,8 +37,8 @@ import java.util.function.Predicate;
  * the system properties. Following properties are supported:
  * <pre>
  *     {@code
- *          promise.pool.service.class=org.javalaboratories.core.concurrency.ManagedPromisePoolExecutor
- *          promise.pool.service.capacity=-1
+ *          promise.managed.service.class=org.javalaboratories.core.concurrency.ManagedPromisePoolExecutor
+ *          promise.managed.service.capacity=-1
  *     }
  * </pre>
  * Setting the property value {@code promise.pool.service.capacity} to -1
@@ -54,18 +57,23 @@ import java.util.function.Predicate;
  */
 @Value
 public class PromiseConfiguration {
-    static final String PROMISE_POOL_SERVICE_CAPACITY_PROPERTY="promise.pool.service.capacity";
-    static final String PROMISE_POOL_SERVICE_CLASS_PROPERTY ="promise.pool.service.class";
+
+    public static final String PROMISE_MANAGED_SERVICE_CAPACITY_PROPERTY ="promise.managed.service.capacity";
+    public static final String PROMISE_MANAGED_SERVICE_CLASS_PROPERTY ="promise.managed.service.class";
+
+    public static final String DEFAULT_MANAGED_SERVICE_CLASSNAME ="org.javalaboratories.core.concurrency.ManagedThreadPoolPromiseExecutor";
 
     private static final String PROMISE_CONFIGURATION_FILE= "promise-configuration.properties";
-    private static final String DEFAULT_POOL_SERVICE_CLASSNAME ="org.javalaboratories.core.concurrency.ManagedPromisePoolExecutor";
     private static final int MINIMUM_CAPACITY = 1;
+
+    @Getter(AccessLevel.NONE)
+    ReentrantLock lock;
 
     @ToString.Exclude
     Map<String,Object> properties;
 
-    int poolServiceCapacity;
-    String poolServiceClassName;
+    int serviceCapacity;
+    String serviceClassName;
 
     /**
      * Constructs an instance of this object.
@@ -108,10 +116,11 @@ public class PromiseConfiguration {
      *                 account.
      */
     PromiseConfiguration(final String filename) {
+        lock = new ReentrantLock();
         properties = load(filename);
-        poolServiceClassName = getValue(PROMISE_POOL_SERVICE_CLASS_PROPERTY, DEFAULT_POOL_SERVICE_CLASSNAME);
-        int capacity = getValue(PROMISE_POOL_SERVICE_CAPACITY_PROPERTY,-1);
-        poolServiceCapacity = capacity < MINIMUM_CAPACITY ? Runtime.getRuntime().availableProcessors() : capacity;
+        serviceClassName = getValue(PROMISE_MANAGED_SERVICE_CLASS_PROPERTY, DEFAULT_MANAGED_SERVICE_CLASSNAME);
+        int capacity = getValue(PROMISE_MANAGED_SERVICE_CAPACITY_PROPERTY,-1);
+        serviceCapacity = capacity < MINIMUM_CAPACITY ? Runtime.getRuntime().availableProcessors() : capacity;
     }
 
     private <T> T getValue(String property, T value) {
@@ -133,24 +142,24 @@ public class PromiseConfiguration {
     private <T> Map<String,T> load(final String filename) {
         Map<String,T> result = new HashMap<>();
         if (properties == null) {
-            synchronized (this) {
-                try {
-                    if (filename != null) {
-                        Properties fileProperties = new Properties();
-                        InputStream stream = PromiseConfiguration.class.getClassLoader()
-                                .getResourceAsStream(filename);
-                        // Load file if it exists
-                        if (stream != null)
-                            fileProperties.load(stream);
-                        load(fileProperties, result, null);
-                    }
-                } catch (IOException e) {
-                    // Do-nothing, file I/O error will result in system overrides being applied, if any.
-                } finally {
-                    // Load potential overrides from system properties
-                    Properties sysProperties = System.getProperties();
-                    load(sysProperties,result,k -> k.startsWith("promise."));
+            lock.lock();
+            try {
+                if (filename != null) {
+                    Properties fileProperties = new Properties();
+                    InputStream stream = PromiseConfiguration.class.getClassLoader()
+                            .getResourceAsStream(filename);
+                    // Load file if it exists
+                    if (stream != null)
+                        fileProperties.load(stream);
+                    load(fileProperties, result, null);
                 }
+            } catch (IOException e) {
+                // Do-nothing, file I/O error will result in system overrides being applied, if any.
+            } finally {
+                // Load potential overrides from system properties
+                Properties sysProperties = System.getProperties();
+                load(sysProperties,result,k -> k.startsWith("promise."));
+                lock.unlock();
             }
         }
         return result;
