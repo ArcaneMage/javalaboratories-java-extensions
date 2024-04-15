@@ -16,7 +16,7 @@
 package org.javalaboratories.core.cryptography.keys;
 
 import org.javalaboratories.core.cryptography.CryptographyException;
-import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey.SaltMode;
+import org.javalaboratories.core.cryptography.keys.SymmetricKey.SaltMode;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SymmetricSecretKeyTest {
+public class SymmetricKeyTest {
 
     private static final String ENCRYPTED_KEY = "YM+BfBZ4my4MfvTKWo8LwLcyEL+cn2AjxNCNspc30nw=";
     private static final String INVALID_FILE = "aes-file-does-not-exist.tmp";
@@ -38,61 +38,61 @@ public class SymmetricSecretKeyTest {
 
     @Test
     public void testNewInstance_Pass() {
-        SymmetricSecretKey key1 = SymmetricSecretKey.newInstance();
-        SymmetricSecretKey key2 = SymmetricSecretKey.newInstance();
+        SymmetricKey key1 = SymmetricKey.newInstance();
+        SymmetricKey key2 = SymmetricKey.newInstance();
 
         assertNotEquals(key1,key2);
     }
 
     @Test
     public void testFromPassword_Pass() {
-        SymmetricSecretKey key1 = SymmetricSecretKey.from(PASSWORD);
-        SymmetricSecretKey key2 = SymmetricSecretKey.from(PASSWORD2);
+        SymmetricKey key1 = SymmetricKey.from(PASSWORD);
+        SymmetricKey key2 = SymmetricKey.from(PASSWORD2);
 
-        assertEquals(SymmetricSecretKey.from(PASSWORD), key1);
+        assertEquals(SymmetricKey.from(PASSWORD), key1);
         assertNotEquals(key1,key2);
     }
 
     @Test
     public void testFromPassword_AutoSalt_Pass() {
-        SymmetricSecretKey keySalted = SymmetricSecretKey.from(PASSWORD, SaltMode.AUTO_GENERATE);
-        SymmetricSecretKey keyUnsalted = SymmetricSecretKey.from(PASSWORD);
+        SymmetricKey keySalted = SymmetricKey.from(PASSWORD, SaltMode.AUTO_GENERATE);
+        SymmetricKey keyUnsalted = SymmetricKey.from(PASSWORD);
 
-        assertNotEquals(SymmetricSecretKey.from(PASSWORD),keySalted);
-        assertEquals(SymmetricSecretKey.from(PASSWORD), keyUnsalted);
+        assertNotEquals(SymmetricKey.from(PASSWORD),keySalted);
+        assertEquals(SymmetricKey.from(PASSWORD), keyUnsalted);
     }
 
     @Test
     public void testFromStream_Pass() {
-        SymmetricSecretKey key = SymmetricSecretKey.from(new ByteArrayInputStream(ENCRYPTED_KEY.getBytes()));
+        SymmetricKey key = SymmetricKey.from(new ByteArrayInputStream(ENCRYPTED_KEY.getBytes()));
 
-        assertEquals(SymmetricSecretKey.from(PASSWORD),key);
+        assertEquals(SymmetricKey.from(PASSWORD),key);
     }
 
     @Test
     public void testFromStream_Fail() {
-        assertThrows(CryptographyException.class, () -> SymmetricSecretKey.from(new ByteArrayInputStream("".getBytes())));
+        assertThrows(CryptographyException.class, () -> SymmetricKey.from(new ByteArrayInputStream("".getBytes())));
     }
 
     @Test
     public void testFromFile_Pass() throws URISyntaxException {
-        ClassLoader classLoader = SymmetricSecretKeyTest.class.getClassLoader();
+        ClassLoader classLoader = SymmetricKeyTest.class.getClassLoader();
         File file = Paths.get(classLoader.getResource(ENCRYPTED_FILE_KEY).toURI()).toFile();
 
-        SymmetricSecretKey key = SymmetricSecretKey.from(file);
+        SymmetricKey key = SymmetricKey.from(file);
 
-        assertEquals(SymmetricSecretKey.from(PASSWORD),key);
+        assertEquals(SymmetricKey.from(PASSWORD),key);
     }
 
     @Test
     public void testFromFile_Fail() {
-        assertThrows(CryptographyException.class, () -> SymmetricSecretKey.from(new File(INVALID_FILE)));
+        assertThrows(CryptographyException.class, () -> SymmetricKey.from(new File(INVALID_FILE)));
     }
 
     @Test
     public void testWriteStream_Pass() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
+        SymmetricKey key = SymmetricKey.from(PASSWORD);
 
         key.write(os);
 
@@ -101,7 +101,7 @@ public class SymmetricSecretKeyTest {
 
     @Test
     public void testWriteFile_Pass() throws IOException {
-        SymmetricSecretKey key = SymmetricSecretKey.from(PASSWORD);
+        SymmetricKey key = SymmetricKey.from(PASSWORD);
         File file = new File("aes-encrypted-key-file.tmp");
 
         key.write(file);

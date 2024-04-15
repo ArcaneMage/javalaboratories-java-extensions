@@ -32,10 +32,10 @@ Explore the package but here's an example of usage of the library:
 ```
        // Symmetric cryptography
        AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
-       ByteCryptographyResult<SymmetricSecretKey> result = cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), TEXT);
+       ByteCryptographyResult<SymmetricKey> result = cryptography.encrypt(SymmetricKey.from(PASSWORD), TEXT);
        String encrypted = result.getBytesAsBase64();
 
-       ByteCryptographyResult<SymmetricSecretKey> stringResult = cryptography.decrypt(SymmetricSecretKey.from(PASSWORD),encrypted);
+       ByteCryptographyResult<SymmetricKey> stringResult = cryptography.decrypt(SymmetricKey.from(PASSWORD),encrypted);
        assertEquals(TEXT, stringResult.getString().orElseThrow());
        
        // Asymmetric cryptography
@@ -52,7 +52,7 @@ Explore the package but here's an example of usage of the library:
        Message message = signer.encrypt(publicKey,TEXT);
        
        // Note that verification does not require a public key, this is "transmitted" in the ciphertext
-       // and decoded at the recipient's end and used to verify the message.
+       // and decoded at the recipient's end and then used to verify the message.
        RsaMessageVerifier verifier = CryptographyFactory.getMessageVerifier();
        String s = verifier.decryptAsString(privateKey,message.getSignedAsBase64());
 

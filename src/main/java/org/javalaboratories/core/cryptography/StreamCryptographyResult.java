@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+import org.javalaboratories.core.cryptography.keys.SymmetricKey;
 
 import java.io.OutputStream;
 import java.security.Key;
@@ -25,7 +25,7 @@ import java.security.Key;
  * operations with the {@link AesCryptography} and {@link RsaHybridCryptography}
  * objects.
  * <p>
- * It encapsulates the {@link SymmetricSecretKey} and {@code stream} that are
+ * It encapsulates the {@link SymmetricKey} and {@code stream} that are
  * associated with the {@code cipher text}.
  * <p>
  * This object is returned from performing cryptographic operations with {@code

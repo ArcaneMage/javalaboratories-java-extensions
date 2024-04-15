@@ -15,14 +15,13 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+import org.javalaboratories.core.cryptography.keys.SymmetricKey;
 import org.javalaboratories.core.util.Bytes;
 
 import javax.crypto.Cipher;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.security.*;
 import java.util.Objects;
 
@@ -101,7 +100,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
         K pk = Objects.requireNonNull(publicKey,"Expected public key");
         try (InputStream is = getInputStream(Objects.requireNonNull(inputStream,"Expected input stream"));
              T os = Objects.requireNonNull(ciphertext, "Expected cipher stream")) {
-            SymmetricSecretKey secretKey = SymmetricSecretKey.newInstance();
+            SymmetricKey secretKey = SymmetricKey.newInstance();
 
             // Encrypt session key with public key
             Cipher cipher = Cipher.getInstance(ALGORITHM);
@@ -115,7 +114,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
 
             // Now encrypt message with AES
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();
-            StreamCryptographyResult<SymmetricSecretKey,T> result = aes.encrypt(secretKey,is,os);
+            StreamCryptographyResult<SymmetricKey,T> result = aes.encrypt(secretKey,is,os);
 
             return new StreamCryptographyResultImpl<>(pk,sessionKeyBytes,getMessageHashFromInputStream(is),result.getStream());
         } catch (GeneralSecurityException e) {
@@ -141,7 +140,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE,pk);
             byte[] sessionKeyBytes = cipher.doFinal(encryptedSessionKey);
-            SymmetricSecretKey secretKey = SymmetricSecretKey.from(sessionKeyBytes);
+            SymmetricKey secretKey = SymmetricKey.from(sessionKeyBytes);
 
             // Decrypt AES message with AES secret key
             AesCryptography aes = CryptographyFactory.getSymmetricCryptography();

@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+import org.javalaboratories.core.cryptography.keys.SymmetricKey;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -48,9 +48,9 @@ public final class DefaultAesCryptography implements AesCryptography {
      * {@inheritDoc}
      */
     @Override
-    public <K extends SymmetricSecretKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K key,
-                                                                                                       final InputStream ciphertext,
-                                                                                                       final T outputStream) {
+    public <K extends SymmetricKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K key,
+                                                                                                 final InputStream ciphertext,
+                                                                                                 final T outputStream) {
         K k = Objects.requireNonNull(key,"Expected key object");
         try {
             // Read IV Header
@@ -71,9 +71,9 @@ public final class DefaultAesCryptography implements AesCryptography {
      * {@inheritDoc}
      */
     @Override
-    public <K extends SymmetricSecretKey,T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K key,
-                                                                                                       final InputStream inputStream,
-                                                                                                       final T ciphertext) {
+    public <K extends SymmetricKey,T extends OutputStream> StreamCryptographyResult<K,T> encrypt(final K key,
+                                                                                                 final InputStream inputStream,
+                                                                                                 final T ciphertext) {
         K k = Objects.requireNonNull(key, "Expected key object");
         try {
             IvParameterSpec iv = generateIvParameterSpec();

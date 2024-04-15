@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+import org.javalaboratories.core.cryptography.keys.SymmetricKey;
 
 import java.security.Key;
 
@@ -23,14 +23,14 @@ import java.security.Key;
  * {@code CryptographyResult} object is returned from performing cryptographic
  * operations with the {@link AesCryptography} object.
  * <p>
- * It encapsulates the {@link SymmetricSecretKey} that is associated with the
+ * It encapsulates the {@link SymmetricKey} that is associated with the
  * {@code cipher text}.
  */
 public interface CryptographyResult<K extends Key> {
 
     /**
      * @return the key that is associated with the {@code cipher text}.
-     * @see SymmetricSecretKey
+     * @see SymmetricKey
      */
     K getKey();
 }

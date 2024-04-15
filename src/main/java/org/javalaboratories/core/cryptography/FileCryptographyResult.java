@@ -15,16 +15,16 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+import org.javalaboratories.core.cryptography.keys.SymmetricKey;
 
 import java.io.File;
 import java.security.Key;
 
-/**
+/**Ï
  * {@code CryptographyResult} object is returned from performing cryptographic
  * operations with the {@link AesCryptography} object.
  * <p>
- * It encapsulates the {@link SymmetricSecretKey} and {@code File} that are
+ * It encapsulates the {@link SymmetricKey} and {@code File} that are
  * associated with the {@code cipher text}.
  * <p>
  * This object is returned from performing cryptographic operations with {@code

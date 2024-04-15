@@ -15,7 +15,7 @@
  */
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.keys.SymmetricSecretKey;
+import org.javalaboratories.core.cryptography.keys.SymmetricKey;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -29,7 +29,7 @@ import java.security.PublicKey;
  *     {@code
  *         AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
  *         CryptographyStringResult result =
- *             cryptography.encrypt(SymmetricSecretKey.from(PASSWORD), STRING_LITERAL);
+ *             cryptography.encrypt(SymmetricKey.from(PASSWORD), STRING_LITERAL);
  *         String cipherText = result.getDataAsBase64();
  *
  *         Outputs -> "xGc/N5WQGeje8QHK68GPdUbho0YIX3mYj/Zqgt5wqTjvkAvOLMOp/RGMM8yRn2GBsFRZA=="
@@ -37,7 +37,7 @@ import java.security.PublicKey;
  *         ...
  *         AesCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
  *         CryptographyStringResult result =
- *             cryptography.decrypt(SymmetricSecretKey.from(PASSWORD), cipherText);
+ *             cryptography.decrypt(SymmetricKey.from(PASSWORD), cipherText);
  *         String string = result.getDataAsString.orElseThrow();
  *
  *         Outputs -> "The quick brown fox jumped over the fence"
@@ -47,7 +47,7 @@ import java.security.PublicKey;
  * OutputStream} are also provided, as well as {@code File} encryption/decryption.
  *
  * @see AesCryptography
- * @see SymmetricSecretKey
+ * @see SymmetricKey
  */
 public final class CryptographyFactory {
 

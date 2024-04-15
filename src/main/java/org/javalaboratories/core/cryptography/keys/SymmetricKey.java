@@ -47,11 +47,11 @@ import java.util.Objects;
  * {@code password} and {@code salt} combination, and then use it to encrypt
  * or decrypt data.
  * <p>
- * {code @SymmetricSecretKey} is persistable to storage or a stream, making
+ * {code @SymmetricKey} is persistable to storage or a stream, making
  * it retrievable for later use.
  * <pre>
  *     {@code
- *          SymmetricSecretKey key = SymmetricSecretKey.from(password)
+ *          SymmetricKey key = SymmetricKey.from(password)
  *          SymmetricCryptography cryptography = CryptographyFactory.getSymmetricCryptography();
  *          cryptography.encrypt(key,...);
  *          ...
@@ -62,11 +62,11 @@ import java.util.Objects;
  * can be either auto-generated or supplied manually.
  * <pre>
  *     {@code
- *          SymmetricSecretKey key = SymmetricSecretKey.from(password, SaltMode.AUTO_GENERATE);
+ *          SymmetricKey key = SymmetricKey.from(password, SaltMode.AUTO_GENERATE);
  *     }
  * </pre>
  */
-public final class SymmetricSecretKey extends SecretKeySpec {
+public final class SymmetricKey extends SecretKeySpec {
 
     @Serial
     private static final long serialVersionUID = 6879954897958082210L;
@@ -82,7 +82,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     public enum SaltMode {AUTO_GENERATE, DEFAULT}
 
     /**
-     * Creates a {@link SymmetricSecretKey} object with an auto-generated
+     * Creates a {@link SymmetricKey} object with an auto-generated
      * password and salt.
      * <p>
      * The {@code key} is designed to be used with the {@link
@@ -91,26 +91,26 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      * @return the resultant {@code secret key} is completely made up from
      * securely randomised password and salt.
      */
-    public static SymmetricSecretKey newInstance() {
+    public static SymmetricKey newInstance() {
         return from(Base64.getEncoder().encodeToString(getSecureRandomBytes(AUTO_PASSWORD_BYTES)),
                 SaltMode.AUTO_GENERATE);
     }
 
     /**
-     * Creates a {@link SymmetricSecretKey} object from encoded bytes.
+     * Creates a {@link SymmetricKey} object from encoded bytes.
      * <p>
      * The {@code key} is designed to be used with the {@link
      * AesCryptography} interface.
      *
      * @return the resultant {@code secret key} is completely made up from
-     * previously encoded bytes from {@code SymmetricSecretKey}.
+     * previously encoded bytes from {@code SymmetricKey}.
      */
-    public static SymmetricSecretKey from(final byte[] bytes) {
-        return new SymmetricSecretKey(bytes,KEY_ALGORITHM);
+    public static SymmetricKey from(final byte[] bytes) {
+        return new SymmetricKey(bytes,KEY_ALGORITHM);
     }
 
     /**
-     * Creates a {@link SymmetricSecretKey} object from a given {@code password}
+     * Creates a {@link SymmetricKey} object from a given {@code password}
      * and {@code salt}.
      * <p>
      * The {@code key} is designed to be used with the {@link 
@@ -124,22 +124,22 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      *
      * @param password the password.
      * @param salt the salt.
-     * @return {@link SymmetricSecretKey} object encapsulating the encrypted key.
+     * @return {@link SymmetricKey} object encapsulating the encrypted key.
      * @throws NullPointerException when password and/or salt is null.
      * @throws CryptographyException key creation failure.
      */
-    public static SymmetricSecretKey from(final String password, final String salt) {
+    public static SymmetricKey from(final String password, final String salt) {
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_FACTORY);
             KeySpec spec = new PBEKeySpec(Objects.requireNonNull(password).toCharArray(),salt.getBytes(),65536,KEY_LENGTH);
-            return new SymmetricSecretKey(factory.generateSecret(spec).getEncoded(),KEY_ALGORITHM);
+            return new SymmetricKey(factory.generateSecret(spec).getEncoded(),KEY_ALGORITHM);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new CryptographyException("Failed to create secret key",e);
         }
     }
 
     /**
-     * Creates a {@link SymmetricSecretKey} object from a given {@code password}.
+     * Creates a {@link SymmetricKey} object from a given {@code password}.
      * <p>
      * The {@code key} is designed to be used with the {@link
      * AesCryptography} interface.
@@ -149,16 +149,16 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      * such cases, it is encouraged to supply a good, strong password/passphrase. 
      *
      * @param password the password.
-     * @return {@link SymmetricSecretKey} object encapsulating the encrypted key.
+     * @return {@link SymmetricKey} object encapsulating the encrypted key.
      * @throws NullPointerException when password is null.
      * @throws CryptographyException key creation failure.
      */
-    public static SymmetricSecretKey from(final String password) {
+    public static SymmetricKey from(final String password) {
         return from(password,SaltMode.DEFAULT);
     }
 
     /**
-     * Creates a {@link SymmetricSecretKey} object from a given {@code password}
+     * Creates a {@link SymmetricKey} object from a given {@code password}
      * and {@code salt mode}.
      * <p>
      * The {@code key} is designed to be used with the {@link
@@ -173,11 +173,11 @@ public final class SymmetricSecretKey extends SecretKeySpec {
      * @param password the password.
      * @param mode the salt mode: AUTO_GENERATE creates a random salt; DEFAULT 
      *             uses an internal salt value.
-     * @return {@link SymmetricSecretKey} object encapsulating the encrypted key.
+     * @return {@link SymmetricKey} object encapsulating the encrypted key.
      * @throws NullPointerException when password is null.
      * @throws CryptographyException key creation failure.
      */
-    public static SymmetricSecretKey from(final String password, final SaltMode mode) {
+    public static SymmetricKey from(final String password, final SaltMode mode) {
         String p = Objects.requireNonNull(password,"Expected password");
         return switch(mode) {
             case AUTO_GENERATE -> from(p,Base64.getEncoder().encodeToString(getSecureRandomBytes(SALT_BYTES)));
@@ -186,24 +186,24 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     }
 
     /**
-     * Creates a {@link SymmetricSecretKey} object from the given {@link 
+     * Creates a {@link SymmetricKey} object from the given {@link
      * InputStream}.
      * <p>
      * The {@code key} is designed to be used with the {@link
      * AesCryptography} interface.
      * <p>
      * The {@code key} would have been persisted to the stream with the 
-     * use of the {@link SymmetricSecretKey#write(OutputStream)} method.
+     * use of the {@link SymmetricKey#write(OutputStream)} method.
      *
      * @param inputStream the input stream.
-     * @return {@link SymmetricSecretKey} object encapsulating the encrypted key.
+     * @return {@link SymmetricKey} object encapsulating the encrypted key.
      * @throws NullPointerException when the inputStream is null. 
      * @throws CryptographyException key creation failure due to stream failure
      * or invalid key encountered.
      */
-    public static SymmetricSecretKey from(final InputStream inputStream) {
+    public static SymmetricKey from(final InputStream inputStream) {
         try (InputStream is = Objects.requireNonNull(inputStream,"Expected input stream")) {
-            return new SymmetricSecretKey(Base64.getDecoder().decode(is.readAllBytes()),KEY_ALGORITHM);
+            return new SymmetricKey(Base64.getDecoder().decode(is.readAllBytes()),KEY_ALGORITHM);
         } catch (IOException e) {
             throw new CryptographyException("Failed to read secret key from stream",e);
         } catch (IllegalArgumentException e) {
@@ -212,20 +212,20 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     }
 
     /**
-     * Creates a {@link SymmetricSecretKey} object from the given {@link File}.
+     * Creates a {@link SymmetricKey} object from the given {@link File}.
      * <p>
      * The {@code key} is designed to be used with the {@link
      * AesCryptography} interface.
      * <p>
      * The {@code key} would have been persisted to the file with the 
-     * use of the {@link SymmetricSecretKey#write(File)} method.
+     * use of the {@link SymmetricKey#write(File)} method.
      *
      * @param file the file.
-     * @return {@link SymmetricSecretKey} object encapsulating the encrypted key.
+     * @return {@link SymmetricKey} object encapsulating the encrypted key.
      * @throws NullPointerException when the file reference is null.
      * @throws CryptographyException key creation failure.
      */
-    public static SymmetricSecretKey from(final File file) {
+    public static SymmetricKey from(final File file) {
         try (FileInputStream fis = new FileInputStream(Objects.requireNonNull(file))) {
             return from(fis);
         } catch (IOException e) {
@@ -234,11 +234,11 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     }
 
     /**
-     * Persists a {@link SymmetricSecretKey} object to a given {@link
+     * Persists a {@link SymmetricKey} object to a given {@link
      * OutputStream}.
      * <p>
      * The key can be read from the stream with the use of {@link
-     * SymmetricSecretKey#from(InputStream)}.
+     * SymmetricKey#from(InputStream)}.
      *
      * @param outputStream the output stream.
      * @throws NullPointerException when the {@code outputStream} reference is
@@ -254,10 +254,10 @@ public final class SymmetricSecretKey extends SecretKeySpec {
     }
 
     /**
-     * Persists a {@link SymmetricSecretKey} object to a given {@link File}.
+     * Persists a {@link SymmetricKey} object to a given {@link File}.
      * <p>
      * The key can be read from the stream with the use of {@link
-     * SymmetricSecretKey#from(File)}.
+     * SymmetricKey#from(File)}.
      *
      * @param file the file.
      * @throws NullPointerException when the {@code file} reference is
@@ -279,7 +279,7 @@ public final class SymmetricSecretKey extends SecretKeySpec {
         return result;
     }
 
-    private SymmetricSecretKey(final byte[] key, final String algorithm) {
+    private SymmetricKey(final byte[] key, final String algorithm) {
         super(key,algorithm);
     }
 }
