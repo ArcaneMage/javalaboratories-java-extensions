@@ -60,6 +60,8 @@ import java.util.Objects;
 @EqualsAndHashCode(callSuper = true)
 public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements RsaMessageSigner {
 
+    private static final String MESSAGE_NOT_SIGNABLE = "Encrypted data is not signable";
+
     PrivateKey privateKey;
 
     /**

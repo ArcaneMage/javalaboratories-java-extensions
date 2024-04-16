@@ -20,12 +20,19 @@ import lombok.Getter;
 
 import java.util.Objects;
 
+/**
+ * Parent class of the authentication classes that have the ability to sign or
+ * verify encrypted data.
+ * <p>
+ * Encapsulates common behaviour for all RSA authentication classes and provides
+ * a {@link RsaHybridCryptography} implementation for encryption and decryption
+ * functionality.
+ */
 @EqualsAndHashCode
 public class MessageRsaAuthentication {
 
     protected static final int STREAM_BUFFER_SIZE = 4096;
 
-    protected static final String MESSAGE_NOT_SIGNABLE = "Encrypted data is not signable";
     protected static final String DEFAULT_SIGNING_ALGORITHM = "SHA256withRSA";
     protected static final String DEFAULT_KEY_FACTORY_ALGORITHM = "RSA";
 
@@ -35,11 +42,23 @@ public class MessageRsaAuthentication {
     @EqualsAndHashCode.Exclude
     private final RsaHybridCryptography signable;
 
+    /**
+     * Creates an instance of the {@link MessageRsaAuthentication} object with
+     * the given {@link MessageDigestAlgorithms}.
+     *
+     * @param algorithm the signing or verification algorithm
+     */
     public MessageRsaAuthentication(final MessageDigestAlgorithms algorithm) {
         this.algorithm = Objects.requireNonNull(algorithm);
         this.signable = CryptographyFactory.getSignableAsymmetricHybridCryptography(algorithm);
     }
 
+    /**
+     * Provides an implementation of the {@link RsaHybridCryptography} for
+     * derived classes to leverage encryption/decryption operations.
+     *
+     * @return an implementation of the {@link RsaHybridCryptography}.
+     */
     protected RsaHybridCryptography signable() {
         return this.signable;
     }
