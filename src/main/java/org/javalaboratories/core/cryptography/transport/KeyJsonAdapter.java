@@ -25,25 +25,27 @@ import com.google.gson.JsonSerializer;
 import org.javalaboratories.core.cryptography.keys.RsaKeys;
 
 import java.lang.reflect.Type;
+import java.security.Key;
 import java.security.PublicKey;
 import java.util.Base64;
 
 /**
  * Serializes adn deserializes PublicKey objects in objects, turning encoded bytes
  * to and from Base64 data format.
- * @deprecated Use KeyJsonAdapter
  */
-@Deprecated
-public final class PublicKeyJsonAdapter implements JsonSerializer<PublicKey>, JsonDeserializer<PublicKey> {
+public final class KeyJsonAdapter implements JsonSerializer<Key>, JsonDeserializer<Key> {
     @Override
-    public JsonElement serialize(final PublicKey key, final Type type, final JsonSerializationContext context) {
+    public JsonElement serialize(final Key key, final Type type, final JsonSerializationContext context) {
         return new JsonPrimitive(Base64.getEncoder().encodeToString(key.getEncoded()));
     }
 
     @Override
-    public PublicKey deserialize(final JsonElement jsonElement, final Type type, final JsonDeserializationContext context)
+    public Key deserialize(final JsonElement jsonElement, final Type type, final JsonDeserializationContext context)
             throws JsonParseException {
         String s = jsonElement.getAsString();
-        return RsaKeys.getPublicKeyFrom(Base64.getDecoder().decode(s));
+        byte[] encoded = Base64.getDecoder().decode(s);
+        if (type.equals(PublicKey.class)) return RsaKeys.getPublicKeyFrom(encoded);
+        else return RsaKeys.getPrivateKeyFrom(encoded);
+
     }
 }

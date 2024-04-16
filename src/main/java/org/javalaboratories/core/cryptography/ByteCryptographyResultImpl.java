@@ -36,7 +36,7 @@ public final class ByteCryptographyResultImpl<K extends Key> extends SignableSes
         implements ByteCryptographyResult<K> {
 
     private final byte[] bytes;
-    private final Maybe<String> string;
+    private final String string;
 
     public ByteCryptographyResultImpl(final K key, byte[] bytes, String string) {
         this(key,null,null,bytes,string);
@@ -46,7 +46,7 @@ public final class ByteCryptographyResultImpl<K extends Key> extends SignableSes
                                       final String string) {
         super(key,sessionKey,messageHash);
         this.bytes = Objects.requireNonNull(bytes);
-        this.string = Maybe.ofNullable(string);
+        this.string = string;
     }
 
     /**
@@ -62,6 +62,6 @@ public final class ByteCryptographyResultImpl<K extends Key> extends SignableSes
      */
     @Override
     public Maybe<String> getString() {
-        return string;
+        return Maybe.ofNullable(string);
     }
 }

@@ -21,7 +21,8 @@ module javalaboratories.java.extensions {
   requires org.apache.commons.lang3;
   requires org.slf4j;
 
-  opens org.javalaboratories.core.cryptography.transport;
+  opens org.javalaboratories.core.cryptography to com.google.gson;
+  opens org.javalaboratories.core.cryptography.transport to com.google.gson;
 
   exports org.javalaboratories.core;
   exports org.javalaboratories.core.atomic;

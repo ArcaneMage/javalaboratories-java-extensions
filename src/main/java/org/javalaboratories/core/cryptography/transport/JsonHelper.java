@@ -17,7 +17,14 @@ package org.javalaboratories.core.cryptography.transport;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import org.javalaboratories.core.cryptography.ByteCryptographyResult;
+import org.javalaboratories.core.cryptography.ByteCryptographyResultImpl;
+import org.javalaboratories.core.cryptography.CryptographyResult;
 
+import java.lang.reflect.Type;
+import java.security.Key;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Objects;
 
@@ -52,7 +59,9 @@ public final class JsonHelper {
     private static Gson getCustomGson() {
         return new GsonBuilder()
                 .registerTypeAdapter(byte[].class, new ByteArrayJsonAdapter())
+                .registerTypeHierarchyAdapter(Key.class, new KeyJsonAdapter())
                 .registerTypeHierarchyAdapter(PublicKey.class,new PublicKeyJsonAdapter())
+                .setPrettyPrinting()
                 .create();
     }
 }
