@@ -17,7 +17,7 @@ package org.javalaboratories.core.cryptography;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.javalaboratories.core.cryptography.transport.Message;
+import org.javalaboratories.core.cryptography.json.Message;
 import org.javalaboratories.core.util.Bytes;
 
 import java.io.File;

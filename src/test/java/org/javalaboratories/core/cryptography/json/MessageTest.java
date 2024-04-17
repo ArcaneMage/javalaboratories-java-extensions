@@ -1,4 +1,4 @@
-package org.javalaboratories.core.cryptography.transport;
+package org.javalaboratories.core.cryptography.json;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
