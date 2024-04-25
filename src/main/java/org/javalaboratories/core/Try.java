@@ -212,11 +212,11 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
     @Override
     public <U> Try<U> flatMap(final Function<? super T, ? extends Monad<U>> mapper) {
         Objects.requireNonNull(mapper, "Function expected");
-        Function<? super T,? extends Monad<U>> self = v -> Try.failure((Throwable)v);
-
-        return isSuccess()
-                ? (Try<U>) Monad.super.flatMap(mapper)
-                : (Try<U>) self.apply(get());
+        if (isSuccess()) {
+            return (Try<U>) Monad.super.flatMap(mapper);
+        } else {
+           return failure(getThrowableValue().get());
+        }
     }
 
     /**

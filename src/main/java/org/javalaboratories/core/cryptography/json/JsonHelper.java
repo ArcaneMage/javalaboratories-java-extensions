@@ -13,11 +13,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.cryptography.transport;
+package org.javalaboratories.core.cryptography.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.security.Key;
 import java.security.PublicKey;
 import java.util.Objects;
 
@@ -52,7 +53,9 @@ public final class JsonHelper {
     private static Gson getCustomGson() {
         return new GsonBuilder()
                 .registerTypeAdapter(byte[].class, new ByteArrayJsonAdapter())
+                .registerTypeHierarchyAdapter(Key.class, new KeyJsonAdapter())
                 .registerTypeHierarchyAdapter(PublicKey.class,new PublicKeyJsonAdapter())
+                .setPrettyPrinting()
                 .create();
     }
 }

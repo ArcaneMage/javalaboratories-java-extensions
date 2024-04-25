@@ -1,6 +1,6 @@
 package org.javalaboratories.core.cryptography;
 
-import org.javalaboratories.core.cryptography.transport.Message;
+import org.javalaboratories.core.cryptography.json.Message;
 
 import java.io.File;
 import java.security.PublicKey;

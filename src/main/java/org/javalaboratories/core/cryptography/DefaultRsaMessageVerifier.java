@@ -18,7 +18,7 @@ package org.javalaboratories.core.cryptography;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.javalaboratories.core.cryptography.keys.RsaKeys;
-import org.javalaboratories.core.cryptography.transport.Message;
+import org.javalaboratories.core.cryptography.json.Message;
 
 import java.io.File;
 import java.io.FileInputStream;

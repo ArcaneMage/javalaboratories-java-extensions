@@ -21,7 +21,7 @@ module javalaboratories.java.extensions {
   requires org.apache.commons.lang3;
   requires org.slf4j;
 
-  opens org.javalaboratories.core.cryptography.transport;
+  opens org.javalaboratories.core.cryptography.json to com.google.gson;
 
   exports org.javalaboratories.core;
   exports org.javalaboratories.core.atomic;
@@ -29,7 +29,7 @@ module javalaboratories.java.extensions {
   exports org.javalaboratories.core.concurrency;
   exports org.javalaboratories.core.concurrency.utils;
   exports org.javalaboratories.core.cryptography;
-  exports org.javalaboratories.core.cryptography.transport;
+  exports org.javalaboratories.core.cryptography.json;
   exports org.javalaboratories.core.cryptography.keys;
   exports org.javalaboratories.core.event;
   exports org.javalaboratories.core.function;

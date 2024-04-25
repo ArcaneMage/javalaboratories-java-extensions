@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.javalaboratories.core.cryptography.transport;
+package org.javalaboratories.core.cryptography.json;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -22,24 +22,28 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import org.javalaboratories.core.cryptography.keys.RsaKeys;
 
 import java.lang.reflect.Type;
+import java.security.PublicKey;
 import java.util.Base64;
 
 /**
- * Serializes and deserializes byte arrays, turning bytes to and from Base64
- * data format.
+ * Serializes adn deserializes PublicKey objects in objects, turning encoded bytes
+ * to and from Base64 data format.
+ * @deprecated Use KeyJsonAdapter
  */
-public final class ByteArrayJsonAdapter implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
+@Deprecated
+public final class PublicKeyJsonAdapter implements JsonSerializer<PublicKey>, JsonDeserializer<PublicKey> {
     @Override
-    public JsonElement serialize(final byte[] bytes, final Type type, final JsonSerializationContext context) {
-        return new JsonPrimitive(Base64.getEncoder().encodeToString(bytes));
+    public JsonElement serialize(final PublicKey key, final Type type, final JsonSerializationContext context) {
+        return new JsonPrimitive(Base64.getEncoder().encodeToString(key.getEncoded()));
     }
 
     @Override
-    public byte[] deserialize(final JsonElement jsonElement, final Type type, final JsonDeserializationContext context)
+    public PublicKey deserialize(final JsonElement jsonElement, final Type type, final JsonDeserializationContext context)
             throws JsonParseException {
         String s = jsonElement.getAsString();
-        return Base64.getDecoder().decode(s);
+        return RsaKeys.getPublicKeyFrom(Base64.getDecoder().decode(s));
     }
 }

@@ -16,8 +16,8 @@
 package org.javalaboratories.core.cryptography;
 
 import org.javalaboratories.core.cryptography.keys.RsaKeys;
-import org.javalaboratories.core.cryptography.transport.JsonHelper;
-import org.javalaboratories.core.cryptography.transport.Message;
+import org.javalaboratories.core.cryptography.json.JsonHelper;
+import org.javalaboratories.core.cryptography.json.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -28,7 +28,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.Base64;
 import java.util.stream.Collectors;
 

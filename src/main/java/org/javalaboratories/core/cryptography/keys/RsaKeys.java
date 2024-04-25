@@ -69,11 +69,23 @@ public final class RsaKeys {
         InputStream is = Objects.requireNonNull(inputStream);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             byte[] bytes = keyDataToBytes(reader);
-            KeyFactory factory = KeyFactory.getInstance(ALGORITHM);
-            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(bytes);
-            return factory.generatePrivate(spec);
+            return getPrivateKeyFrom(bytes);
         } catch(IOException e) {
             throw new CryptographyException("Failed to read input stream",e);
+        }
+    }
+
+    /**
+     * Reads private RSA key from the given encoded bytes.
+     *
+     * @param encoded RSA encoded bytes
+     * @return a private key.
+     */
+    public static PrivateKey getPrivateKeyFrom(final byte[] encoded) {
+        try {
+            KeyFactory factory = KeyFactory.getInstance(ALGORITHM);
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(encoded);
+            return factory.generatePrivate(spec);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to create private key",e);
         }

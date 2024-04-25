@@ -17,7 +17,7 @@ package org.javalaboratories.core.cryptography;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.javalaboratories.core.cryptography.transport.Message;
+import org.javalaboratories.core.cryptography.json.Message;
 import org.javalaboratories.core.util.Bytes;
 
 import java.io.File;
@@ -59,6 +59,8 @@ import java.util.Objects;
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements RsaMessageSigner {
+
+    private static final String MESSAGE_NOT_SIGNABLE = "Encrypted data is not signable";
 
     PrivateKey privateKey;
 
