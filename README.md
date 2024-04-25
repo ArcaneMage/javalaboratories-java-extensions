@@ -15,13 +15,13 @@ configuration below:
         <dependency>
           <groupId>org.javalaboratories</groupId>
           <artifactId>java-extensions</artifactId>
-          <version>2.0.0.0-RELEASE</version>
+          <version>2.0.1.0-RELEASE</version>
         </dependency>
 ```
 Alternatively, for `Gradle` users, amend the `build.gradle` file with the following:
 ```
         // https://mvnrepository.com/artifact/org.javalaboratories/java-extensions
-        compile group: 'org.javalaboratories', name: 'java-extensions', version: '2.0.0.0-RELEASE'
+        compile group: 'org.javalaboratories', name: 'java-extensions', version: '2.0.1.0-RELEASE'
 ```
 ### CryptographyFactory
 Use the `CryptographyFactory` class to gain access to both symmetric and asymmetric cryptography objects. It provides

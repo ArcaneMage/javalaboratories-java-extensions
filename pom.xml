@@ -9,9 +9,8 @@
     <version>2.0.1.0-RELEASE</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>This is a library of utilities to encourage functional
-        programming in Java, particularly for Java-8 developers but not
-        exclusively.</description>
+    <description>This is an eclectic library of utilities, framework abstractions and patterns
+        in Java</description>
     <url>https://github.com/arcanemage/javalaboratories-java-extensions</url>
 
     <licenses>
