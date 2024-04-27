@@ -16,6 +16,7 @@
 package org.javalaboratories.core;
 
 import lombok.EqualsAndHashCode;
+import org.javalaboratories.core.handlers.ThrowableFunction;
 import org.javalaboratories.core.handlers.ThrowableSupplier;
 import org.javalaboratories.core.util.Arguments;
 
@@ -85,6 +86,7 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * @param <T> resultant type of computation.
      * @param <E> type of exception.
      * @return Try object.
+     * @throws NullPointerException if supplier has a null reference.
      */
     public static <T, E extends Throwable> Try<T> of(final ThrowableSupplier<T, E> supplier) {
         Objects.requireNonNull(supplier);
@@ -95,6 +97,50 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
             result = failure(e);
         }
         return result;
+    }
+
+    /**
+     * Factory method of Try object to create an instance with a closable
+     * resource.
+     * <p>
+     * The {@code resource} must implement the {@link AutoCloseable} interface,
+     * resource is then made available to the function where operations can be
+     * performed on it. The resource is automatically closed after the function
+     * concludes, releasing any associated resources for example file handles.
+     * Example of usage:
+     * <pre>
+     *     {@code
+     *          int length =
+     *             Try.with(() -> new BufferedReader(new FileReader("hello-world.txt")),
+     *                    BufferedReader::readLine)
+     *             .map(String::length)
+     *             .fold(-1,Function.identity());
+     *
+     *          assertEquals(11,length);
+     *     }
+     * </pre>
+     *
+     * @param resource closable resource.
+     * @param function the function encapsulating computation/operation
+     * @return Try object.
+     * @param <T> type of resource.
+     * @param <R> resultant type of computation/operation
+     * @param <E> type of exception.
+     * @throws NullPointerException if resource or function has a null reference.
+     */
+    public static <T extends AutoCloseable, R, E extends Throwable> Try<R> with(
+            final ThrowableSupplier<? extends T,E> resource, final ThrowableFunction<? super T,? extends R,E> function) {
+        final ThrowableSupplier<? extends T,E> r = Objects.requireNonNull(resource);
+        final ThrowableFunction<? super T,? extends R,E> f = Objects.requireNonNull(function);
+        try {
+            return of(() -> f.apply(r.get()));
+        } finally {
+            try {
+                r.get().close();
+            } catch (Throwable e) {
+                // Handled
+            }
+        }
     }
 
     /**
