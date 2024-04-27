@@ -128,8 +128,8 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * @param <E> type of exception.
      * @throws NullPointerException if resource or function has a null reference.
      */
-    public static <T extends AutoCloseable, R, E extends Throwable> Try<R> with(
-            final ThrowableSupplier<? extends T,E> resource, final ThrowableFunction<? super T,? extends R,E> function) {
+    public static <T extends AutoCloseable, R, E extends Throwable> Try<R> with(final ThrowableSupplier<? extends T,E> resource,
+                                                                                final ThrowableFunction<? super T,? extends R,E> function) {
         final ThrowableSupplier<? extends T,E> r = Objects.requireNonNull(resource);
         final ThrowableFunction<? super T,? extends R,E> f = Objects.requireNonNull(function);
         try {
