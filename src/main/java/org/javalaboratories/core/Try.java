@@ -22,7 +22,12 @@ import org.javalaboratories.core.util.Arguments;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -90,13 +95,11 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      */
     public static <T, E extends Throwable> Try<T> of(final ThrowableSupplier<T, E> supplier) {
         Objects.requireNonNull(supplier);
-        Try<T> result;
         try {
-            result = success(supplier.get());
+            return success(supplier.get());
         } catch (Throwable e) {
-            result = failure(e);
+            return failure(e);
         }
-        return result;
     }
 
     /**
@@ -128,18 +131,14 @@ public abstract class Try<T> extends Applicative<T> implements Monad<T>, Exporta
      * @param <E> type of exception.
      * @throws NullPointerException if resource or function has a null reference.
      */
-    public static <T extends AutoCloseable, R, E extends Throwable> Try<R> with(final ThrowableSupplier<? extends T,E> resource,
-                                                                                final ThrowableFunction<? super T,? extends R,E> function) {
+    public static <T extends AutoCloseable, R, E extends Throwable> Try<R> with(final ThrowableSupplier<? extends T, E> resource,
+                                                                                final ThrowableFunction<? super T,? extends R, E> function) {
         final ThrowableSupplier<? extends T,E> r = Objects.requireNonNull(resource);
         final ThrowableFunction<? super T,? extends R,E> f = Objects.requireNonNull(function);
-        try {
-            return of(() -> f.apply(r.get()));
-        } finally {
-            try {
-                r.get().close();
-            } catch (Throwable e) {
-                // Handled
-            }
+        try (T c = r.get()) {
+            return of(() -> f.apply(c));
+        } catch (Throwable e) {
+            return failure(e);
         }
     }
 

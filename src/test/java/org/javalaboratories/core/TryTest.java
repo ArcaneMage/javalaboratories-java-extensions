@@ -41,13 +41,13 @@ public class TryTest {
 
     @BeforeEach
     public void setup() {
-        aTry1 = Try.of(() -> new String(Files.readAllBytes(Paths.get("target/test-classes/testfile.txt"))));
+        aTry1 = Try.of(() -> new String(Files.readAllBytes(Paths.get("src/test/resources/testfile.txt"))));
         aTry2 = Try.of(() -> 10 / 0);
     }
 
     @Test
     public void testWithResource_Pass() {
-        int length = Try.with(() -> new BufferedReader(new FileReader("target/test-classes/testfile.txt")), BufferedReader::readLine)
+        int length = Try.with(() -> new BufferedReader(new FileReader("src/test/resources/testfile.txt")), BufferedReader::readLine)
                 .map(String::length)
                 .fold(-1,l -> l);
 
@@ -55,7 +55,16 @@ public class TryTest {
     }
 
     @Test
-    public void testWithResource_Fail() {
+    public void testWithResource_IOException1_Fail() {
+        int length = Try.with(() -> new BufferedReader(new FileReader("src/test/resources/does-not-exist.txt")), BufferedReader::readLine)
+                .map(String::length)
+                .fold(-1,l -> l);
+
+        assertEquals(-1,length);
+    }
+
+    @Test
+    public void testWithResource_IOException2_Fail() {
         int read = Try.with(() -> new InputStreamReader(InputStream.nullInputStream()), r -> {r.close(); return r.read();})
                 .fold(-16,Function.identity());
 
