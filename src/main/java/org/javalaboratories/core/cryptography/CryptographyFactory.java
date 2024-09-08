@@ -53,7 +53,7 @@ public final class CryptographyFactory {
 
     /**
      * Provides an interface for {@code Asymmetric} encryption and decryption,
-     * levering RSA standard.
+     * leveraging RSA standard.
      * <p>
      * Asymmetric cryptography means that there are multiple keys required to
      * encrypt/decrypt {@code ciphertext}, namely {@code PublicKey} and
