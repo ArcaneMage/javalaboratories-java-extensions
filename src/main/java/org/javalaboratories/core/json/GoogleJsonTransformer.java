@@ -93,10 +93,10 @@ public class GoogleJsonTransformer implements JsonTransformer {
             JsonElement schema = gson.fromJson(this.schema,JsonElement.class);
             JsonElement data = gson.fromJson(s,JsonElement.class);
             JsonElement transformed = this.transform(null,schema,data);
-            // Finally generate JSON output applying formatting bit flags
+            // Finally generate JSON output, applying formatting bit flags
             return this.toJson(transformed,flags);
         } catch (JsonSyntaxException e) {
-            throw new JsonTransformerException("Encountered JSON transformation error",e);
+            throw new JsonTransformerException("Encountered JSON transformation error, relating to JSON syntax",e);
         }
     }
 
@@ -122,24 +122,29 @@ public class GoogleJsonTransformer implements JsonTransformer {
      * @param data the JSON data encapsulated in {@link JsonElement}.
      * @return the data value encapsulated in {@link JsonElement}. If the value
      * cannot be retrieved, then {@code null} is returned.
+     * @throws JsonTransformerException When multiple elements in array but no
+     * subscript specified
+     * @throws NullPointerException Path or data parameter is null.
      */
     protected final JsonElement getValue(final String path, final JsonElement data) {
+        String p = Objects.requireNonNull(path);
+        JsonElement d = Objects.requireNonNull(data);
         JsonElement result = null;
-        String[] k = path.split("\\.");
+        String[] k = p.split("\\.");
         if (path.startsWith("$"))  // Is it a literal?
-            return new JsonPrimitive(path.substring(1));
+            return new JsonPrimitive(p.substring(1));
         JsonArrayIndex arrayIndex = this.createJsonArrayIndex(k[0]);
-        JsonElement je = nextElement(arrayIndex.property(),data);
+        JsonElement je = nextElement(arrayIndex.property(),d);
         if (je != null) {
             if (je.isJsonObject()) {
-                result = this.getValue(path.substring(path.indexOf(".") + 1),je);
+                result = this.getValue(p.substring(p.indexOf(".") + 1),je);
             } else if (je.isJsonArray()) {
                 if (arrayIndex.index() > -1 && arrayIndex.index() < je.getAsJsonArray().size()) // Check index boundary
-                    result = this.getValue(path.substring(path.indexOf(".") + 1),je.getAsJsonArray().get(arrayIndex.index()));
+                    result = this.getValue(p.substring(p.indexOf(".") + 1),je.getAsJsonArray().get(arrayIndex.index()));
                 else if (arrayIndex.index() == -1) {
-                    if (path.contains("."))
+                    if (p.contains("."))
                         if (je.getAsJsonArray().size() == 1)
-                            result = this.getValue(path.substring(path.indexOf(".") + 1),je.getAsJsonArray().get(0));
+                            result = this.getValue(p.substring(p.indexOf(".") + 1),je.getAsJsonArray().get(0));
                         else
                             throw new JsonTransformerException("Multiple elements in array, expected 1",je.toString());
                     else
@@ -164,31 +169,36 @@ public class GoogleJsonTransformer implements JsonTransformer {
      * @param schema schema/mappings leveraging STL.
      * @param data source data in JSON notation.
      * @return transformed output in JSON notation, encapsulated in {@link JsonElement}
+     * @throws JsonTransformerException When multiple elements in array but no
+     * subscript specified
+     * @throws NullPointerException Schema or data parameter is null.
      *
      * @see JsonTransformer
      * @see JsonTransformerException
      */
     protected JsonElement transform(final String target, final JsonElement schema, final JsonElement data) {
+        JsonElement s = Objects.requireNonNull(schema);
+        JsonElement d = Objects.requireNonNull(data);
         if (schema.isJsonObject()) {
             JsonObject jo = new JsonObject();
-            for (String t : schema.getAsJsonObject().keySet()) {
-                JsonElement je = schema.getAsJsonObject().get(t);
-                jo.add(t,this.transform(t,je,data));
+            for (String t : s.getAsJsonObject().keySet()) {
+                JsonElement je = s.getAsJsonObject().get(t);
+                jo.add(t,this.transform(t,je,d));
             }
             return jo;
         } else if (schema.isJsonArray()) {
             JsonArray ja = new JsonArray();
-            for (JsonElement e : schema.getAsJsonArray())
-                ja.add(this.transform(target,e,data));
+            for (JsonElement e : s.getAsJsonArray())
+                ja.add(this.transform(target,e,d));
             return ja;
         } else {
             // Must be primitive, so evaluate mapping expression.
-            String sourcePath = schema.getAsString();
+            String sourcePath = s.getAsString();
             // Logical OR expression used?
             String[] paths = sourcePath.split("\\|");
             JsonElement je = null;
             for (int i = 0; i < paths.length && je == null; i++)
-                je = this.getValue(paths[i].trim(),data);
+                je = this.getValue(paths[i].trim(),d);
             return je;
         }
     }
