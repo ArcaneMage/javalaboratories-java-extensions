@@ -34,6 +34,7 @@ module javalaboratories.java.extensions {
   exports org.javalaboratories.core.event;
   exports org.javalaboratories.core.function;
   exports org.javalaboratories.core.handlers;
+  exports org.javalaboratories.core.json;
   exports org.javalaboratories.core.statistics;
   exports org.javalaboratories.core.tuple;
   exports org.javalaboratories.core.util;

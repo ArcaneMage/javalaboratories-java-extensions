@@ -20,12 +20,9 @@ import org.javalaboratories.core.CoreApplicative;
 import org.javalaboratories.core.Monad;
 
 import java.io.Serial;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.*;
-
-import static java.lang.StringTemplate.STR;
 
 /**
  * This is a container object that holds a value.
