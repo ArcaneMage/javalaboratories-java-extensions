@@ -93,7 +93,7 @@ public class GoogleJsonTransformer implements JsonTransformer {
             JsonElement schema = gson.fromJson(this.schema,JsonElement.class);
             JsonElement data = gson.fromJson(s,JsonElement.class);
             JsonElement transformed = this.transform(null,schema,data);
-            // Apply formatting
+            // Finally generate JSON output applying formatting bit flags
             return this.toJson(transformed,flags);
         } catch (JsonSyntaxException e) {
             throw new JsonTransformerException("Encountered JSON transformation error",e);
