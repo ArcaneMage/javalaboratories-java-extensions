@@ -1,8 +1,8 @@
 # java-extensions
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions)
+[![Maven Central](https://maven-badges.sml.io/maven-central/org.javalaboratories/java-extensions/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.javalaboratories/java-extensions)
 
-This is a library of utilities to encourage and support functional programming in Java, With inspiration from functional 
+This is a library of utilities to encourage and support functional programming in Java. With inspiration from functional 
 programming articles and languages like Haskell and Scala, new monads and enhancements to existing ones have been introduced.
 This page provides a brief description of the objects in the library, but it is encouraged to review the javadoc 
 documentation for additional information and examples. 
