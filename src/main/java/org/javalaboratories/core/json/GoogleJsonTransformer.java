@@ -87,7 +87,7 @@ public class GoogleJsonTransformer implements JsonTransformer {
      * {@inheritDoc}
      */
     public String transform(final String json, final int flags) throws JsonTransformerException {
-        String s = Objects.requireNonNull(json);
+        String s = Objects.requireNonNull(json,"JSON parameter cannot be null");
         try {
             Gson gson = new Gson();
             JsonElement schema = gson.fromJson(this.schema,JsonElement.class);
@@ -127,8 +127,8 @@ public class GoogleJsonTransformer implements JsonTransformer {
      * @throws NullPointerException Path or data parameter is null.
      */
     protected final JsonElement getValue(final String path, final JsonElement data) {
-        String p = Objects.requireNonNull(path);
-        JsonElement d = Objects.requireNonNull(data);
+        String p = Objects.requireNonNull(path,"Path cannot be null");
+        JsonElement d = Objects.requireNonNull(data,"Data cannot be null");
         JsonElement result = null;
         String[] k = p.split("\\.");
         if (path.startsWith("$"))  // Is it a literal?
@@ -177,8 +177,8 @@ public class GoogleJsonTransformer implements JsonTransformer {
      * @see JsonTransformerException
      */
     protected JsonElement transform(final String target, final JsonElement schema, final JsonElement data) {
-        JsonElement s = Objects.requireNonNull(schema);
-        JsonElement d = Objects.requireNonNull(data);
+        JsonElement s = Objects.requireNonNull(schema,"Schema cannot be null");
+        JsonElement d = Objects.requireNonNull(data,"Data cannot be null");
         if (s.isJsonObject()) {
             JsonObject jo = new JsonObject();
             for (String t : s.getAsJsonObject().keySet()) {
