@@ -18,6 +18,9 @@ package org.javalaboratories.core.json;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+import java.io.*;
+import java.nio.charset.Charset;
+
 import static org.javalaboratories.core.json.JsonTransformer.FLAG_PRETTY_FORMAT;
 import static org.javalaboratories.core.json.JsonTransformer.FLAG_SERIALISE_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -321,5 +324,93 @@ public class JsonTransformerTest {
         JsonTransformerException e = assertThrows(JsonTransformerException.class,() -> transformer.transform(source));
         log.error(e.getMessage());
         log.error(e.getJson());
+    }
+
+    @Test
+    public void testComplexSourceTransformationWithReaderWriterObjects_Pass() {
+        String schema = """
+            {
+                "name": "medications.antianginal.name"
+            }
+            """;
+        String source  = """
+            {
+              "medications":[
+                {
+                  "aceInhibitors": [
+                    {
+                      "name": "lisinopril",
+                      "strength": "10 mg Tab",
+                      "dose": "1 tab",
+                      "route": "PO",
+                      "sig": "daily",
+                      "pillCount": "#90",
+                      "refills": "Refill 3"
+                    }
+                  ],
+                  "antianginal": [
+                    {
+                      "name": "nitroglycerin",
+                      "strength": "0.4 mg Sublingual Tab",
+                      "dose": "1 tab",
+                      "route": "SL",
+                      "sig": "q15min PRN",
+                      "pillCount": "#30",
+                      "refills": "Refill 1"
+                    }
+                  ]
+                }]
+            }
+            """;
+        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        StringReader reader = new StringReader(source);
+        StringWriter writer = new StringWriter();
+        transformer.transform(reader,writer);
+        String result = writer.toString();
+        assertEquals("{\"name\":\"nitroglycerin\"}",result);
+    }
+
+    @Test
+    public void testComplexSourceTransformationWithStreams_Pass() {
+        String schema = """
+            {
+                "name": "medications.antianginal.name"
+            }
+            """;
+        String source  = """
+            {
+              "medications":[
+                {
+                  "aceInhibitors": [
+                    {
+                      "name": "lisinopril",
+                      "strength": "10 mg Tab",
+                      "dose": "1 tab",
+                      "route": "PO",
+                      "sig": "daily",
+                      "pillCount": "#90",
+                      "refills": "Refill 3"
+                    }
+                  ],
+                  "antianginal": [
+                    {
+                      "name": "nitroglycerin",
+                      "strength": "0.4 mg Sublingual Tab",
+                      "dose": "1 tab",
+                      "route": "SL",
+                      "sig": "q15min PRN",
+                      "pillCount": "#30",
+                      "refills": "Refill 1"
+                    }
+                  ]
+                }]
+            }
+            """;
+        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        InputStream input = new ByteArrayInputStream(source.getBytes());
+        OutputStream output = new ByteArrayOutputStream();
+        transformer.transform(input,output);
+        String result = output.toString();
+        assertEquals("{\"name\":\"nitroglycerin\"}",result);
     }
 }

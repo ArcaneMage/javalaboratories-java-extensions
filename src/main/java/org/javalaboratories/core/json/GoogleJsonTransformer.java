@@ -179,14 +179,14 @@ public class GoogleJsonTransformer implements JsonTransformer {
     protected JsonElement transform(final String target, final JsonElement schema, final JsonElement data) {
         JsonElement s = Objects.requireNonNull(schema);
         JsonElement d = Objects.requireNonNull(data);
-        if (schema.isJsonObject()) {
+        if (s.isJsonObject()) {
             JsonObject jo = new JsonObject();
             for (String t : s.getAsJsonObject().keySet()) {
                 JsonElement je = s.getAsJsonObject().get(t);
                 jo.add(t,this.transform(t,je,d));
             }
             return jo;
-        } else if (schema.isJsonArray()) {
+        } else if (s.isJsonArray()) {
             JsonArray ja = new JsonArray();
             for (JsonElement e : s.getAsJsonArray())
                 ja.add(this.transform(target,e,d));
@@ -230,7 +230,7 @@ public class GoogleJsonTransformer implements JsonTransformer {
         switch(flags & BIT_MASK) {
             case FLAG_PRETTY_FORMAT -> gson = new GsonBuilder().setPrettyPrinting().create();
             case FLAG_SERIALISE_NULLS -> gson = new GsonBuilder().serializeNulls().create();
-            case FLAG_PRETTY_FORMAT + FLAG_SERIALISE_NULLS -> gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+            case FLAG_PRETTY_FORMAT | FLAG_SERIALISE_NULLS -> gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
             default -> gson = new GsonBuilder().create();
         }
         return gson.toJson(json);

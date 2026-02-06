@@ -1,5 +1,10 @@
 package org.javalaboratories.core.json;
 
+import com.google.gson.stream.JsonReader;
+
+import java.io.*;
+import java.util.Objects;
+
 /**
  * An object that implements this interface has the ability to transform a
  * JSON structure from one form to another.
@@ -104,6 +109,96 @@ public interface JsonTransformer {
      * transforming the JSON structure.
      */
     String transform(final String s, final int flags) throws JsonTransformerException;
+
+    /**
+     * Transforms the JSON source in the {@link InputStream} as dictated by the
+     * mappings schema.
+     * <p>
+     * The schema/mappings are internalised within this {@link JsonTransformer}
+     * object.
+     * <p>
+     * The transformed data is available via the {@link OutputStream} stream.
+     *
+     * @param in JSON source data
+     * @param out JSON output data
+     * @throws JsonTransformerException when an error is encountered whilst
+     * transforming the JSON structure.
+     */
+    default void transform(final InputStream in, final OutputStream out) throws JsonTransformerException {
+        this.transform(in,out,FLAG_CLEAR);
+    }
+
+    /**
+     * Transforms the JSON source in the {@link InputStream} as dictated by the
+     * mappings schema.
+     * <p>
+     * The schema/mappings are internalised within this {@link JsonTransformer}
+     * object.
+     * <p>
+     * The transformed data is available via the {@link OutputStream} stream.
+     *
+     * @param in JSON source data
+     * @param out JSON output data
+     * @param flags formatting bit flags
+     * @throws JsonTransformerException when an error is encountered whilst
+     * transforming the JSON structure.
+     */
+    default void transform(final InputStream in, final OutputStream out, int flags) throws JsonTransformerException {
+        InputStreamReader r = new InputStreamReader(Objects.requireNonNull(in, "Input stream is null"));
+        OutputStreamWriter w = new OutputStreamWriter(Objects.requireNonNull(out,"Output stream is null"));
+        this.transform(r,w,flags);
+    }
+
+    /**
+     * Transforms the JSON source in the {@link Reader} as dictated by the
+     * mappings schema.
+     * <p>
+     * The schema/mappings are internalised within this {@link JsonTransformer}
+     * object.
+     * <p>
+     * The transformed data is available via the {@link Writer} object.
+     *
+     * @param reader JSON source data
+     * @param writer JSON output data
+     * @throws JsonTransformerException when an error is encountered whilst
+     * transforming the JSON structure.
+     */
+    default void transform(final Reader reader, final Writer writer)  throws JsonTransformerException {
+        this.transform(reader, writer, FLAG_CLEAR);
+    }
+
+    /**
+     * Transforms the JSON source in the {@link Reader} as dictated by the
+     * mappings schema.
+     * <p>
+     * The schema/mappings are internalised within this {@link JsonTransformer}
+     * object.
+     * <p>
+     * The transformed data is available via the {@link Writer} object.
+     *
+     * @param reader JSON source data
+     * @param writer JSON output data
+     * @param flags formatting bit flags
+     * @throws JsonTransformerException when an error is encountered whilst
+     * transforming the JSON structure.
+     */
+    default void transform(final Reader reader, final Writer writer, final int flags) throws JsonTransformerException {
+        Reader r = Objects.requireNonNull(reader, "Reader must not be null");
+        Writer w = Objects.requireNonNull(writer, "Writer must not be null");
+        final int BUFFER_SIZE = 1024;
+        char[] buffer = new char[BUFFER_SIZE];
+        int read;
+        StringBuilder sb = new StringBuilder();
+
+        try (Reader rr = r; Writer ww = w) {
+            while ((read = rr.read(buffer)) != -1)
+                sb.append(buffer,0,read);
+            String t = this.transform(sb.toString(),flags);
+            ww.write(t);
+        } catch (IOException e) {
+            throw new JsonTransformerException("I/O Error occurred during transformation",e);
+        }
+     }
 
     /**
      * Transforms the JSON source as dictated by the mappings schema.
