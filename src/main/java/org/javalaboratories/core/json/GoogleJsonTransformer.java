@@ -60,8 +60,8 @@ import java.util.regex.Pattern;
  * @see JsonTransformer
  */
 public class GoogleJsonTransformer implements JsonTransformer {
-    private final String schema;
     private final Pattern arrayRefPattern;
+    private final String schema;
 
     /**
      * Constructs this {@link GoogleJsonTransformer} with a mappings schema.

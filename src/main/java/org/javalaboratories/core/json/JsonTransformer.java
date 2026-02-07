@@ -1,8 +1,12 @@
 package org.javalaboratories.core.json;
 
-import com.google.gson.stream.JsonReader;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Objects;
 
 /**
@@ -119,8 +123,8 @@ public interface JsonTransformer {
      * <p>
      * The transformed data is available via the {@link OutputStream} stream.
      *
-     * @param in JSON source data
-     * @param out JSON output data
+     * @param in source JSON data to be transformed
+     * @param out transformed JSON data
      * @throws JsonTransformerException when an error is encountered whilst
      * transforming the JSON structure.
      */
@@ -137,8 +141,8 @@ public interface JsonTransformer {
      * <p>
      * The transformed data is available via the {@link OutputStream} stream.
      *
-     * @param in JSON source data
-     * @param out JSON output data
+     * @param in source JSON data to be transformed
+     * @param out transformed JSON data
      * @param flags formatting bit flags
      * @throws JsonTransformerException when an error is encountered whilst
      * transforming the JSON structure.
@@ -158,8 +162,8 @@ public interface JsonTransformer {
      * <p>
      * The transformed data is available via the {@link Writer} object.
      *
-     * @param reader JSON source data
-     * @param writer JSON output data
+     * @param reader source JSON data to be transformed
+     * @param writer transformed JSON data
      * @throws JsonTransformerException when an error is encountered whilst
      * transforming the JSON structure.
      */
@@ -176,8 +180,8 @@ public interface JsonTransformer {
      * <p>
      * The transformed data is available via the {@link Writer} object.
      *
-     * @param reader JSON source data
-     * @param writer JSON output data
+     * @param reader source JSON data to be transformed
+     * @param writer transformed JSON data
      * @param flags formatting bit flags
      * @throws JsonTransformerException when an error is encountered whilst
      * transforming the JSON structure.

@@ -290,7 +290,7 @@ public class JsonTransformerTest {
     }
 
     @Test
-    public void testFormattingFlagsArray_Pass() {
+    public void testFormattingBitFlags_Pass() {
         String schema = """
             {
                "openDays": "openEnum",
@@ -301,6 +301,9 @@ public class JsonTransformerTest {
 
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
         String result = transformer.transform(source);
+        assertEquals("{}",result);
+
+        result = transformer.transform(source, FLAG_PRETTY_FORMAT);
         assertEquals("{}",result);
 
         result = transformer.transform(source, FLAG_SERIALISE_NULLS);
