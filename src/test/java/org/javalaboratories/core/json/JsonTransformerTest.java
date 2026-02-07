@@ -18,8 +18,12 @@ package org.javalaboratories.core.json;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
-import java.nio.charset.Charset;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 import static org.javalaboratories.core.json.JsonTransformer.FLAG_PRETTY_FORMAT;
 import static org.javalaboratories.core.json.JsonTransformer.FLAG_SERIALISE_NULLS;
@@ -32,60 +36,85 @@ public class JsonTransformerTest {
     @Test
     public void testHappyPath_Pass() {
         String schema = """
-                {
-                   "id": "customerId",
-                   "name": "firstName",
-                   "address": {
-                       "city": "address.location.city"
-                   }
-                }
-                """;
+            {
+               "id": "customerId",
+               "name": "firstName",
+               "address": {
+                   "city": "address.location.city"
+               }
+            }
+            """;
         String source = """
-                {
-                    "customerId": 1923,
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "email": "john.doe@gmail.com",
-                    "address": {
-                        "location": {
-                            "city": "Dunstable"
-                        },
-                        "county": "Bedfordshire",
-                        "postalCode": "LU6 3BX"
-                    }
+            {
+                "customerId": 1923,
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john.doe@gmail.com",
+                "address": {
+                    "location": {
+                        "city": "Dunstable"
+                    },
+                    "county": "Bedfordshire",
+                    "postalCode": "LU6 3BX"
                 }
-                """;
+            }
+            """;
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{\"id\":1923,\"name\":\"John\",\"address\":{\"city\":\"Dunstable\"}}",result);
     }
 
     @Test
+    public void testNewWithBadParameters_Fail() {
+        String schema = null;
+
+        assertThrows(NullPointerException.class, () -> TransformerFactory.createJsonTransformer(schema));
+    }
+
+    @Test
+    public void testTransformationWithBadParameters_Fail() {
+        String schema = """
+            {
+               "id": "customerId",
+               "name": "firstName",
+               "address": {
+                   "city": "address.location.city"
+               }
+            }
+            """;
+        String source = null;
+
+        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        assertThrows(NullPointerException.class, () -> transformer.transform(source));
+    }
+
+    @Test
     public void testLogicalOrExpression_Pass() {
         String schema = """
-                {
-                   "id": "id2 | customerId",
-                   "name": "firstName",
-                   "address": {
-                       "city": "address.location.city"
-                   }
-                }
-                """;
+            {
+               "id": "id2 | customerId",
+               "name": "firstName",
+               "address": {
+                   "city": "address.location.city"
+               }
+            }
+            """;
         String source = """
-                {
-                    "customerId": 1923,
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "email": "john.doe@gmail.com",
-                    "address": {
-                        "location": {
-                            "city": "Dunstable"
-                        },
-                        "county": "Bedfordshire",
-                        "postalCode": "LU6 3BX"
-                    }
+            {
+                "customerId": 1923,
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john.doe@gmail.com",
+                "address": {
+                    "location": {
+                        "city": "Dunstable"
+                    },
+                    "county": "Bedfordshire",
+                    "postalCode": "LU6 3BX"
                 }
-                """;
+            }
+            """;
+
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{\"id\":1923,\"name\":\"John\",\"address\":{\"city\":\"Dunstable\"}}",result);
@@ -94,33 +123,33 @@ public class JsonTransformerTest {
     @Test
     public void testArrayTransformation1_Pass() {
         String schema = """
-                {
-                   "id": "customerId",
-                   "name": "firstName",
-                   "OpenDaysEnum": ["$Mon","$Wed","$Fri"],
-                   "data": [
-                     {
-                        "city": "(0)address.city"
-                     }
-                   ],
-                   "address": {
-                       "city": "(0)address.city"
-                    }
+            {
+               "id": "customerId",
+               "name": "firstName",
+               "OpenDaysEnum": ["$Mon","$Wed","$Fri"],
+               "data": [
+                 {
+                    "city": "(0)address.city"
+                 }
+               ],
+               "address": {
+                   "city": "(0)address.city"
                 }
-                """;
+            }
+            """;
         String source = """
-                {
-                    "customerId": 1923,
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "email": "john.doe@gmail.com",
-                    "address": [{
-                            "city": "Dunstable",
-                            "county": "Bedfordshire",
-                            "postalCode": "LU6 3BX"
-                    }]
-                }
-                """;
+            {
+                "customerId": 1923,
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john.doe@gmail.com",
+                "address": [{
+                        "city": "Dunstable",
+                        "county": "Bedfordshire",
+                        "postalCode": "LU6 3BX"
+                }]
+            }
+            """;
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{\"id\":1923,\"name\":\"John\",\"OpenDaysEnum\":[\"Mon\",\"Wed\",\"Fri\"]," +
@@ -130,17 +159,17 @@ public class JsonTransformerTest {
     @Test
     public void testArrayTransformation2_Pass() {
         String schema = """
-                {
-                   "openDays": "openEnum",
-                   "name": "business"
-                }
-                """;
+            {
+               "openDays": "openEnum",
+               "name": "business"
+            }
+            """;
         String source = """ 
-                {
-                    "openEnum": ["Mon","Wed","Fri"],
-                    "business": "Jakes Cakes"
-                }
-                """;
+            {
+                "openEnum": ["Mon","Wed","Fri"],
+                "business": "Jakes Cakes"
+            }
+            """;
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{\"openDays\":[\"Mon\",\"Wed\",\"Fri\"],\"name\":\"Jakes Cakes\"}",result);
@@ -149,14 +178,14 @@ public class JsonTransformerTest {
     @Test
     public void testArrayTransformation3_Pass() {
         String schema = """
-                ["openEnum","business","$Fri"]
-                """;
+            ["openEnum","business","$Fri"]
+            """;
         String source = """ 
-                {
-                    "openEnum": ["Mon","Wed","Fri"],
-                    "business": "Jakes Cakes"
-                }
-                """;
+            {
+                "openEnum": ["Mon","Wed","Fri"],
+                "business": "Jakes Cakes"
+            }
+            """;
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("[[\"Mon\",\"Wed\",\"Fri\"],\"Jakes Cakes\",\"Fri\"]",result);
@@ -166,18 +195,18 @@ public class JsonTransformerTest {
     public void testEmptyJchema_Pass() {
         String schema = "{}";
         String source = """
-                {
-                    "customerId": 1923,
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "email": "john.doe@gmail.com",
-                    "address": [{
-                            "city": "Dunstable",
-                            "county": "Bedfordshire",
-                            "postalCode": "LU6 3BX"
-                    }]
-                }
-                """;
+            {
+                "customerId": 1923,
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john.doe@gmail.com",
+                "address": [{
+                        "city": "Dunstable",
+                        "county": "Bedfordshire",
+                        "postalCode": "LU6 3BX"
+                }]
+            }
+            """;
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{}",result);
@@ -187,18 +216,18 @@ public class JsonTransformerTest {
     public void testEmptySchemaArray_Pass() {
         String schema = "[]";
         String source = """
-                {
-                    "customerId": 1923,
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "email": "john.doe@gmail.com",
-                    "address": [{
-                            "city": "Dunstable",
-                            "county": "Bedfordshire",
-                            "postalCode": "LU6 3BX"
-                    }]
-                }
-                """;
+            {
+                "customerId": 1923,
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john.doe@gmail.com",
+                "address": [{
+                        "city": "Dunstable",
+                        "county": "Bedfordshire",
+                        "postalCode": "LU6 3BX"
+                }]
+            }
+            """;
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("[]",result);
@@ -207,10 +236,10 @@ public class JsonTransformerTest {
     @Test
     public void testComplexSourceTransformation_Pass() {
         String schema = """
-                {
-                    "name": "medications.antianginal.name"
-                }
-                """;
+            {
+                "name": "medications.antianginal.name"
+            }
+            """;
         String source  = """
             {
               "medications":[
@@ -248,11 +277,11 @@ public class JsonTransformerTest {
     @Test
     public void testEmptySourceArray_Pass() {
         String schema = """
-                {
-                   "openDays": "openEnum",
-                   "name": "business"
-                }
-                """;
+            {
+               "openDays": "openEnum",
+               "name": "business"
+            }
+            """;
         String source = "[]";
 
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
@@ -263,11 +292,11 @@ public class JsonTransformerTest {
     @Test
     public void testFormattingFlagsArray_Pass() {
         String schema = """
-                {
-                   "openDays": "openEnum",
-                   "name": "business"
-                }
-                """;
+            {
+               "openDays": "openEnum",
+               "name": "business"
+            }
+            """;
         String source = "[]";
 
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
