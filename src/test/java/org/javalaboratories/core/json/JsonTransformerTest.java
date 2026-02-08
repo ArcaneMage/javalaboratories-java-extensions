@@ -89,6 +89,34 @@ public class JsonTransformerTest {
     }
 
     @Test
+    public void testJsonSourceWithMissingBracesSyntax_Fail() {
+        String schema = """
+            {
+               "id": "customerId",
+               "name": "firstName",
+               "address": {
+                   "city": "address.location.city"
+            }
+            """;
+        String source = """
+            {
+                "customerId": 1923,
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john.doe@gmail.com",
+                "address": {
+                    "location": {
+                        "city": "Dunstable"
+                    },
+                    "county": "Bedfordshire",
+                    "postalCode": "LU6 3BX"
+            }
+            """;
+        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        assertThrows(JsonTransformerException.class,() -> transformer.transform(source));
+    }
+
+    @Test
     public void testLogicalOrExpression_Pass() {
         String schema = """
             {

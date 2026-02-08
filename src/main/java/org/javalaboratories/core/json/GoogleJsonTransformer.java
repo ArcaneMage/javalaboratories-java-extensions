@@ -86,8 +86,8 @@ public class GoogleJsonTransformer implements JsonTransformer {
     /**
      * {@inheritDoc}
      */
-    public String transform(final String json, final int flags) throws JsonTransformerException {
-        String s = Objects.requireNonNull(json,"JSON parameter cannot be null");
+    public String transform(final String source, final int flags) throws JsonTransformerException {
+        String s = Objects.requireNonNull(source,"Source parameter cannot be null");
         try {
             Gson gson = new Gson();
             JsonElement schema = gson.fromJson(this.schema,JsonElement.class);
