@@ -16,6 +16,7 @@
 package org.javalaboratories.core.json;
 
 import lombok.extern.slf4j.Slf4j;
+import org.javalaboratories.core.json.events.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -471,6 +472,59 @@ public class JsonTransformerTest {
         OutputStream output = new ByteArrayOutputStream();
         transformer.transform(input,output);
         String result = output.toString();
+        assertEquals("{\"name\":\"nitroglycerin\"}",result);
+    }
+
+    @Test
+    public void testEventProcessing_Pass() {
+        String schema = """
+            {
+                "name": "medications.antianginal.name"
+            }
+            """;
+        String source  = """
+            {
+              "medications":[
+                {
+                  "aceInhibitors": [
+                    {
+                      "name": "lisinopril",
+                      "strength": "10 mg Tab",
+                      "dose": "1 tab",
+                      "route": "PO",
+                      "sig": "daily",
+                      "pillCount": "#90",
+                      "refills": "Refill 3"
+                    }
+                  ],
+                  "antianginal": [
+                    {
+                      "name": "nitroglycerin",
+                      "strength": "0.4 mg Sublingual Tab",
+                      "dose": "1 tab",
+                      "route": "SL",
+                      "sig": "q15min PRN",
+                      "pillCount": "#30",
+                      "refills": "Refill 1"
+                    }
+                  ]
+                }]
+            }
+            """;
+        AbstractJsonTransformerSubscriber listener = new AbstractJsonTransformerSubscriber() {
+            @Override
+            public void notify(TransformerEvent event) {
+                switch (event) {
+                    case BeforeTransformationEvent e -> log.info("Before transformation {}",e.getEventId());
+                    case AfterTransformationEvent e -> log.info("After transformation {}",e.getEventId());
+                    case JsonNodeTransformationEvent e -> log.info("Json node transformation: \"{}\", {}",e.getMapping(),e.getJsonValue());
+                }
+            }
+        };
+
+        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        transformer.subscribe(listener);
+        String result = transformer.transform(source);
         assertEquals("{\"name\":\"nitroglycerin\"}",result);
     }
 }

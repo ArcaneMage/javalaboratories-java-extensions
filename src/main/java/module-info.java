@@ -20,8 +20,9 @@ module javalaboratories.java.extensions {
   requires org.apache.commons.codec;
   requires org.apache.commons.lang3;
   requires org.slf4j;
+    requires java.desktop;
 
-  opens org.javalaboratories.core.cryptography.json to com.google.gson;
+    opens org.javalaboratories.core.cryptography.json to com.google.gson;
 
   exports org.javalaboratories.core;
   exports org.javalaboratories.core.atomic;
@@ -39,4 +40,5 @@ module javalaboratories.java.extensions {
   exports org.javalaboratories.core.tuple;
   exports org.javalaboratories.core.util;
   exports org.javalaboratories.core.holders;
+  exports org.javalaboratories.core.json.events;
 }

@@ -22,6 +22,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
+import org.javalaboratories.core.event.EventBroadcaster;
+import org.javalaboratories.core.event.EventSource;
+import org.javalaboratories.core.json.events.*;
 import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple2;
 
@@ -59,7 +62,8 @@ import java.util.regex.Pattern;
  *
  * @see JsonTransformer
  */
-public class GoogleJsonTransformer implements JsonTransformer {
+public class GoogleJsonTransformer implements JsonTransformer, EventSource {
+    private final EventBroadcaster<GoogleJsonTransformer,TransformerEvent, AbstractJsonTransformerSubscriber> broadcaster;
     private final Pattern arrayRefPattern;
     private final String schema;
 
@@ -74,6 +78,7 @@ public class GoogleJsonTransformer implements JsonTransformer {
     GoogleJsonTransformer(final String s) {
         this.schema = Objects.requireNonNull(s);
         this.arrayRefPattern = Pattern.compile("\\([0-9]+\\)");
+        this.broadcaster = new EventBroadcaster<>();
     }
 
     /**
@@ -92,11 +97,14 @@ public class GoogleJsonTransformer implements JsonTransformer {
             Gson gson = new Gson();
             JsonElement schema = gson.fromJson(this.schema,JsonElement.class);
             JsonElement data = gson.fromJson(s,JsonElement.class);
+            publish(new BeforeTransformationEvent(this));
             JsonElement transformed = this.transform(null,schema,data);
             // Finally generate JSON output, applying formatting bit flags
             return this.toJson(transformed,flags);
         } catch (JsonSyntaxException e) {
             throw new JsonTransformerException("Encountered JSON transformation error, relating to JSON syntax",e);
+        } finally {
+            publish(new AfterTransformationEvent(this));
         }
     }
 
@@ -199,8 +207,47 @@ public class GoogleJsonTransformer implements JsonTransformer {
             JsonElement je = null;
             for (int i = 0; i < paths.length && je == null; i++)
                 je = this.getValue(paths[i].trim(),d);
+            publish(new JsonNodeTransformationEvent(this,sourcePath,je != null ? je.toString() : null));
             return je;
         }
+    }
+
+    /**
+     * Publish events to interested {@code subscribers} objects.
+     * <p>
+     * Refer to {@link this#subscribe(AbstractJsonTransformerSubscriber)} to register
+     * a subscriber with this {@link JsonTransformer} object.
+     *
+     * @see TransformerEvent
+     * @see BeforeTransformationEvent
+     * @see AfterTransformationEvent
+     */
+    protected void publish(final TransformerEvent event) {
+        this.broadcaster.publish(event);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void subscribe(final AbstractJsonTransformerSubscriber subscriber) {
+        this.broadcaster.subscribe(subscriber);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean unsubscribe(final AbstractJsonTransformerSubscriber subscriber) {
+        return this.broadcaster.unsubscribe(subscriber);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int subscribers() {
+        return this.broadcaster.subscribers();
     }
 
     private JsonArrayIndex createJsonArrayIndex(final String property) {

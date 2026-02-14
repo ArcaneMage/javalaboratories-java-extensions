@@ -235,7 +235,7 @@ public interface Promise<T> extends Invocable<T> {
      * object is processed, the state will either be {@link States#FULFILLED}
      * or {@link States#REJECTED} depending on the outcome of the action.
      *
-     * @return enum {@code States}, the current state of this {@link Promise}
+     * @return enum {@code EventTypes}, the current state of this {@link Promise}
      * object.
      */
     States getState();

@@ -1,5 +1,8 @@
 package org.javalaboratories.core.json;
 
+import org.javalaboratories.core.event.EventSubscribable;
+import org.javalaboratories.core.json.events.AbstractJsonTransformerSubscriber;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -83,7 +86,7 @@ import java.util.Objects;
  * </pre>
  */
 @FunctionalInterface
-public interface JsonTransformer {
+public interface JsonTransformer extends EventSubscribable<AbstractJsonTransformerSubscriber> {
     /**
      * Default flag setting -- no formatting
      */
@@ -226,5 +229,30 @@ public interface JsonTransformer {
      */
     default String schema() {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default void subscribe(final AbstractJsonTransformerSubscriber subscriber) {
+        throw new UnsupportedOperationException();
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default boolean unsubscribe(final AbstractJsonTransformerSubscriber subscriber) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default int subscribers() {
+        return 0;
     }
 }
