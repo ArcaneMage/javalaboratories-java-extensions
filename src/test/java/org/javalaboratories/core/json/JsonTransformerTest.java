@@ -479,7 +479,8 @@ public class JsonTransformerTest {
     public void testEventProcessing_Pass() {
         String schema = """
             {
-                "name": "medications.antianginal.name"
+                "name": "medications.antianginal.name",
+                "strength": "medications.antianginal.strength"
             }
             """;
         String source  = """
@@ -511,20 +512,16 @@ public class JsonTransformerTest {
                 }]
             }
             """;
-        AbstractJsonTransformerSubscriber listener = new AbstractJsonTransformerSubscriber() {
-            @Override
-            public void notify(TransformerEvent event) {
-                switch (event) {
-                    case BeforeTransformationEvent e -> log.info("Before transformation {}",e.getEventId());
-                    case AfterTransformationEvent e -> log.info("After transformation {}",e.getEventId());
-                    case JsonNodeTransformationEvent e -> log.info("Json node transformation: \"{}\", {}",e.getMapping(),e.getJsonValue());
-                }
-            }
-        };
-
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
-        transformer.subscribe(listener);
+        transformer.subscribe(event -> {
+            switch (event) {
+                case BeforeTransformationEvent e -> log.info("Before transformation {}",e.getEventId());
+                case AfterTransformationEvent e -> log.info("After transformation {}",e.getEventId());
+                case JsonPropertyTransformationEvent e -> log.info("Json property transformation: \"{}\", \"{}\", {}",
+                        e.getTarget(),e.getMapping(),e.getValue());
+            }
+        });
         String result = transformer.transform(source);
-        assertEquals("{\"name\":\"nitroglycerin\"}",result);
+        assertEquals("{\"name\":\"nitroglycerin\",\"strength\":\"0.4 mg Sublingual Tab\"}",result);
     }
 }

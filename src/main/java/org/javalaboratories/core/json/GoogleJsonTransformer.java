@@ -63,7 +63,7 @@ import java.util.regex.Pattern;
  * @see JsonTransformer
  */
 public class GoogleJsonTransformer implements JsonTransformer, EventSource {
-    private final EventBroadcaster<GoogleJsonTransformer,TransformerEvent, AbstractJsonTransformerSubscriber> broadcaster;
+    private final EventBroadcaster<GoogleJsonTransformer,TransformerEvent, JsonTransformerSubscriber> broadcaster;
     private final Pattern arrayRefPattern;
     private final String schema;
 
@@ -207,7 +207,7 @@ public class GoogleJsonTransformer implements JsonTransformer, EventSource {
             JsonElement je = null;
             for (int i = 0; i < paths.length && je == null; i++)
                 je = this.getValue(paths[i].trim(),d);
-            publish(new JsonNodeTransformationEvent(this,sourcePath,je != null ? je.toString() : null));
+            publish(new JsonPropertyTransformationEvent(this,target,sourcePath,je != null ? je.toString() : null));
             return je;
         }
     }
@@ -215,7 +215,7 @@ public class GoogleJsonTransformer implements JsonTransformer, EventSource {
     /**
      * Publish events to interested {@code subscribers} objects.
      * <p>
-     * Refer to {@link this#subscribe(AbstractJsonTransformerSubscriber)} to register
+     * Refer to {@link this#subscribe(JsonTransformerSubscriber)} to register
      * a subscriber with this {@link JsonTransformer} object.
      *
      * @see TransformerEvent
@@ -230,7 +230,7 @@ public class GoogleJsonTransformer implements JsonTransformer, EventSource {
      * {@inheritDoc}
      */
     @Override
-    public void subscribe(final AbstractJsonTransformerSubscriber subscriber) {
+    public void subscribe(final JsonTransformerSubscriber subscriber) {
         this.broadcaster.subscribe(subscriber);
     }
 
@@ -238,7 +238,7 @@ public class GoogleJsonTransformer implements JsonTransformer, EventSource {
      * {@inheritDoc}
      */
     @Override
-    public boolean unsubscribe(final AbstractJsonTransformerSubscriber subscriber) {
+    public boolean unsubscribe(final JsonTransformerSubscriber subscriber) {
         return this.broadcaster.unsubscribe(subscriber);
     }
 

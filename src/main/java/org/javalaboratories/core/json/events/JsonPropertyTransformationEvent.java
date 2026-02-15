@@ -23,9 +23,10 @@ import org.javalaboratories.core.event.EventSource;
  * successfully.
  */
 @Getter
-public final class JsonNodeTransformationEvent extends TransformerEvent {
+public final class JsonPropertyTransformationEvent extends TransformerEvent {
 
-    private final String jsonValue;
+    private final String target;
+    private final String value;
     private final String mapping;
 
     /**
@@ -33,11 +34,12 @@ public final class JsonNodeTransformationEvent extends TransformerEvent {
      *
      * @param source source of the event, normally the publisher
      * @param mapping mapping/schema that dictates final JSON structure
-     * @param jsonValue transformed JSON value
+     * @param value transformed JSON value
      */
-    public JsonNodeTransformationEvent(final EventSource source, final String mapping, final String jsonValue) {
+    public JsonPropertyTransformationEvent(final EventSource source, final String target, final String mapping, final String value) {
         super(source);
-        this.jsonValue = jsonValue;
+        this.target = target;
+        this.value = value;
         this.mapping = mapping;
     }
 }

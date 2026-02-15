@@ -23,11 +23,11 @@ import org.javalaboratories.core.event.EventSource;
  * events.
  * <p>
  * Implementors of the {@code JsonTransformer} interface, if they support
- * event publishing, should consider publishing {@link JsonNodeTransformationEvent},
+ * event publishing, should consider publishing {@link JsonPropertyTransformationEvent},
  * {@link BeforeTransformationEvent} and {@link AfterTransformationEvent}.
  */
 public abstract sealed class TransformerEvent extends AbstractEvent
-        permits AfterTransformationEvent, BeforeTransformationEvent, JsonNodeTransformationEvent {
+        permits AfterTransformationEvent, BeforeTransformationEvent, JsonPropertyTransformationEvent {
 
     /**
      * Constructs the {@code transformer} event.
