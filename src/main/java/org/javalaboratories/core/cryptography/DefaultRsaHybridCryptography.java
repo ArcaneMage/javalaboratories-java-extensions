@@ -130,7 +130,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
     @Override
     public <K extends PrivateKey,T extends OutputStream> StreamCryptographyResult<K,T> decrypt(final K privateKey,
                                                                                                final InputStream ciphertext,
-                                                                                               T outputStream) {
+                                                                                               final T outputStream) {
         K pk = Objects.requireNonNull(privateKey,"Expected private key");
         try (InputStream is = Objects.requireNonNull(ciphertext,"Expected cipher stream");
              T os = getOutputStream(Objects.requireNonNull(outputStream,"Expected out stream"))) {

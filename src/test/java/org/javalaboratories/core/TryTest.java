@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -36,13 +35,40 @@ public class TryTest {
 
     private static final Logger logger = LoggerFactory.getLogger(TryTest.class);
 
+    private static final String TEST_FILE_TEXT = "This is a test file with some text.";
     private Try<String> aTry1;
     private Try<Integer> aTry2;
 
     @BeforeEach
     public void setup() {
-        aTry1 = Try.of(() -> new String(Files.readAllBytes(Paths.get("target/test-classes/testfile.txt"))));
+        aTry1 = Try.of(() -> new String(Files.readAllBytes(Paths.get("src/test/resources/testfile.txt"))));
         aTry2 = Try.of(() -> 10 / 0);
+    }
+
+    @Test
+    public void testWithResource_Pass() {
+        int length = Try.with(() -> new BufferedReader(new FileReader("src/test/resources/testfile.txt")), BufferedReader::readLine)
+                .map(String::length)
+                .fold(-1,l -> l);
+
+        assertEquals(35,length);
+    }
+
+    @Test
+    public void testWithResource_IOException1_Fail() {
+        int length = Try.with(() -> new BufferedReader(new FileReader("src/test/resources/does-not-exist.txt")), BufferedReader::readLine)
+                .map(String::length)
+                .fold(-1,l -> l);
+
+        assertEquals(-1,length);
+    }
+
+    @Test
+    public void testWithResource_IOException2_Fail() {
+        int read = Try.with(() -> new InputStreamReader(InputStream.nullInputStream()), r -> {r.close(); return r.read();})
+                .fold(-16,Function.identity());
+
+        assertEquals(-16,read);
     }
 
     @Test
@@ -52,7 +78,7 @@ public class TryTest {
         Integer number = aTry2.fold(t -> t instanceof ArithmeticException ? 0 : 1,Function.identity());
 
         // Then
-        assertEquals("This is a test file with some text.",text);
+        assertEquals(TEST_FILE_TEXT,text);
         assertEquals(0, number);
 
         assertTrue(aTry1.isSuccess());
@@ -162,7 +188,7 @@ public class TryTest {
         int number = aTry2.fold(t -> t instanceof ArithmeticException ? 0 : 1,Function.identity());
 
         // Then
-        assertEquals("This is a test file with some text.", string);
+        assertEquals(TEST_FILE_TEXT, string);
         assertEquals(0,number);
     }
 
@@ -224,7 +250,7 @@ public class TryTest {
                           .fold(0, Function.identity());
 
         // Then
-        assertEquals("This is a test file with some text.",string);
+        assertEquals(TEST_FILE_TEXT,string);
         assertEquals(-1,number);
     }
 
@@ -235,7 +261,7 @@ public class TryTest {
 
         // Then
         assertThrows(IllegalArgumentException.class, () -> aTry2.orElseThrow(IllegalArgumentException::new));
-        assertEquals("This is a test file with some text.",string);
+        assertEquals(TEST_FILE_TEXT,string);
     }
 
     @Test
@@ -245,7 +271,7 @@ public class TryTest {
 
         // Then
         assertThrows(IOException.class, () -> aTry2.orElseThrow(IOException::new));
-        assertEquals("This is a test file with some text.",string);
+        assertEquals(TEST_FILE_TEXT,string);
     }
 
     @Test
@@ -282,7 +308,7 @@ public class TryTest {
         assertEquals(0,size);
 
         assertTrue(aTryString.isSuccess());
-        assertEquals("This is a test file with some text.",string);
+        assertEquals(TEST_FILE_TEXT,string);
     }
 
     @Test
@@ -339,7 +365,7 @@ public class TryTest {
 
         // Then
         assertEquals(1,map1.size());
-        assertEquals("This is a test file with some text.",map1.get("key1"));
+        assertEquals(TEST_FILE_TEXT,map1.get("key1"));
 
         assertEquals(0,map2.size());
 
@@ -356,7 +382,7 @@ public class TryTest {
 
         // Then
         assertEquals(1,set1.size());
-        assertTrue(set1.contains("This is a test file with some text."));
+        assertTrue(set1.contains(TEST_FILE_TEXT));
         assertEquals(0,set2.size());
 
         assertThrows(UnsupportedOperationException.class, () -> set1.add("10"));
@@ -370,14 +396,14 @@ public class TryTest {
         Maybe<Integer> maybe2 = aTry2.toMaybe();
 
         // Then
-        assertEquals("This is a test file with some text.",maybe1.get());
+        assertEquals(TEST_FILE_TEXT,maybe1.get());
         assertEquals(Maybe.empty(),maybe2);
     }
 
     @Test
     public void testEqualsHashCode_Pass() {
         // Given
-        Try<String> aTryString = Try.of(() -> "This is a test file with some text.");
+        Try<String> aTryString = Try.of(() -> TEST_FILE_TEXT);
 
         // Then
         assertEquals(aTryString,aTry1);
