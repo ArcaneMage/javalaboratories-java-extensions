@@ -16,7 +16,7 @@ import org.javalaboratories.core.event.EventSubscriber;
  *
  * @see TransformerEvent
  * @see BeforeTransformationEvent
- * @see AfterTransformationEvent*
+ * @see AfterTransformationEvent
  */
 @FunctionalInterface
 public interface JsonTransformerSubscriber extends EventSubscriber<TransformerEvent> {}

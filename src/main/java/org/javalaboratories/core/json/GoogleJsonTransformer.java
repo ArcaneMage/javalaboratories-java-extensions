@@ -215,7 +215,7 @@ public class GoogleJsonTransformer implements JsonTransformer, EventSource {
     /**
      * Publish events to interested {@code subscribers} objects.
      * <p>
-     * Refer to {@link this#subscribe(JsonTransformerSubscriber)} to register
+     * Refer to {@link #subscribe(JsonTransformerSubscriber)} to register
      * a subscriber with this {@link JsonTransformer} object.
      *
      * @see TransformerEvent
