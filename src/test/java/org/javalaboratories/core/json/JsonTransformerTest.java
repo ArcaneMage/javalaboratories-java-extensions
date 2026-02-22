@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.javalaboratories.core.json.JsonTransformer.FLAG_PRETTY_FORMAT;
 import static org.javalaboratories.core.json.JsonTransformer.FLAG_SERIALISE_NULLS;
@@ -513,15 +514,26 @@ public class JsonTransformerTest {
             }
             """;
         JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        AtomicInteger events = new AtomicInteger(0);
         transformer.subscribe(event -> {
             switch (event) {
-                case BeforeTransformationEvent e -> log.info("Before transformation {}",e.getEventId());
-                case AfterTransformationEvent e -> log.info("After transformation {}",e.getEventId());
-                case JsonPropertyTransformationEvent e -> log.info("Json property transformation: \"{}\", \"{}\", {}",
+                case BeforeTransformationEvent e -> {
+                    log.info("Before transformation {}",e.getEventId());
+                    events.incrementAndGet();
+                }
+                case AfterTransformationEvent e -> {
+                    log.info("After transformation {}",e.getEventId());
+                    events.incrementAndGet();
+                }
+                case JsonPropertyTransformationEvent e -> {
+                    log.info("Json property transformation: \"{}\", \"{}\", {}",
                         e.getTarget(),e.getMapping(),e.getValue());
+                    events.incrementAndGet();
+                }
             }
         });
         String result = transformer.transform(source);
         assertEquals("{\"name\":\"nitroglycerin\",\"strength\":\"0.4 mg Sublingual Tab\"}",result);
+        assertEquals(4,events.get());
     }
 }

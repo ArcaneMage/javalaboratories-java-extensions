@@ -63,7 +63,7 @@ import java.util.regex.Pattern;
  * @see JsonTransformer
  */
 public class GoogleJsonTransformer implements JsonTransformer, EventSource {
-    private final EventBroadcaster<GoogleJsonTransformer,TransformerEvent, JsonTransformerSubscriber> broadcaster;
+    private final EventBroadcaster<GoogleJsonTransformer,TransformerEvent,JsonTransformerSubscriber> broadcaster;
     private final Pattern arrayRefPattern;
     private final String schema;
 
@@ -76,7 +76,7 @@ public class GoogleJsonTransformer implements JsonTransformer, EventSource {
      * @throws NullPointerException if the schema is null.
      */
     GoogleJsonTransformer(final String s) {
-        this.schema = Objects.requireNonNull(s);
+        this.schema = Objects.requireNonNull(s,"schema/mappings is null");
         this.arrayRefPattern = Pattern.compile("\\([0-9]+\\)");
         this.broadcaster = new EventBroadcaster<>();
     }
@@ -98,9 +98,9 @@ public class GoogleJsonTransformer implements JsonTransformer, EventSource {
             JsonElement schema = gson.fromJson(this.schema,JsonElement.class);
             JsonElement data = gson.fromJson(s,JsonElement.class);
             publish(new BeforeTransformationEvent(this));
-            JsonElement transformed = this.transform(null,schema,data);
+            JsonElement jsonElement = this.transform(null,schema,data);
             // Finally generate JSON output, applying formatting bit flags
-            return this.toJson(transformed,flags);
+            return this.toJson(jsonElement,flags);
         } catch (JsonSyntaxException e) {
             throw new JsonTransformerException("Encountered JSON transformation error, relating to JSON syntax",e);
         } finally {

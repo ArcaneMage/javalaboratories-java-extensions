@@ -10,7 +10,7 @@ import org.javalaboratories.core.event.EventSubscriber;
  * this should be clearly documented by the transformer object: in such cases,
  * the subscriber methods are unsupported operations.
  * <p>
- * However, for {@code JsonTransformer} that do publish events, implement
+ * However, for {@code JsonTransformer} objects that do publish events, implement
  * this abstract class then register it with the subscriber method of the
  * {@code JsonTransformer} object.
  *
