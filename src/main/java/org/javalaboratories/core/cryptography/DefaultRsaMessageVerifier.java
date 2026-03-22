@@ -133,7 +133,7 @@ public class DefaultRsaMessageVerifier extends MessageRsaAuthentication implemen
 
     @Override
     public String toString() {
-        return STR."[RsaMessageVerifier,\{getAlgorithm()}]";
+        return String.format("[RsaMessageVerifier,%s]",getAlgorithm());
     }
 
     private PublicKey readPublicKeyFrom(final InputStream fis) throws IOException {

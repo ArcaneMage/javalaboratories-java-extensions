@@ -21,7 +21,7 @@ package org.javalaboratories.core.json;
  * @see JsonTransformer
  * @see JsonTransformerException
  */
-public final class TransformerFactory {
+public final class JsonTransformerFactory {
 
     /**
      * Creates an instance of the {@link JsonTransformer} with a mappings
@@ -30,9 +30,9 @@ public final class TransformerFactory {
      * @param schema mappings schema.
      * @return an instance of {@link JsonTransformer}.
      */
-    public static JsonTransformer createJsonTransformer(final String schema) {
-        return new GoogleJsonTransformer(schema);
+    public static JsonTransformer createTransformer(final String schema) {
+        return new DefaultJsonTransformer(schema);
     }
 
-    private TransformerFactory() {}
+    private JsonTransformerFactory() {}
 }

@@ -143,7 +143,7 @@ public class Message {
     public String toString() {
         boolean signature = this.signature != null;
         boolean signedHeaderBlock = this.signed != null;
-        return STR."[signature=\{signature},signedHeaderBlock=\{signedHeaderBlock}]";
+        return String.format("[signature=%s,signedHeaderBlock=%s]",signature,signedHeaderBlock);
     }
 
     private byte[] encodeSign() {

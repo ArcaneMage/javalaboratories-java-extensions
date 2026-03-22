@@ -36,7 +36,7 @@ public abstract class CoreApplicative<T> extends Applicative<T> implements Compa
             Comparable<T> a = (Comparable<T>) this.get();
             return a.compareTo(Objects.requireNonNull(other).get());
         } catch (ClassCastException e) {
-            throw new ClassCastException(STR."Applicative \{this.get()} is not a comparable type");
+            throw new ClassCastException(String.format("Applicative %s is not a comparable type",this.get()));
         }
     }
 
@@ -45,6 +45,6 @@ public abstract class CoreApplicative<T> extends Applicative<T> implements Compa
      */
     @Override
     public String toString() {
-       return STR."Applicative[value=\{this.get()}]";
+        return String.format("Applicative[value=%s]", this.get());
     }
 }

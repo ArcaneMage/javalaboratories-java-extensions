@@ -122,7 +122,7 @@ public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements
             .orElseThrow(() -> new CryptographyException(MESSAGE_NOT_SIGNABLE));
 
         PublicKey publicKey = getPublicKey();
-        File tempfile = new File(STR."\{ciphertext.getAbsolutePath()}.tmp");
+        File tempfile = new File(String.format("%s.tmp",ciphertext.getAbsolutePath()));
         try (FileInputStream fis = new FileInputStream(ct);
             FileOutputStream fos = new FileOutputStream(tempfile)) {
 
@@ -144,7 +144,7 @@ public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements
     }
     @Override
     public String toString() {
-        return STR."[RsaMessageSigner,\{getAlgorithm()}]";
+        return String.format("[RsaMessageSigner,%s]",getAlgorithm());
     }
 
     private PublicKey getPublicKey() {

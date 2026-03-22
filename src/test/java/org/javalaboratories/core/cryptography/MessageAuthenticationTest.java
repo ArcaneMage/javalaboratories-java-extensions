@@ -111,7 +111,7 @@ public class MessageAuthenticationTest {
     public void testFileEncrypt_Pass() throws URISyntaxException{
         ClassLoader classLoader = RsaHybridCryptographyTest.class.getClassLoader();
         File source = Paths.get(classLoader.getResource(AES_UNENCRYPTED_FILE).toURI()).toFile();
-        File ciphertext = new File(STR."\{source.getAbsolutePath()}.enc");
+        File ciphertext = new File("%s.enc".formatted(source.getAbsolutePath()));
 
         boolean signed = signer.encrypt(publicKey,source,ciphertext);
 
@@ -220,9 +220,9 @@ public class MessageAuthenticationTest {
     public void testFileDecrypt_Pass() throws URISyntaxException, IOException {
         ClassLoader classLoader = RsaHybridCryptographyTest.class.getClassLoader();
         File source = Paths.get(classLoader.getResource(AES_UNENCRYPTED_FILE).toURI()).toFile();
-        File ciphertext = new File(STR."\{source.getAbsolutePath()}.enc");
+        File ciphertext = new File("%s.enc".formatted(source.getAbsolutePath()));
 
-        File output = new File(STR."\{source.getAbsolutePath()}.decrypted");
+        File output = new File("%s.decrypted".formatted(source.getAbsolutePath()));
         try {
             signer.encrypt(publicKey,source,ciphertext);
 

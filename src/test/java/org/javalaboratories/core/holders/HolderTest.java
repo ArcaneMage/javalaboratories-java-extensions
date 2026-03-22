@@ -56,7 +56,7 @@ public class HolderTest {
 
         @Override
         public String toString() {
-            return STR."Person[name='\{name}\{'\''}\{']'}";
+            return "Person[name='%s']".formatted(name);
         }
     }
 
@@ -342,7 +342,7 @@ public class HolderTest {
 
         // When
         readWriteHolder
-                .map(v -> STR."\{v}, Galaxy")
+                .map(v -> String.format("%s, Galaxy",v))
                 .peek(v -> logger.info("Peek value as \"{}\"",v))
                 .get();
 
@@ -394,7 +394,7 @@ public class HolderTest {
                 .filter(n -> n % 2 == 0)
                 .reduce(Holder.of(0.0),(h,v) -> h.map(n -> n + v),(a,b) -> a.map(n -> n + b.fold(0.0,v -> v)))
                 .map(n -> n / 2)
-                .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+                .fold("",n -> String.format("Sum of even numbers (2,4,6,8,10) / 2 = %.1f",n));
 
         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
@@ -408,7 +408,7 @@ public class HolderTest {
                 .mapToDouble(Double::valueOf)
                 .reduce(0.0, Double::sum) / 2;
 
-        String result = STR."Sum of even numbers (2,4,6,8,10) / 2 = \{meanEven}";
+        String result = String.format("Sum of even numbers (2,4,6,8,10) / 2 = %.1f",meanEven);
 
         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);

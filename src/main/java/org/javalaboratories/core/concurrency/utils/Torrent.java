@@ -541,7 +541,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
          * of {@link Floodgate} object with a {@link Runnable} {@code resource}.
          * <p>
          * Both {@code threads} and {@code iterations} are defaulted to respective
-         * parameters provided in the {@link TorrentBuilder#builder(Class, int, int)}
+         * parameters provided in the {@link #builder(Class, int, int)}
          * factory method.
          * <p>
          * {@code Tag} not required for the {@link Floodgate} object.
@@ -559,7 +559,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
          * of {@link Floodgate} object with a {@link Supplier} {@code resource}.
          * <p>
          * Both {@code threads} and {@code iterations} are defaulted to respective
-         * parameters provided in the {@link TorrentBuilder#builder(Class, int, int)}
+         * parameters provided in the {@link #builder(Class, int, int)}
          * factory method.
          * <p>
          * {@code Tag} not required for the {@link Floodgate} object.
@@ -617,7 +617,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
          * of {@link Floodgate} object with a {@link Runnable} {@code resource}.
          * <p>
          * Both {@code threads} and {@code iterations} are defaulted to respective
-         * parameters provided in the {@link TorrentBuilder#builder(Class, int, int)}
+         * parameters provided in the {@link #builder(Class, int, int)}
          * factory method.
          *
          * @param tag supply a meaningful name for the {@code resource} for
@@ -636,7 +636,7 @@ public final class Torrent extends AbstractResourceFloodStability<Map<String,Lis
          * of {@link Floodgate} object with a {@link Supplier} {@code resource}.
          * <p>
          * Both {@code threads} and {@code iterations} are defaulted to respective
-         * parameters provided in the {@link TorrentBuilder#builder(Class, int, int)}
+         * parameters provided in the {@link #builder(Class, int, int)}
          * factory method.
          * {@code Tag} not required for the {@link Floodgate} object.
          *

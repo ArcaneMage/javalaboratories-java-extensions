@@ -35,7 +35,7 @@ public class FloatHoldersTest {
                .filter(n -> n % 2 == 0)
                .collect(() -> Holder.of(0.0f),(a, b) -> a.setGet(v -> v + b),(a, b) -> a.setGet(v -> v + b.fold(0.0f, n -> n)))
                .map(n -> n / 2)
-               .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+               .fold("","Sum of even numbers (2,4,6,8,10) / 2 = %.1f"::formatted);
 
         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
@@ -56,7 +56,7 @@ public class FloatHoldersTest {
                .map(Float::valueOf)
                .collect(FloatHolders.summing())
                .map(n -> n / 2)
-               .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+               .fold("","Sum of even numbers (2,4,6,8,10) / 2 = %.1f"::formatted);
 
         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
@@ -70,7 +70,7 @@ public class FloatHoldersTest {
                .map(Float::valueOf)
                .collect(FloatHolders.max())
                .map(n -> n / 2)
-               .fold("",n -> STR."Maximum of even numbers (10) / 2 = \{n}");
+               .fold("","Maximum of even numbers (10) / 2 = %.1f"::formatted);
 
         assertEquals("Maximum of even numbers (10) / 2 = 5.0",result);
         logger.info(result);
@@ -84,7 +84,7 @@ public class FloatHoldersTest {
                 .map(Float::valueOf)
                 .collect(FloatHolders.min())
                 .map(n -> n / 2)
-                .fold("",n -> STR."Minimum of even numbers (2) / 2 = \{n}");
+                .fold("","Minimum of even numbers (2) / 2 = %.1f"::formatted);
 
         assertEquals("Minimum of even numbers (2) / 2 = 1.0",result);
         logger.info(result);
@@ -97,7 +97,7 @@ public class FloatHoldersTest {
             .filter(n -> n % 2 == 0)
             .reduce(Holder.of(0.0f),FloatHolders::sum,FloatHolders::sum)
             .map(n -> n / 2)
-            .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+            .fold("","Sum of even numbers (2,4,6,8,10) / 2 = %.1f"::formatted);
 
         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15.0",result);
         logger.info(result);
@@ -110,7 +110,7 @@ public class FloatHoldersTest {
                 .filter(n -> n % 2 == 0)
                 .reduce(Holder.of(0.0f),FloatHolders::max,FloatHolders::max)
                 .map(n -> n / 2)
-                .fold("",n -> STR."Maximum of even numbers (10) / 2 = \{n}");
+                .fold("","Maximum of even numbers (10) / 2 = %.1f"::formatted);
 
         assertEquals("Maximum of even numbers (10) / 2 = 5.0",result);
         logger.info(result);
@@ -123,7 +123,7 @@ public class FloatHoldersTest {
                 .filter(n -> n % 2 == 0)
                 .reduce(Holder.of(Float.MAX_VALUE),FloatHolders::min,FloatHolders::min)
                 .map(n -> n / 2)
-                .fold("",n -> STR."Minimum of even numbers (2) / 2 = \{n}");
+                .fold("","Minimum of even numbers (2) / 2 = %.1f"::formatted);
 
         assertEquals("Minimum of even numbers (2) / 2 = 1.0",result);
         logger.info(result);

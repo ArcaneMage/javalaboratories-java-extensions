@@ -379,7 +379,7 @@ public sealed abstract class Holder<T> extends CoreApplicative<T> implements Mon
     public String toString() {
         lock.lock();
         try {
-            return STR."Holder[value=\{value}\{']'}";
+            return String.format("Holder[value=%s]",value);
         } finally {
             lock.unlock();
         }
