@@ -148,8 +148,8 @@ public class Message {
 
     private byte[] encodeSign() {
         byte[] publicKeyBytes = publicKey.getEncoded();
-        byte[] signatureSz = Bytes.toByteArray(signature.length);
-        byte[] publicKeySz = Bytes.toByteArray(publicKeyBytes.length);
+        byte[] signatureSz = Bytes.toBytes(signature.length);
+        byte[] publicKeySz = Bytes.toBytes(publicKeyBytes.length);
         byte[] publicKeyBlock = Bytes.concat(publicKeySz,publicKeyBytes);
         byte[] signatureBlock = Bytes.concat(signatureSz,signature);
         byte[] header = Bytes.concat(publicKeyBlock,signatureBlock);

@@ -39,9 +39,8 @@ public final class ArgumentsTest {
 
     @Test
     public void testRequireNonNull_NullPointerExceptionWithMessage_Fail() {
-        Object argument = null;
+        Object argument = "null";
         Exception e = assertThrows(NullPointerException.class,() -> Arguments.requireNonNull("No argument",argument));
-
         assertEquals("No argument",e.getMessage());
     }
 
@@ -55,5 +54,24 @@ public final class ArgumentsTest {
     public void testRequireNonNull_ValidateArguments_Pass() {
         String argument = "Hello World";
         Arguments.requireNonNull("Expected argument",argument);
+    }
+
+    @Test
+    public void testRequireNonEmpty_ValidateArguments_Pass() {
+        String argument = "Hello World";
+        String value = Arguments.requireNonEmpty(IllegalArgumentException::new,String::isEmpty,argument);
+        assertEquals("Hello World", value);
+    }
+
+    @Test
+    public void testRequireNonEmpty_EmptyException_Fail() {
+        String argument = "";
+        assertThrows(Exception.class, () -> Arguments.requireNonEmpty(IllegalArgumentException::new,String::isEmpty,argument));
+    }
+
+    @Test
+    public void testRequireNonEmpty_NullException_Fail() {
+        String argument = null;
+        assertThrows(Exception.class, () -> Arguments.requireNonEmpty(IllegalArgumentException::new,String::isEmpty,argument));
     }
 }

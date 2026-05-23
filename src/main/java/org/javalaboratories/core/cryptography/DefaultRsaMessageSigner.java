@@ -127,9 +127,9 @@ public class DefaultRsaMessageSigner extends MessageRsaAuthentication implements
             FileOutputStream fos = new FileOutputStream(tempfile)) {
 
             // Write signature header to file
-            fos.write(Bytes.toByteArray(publicKey.getEncoded().length));
+            fos.write(Bytes.toBytes(publicKey.getEncoded().length));
             fos.write(publicKey.getEncoded());
-            fos.write(Bytes.toByteArray(signature.length));
+            fos.write(Bytes.toBytes(signature.length));
             fos.write(signature);
 
             byte[] buffer = new byte[STREAM_BUFFER_SIZE];

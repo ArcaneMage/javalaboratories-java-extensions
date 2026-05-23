@@ -108,7 +108,7 @@ public final class DefaultRsaHybridCryptography implements RsaHybridCryptography
             byte[] sessionKeyBytes = cipher.doFinal(secretKey.getEncoded());
 
             // Write the RSA encrypted session key to the output stream first
-            byte[] sessionKeyBytesSz = Bytes.toByteArray(sessionKeyBytes.length);
+            byte[] sessionKeyBytesSz = Bytes.toBytes(sessionKeyBytes.length);
             os.write(sessionKeyBytesSz);
             os.write(sessionKeyBytes);
 

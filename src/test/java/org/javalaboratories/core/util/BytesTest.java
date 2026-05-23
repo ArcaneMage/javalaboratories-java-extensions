@@ -17,59 +17,69 @@ package org.javalaboratories.core.util;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BytesTest {
 
     private static final byte[] SOURCE_BYTES = {1,2,3,4,5,6,7,9,10,127};
 
     @Test
-    public void testConcat() {
+    public void testStaticConcat() {
         byte[] first = {10,20,30};
         byte[] second = {40,50,60,70};
 
         byte[] result = Bytes.concat(first,second);
 
-        assertTrue(Arrays.equals(new byte[]{10, 20, 30, 40, 50, 60, 70}, result));
+        assertArrayEquals(new byte[]{10, 20, 30, 40, 50, 60, 70}, result);
     }
 
     @Test
-    public void testCopy() {
+    public void testStaticConcat_IndexOutOfBoundsException_Fail() {
+        byte[] first = {10,20,30};
+        byte[] second = {40,50,60,70};
+
+        assertThrows(IndexOutOfBoundsException.class, () -> Bytes.concat(first,second,5));
+    }
+
+    @Test
+    public void testStaticCopy() {
         byte[] result = Bytes.copy(SOURCE_BYTES);
 
-        assertTrue(Arrays.equals(SOURCE_BYTES, result));
+        assertArrayEquals(SOURCE_BYTES, result);
     }
 
     @Test
-    public void testTrimLeft() {
+    public void testStaticCopy_IndexOutOfBoundsException_Fail() {
+        assertThrows(IndexOutOfBoundsException.class, () -> Bytes.copy(SOURCE_BYTES,-1));
+    }
+
+    @Test
+    public void testStaticTrimLeft() {
         byte[] result = Bytes.trimLeft(SOURCE_BYTES,3);
 
-        assertTrue(Arrays.equals(new byte[]{4,5,6,7,9,10,127}, result));
+        assertArrayEquals(new byte[]{4, 5, 6, 7, 9, 10, 127}, result);
     }
 
     @Test
-    public void testTrimRight() {
+    public void testStaticTrimRight() {
         byte[] result = Bytes.trimRight(SOURCE_BYTES,3);
 
-        assertTrue(Arrays.equals(new byte[]{1,2,3,4,5,6,7}, result));
+        assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7}, result);
     }
 
     @Test
-    public void testToByteArray() {
-        byte[] bytes = Bytes.toByteArray(0xAABBCCDD);
-        byte[] bytes2 = Bytes.toByteArray(0xFFFFFFFF);
-        byte[] bytes3 = Bytes.toByteArray(0x00000002);
+    public void testStaticToBytes() {
+        byte[] bytes = Bytes.toBytes(0xAABBCCDD);
+        byte[] bytes2 = Bytes.toBytes(0xFFFFFFFF);
+        byte[] bytes3 = Bytes.toBytes(0x00000002);
 
-        assertTrue(Arrays.equals(new byte[]{(byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD},bytes));
-        assertTrue(Arrays.equals(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF},bytes2));
-        assertTrue(Arrays.equals(new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x02},bytes3));
+        assertArrayEquals(new byte[]{(byte) 0xAA, (byte) 0xBB, (byte) 0xCC, (byte) 0xDD}, bytes);
+        assertArrayEquals(new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF}, bytes2);
+        assertArrayEquals(new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x02}, bytes3);
     }
 
     @Test
-    public void testFromBytes() {
+    public void testStaticFromBytes() {
         byte[] bytes = new byte[]{(byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD};
         byte[] bytes2 = new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF};
         byte[] bytes3 = new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x02};
@@ -84,12 +94,181 @@ public class BytesTest {
     }
 
     @Test
-    public void testSubBytes() {
+    public void testStaticSubBytes() {
         byte[] bytes = new byte[]{0,1,2,3,4,5,6,7,8};
         byte[] sub1 = Bytes.subBytes(bytes,1,3);
         byte[] sub2 = Bytes.subBytes(bytes,5,9);
 
-        assertTrue(Arrays.equals(new byte[]{1,2}, sub1));
-        assertTrue(Arrays.equals(new byte[]{5,6,7,8}, sub2));
+        assertArrayEquals(new byte[]{1, 2}, sub1);
+        assertArrayEquals(new byte[]{5, 6, 7, 8}, sub2);
+    }
+
+    @Test
+    public void testBytesObjectConstructor() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+
+        assertEquals("[1,2,3,4,5,6,7,9,10,127]",bytes.toString());
+        assertEquals(10,bytes.length());
+    }
+
+    @Test
+    public void testBytesObjectCopyConstructor() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        Bytes copied = new Bytes(bytes);
+
+        assertEquals("[1,2,3,4,5,6,7,9,10,127]",bytes.toString());
+        assertEquals("[1,2,3,4,5,6,7,9,10,127]",copied.toString());
+        assertEquals(10,bytes.length());
+
+        assertEquals(bytes,copied);
+    }
+
+    @Test
+    public void testBytesObjectAdd() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        bytes.add((byte)128);
+        bytes.add((byte)129);
+
+        assertEquals("[1,2,3,4,5,6,7,9,10,127,128,129]",bytes.toString(true));
+        assertEquals(12,bytes.length());
+    }
+
+    @Test
+    public void testBytesObjectAt() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        bytes.add((byte)128);
+        bytes.add((byte)129);
+        byte value = bytes.at(11);
+        int uvalue = bytes.at(11, true);
+        int svalue = bytes.at(11, false);
+
+        assertEquals("[1,2,3,4,5,6,7,9,10,127,128,129]",bytes.toString(true));
+        assertEquals(12,bytes.length());
+
+        assertEquals(-127,value);
+        assertEquals(129,uvalue);
+        assertEquals(-127,svalue);
+    }
+
+    @Test
+    public void testBytesObjectAt_IndexOutOfBoundException_Fail() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        bytes.add((byte)128);
+        bytes.add((byte)129);
+
+        assertThrows(IndexOutOfBoundsException.class,() -> bytes.at(-1));
+        assertThrows(IndexOutOfBoundsException.class,() -> bytes.at(12));
+    }
+
+    @Test
+    public void testBytesObjectConcat() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        Bytes ext = new Bytes(new byte[]{(byte)128, (byte)129});
+
+        Bytes result = bytes.concat(ext);
+
+        byte value = result.at(11);
+        int uvalue = result.at(11, true);
+        int svalue = result.at(11, false);
+
+        assertEquals("[1,2,3,4,5,6,7,9,10,127,128,129]",result.toString(true));
+        assertEquals(12,result.length());
+
+        assertEquals(-127,value);
+        assertEquals(129,uvalue);
+        assertEquals(-127,svalue);
+    }
+
+    @Test
+    public void testBytesObjectCopy() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        Bytes copied = bytes.copy();
+
+        byte value = copied.at(9);
+        int uvalue = copied.at(9, true);
+        int svalue = copied.at(9, false);
+
+        assertEquals("[1,2,3,4,5,6,7,9,10,127]",copied.toString());
+        assertEquals(10,copied.length());
+
+        assertEquals(127,value);
+        assertEquals(127,uvalue);
+        assertEquals(127,svalue);
+
+        assertEquals(bytes, copied);
+    }
+
+    @Test
+    public void testBytesObjectLeftTrim() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        Bytes trimmed = bytes.trimLeft(3);
+
+        byte value = trimmed.at(6);
+        int uvalue = trimmed.at(6, true);
+        int svalue = trimmed.at(6, false);
+
+        assertEquals("[4,5,6,7,9,10,127]",trimmed.toString());
+        assertEquals(7,trimmed.length());
+
+        assertEquals(127,value);
+        assertEquals(127,uvalue);
+        assertEquals(127,svalue);
+    }
+
+    @Test
+    public void testBytesObjectLeftTrim_IndexOutOfBoundException_Fail() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        assertThrows(IndexOutOfBoundsException.class, () -> bytes.trimLeft(11));
+    }
+
+
+    @Test
+    public void testBytesObjectRightTrim() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        Bytes trimmed = bytes.trimRight(3);
+
+        byte value = trimmed.at(6);
+        int uvalue = trimmed.at(6, true);
+        int svalue = trimmed.at(6, false);
+
+        assertEquals("[1,2,3,4,5,6,7]",trimmed.toString());
+        assertEquals(7,trimmed.length());
+
+        assertEquals(7,value);
+        assertEquals(7,uvalue);
+        assertEquals(7,svalue);
+    }
+
+    @Test
+    public void testBytesObjectRightTrim_IndexOutOfBoundException_Fail() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        assertThrows(IndexOutOfBoundsException.class, () -> bytes.trimRight(11));
+    }
+
+    @Test
+    public void testBytesObjectSubBytes() {
+        Bytes bytes = new Bytes(new byte[] {0,1,2,3,4,5,6,7,8});
+        Bytes sub1 = bytes.subBytes(1,3);
+        Bytes sub2 = bytes.subBytes(5,9);
+
+        assertEquals(new Bytes(new byte[]{1,2}), sub1);
+        assertEquals(new Bytes(new byte[]{5,6,7,8}), sub2);
+    }
+
+    @Test
+    public void testBytesObjectSubBytes_IndexOutOfBoundsException_Fail() {
+        Bytes bytes = new Bytes(new byte[] {0,1,2,3,4,5,6,7,8});
+
+        assertThrows(IndexOutOfBoundsException.class, () -> bytes.subBytes(-1,9));
+        assertThrows(IndexOutOfBoundsException.class, () -> bytes.subBytes(1,10));
+    }
+
+    @Test
+    public void testBytesObjectToArray() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        byte[] array = bytes.toArray();
+
+        assertArrayEquals(new byte[]{1,2,3,4,5,6,7,9,10,127},array);
+        assertEquals(10,array.length);
     }
 }

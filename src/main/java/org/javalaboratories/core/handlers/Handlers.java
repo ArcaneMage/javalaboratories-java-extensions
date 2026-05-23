@@ -287,7 +287,6 @@ public final class Handlers {
         if (t instanceof IOException)
             throw new UncheckedIOException((IOException) t);
 
-
         if (t instanceof Exception)
             throw new RuntimeException(t);
 

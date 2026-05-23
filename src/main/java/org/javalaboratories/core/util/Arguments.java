@@ -15,7 +15,11 @@
  */
 package org.javalaboratories.core.util;
 
+import org.javalaboratories.core.handlers.Handlers;
+
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -25,6 +29,45 @@ import java.util.function.Supplier;
  * convenient methods to test multiple arguments for validation as varargs.
  */
 public final class Arguments {
+
+    /**
+     * Validates {@code argument} for {@code null} and empty values.
+     * <p>
+     * If the {@code argument} contains a null or is "empty", for example {@code
+     * String} contains "" string value, this function will throw an exception
+     * supplied by the {@code supplier} function.
+     *
+     * @param supplier supplies the exception object to be thrown when
+     *                 validation fails.
+     * @param emptiness emptiness test function.
+     * @param argument the argument to undergo test.
+     * @return validated argument
+     * @param <T> type of argument undergoing test
+     * @param <E> type of exception to be thrown when validation fails.
+     * @throws E the exception object being thrown.
+     */
+    public static <T, E extends Exception> T requireNonEmpty(final Supplier<? extends E> supplier, final Predicate<? super T> emptiness,
+                                                             final T argument) throws E {
+        requireNonNull("Expected arguments?",supplier,emptiness,argument);
+        if (emptiness.test(argument))
+            throw supplier.get();
+        return argument;
+    }
+
+    /**
+     * Validates {@code arguments} for {@code null} values then throws requested
+     * exception of type E when {@code null} is encountered.
+     *
+     * @param argument the argument to undergo test.
+     * @return validated value
+     * @param <T> type of argument undergoing test
+     * @param <E> type of exception to be thrown when validation fails.
+     * @throws E the exception object being thrown.
+     */
+    public static <T, E extends Exception> T requireNonNull(final String message, final T argument) throws E {
+        requireNonNull(message, (Object[]) argument);
+        return argument;
+    }
 
     /**
      * Validates {@code arguments} for {@code null} values.
@@ -51,7 +94,7 @@ public final class Arguments {
 
     /**
      * Validates {@code arguments} for {@code null} values then throws requested
-     * exception of type E.
+     * exception of type E when {@code null} is encountered.
      *
      * @param arguments varargs of {@code arguments/parameters}.
      * @param supplier supplies exception with which to raise.
@@ -66,9 +109,12 @@ public final class Arguments {
         Objects.requireNonNull(arguments,"Expected arguments?");
         if (arguments.length == 0)
             throw supplier.get();
-        for (Object o : arguments) {
-            if (o == null)
-                throw supplier.get();
-        }
+        Arrays.stream(arguments)
+                .forEach(Handlers.consumer(o -> {
+                    if (o == null)
+                        throw supplier.get();
+                }));
     }
+
+    private Arguments() {}
 }
