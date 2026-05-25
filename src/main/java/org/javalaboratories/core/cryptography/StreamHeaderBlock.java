@@ -72,7 +72,7 @@ public class StreamHeaderBlock {
         byte[] b = new byte[4]; // 32bit number: encoded size of block
         if (stream.read(b) == -1)
             throw new IOException("Failed to read block from stream: cannot determine size");
-        int blockSize = Bytes.fromBytes(b);
+        int blockSize = Bytes.valueOf(b);
         if (validate != null && validate.test(blockSize))
             throw new IOException("Invalid block size encountered");
         byte[] block = new byte[blockSize];

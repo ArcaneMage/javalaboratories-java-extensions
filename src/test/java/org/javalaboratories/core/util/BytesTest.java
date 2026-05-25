@@ -68,6 +68,33 @@ public class BytesTest {
     }
 
     @Test
+    public void testStaticMoveBlock() {
+        byte[] result = Bytes.copy(SOURCE_BYTES);
+        byte[] moved = Bytes.moveBlock(result,2,5,7);
+        byte[] restored = Bytes.moveBlock(moved,7,10,2);
+
+        assertArrayEquals(new byte[]{1, 2, 6, 7, 9, 10, 127, 3, 4, 5}, moved);
+        assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 9, 10, 127}, restored);
+        assertArrayEquals(result, restored);
+    }
+
+    @Test
+    public void testStaticCopyBlock() {
+        byte[] result = Bytes.copy(SOURCE_BYTES);
+        byte[] copied = Bytes.copyBlock(result,2,5,5);
+
+        assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 3, 4, 5, 10, 127}, copied);
+    }
+
+    @Test
+    public void testStaticRemoveBlock() {
+        byte[] result = Bytes.copy(SOURCE_BYTES);
+        byte[] deleted = Bytes.removeBlock(result,2,5);
+
+        assertArrayEquals(new byte[]{1, 2, 6, 7, 9, 10, 127}, deleted);
+    }
+
+    @Test
     public void testStaticToBytes() {
         byte[] bytes = Bytes.toBytes(0xAABBCCDD);
         byte[] bytes2 = Bytes.toBytes(0xFFFFFFFF);
@@ -79,14 +106,14 @@ public class BytesTest {
     }
 
     @Test
-    public void testStaticFromBytes() {
+    public void testStaticValueOf() {
         byte[] bytes = new byte[]{(byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD};
         byte[] bytes2 = new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF};
         byte[] bytes3 = new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x02};
 
-        int value = Bytes.fromBytes(bytes);
-        int value2 = Bytes.fromBytes(bytes2);
-        int value3 = Bytes.fromBytes(bytes3);
+        int value = Bytes.valueOf(bytes);
+        int value2 = Bytes.valueOf(bytes2);
+        int value3 = Bytes.valueOf(bytes3);
 
         assertEquals(0xAABBCCDD,value);
         assertEquals(0xFFFFFFFF,value2);
@@ -240,6 +267,30 @@ public class BytesTest {
     }
 
     @Test
+    public void testBytesObjectMoveBlock() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        Bytes moved = bytes.moveBlock(2,5,7);
+
+        assertArrayEquals(new byte[]{1, 2, 6, 7, 9, 10, 127, 3, 4, 5}, moved.toArray());
+    }
+
+    @Test
+    public void testBytesObjectCopyBlock() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        Bytes moved = bytes.copyBlock(2,5,5);
+
+        assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 3, 4, 5, 10, 127}, moved.toArray());
+    }
+
+    @Test
+    public void testBytesObjectRemoveBlock() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        Bytes deleted = bytes.removeBlock(2,5);
+
+        assertArrayEquals(new byte[]{1, 2, 6, 7, 9, 10, 127}, deleted.toArray());
+    }
+
+    @Test
     public void testBytesObjectRightTrim_IndexOutOfBoundException_Fail() {
         Bytes bytes = new Bytes(SOURCE_BYTES);
         assertThrows(IndexOutOfBoundsException.class, () -> bytes.trimRight(11));
@@ -261,6 +312,20 @@ public class BytesTest {
 
         assertThrows(IndexOutOfBoundsException.class, () -> bytes.subBytes(-1,9));
         assertThrows(IndexOutOfBoundsException.class, () -> bytes.subBytes(1,10));
+    }
+
+    @Test
+    public void testBytesObjectValueOf() {
+        Bytes number = new Bytes(new byte[]{(byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD});
+
+        assertEquals(0xAABBCCDD,number.valueOf(0));
+    }
+
+    @Test
+    public void testBytesObjectValueOf_IndexOutOfBoundsException_Fail() {
+        Bytes number = new Bytes(new byte[]{(byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD});
+
+        assertThrows(IndexOutOfBoundsException.class, () -> number.valueOf(1));
     }
 
     @Test

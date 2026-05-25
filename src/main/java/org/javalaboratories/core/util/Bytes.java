@@ -15,10 +15,7 @@
  */
 package org.javalaboratories.core.util;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Bytes class containing useful byte array operations.
@@ -191,6 +188,79 @@ public final class Bytes implements Iterable<Byte> {
     }
 
     /**
+     * Copies a block of bytes in {@code source} to a destination specified by
+     * {@code destIndex}.
+     * <p>
+     * A new {@link Bytes} object is returned with copied block of bytes, the
+     * original source bytes remain unchanged.
+     *
+     * @param beginIndex beginning of block (inclusive)
+     * @param endIndex end of block (exclusive)
+     * @param destIndex destination of block
+     * @return a new byte array is returned with moved bytes.
+     * @throws IndexOutOfBoundsException when block is greater than size of
+     * {@code source} array; {@code destIndex} cannot accommodate block.
+     */
+    public Bytes copyBlock(final int beginIndex, final int endIndex, final int destIndex) {
+        byte[] scope = Bytes.copy(this.bytes,this.length());
+        return new Bytes(Bytes.copyBlock(scope,beginIndex,endIndex,destIndex));
+    }
+
+    /**
+     * Moves a block of bytes in {@code source} to a destination specified by
+     * {@code destIndex}.
+     * <p>
+     * A new {@link Bytes} object is returned with moved bytes, the original
+     * source bytes remain unchanged.
+     *
+     * @param beginIndex beginning of block (inclusive)
+     * @param endIndex end of block (exclusive)
+     * @param destIndex destination of block
+     * @return a new byte array is returned with moved bytes.
+     * @throws IndexOutOfBoundsException when block is greater than size of
+     * {@code source} array; {@code destIndex} cannot accommodate block.
+     */
+    public Bytes moveBlock(final int beginIndex, final int endIndex, final int destIndex) {
+        byte[] scope = Bytes.copy(this.bytes,this.length());
+        return new Bytes(Bytes.moveBlock(scope,beginIndex,endIndex,destIndex));
+    }
+
+    /**
+     * Removes a block of bytes in {@code source}.
+     * <p>
+     * A new {@link Bytes} object is returned with removed block of bytes, the
+     * original source bytes remain unchanged.
+     *
+     * @param beginIndex beginning of block (inclusive)
+     * @param endIndex end of block (exclusive)
+     * @return a new byte array is returned with moved bytes.
+     * @throws IndexOutOfBoundsException when block is greater than size of
+     * {@code source} array.
+     */
+    public Bytes removeBlock(final int beginIndex, final int endIndex) {
+        byte[] scope = Bytes.copy(this.bytes,this.length());
+        return new Bytes(Bytes.removeBlock(scope,beginIndex,endIndex));
+    }
+
+    /**
+     * Decodes 32-bit integer from the current {@code index} location.
+     * <p>
+     * Calculates the integer at the current {@code index} location. Four bytes
+     * from the current {@code index} are used to calculate the 32-bit number.
+     *
+     * @param index index must be greater than 0 and less than
+     * {@link this#length() -4}
+     * @return a 32 bit integer number
+     * @throws IndexOutOfBoundsException exception if insufficient bytes are
+     * supplied from current {@code index} location.
+     */
+    public int valueOf(final int index) {
+        int i = Objects.checkFromToIndex(index, index + 4, this.length());
+        Bytes sub = this.subBytes(i, i + 4);
+        return Bytes.valueOf(sub.bytes);
+    }
+
+    /**
      * Returns a copy of the internal array of bytes.
      *
      * @return bytes array.
@@ -315,6 +385,85 @@ public final class Bytes implements Iterable<Byte> {
     }
 
     /**
+     * Copies a block of bytes in {@code source} to a destination specified by
+     * {@code destIndex}.
+     * <p>
+     * A new byte array is returned with copied block of bytes, the original
+     * source bytes remain unchanged.
+     *
+     * @param source source of bytes to be processed.
+     * @param beginIndex beginning of block (inclusive)
+     * @param endIndex end of block (exclusive)
+     * @param destIndex destination of block
+     * @return a new byte array is returned with moved bytes.
+     * @throws IndexOutOfBoundsException when block is greater than size of
+     * {@code source} array; {@code destIndex} cannot accommodate block.
+     */
+    public static byte[] copyBlock(final byte[] source, final int beginIndex, final int endIndex, final int destIndex) {
+        byte[] s = Objects.requireNonNull(source,"Source byte array is null");
+        int fromIndex = checkBlockIndexes(beginIndex, endIndex, destIndex, s.length);
+        byte[] block = Bytes.subBytes(s, fromIndex, endIndex);
+        byte[] result = Bytes.copy(source);
+        System.arraycopy(block, 0, result, destIndex, block.length);
+        return result;
+    }
+
+    /**
+     * Moves a block of bytes in {@code source} to a destination specified by
+     * {@code destIndex}.
+     * <p>
+     * A new byte array is returned with moved bytes, the original source bytes
+     * remain unchanged.
+     *
+     * @param source source of bytes to be processed.
+     * @param beginIndex beginning of block (inclusive)
+     * @param endIndex end of block (exclusive)
+     * @param destIndex destination of block
+     * @return a new byte array is returned with moved bytes.
+     * @throws IndexOutOfBoundsException when block is greater than size of
+     * {@code source} array; {@code destIndex} cannot accommodate block.
+     */
+    public static byte[] moveBlock(final byte[] source, final int beginIndex, final int endIndex, final int destIndex) {
+        byte[] s = Objects.requireNonNull(source,"Source byte array is null");
+        int fromIndex = checkBlockIndexes(beginIndex, endIndex, destIndex, s.length);
+        // Extract block
+        byte[] block = Bytes.subBytes(s, fromIndex, endIndex);
+        // Concatenate left and right portions on either side of block
+        byte[] remainder = Bytes.concat(Bytes.subBytes(s, 0, fromIndex), Bytes.subBytes(s, endIndex, s.length));
+        byte[] result = new byte[s.length];
+        // Write block to destination
+        System.arraycopy(block, 0, result, destIndex, block.length);
+        // Write left-most of remainder
+        System.arraycopy(remainder, 0, result, 0, destIndex);
+        // Write right-most of remainder
+        System.arraycopy(remainder, destIndex, result, destIndex + block.length, s.length - (destIndex + block.length));
+        return result;
+    }
+
+    /**
+     * Removes a block of bytes in {@code source}.
+     * <p>
+     * A new byte array is returned with removed block of bytes, the original
+     * source bytes remain unchanged.
+     *
+     * @param source source of bytes to be processed.
+     * @param beginIndex beginning of block (inclusive)
+     * @param endIndex end of block (exclusive)
+     * @return a new byte array is returned with moved bytes.
+     * @throws IndexOutOfBoundsException when block is greater than size of
+     * {@code source} array.
+     */
+    public static byte[] removeBlock(final byte[] source, final int beginIndex, final int endIndex) {
+        byte[] s = Objects.requireNonNull(source,"Source byte array is null");
+        int fromIndex = checkBlockIndexes(beginIndex, endIndex, 0, s.length);
+        int block = endIndex - fromIndex;
+        byte[] result = new byte[source.length - block];
+        System.arraycopy(s, 0, result, 0, fromIndex);
+        System.arraycopy(s, endIndex, result, endIndex - block, s.length - endIndex);
+        return result;
+    }
+
+    /**
      * Trims/truncates the left-most bytes from the byte array source and
      * returns a copy of the source byte array.
      *
@@ -381,7 +530,7 @@ public final class Bytes implements Iterable<Byte> {
      * @param bytes the byte array with encoded integer.
      * @return the integer
      */
-    public static int fromBytes(byte[] bytes) {
+    public static int valueOf(byte[] bytes) {
         byte[] b = Objects.requireNonNull(bytes);
         if (b.length != 4)
             throw new IllegalArgumentException("Expected 32 bit array");
@@ -402,6 +551,14 @@ public final class Bytes implements Iterable<Byte> {
         byte[] result = new byte[length - bytes];
         System.arraycopy(s,0,result,0,length - bytes);
         return result;
+    }
+
+    private static int checkBlockIndexes(final int beginIndex, final int endIndex, final int destIndex, final int length) {
+        int fromIndex = Objects.checkFromToIndex(beginIndex,endIndex,length);
+        if (destIndex < 0 || destIndex >= length - (endIndex - beginIndex) + 1)
+            throw new IndexOutOfBoundsException("Insufficient space in which to copy/move block size %d, destination %d"
+                    .formatted(endIndex - beginIndex,destIndex));
+        return fromIndex;
     }
 
     private byte[] createCapacity() {
