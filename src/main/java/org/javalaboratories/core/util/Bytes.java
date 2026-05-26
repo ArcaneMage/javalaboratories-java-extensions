@@ -43,8 +43,7 @@ public final class Bytes implements Iterable<Byte> {
      * @throws NullPointerException when bytes array is null
      */
     public Bytes(final byte[] bytes) {
-        byte[] b = Objects.requireNonNull(bytes);
-        this.bytes = b;
+        this.bytes = Objects.requireNonNull(bytes);
         this.marker = this.bytes.length;
     }
 
@@ -428,8 +427,8 @@ public final class Bytes implements Iterable<Byte> {
         int fromIndex = checkBlockIndexes(beginIndex, endIndex, destIndex, s.length);
         // Extract block
         byte[] block = Bytes.subBytes(s, fromIndex, endIndex);
-        // Concatenate left and right portions on either side of block
-        byte[] remainder = Bytes.concat(Bytes.subBytes(s, 0, fromIndex), Bytes.subBytes(s, endIndex, s.length));
+        // Remove source block, leaving just left and right portions of either side of block
+        byte[] remainder = removeBlock(s, beginIndex, endIndex);
         byte[] result = new byte[s.length];
         // Write block to destination
         System.arraycopy(block, 0, result, destIndex, block.length);
