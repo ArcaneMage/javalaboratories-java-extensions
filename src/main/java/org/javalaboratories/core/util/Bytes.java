@@ -42,7 +42,7 @@ public final class Bytes implements Iterable<Byte> {
      *              container.
      * @throws NullPointerException when bytes array is null
      */
-    public Bytes(final byte[] bytes) {
+    public Bytes(final byte... bytes) {
         this.bytes = Objects.requireNonNull(bytes);
         this.marker = this.bytes.length;
     }

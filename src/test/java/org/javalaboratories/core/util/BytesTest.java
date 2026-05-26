@@ -139,6 +139,14 @@ public class BytesTest {
     }
 
     @Test
+    public void testBytesObjectConstructorWithVarArgs() {
+        Bytes bytes = new Bytes((byte)1,(byte)2,(byte)3,(byte)4,(byte)5,(byte)6,(byte)7,(byte)9,(byte)10,(byte)127);
+
+        assertEquals("[1,2,3,4,5,6,7,9,10,127]",bytes.toString());
+        assertEquals(10,bytes.length());
+    }
+
+    @Test
     public void testBytesObjectCopyConstructor() {
         Bytes bytes = new Bytes(SOURCE_BYTES);
         Bytes copied = new Bytes(bytes);
