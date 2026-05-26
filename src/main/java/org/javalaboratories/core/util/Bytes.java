@@ -19,6 +19,12 @@ import java.util.*;
 
 /**
  * Bytes class containing useful byte array operations.
+ * <p>
+ * Static operations include the ability to copy, concatenate, move and much
+ * more. Moreover, it is possible to create a a container of bytes and perform
+ * a variety of operations to manipulate the contained bytes.
+ * <p>
+ * The bytes class is immutable and threadsafe.
  */
 public final class Bytes implements Iterable<Byte> {
 
