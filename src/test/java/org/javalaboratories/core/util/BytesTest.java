@@ -161,8 +161,17 @@ public class BytesTest {
     @Test
     public void testBytesObjectAdd() {
         Bytes bytes = new Bytes(SOURCE_BYTES);
-        bytes.add((byte)128);
-        bytes.add((byte)129);
+        bytes.add((byte) 128);
+        bytes.add((byte) 129);
+
+        assertEquals("[1,2,3,4,5,6,7,9,10,127,128,129]",bytes.toString(true));
+        assertEquals(12,bytes.length());
+    }
+
+    @Test
+    public void testBytesObjectAddVarArgs() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+        bytes.add((byte) 128, (byte) 129);
 
         assertEquals("[1,2,3,4,5,6,7,9,10,127,128,129]",bytes.toString(true));
         assertEquals(12,bytes.length());
@@ -171,8 +180,8 @@ public class BytesTest {
     @Test
     public void testBytesObjectAt() {
         Bytes bytes = new Bytes(SOURCE_BYTES);
-        bytes.add((byte)128);
-        bytes.add((byte)129);
+        bytes.add((byte) 128);
+        bytes.add((byte) 129);
         byte value = bytes.at(11);
         int uvalue = bytes.at(11, true);
         int svalue = bytes.at(11, false);

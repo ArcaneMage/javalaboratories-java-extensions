@@ -91,6 +91,27 @@ public final class Bytes implements Iterable<Byte> {
     }
 
     /**
+     * Adds bytes {@code value} to the end of the internal byte array.
+     * <p>
+     * The internal {@code marker} is reset to point to the end of the
+     * concatenated bytes.
+     *
+     * @param values the values to be added to the container of bytes.
+     * @throws NullPointerException when values bytes reference is null
+     */
+    public void add(final byte... values) {
+        byte[] v = Objects.requireNonNull(values);
+        lock.lock();
+        try {
+            byte[] scope = Bytes.copy(this.bytes,this.marker);
+            this.bytes = Bytes.concat(scope, v);
+            this.marker = this.bytes.length;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
      * Returns a byte (signed) at {@code index} location.
      *
      * @param index index location of byte to be returned.
