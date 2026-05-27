@@ -15,7 +15,11 @@
  */
 package org.javalaboratories.core.util;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Bytes class containing useful byte array operations.
@@ -24,15 +28,16 @@ import java.util.*;
  * more. Moreover, it is possible to create a a container of bytes and perform
  * a variety of operations to manipulate the contained bytes.
  * <p>
- * The bytes class is immutable and threadsafe.
+ * The bytes class instance is threadsafe.
  */
 public final class Bytes implements Iterable<Byte> {
 
     private static final int DEFAULT_EXTENSION = 32;
     private static final int UNSIGNED_MASK = 0xFF;
 
+    private final ReentrantLock lock;
     private byte[] bytes;
-    private int marker;
+    private volatile int marker;
 
     /**
      * Default constructor of this Bytes container.
@@ -50,6 +55,7 @@ public final class Bytes implements Iterable<Byte> {
      */
     public Bytes(final byte... bytes) {
         this.bytes = Objects.requireNonNull(bytes);
+        this.lock = new ReentrantLock();
         this.marker = this.bytes.length;
     }
 
@@ -60,6 +66,7 @@ public final class Bytes implements Iterable<Byte> {
      */
     public Bytes(final Bytes other) {
         Bytes o = Objects.requireNonNull(other,"Bytes object expected");
+        this.lock = new ReentrantLock();
         this.bytes = Bytes.copy(o.bytes);
         this.marker = o.marker;
     }
@@ -74,8 +81,13 @@ public final class Bytes implements Iterable<Byte> {
      * @param value the value to be added to the array.
      */
     public void add(final byte value) {
-       bytes = createCapacity();
-       bytes[this.marker++] = value;
+       lock.lock();
+       try {
+           bytes = createCapacity();
+           bytes[this.marker++] = value;
+       } finally {
+           lock.unlock();
+       }
     }
 
     /**
@@ -106,8 +118,13 @@ public final class Bytes implements Iterable<Byte> {
      * byte array; if index is less than 0.
      */
     public int at(final int index, final boolean unsigned) {
-        int i = Objects.checkIndex(index,this.marker);
-        return unsigned ? bytes[i] & UNSIGNED_MASK : bytes[i];
+        int i = Objects.checkIndex(index, this.marker);
+        lock.lock();
+        try {
+            return unsigned ? bytes[i] & UNSIGNED_MASK : bytes[i];
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -115,8 +132,8 @@ public final class Bytes implements Iterable<Byte> {
      */
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Bytes bytes1)) return false;
-        return marker == bytes1.marker && Objects.deepEquals(bytes, bytes1.bytes);
+        if (!(o instanceof Bytes b)) return false;
+        return marker == b.marker && Objects.deepEquals(this.atomicBytes(), b.atomicBytes());
     }
 
     /**
@@ -124,7 +141,7 @@ public final class Bytes implements Iterable<Byte> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(Arrays.hashCode(bytes), marker);
+        return Objects.hash(Arrays.hashCode(this.atomicBytes()), marker);
     }
 
     /**
@@ -147,7 +164,7 @@ public final class Bytes implements Iterable<Byte> {
      */
     public Bytes concat(final Bytes bytes) {
         Objects.requireNonNull(bytes,"Requires bytes object");
-        return new Bytes(Bytes.concat(this.bytes,bytes.bytes,bytes.length()));
+        return new Bytes(Bytes.concat(this.atomicBytes(),bytes.atomicBytes(),bytes.length()));
     }
 
     /**
@@ -156,7 +173,7 @@ public final class Bytes implements Iterable<Byte> {
      * @return an independent copy of this container.
      */
     public Bytes copy() {
-        return new Bytes(Bytes.copy(this.bytes,this.length()));
+        return new Bytes(Bytes.copy(this.atomicBytes(),this.length()));
     }
 
     /**
@@ -165,7 +182,7 @@ public final class Bytes implements Iterable<Byte> {
      * @param bytes number of bytes to truncate
      */
      public Bytes trimLeft(int bytes) {
-        return new Bytes(Bytes.trimLeft(this.bytes,bytes,this.length()));
+        return new Bytes(Bytes.trimLeft(this.atomicBytes(),bytes,this.length()));
     }
 
     /**
@@ -174,7 +191,7 @@ public final class Bytes implements Iterable<Byte> {
      * @param bytes number of bytes to truncate
      */
     public Bytes trimRight(int bytes) {
-        return new Bytes(Bytes.trimRight(this.bytes,bytes,this.length()));
+        return new Bytes(Bytes.trimRight(this.atomicBytes(),bytes,this.length()));
     }
 
     /**
@@ -188,8 +205,7 @@ public final class Bytes implements Iterable<Byte> {
      * endIndex > source length; beginIndex > endIndex.
      */
     public Bytes subBytes(final int beginIndex, final int endIndex) {
-        Objects.requireNonNull(bytes,"Requires bytes object");
-        return new Bytes(Bytes.subBytes(this.bytes,beginIndex,endIndex));
+        return new Bytes(Bytes.subBytes(this.atomicBytes(),beginIndex,endIndex));
     }
 
     /**
@@ -207,7 +223,7 @@ public final class Bytes implements Iterable<Byte> {
      * {@code source} array; {@code destIndex} cannot accommodate block.
      */
     public Bytes copyBlock(final int beginIndex, final int endIndex, final int destIndex) {
-        byte[] scope = Bytes.copy(this.bytes,this.length());
+        byte[] scope = Bytes.copy(this.atomicBytes(),this.length());
         return new Bytes(Bytes.copyBlock(scope,beginIndex,endIndex,destIndex));
     }
 
@@ -226,7 +242,7 @@ public final class Bytes implements Iterable<Byte> {
      * {@code source} array; {@code destIndex} cannot accommodate block.
      */
     public Bytes moveBlock(final int beginIndex, final int endIndex, final int destIndex) {
-        byte[] scope = Bytes.copy(this.bytes,this.length());
+        byte[] scope = Bytes.copy(this.atomicBytes(),this.length());
         return new Bytes(Bytes.moveBlock(scope,beginIndex,endIndex,destIndex));
     }
 
@@ -243,7 +259,7 @@ public final class Bytes implements Iterable<Byte> {
      * {@code source} array.
      */
     public Bytes removeBlock(final int beginIndex, final int endIndex) {
-        byte[] scope = Bytes.copy(this.bytes,this.length());
+        byte[] scope = Bytes.copy(this.atomicBytes(),this.length());
         return new Bytes(Bytes.removeBlock(scope,beginIndex,endIndex));
     }
 
@@ -262,7 +278,7 @@ public final class Bytes implements Iterable<Byte> {
     public int valueOf(final int index) {
         int i = Objects.checkFromToIndex(index, index + 4, this.length());
         Bytes sub = this.subBytes(i, i + 4);
-        return Bytes.valueOf(sub.bytes);
+        return Bytes.valueOf(sub.atomicBytes());
     }
 
     /**
@@ -271,7 +287,7 @@ public final class Bytes implements Iterable<Byte> {
      * @return bytes array.
      */
     public byte[] toArray() {
-        return Bytes.copy(this.bytes,this.length());
+        return Bytes.copy(this.atomicBytes(),this.length());
     }
 
     /**
@@ -324,6 +340,21 @@ public final class Bytes implements Iterable<Byte> {
                 return Bytes.this.at(i++);
             }
         };
+    }
+
+    /**
+     * Returns internal bytes array.
+     * <p>
+     * This method will black if the internal array is being accessed by another
+     * thread.
+     */
+    private byte[] atomicBytes() {
+        lock.lock();
+        try {
+            return bytes;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
