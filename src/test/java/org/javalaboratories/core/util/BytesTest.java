@@ -15,13 +15,19 @@
  */
 package org.javalaboratories.core.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 public class BytesTest {
 
     private static final byte[] SOURCE_BYTES = {1,2,3,4,5,6,7,9,10,127};
+    private static final byte[] MARKER_BYTES = {127,127,127,127,127,127,127,127,127,127};
 
     @Test
     public void testStaticConcat() {
@@ -195,10 +201,122 @@ public class BytesTest {
     }
 
     @Test
+    public void testBytesObjectAtomicThreadSafety() {
+        Bytes bytes = new Bytes();
+
+        CompletableFuture<Void> a = CompletableFuture.runAsync(() -> {
+            bytes.atomic(b -> {
+                for (int i = 0; i < 2048; i++) {
+                    b.add((byte) 1);
+                }
+                Bytes appendedBytes;
+                appendedBytes = b.concat(new Bytes(MARKER_BYTES));
+                b.add(appendedBytes);
+            });
+
+            log.info("Thread A, bytes = {}", bytes.length());
+            log.info("Thread A, bytes content  = {}", bytes);
+        });
+
+        CompletableFuture<Void> b = CompletableFuture.runAsync(() -> {
+            bytes.atomic(b2 -> {
+                for (int i = 0; i < 2048; i++) {
+                    b2.add((byte) 2);
+                }
+                Bytes appendedBytes;
+                appendedBytes = b2.concat(new Bytes(MARKER_BYTES));
+                b2.add(appendedBytes);
+            });
+
+            log.info("Thread B, bytes = {}", bytes.length());
+            log.info("Thread B, bytes content  = {}", bytes);
+        });
+
+        CompletableFuture<Void> simultaneously = CompletableFuture.allOf(a,b);
+        simultaneously.join();
+        assertTrue(simultaneously.isDone());
+
+        assertEquals(12318,bytes.length());
+    }
+
+    @Test
+    public void testBytesObjectAddThreadSafety() {
+        Bytes fill = new Bytes(new byte[67108864]);
+        Bytes bytes = new Bytes(fill);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        CompletableFuture<Void> a = CompletableFuture.runAsync(() -> {
+            try {
+                latch.await();
+                bytes.add(fill);
+                log.info("Thread A, bytes = {}", bytes.length());
+            } catch (InterruptedException e) {
+                // No operation
+            }
+        });
+
+        CompletableFuture<Void> b = CompletableFuture.runAsync(() -> {
+            try {
+                latch.await();
+                bytes.atomic(b2 -> {
+                    fill.add(new Bytes(MARKER_BYTES));
+                    b2.add(fill);
+                });
+                log.info("Thread B, bytes = {}", bytes.length());
+            } catch (InterruptedException e) {
+                // No operation
+            }
+        });
+
+        CompletableFuture<Void> simultaneously = CompletableFuture.allOf(a,b);
+        latch.countDown();
+
+        simultaneously.join();
+        assertTrue(simultaneously.isDone());
+        assertEquals(201326602,bytes.length());
+    }
+
+    @Test
+    public void testBytesObjectConcatThreadSafety() {
+        byte[] fill = new byte[67108864];
+        Bytes bytes = new Bytes(fill);
+        Bytes[] results = new Bytes[2];
+        CountDownLatch latch = new CountDownLatch(1);
+
+        CompletableFuture<Void> a = CompletableFuture.runAsync(() -> {
+            try {
+                latch.await();
+                results[0] = bytes.concat(new Bytes(MARKER_BYTES));
+                log.info("Thread A, bytes = {}", results[0].length());
+            } catch (InterruptedException e) {
+               //  No operation
+            }
+        });
+
+        CompletableFuture<Void> b = CompletableFuture.runAsync(() -> {
+            try {
+                latch.await();
+                results[1] = bytes.concat(new Bytes(MARKER_BYTES));
+                log.info("Thread B, bytes = {}", results[1].length());
+            } catch (InterruptedException e) {
+                // No operation
+            }
+        });
+
+        CompletableFuture<Void> simultaneously = CompletableFuture.allOf(a,b);
+        latch.countDown();
+
+        simultaneously.join();
+        assertTrue(simultaneously.isDone());
+        assertEquals(67108874,results[0].length());
+        assertEquals(67108874,results[1].length());
+    }
+
+    @Test
     public void testBytesObjectAt_IndexOutOfBoundException_Fail() {
         Bytes bytes = new Bytes(SOURCE_BYTES);
-        bytes.add((byte)128);
-        bytes.add((byte)129);
+        bytes.add((byte) 128);
+        bytes.add((byte) 129);
 
         assertThrows(IndexOutOfBoundsException.class,() -> bytes.at(-1));
         assertThrows(IndexOutOfBoundsException.class,() -> bytes.at(12));
@@ -207,7 +325,7 @@ public class BytesTest {
     @Test
     public void testBytesObjectConcat() {
         Bytes bytes = new Bytes(SOURCE_BYTES);
-        Bytes ext = new Bytes(new byte[]{(byte)128, (byte)129});
+        Bytes ext = new Bytes((byte)128, (byte)129);
 
         Bytes result = bytes.concat(ext);
 
@@ -333,14 +451,14 @@ public class BytesTest {
 
     @Test
     public void testBytesObjectValueOf() {
-        Bytes number = new Bytes(new byte[]{(byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD});
+        Bytes number = new Bytes((byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD);
 
         assertEquals(0xAABBCCDD,number.valueOf(0));
     }
 
     @Test
     public void testBytesObjectValueOf_IndexOutOfBoundsException_Fail() {
-        Bytes number = new Bytes(new byte[]{(byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD});
+        Bytes number = new Bytes((byte)0xAA,(byte)0xBB,(byte)0xCC,(byte)0xDD);
 
         assertThrows(IndexOutOfBoundsException.class, () -> number.valueOf(1));
     }
@@ -352,5 +470,13 @@ public class BytesTest {
 
         assertArrayEquals(new byte[]{1,2,3,4,5,6,7,9,10,127},array);
         assertEquals(10,array.length);
+    }
+
+    private void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            // Do nothing
+        }
     }
 }
