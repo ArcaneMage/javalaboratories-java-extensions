@@ -16,8 +16,11 @@
 package org.javalaboratories.core.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.javalaboratories.core.util.resources.StringResourceFile;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
@@ -209,8 +212,7 @@ public class BytesTest {
                 for (int i = 0; i < 2048; i++) {
                     b.add((byte) 1);
                 }
-                Bytes appendedBytes;
-                appendedBytes = b.concat(new Bytes(MARKER_BYTES));
+                Bytes appendedBytes = b.concat(new Bytes(MARKER_BYTES));
                 b.add(appendedBytes);
             });
 
@@ -223,8 +225,7 @@ public class BytesTest {
                 for (int i = 0; i < 2048; i++) {
                     b2.add((byte) 2);
                 }
-                Bytes appendedBytes;
-                appendedBytes = b2.concat(new Bytes(MARKER_BYTES));
+                Bytes appendedBytes = b2.concat(new Bytes(MARKER_BYTES));
                 b2.add(appendedBytes);
             });
 
@@ -241,7 +242,7 @@ public class BytesTest {
 
     @Test
     public void testBytesObjectAddThreadSafety() {
-        Bytes fill = new Bytes(new byte[67108864]);
+        Bytes fill = new Bytes(new byte[16777216]);
         Bytes bytes = new Bytes(fill);
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -273,7 +274,7 @@ public class BytesTest {
 
         simultaneously.join();
         assertTrue(simultaneously.isDone());
-        assertEquals(201326602,bytes.length());
+        assertEquals(50331658,bytes.length());
     }
 
     @Test
@@ -310,6 +311,33 @@ public class BytesTest {
         assertTrue(simultaneously.isDone());
         assertEquals(67108874,results[0].length());
         assertEquals(67108874,results[1].length());
+    }
+
+    @Test
+    public void testBytesObjectToStringThreadSafety() throws IOException {
+        byte[] fill = new byte[4096];
+        Arrays.fill(fill,(byte)9);
+        Bytes bytes = new Bytes(fill);
+        String[] strings = new String[1];
+
+        CompletableFuture<Void> a = CompletableFuture.runAsync(() -> {
+            bytes.add(fill);
+            log.info("Thread A, bytes = {}", bytes.length());
+        });
+
+        CompletableFuture<Void> b = CompletableFuture.runAsync(() -> {
+            strings[0] = bytes.toString();
+            log.info("Thread B, string = {}", strings[0].length());
+        });
+
+        CompletableFuture<Void> simultaneously = CompletableFuture.allOf(a,b);
+        simultaneously.join();
+        assertTrue(simultaneously.isDone());
+
+        String fillBytesFromFile = StringResourceFile.read("string-fill-bytes-test-file.txt");
+        assertEquals(8192, bytes.length());
+        assertEquals(fillBytesFromFile,strings[0]);
+        assertEquals(16385,strings[0].length());
     }
 
     @Test

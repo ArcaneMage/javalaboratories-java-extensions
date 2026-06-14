@@ -30,7 +30,10 @@ import java.util.function.Consumer;
  * more. Moreover, it is possible to create a a container of bytes and perform
  * a variety of operations to manipulate the contained bytes.
  * <p>
- * The bytes class instance is threadsafe.
+ * The bytes class instance is thread-safe. Although this class is thread-safe,
+ * compound operations need to be made atomic. Use the {@link
+ * this#atomic(Consumer)} method to ensure the consumer function behaviour is
+ * atomic when performing compound operations on this {@link Bytes} instance.
  */
 public final class Bytes implements Iterable<Byte> {
 
@@ -73,7 +76,7 @@ public final class Bytes implements Iterable<Byte> {
      * @throws NullPointerException when bytes array is null
      */
     public Bytes(final byte... bytes) {
-        this.bytes = Objects.requireNonNull(bytes);
+        this.bytes = Arrays.copyOf(Objects.requireNonNull(bytes),bytes.length);
         this.marker = this.bytes.length;
     }
 
@@ -81,6 +84,7 @@ public final class Bytes implements Iterable<Byte> {
      * Copy constructor
      *
      * @param other the other {@link Bytes} container to be copied.
+     * @throws NullPointerException when {@code Bytes} reference is null.
      */
     public Bytes(final Bytes other) {
         Bytes o = Objects.requireNonNull(other,"Bytes object expected");
@@ -342,12 +346,10 @@ public final class Bytes implements Iterable<Byte> {
      * @throws IndexOutOfBoundsException exception if insufficient bytes are
      * supplied from current {@code index} location.
      */
-    public int valueOf(final int index) {
-        synchronized (this) {
-            int i = Objects.checkFromToIndex(index, index + 4, this.marker);
-            Bytes sub = this.subBytes(i, i + 4);
-            return Bytes.valueOf(sub.bytes);
-        }
+    public synchronized int valueOf(final int index) {
+        int i = Objects.checkFromToIndex(index, index + 4, this.marker);
+        Bytes sub = this.subBytes(i, i + 4);
+        return Bytes.valueOf(sub.bytes);
     }
 
     /**

@@ -41,4 +41,5 @@ module javalaboratories.java.extensions {
   exports org.javalaboratories.core.util;
   exports org.javalaboratories.core.holders;
   exports org.javalaboratories.core.json.events;
+    exports org.javalaboratories.core.util.resources;
 }
