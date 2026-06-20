@@ -16,7 +16,6 @@
 package org.javalaboratories.core.util.resources;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
 /**
@@ -50,7 +49,7 @@ public class ByteResourceFile extends ResourceFile<byte[]> {
      * @param root     set to false for relative path search, otherwise search from
      *                 root.
      */
-    public ByteResourceFile(Class<?> clazz, String filename, boolean root) {
+    public ByteResourceFile(final Class<?> clazz, final String filename, final boolean root) {
         super(clazz, filename, root);
     }
 

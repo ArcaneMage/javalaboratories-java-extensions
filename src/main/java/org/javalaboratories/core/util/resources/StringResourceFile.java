@@ -50,7 +50,7 @@ public class StringResourceFile extends ResourceFile<String> {
      * @param root set to false for relative path search, otherwise search from
      *            root.
      */
-    public StringResourceFile(Class<?> clazz, String filename, boolean root) {
+    public StringResourceFile(final Class<?> clazz, final String filename, boolean root) {
         super(clazz, filename, root);
     }
 
