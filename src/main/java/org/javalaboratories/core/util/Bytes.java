@@ -15,13 +15,13 @@
  */
 package org.javalaboratories.core.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Bytes class containing useful byte array operations.
@@ -215,10 +215,10 @@ public final class Bytes implements Iterable<Byte> {
             s1 = this.snapshot();
             s2 = bytes.snapshot();
         }
-        byte[] c = new byte[s1.marker() + s2.marker()];
-        System.arraycopy(s1.bytes(), 0, c, 0, s1.marker());
-        System.arraycopy(s2.bytes(), 0, c, s1.marker(), s2.marker());
-        return new Bytes(c);
+        byte[] result = new byte[s1.marker() + s2.marker()];
+        System.arraycopy(s1.bytes(), 0, result, 0, s1.marker());
+        System.arraycopy(s2.bytes(), 0, result, s1.marker(), s2.marker());
+        return new Bytes(result);
     }
 
     /**
@@ -369,9 +369,7 @@ public final class Bytes implements Iterable<Byte> {
     public synchronized byte[] toArray(final int malloc) {
         if (malloc < this.length())
             throw new IllegalArgumentException("Insufficient allocation for Bytes container");
-        synchronized (this) {
-            return Arrays.copyOf(this.bytes, malloc);
-        }
+        return Arrays.copyOf(this.bytes, malloc);
     }
 
     /**
@@ -408,13 +406,10 @@ public final class Bytes implements Iterable<Byte> {
      * @return a string representation of the container.
      */
     public String toString(boolean unsigned) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("[");
-        forEach(b -> {
-            buffer.append(unsigned ? b & UNSIGNED_MASK : b);
-            buffer.append(",");
-        });
-        return buffer.substring(0, buffer.length() -1)+"]";
+        Snapshot s = this.snapshot();
+        Byte[] bytes = new Byte[s.marker()];
+        Arrays.setAll(bytes, i -> s.bytes()[i]);
+        return Strings.coalesce(bytes, i -> bytes[i], b -> unsigned ? b & UNSIGNED_MASK : b , ",", true, 32);
     }
 
     /**

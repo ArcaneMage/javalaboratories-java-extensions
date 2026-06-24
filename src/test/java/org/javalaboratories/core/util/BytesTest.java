@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -334,10 +335,11 @@ public class BytesTest {
         simultaneously.join();
         assertTrue(simultaneously.isDone());
 
-        String fillBytesFromFile = StringResourceFile.read("string-fill-bytes-test-file.txt");
+        String file = StringResourceFile.read("string-fill-bytes-test-file.txt");
         assertEquals(8192, bytes.length());
-        assertEquals(fillBytesFromFile,strings[0]);
-        assertEquals(16385,strings[0].length());
+        String coalescedStr = Strings.coalesce(file.split(","), ",", true, 32).substring(1);
+        assertEquals(coalescedStr, strings[0]);
+        assertEquals(68,strings[0].length());
     }
 
     @Test
