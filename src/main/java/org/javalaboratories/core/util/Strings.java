@@ -18,6 +18,7 @@ package org.javalaboratories.core.util;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public final class Strings {
@@ -83,15 +84,12 @@ public final class Strings {
         if (l < LIMIT) l = LIMIT;
         String leftBracket = brackets ? "[" : "";
         String rightBracket = brackets ? "]" : "";
-        StringBuilder result = IntStream.range(0, length)
+        return IntStream.range(0, length)
                 .limit(l)
                 .mapToObj(Objects.requireNonNull(mapIndex, "Function mapIndex cannot be null"))
                 .map(Objects.requireNonNull(mapElement, "Function mapElement cannot be null"))
-                .collect(() -> new StringBuilder(leftBracket), (a,b) -> a.append(b).append(d), StringBuilder::append);
-        if (length > 0)
-            result.setLength(result.length() - d.length());
-        result.append(length < l ? rightBracket : "...%s".formatted(rightBracket));
-        return result.toString();
+                .map(Object::toString)
+                .collect(Collectors.joining(d,leftBracket,length < l ? rightBracket : "...%s".formatted(rightBracket)));
     }
 
     private Strings() {}
