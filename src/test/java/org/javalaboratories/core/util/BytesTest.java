@@ -403,6 +403,16 @@ public class BytesTest {
 
         i = test1.indexOf(empty);
         assertEquals(0,i);
+
+        i = test1.indexOf((byte) 1);
+        assertEquals(4,i);
+    }
+
+    @Test
+    public void testBytesObjectContains() {
+        Bytes bytes = new Bytes(SOURCE_BYTES);
+
+        assertTrue(bytes.contains(new Bytes().add((byte)127)));
     }
 
     @Test

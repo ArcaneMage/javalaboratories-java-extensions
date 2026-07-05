@@ -217,6 +217,20 @@ public final class Bytes implements Iterable<Byte> {
     }
 
     /**
+     * Searches byte for first, matching occurrence of {@code byte} and
+     * returns index value greater than -1. The -1 value indicates not match
+     * found.
+     *
+     * @param b byte to search in this {@link Bytes} object.
+     * @return a value greater than -1 is returned for successful search;
+     * otherwise -1 indicates no match found.
+     * @throws NullPointerException for null {@link Bytes} reference
+     */
+    public int indexOf(byte b) {
+        return this.indexOf(new Bytes(b));
+    }
+
+    /**
      * Searches bytes for first, matching occurrence of {@link Bytes} and
      * returns index value greater than -1. The -1 value indicates not match
      * found.
@@ -244,7 +258,7 @@ public final class Bytes implements Iterable<Byte> {
                 // Find first byte
                 while (i++ < m && this.at(i) != first);
             }
-            // Now check the rest of the bytes in sequentially
+            // Now check the rest of the bytes sequentially
             if (i <= m) {
                 int j = i + 1;
                 int k = 1;
