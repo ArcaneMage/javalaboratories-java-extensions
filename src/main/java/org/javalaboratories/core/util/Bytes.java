@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Kevin Henry
+ * Copyright 2024 Kevin Henry
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
  */
 package org.javalaboratories.core.util;
 
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * Bytes class containing useful byte array operations.
@@ -30,36 +29,12 @@ import java.util.stream.Stream;
  * more. Moreover, it is possible to create a a container of bytes and perform
  * a variety of operations to manipulate the contained bytes.
  * <p>
- * The bytes class instance is thread-safe. Although this class is thread-safe,
- * compound operations need to be made atomic. Use the {@link
- * this#atomic(Consumer)} method to ensure the consumer function behaviour is
- * atomic when performing compound operations on this {@link Bytes} instance.
+ * The bytes class instance is thread-safe and immutable.
  */
 public final class Bytes implements Iterable<Byte> {
 
-    private static final int DEFAULT_EXTENSION = 32;
     private static final int UNSIGNED_MASK = 0xFF;
-
-    private byte[] bytes;
-    private int marker;
-
-    /**
-     * Represents an instance of a {@code Snapshot} object.
-     * <p>
-     * A {@link Snapshot} is a thread-safe independent copy of {@code this}
-     * {@link Bytes} copy.
-     * <p>
-     * The creation of the {@link Snapshot} object is thread-safe, the {@code
-     * snapshot} is generally used with thread-safe methods like the {@link
-     * this#copy()}, {@link this#concat(Bytes)} t} and {@link
-     * this#forEach(Consumer)}.
-     */
-    private record Snapshot(byte[] bytes, int marker) {
-        public Snapshot(byte[] bytes,int marker) {
-            this.bytes = Arrays.copyOf(Objects.requireNonNull(bytes),marker);
-            this.marker = marker;
-        }
-    }
+    private final byte[] bytes;
 
     /**
      * Default constructor of this Bytes container.
@@ -77,7 +52,6 @@ public final class Bytes implements Iterable<Byte> {
      */
     public Bytes(final byte... bytes) {
         this.bytes = Arrays.copyOf(Objects.requireNonNull(bytes),bytes.length);
-        this.marker = this.bytes.length;
     }
 
     /**
@@ -87,9 +61,8 @@ public final class Bytes implements Iterable<Byte> {
      * @throws NullPointerException when {@code Bytes} reference is null.
      */
     public Bytes(final Bytes other) {
-        Bytes o = Objects.requireNonNull(other,"Bytes object expected");
-        this.bytes = Bytes.copy(o.bytes);
-        this.marker = o.marker;
+        Bytes o = Objects.requireNonNull(other, "Bytes object expected");
+        this.bytes = Arrays.copyOf(o.bytes,o.length());
     }
 
     /**
@@ -99,15 +72,15 @@ public final class Bytes implements Iterable<Byte> {
      * capacity is created to accommodate the value. In other words, the internal
      * array is "resized" when it's at full capacity.
      *<p>
-     * This method is ideal for small number of bytes. However, if adding
+     * This method is ideal for a small number of bytes. However, if adding
      * megabytes or gigabytes, consider using the optimised {@link
      * this#add(Bytes)} or {@link this#add(byte...)} methods instead.
      *
      * @param value the value to be added to the array.
+     * @return a bytes object with byte added.
      */
-    public synchronized void add(final byte value) {
-       bytes = createCapacity();
-       bytes[this.marker++] = value;
+    public Bytes add(final byte value) {
+        return add(new byte[]{value});
     }
 
     /**
@@ -117,28 +90,25 @@ public final class Bytes implements Iterable<Byte> {
      * concatenated bytes.
      *
      * @param values the values to be added to the container of bytes.
+     * @return a bytes object with bytes added.
      * @throws NullPointerException when values bytes reference is null
      */
-    public void add(final byte... values) {
-        byte[] v = Objects.requireNonNull(values);
-        synchronized(this) {
-            this.add(new Bytes(v));
-        }
+    public Bytes add(final byte... values) {
+        byte[] v = Objects.requireNonNull(values, "Parameter values cannot be null");
+        byte[] result = concat(this.bytes,  v, v.length);
+        return new Bytes(result);
     }
 
     /**
      * Adds {@code Bytes} object to the end of the internal byte array.
      *
      * @param bytes the values to be added to the container of bytes.
+     * @return a bytes object with bytes object added.
      * @throws NullPointerException when values bytes reference is null
      */
-    public void add(final Bytes bytes) {
-        Snapshot s = Objects.requireNonNull(bytes).snapshot();
-        synchronized(this) {
-            Bytes c = this.concat(new Bytes(s.bytes()));
-            this.bytes = c.bytes;
-            this.marker = c.marker;
-        }
+    public Bytes add(final Bytes bytes) {
+        Bytes b = Objects.requireNonNull(bytes, "Parameter bytes cannot be null");
+        return add(b.bytes);
     }
 
     /**
@@ -168,9 +138,9 @@ public final class Bytes implements Iterable<Byte> {
      * @throws IndexOutOfBoundsException when index exceeds length of internal
      * byte array; if index is less than 0.
      */
-    public synchronized int at(final int index, final boolean unsigned) {
-        int i = Objects.checkIndex(index, this.marker);
-            return unsigned ? bytes[i] & UNSIGNED_MASK : bytes[i];
+    public int at(final int index, final boolean unsigned) {
+        int i = Objects.checkIndex(index, this.length());
+        return unsigned ? bytes[i] & UNSIGNED_MASK : bytes[i];
     }
 
     /**
@@ -179,7 +149,7 @@ public final class Bytes implements Iterable<Byte> {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Bytes b)) return false;
-        return marker == b.marker && Objects.deepEquals(this.bytes, b.bytes);
+        return Objects.deepEquals(this.bytes, b.bytes);
     }
 
     /**
@@ -187,7 +157,27 @@ public final class Bytes implements Iterable<Byte> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(Arrays.hashCode(this.bytes), marker);
+        return Objects.hash(Arrays.hashCode(this.bytes));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Iterator<Byte> iterator() {
+        return new Iterator<>() {
+            private int i = 0;
+            @Override
+            public boolean hasNext() {
+                return i < bytes.length;
+            }
+            @Override
+            public Byte next() {
+                if (!hasNext())
+                    throw new NoSuchElementException();
+                return bytes[i++];
+            }
+        };
     }
 
     /**
@@ -198,8 +188,8 @@ public final class Bytes implements Iterable<Byte> {
      *
      * @return length of the byte array.
      */
-    public synchronized int length() {
-        return marker;
+    public int length() {
+        return this.bytes.length;
     }
 
     /**
@@ -209,42 +199,61 @@ public final class Bytes implements Iterable<Byte> {
      * @param bytes bytes object to be concatenated to this object.
      */
     public Bytes concat(final Bytes bytes) {
-        Objects.requireNonNull(bytes, "Requires bytes object");
-        Snapshot s1, s2;
-        synchronized (this) {
-            s1 = this.snapshot();
-            s2 = bytes.snapshot();
-        }
-        byte[] result = new byte[s1.marker() + s2.marker()];
-        System.arraycopy(s1.bytes(), 0, result, 0, s1.marker());
-        System.arraycopy(s2.bytes(), 0, result, s1.marker(), s2.marker());
+        Bytes b = Objects.requireNonNull(bytes, "Requires bytes object");
+        byte[] result = Bytes.concat(this.bytes,b.bytes,b.length());
         return new Bytes(result);
     }
 
     /**
-     * Creates a copy of this {@link Bytes} container.
+     * Searches bytes in this {@link Bytes} class and returns {@code True}
+     * if found; {@code False} for no match found.
      *
-     * @return an independent copy of this container.
+     * @param bytes bytes to search in this {@link Bytes} object.
+     * @return true for match found, otherwise false is returned.
+     * @throws NullPointerException for null {@link Bytes} reference
      */
-    public Bytes copy() {
-        Snapshot s = this.snapshot();
-        return new Bytes(s.bytes());
+    public boolean contains(final Bytes bytes) {
+        return indexOf(bytes) > -1;
     }
 
     /**
-     * Executes a sequence of the operations atomically, a lock is acquired on
-     * {@code this} object.
-     * <p>
-     * The lock is released after the {@code consumer} function completes.
+     * Searches bytes for first, matching occurrence of {@link Bytes} and
+     * returns index value greater than -1. The -1 value indicates not match
+     * found.
      *
-     * @param consumer consumer function consisting of operations to be executed
-     *                 atomically.
+     * @param bytes bytes to search in this {@link Bytes} object.
+     * @return a value greater than -1 is returned for successful search;
+     * otherwise -1 indicates no match found.
+     * @throws NullPointerException for null {@link Bytes} reference
      */
-    public void atomic(final Consumer<Bytes> consumer) {
-        Consumer<Bytes> c = Objects.requireNonNull(consumer);
-        synchronized (this) {
-            c.accept(this);
+    public int indexOf(final Bytes bytes) {
+        Bytes b = Objects.requireNonNull(bytes,"Bytes parameter cannot be null");
+        if (b.length() == 0)
+            return 0;
+        if (this.length() == 0)
+            return -1;
+        if (b.length() > this.length())
+            return -1;
+
+        byte first = b.at(0);
+        int end = b.length();
+        // Calculate maximum
+        int m = this.length() - b.length();
+        for (int i = 0; i <= m; i++) {
+            if (this.at(i) != first) {
+                // Find first byte
+                while (i++ < m && this.at(i) != first);
+            }
+            // Now check the rest of the bytes in sequentially
+            if (i <= m) {
+                int j = i + 1;
+                int k = 1;
+                for (; k < end && this.at(j) == b.at(k);  k++, j++);
+                if (k == end)
+                    return i;
+            }
         }
+        return -1;
     }
 
     /**
@@ -252,8 +261,8 @@ public final class Bytes implements Iterable<Byte> {
      *
      * @param bytes number of bytes to truncate
      */
-     public synchronized Bytes trimLeft(int bytes) {
-        return new Bytes(Bytes.trimLeft(this.bytes, bytes, this.marker));
+    public Bytes trimLeft(int bytes) {
+        return new Bytes(Bytes.trimLeft(this.bytes, bytes));
     }
 
     /**
@@ -261,8 +270,8 @@ public final class Bytes implements Iterable<Byte> {
      *
      * @param bytes number of bytes to truncate
      */
-    public synchronized Bytes trimRight(int bytes) {
-        return new Bytes(Bytes.trimRight(this.bytes, bytes, this.marker));
+    public Bytes trimRight(int bytes) {
+        return new Bytes(Bytes.trimRight(this.bytes, bytes));
     }
 
     /**
@@ -275,8 +284,57 @@ public final class Bytes implements Iterable<Byte> {
      * @throws IndexOutOfBoundsException if beginIndex is negative;
      * endIndex > source length; beginIndex > endIndex.
      */
-    public synchronized Bytes subBytes(final int beginIndex, final int endIndex) {
-        return new Bytes(Bytes.subBytes(this.bytes, beginIndex, endIndex));
+    public Bytes subbytes(final int beginIndex, final int endIndex) {
+        return new Bytes(Bytes.subbytes(this.bytes, beginIndex, endIndex));
+    }
+
+    /**
+     * Returns a copy of the internal bytes array
+     *
+     * @return bytes array.
+     */
+    public byte[] toArray() {
+        return toArray(this.length());
+    }
+
+    /**
+     * Decodes 32-bit integer from the current {@code index} location.
+     * <p>
+     * Calculates the integer at the current {@code index} location. Four bytes
+     * from the current {@code index} are used to calculate the 32-bit number.
+     *
+     * @param index index must be greater than 0 and less than
+     * {@link this#length() -4}
+     * @return a 32 bit integer number
+     * @throws IndexOutOfBoundsException exception if insufficient bytes are
+     * supplied from current {@code index} location.
+     */
+    public int valueOf(final int index) {
+        int i = Objects.checkFromToIndex(index, index + 4, this.length());
+        Bytes sub = this.subbytes(i, i + 4);
+        return Bytes.valueOf(sub.bytes);
+    }
+
+    /**
+     * Returns a copy of the internal array of bytes.
+     *
+     * @return bytes array.
+     */
+    public byte[] toArray(final int malloc) {
+        if (malloc < this.length())
+            throw new IllegalArgumentException("Insufficient allocation for Bytes container");
+        return Arrays.copyOf(this.bytes, malloc);
+    }
+
+    /**
+     * Returns a copy of the internal array in a list collection.
+     *
+     * @return bytes array.
+     */
+    public List<Byte> toList() {
+        ArrayList<Byte> result = new ArrayList<>();
+        forEach(result::add);
+        return result;
     }
 
     /**
@@ -294,8 +352,7 @@ public final class Bytes implements Iterable<Byte> {
      * {@code source} array; {@code destIndex} cannot accommodate block.
      */
     public Bytes copyBlock(final int beginIndex, final int endIndex, final int destIndex) {
-        Snapshot s = snapshot();
-        return new Bytes(Bytes.copyBlock(s.bytes(), beginIndex, endIndex, destIndex));
+        return new Bytes(Bytes.copyBlock(this.bytes, beginIndex, endIndex, destIndex));
     }
 
     /**
@@ -313,8 +370,7 @@ public final class Bytes implements Iterable<Byte> {
      * {@code source} array; {@code destIndex} cannot accommodate block.
      */
     public Bytes moveBlock(final int beginIndex, final int endIndex, final int destIndex) {
-        Snapshot s = snapshot();
-        return new Bytes(Bytes.moveBlock(s.bytes(), beginIndex, endIndex, destIndex));
+        return new Bytes(Bytes.moveBlock(this.bytes, beginIndex, endIndex, destIndex));
     }
 
     /**
@@ -330,58 +386,9 @@ public final class Bytes implements Iterable<Byte> {
      * {@code source} array.
      */
     public Bytes removeBlock(final int beginIndex, final int endIndex) {
-        Snapshot s = snapshot();
-        return new Bytes(Bytes.removeBlock(s.bytes(), beginIndex, endIndex));
+        return new Bytes(Bytes.removeBlock(this.bytes, beginIndex, endIndex));
     }
 
-    /**
-     * Decodes 32-bit integer from the current {@code index} location.
-     * <p>
-     * Calculates the integer at the current {@code index} location. Four bytes
-     * from the current {@code index} are used to calculate the 32-bit number.
-     *
-     * @param index index must be greater than 0 and less than
-     * {@link this#length() -4}
-     * @return a 32 bit integer number
-     * @throws IndexOutOfBoundsException exception if insufficient bytes are
-     * supplied from current {@code index} location.
-     */
-    public synchronized int valueOf(final int index) {
-        int i = Objects.checkFromToIndex(index, index + 4, this.marker);
-        Bytes sub = this.subBytes(i, i + 4);
-        return Bytes.valueOf(sub.bytes);
-    }
-
-    /**
-     * Returns a copy of the internal array of bytes.
-     *
-     * @return bytes array.
-     */
-    public byte[] toArray() {
-        return toArray(this.length());
-    }
-
-    /**
-     * Returns a copy of the internal array of bytes.
-     *
-     * @return bytes array.
-     */
-    public synchronized byte[] toArray(final int malloc) {
-        if (malloc < this.length())
-            throw new IllegalArgumentException("Insufficient allocation for Bytes container");
-        return Arrays.copyOf(this.bytes, malloc);
-    }
-
-    /**
-     * Returns a copy of the internal array in a list collection.
-     *
-     * @return bytes array.
-     */
-    public List<Byte> toList() {
-        ArrayList<Byte> result = new ArrayList<>();
-        forEach(result::add);
-        return result;
-    }
 
     /**
      * Returns a string representation of the {@link Bytes} container.
@@ -406,95 +413,9 @@ public final class Bytes implements Iterable<Byte> {
      * @return a string representation of the container.
      */
     public String toString(boolean unsigned) {
-        Snapshot s = this.snapshot();
-        Byte[] bytes = new Byte[s.marker()];
-        Arrays.setAll(bytes, i -> s.bytes()[i]);
+        Byte[] bytes = new Byte[this.bytes.length];
+        Arrays.setAll(bytes, i -> this.bytes[i]);
         return Strings.coalesce(bytes, i -> bytes[i], b -> unsigned ? b & UNSIGNED_MASK : b , ",", true, 32);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterator<Byte> iterator() {
-        Snapshot s = this.snapshot();
-        return new Iterator<>() {
-            private int i = 0;
-            @Override
-            public boolean hasNext() {
-                return i < s.marker();
-            }
-            @Override
-            public Byte next() {
-                if (!hasNext())
-                    throw new NoSuchElementException();
-                return s.bytes()[i++];
-            }
-        };
-    }
-
-    /**
-     * Concatenates first and second byte arrays and returns a new combined
-     * byte array.
-     *
-     * @param first array of bytes
-     * @param second array of bytes
-     * @return combined byte array.
-     */
-    public static byte[] concat(final byte[] first, final byte[] second) {
-        Bytes f = new Bytes(Objects.requireNonNull(first));
-        Bytes s = new Bytes(Objects.requireNonNull(second));
-        return f.concat(s).toArray();
-    }
-
-    /**
-     * Concatenates first and second byte arrays and returns a new combined
-     * byte array.
-     *
-     * @param first array of bytes
-     * @param second array of bytes
-     * @param length number of bytes to concatenate. This must be greater than 0
-     *              and less than or equal to length of second parameter.
-     * @return combined byte array.
-     * @throws NullPointerException if first or second byte array is null
-     */
-    public static byte[] concat(final byte[] first, final byte[] second, final int length) {
-        Objects.requireNonNull(first);
-        int l = Objects.checkIndex(length,Objects.requireNonNull(second).length + 1);
-        byte[] result = new byte[first.length + l];
-        System.arraycopy(Objects.requireNonNull(first,"First byte array is null"),0,result,0,first.length);
-        System.arraycopy(Objects.requireNonNull(second,"Second byte array is null"),0,result,first.length,l);
-        return result;
-    }
-
-    /**
-     * Copies byte array and returns a new byte array copy.
-     *
-     * @param source of byte array to copy.
-     * @return a copy of the source byte array.
-     */
-    public static byte[] copy(final byte[] source) {
-        Bytes result = new Bytes(source);
-        return result.copy().toArray();
-    }
-
-    /**
-     * Copies byte array and returns a new byte array copy.
-     * <p>
-     * If {@code malloc} is less than {@code source length} then {@link
-     * IndexOutOfBoundsException} is thrown.
-     *
-     * @param source of byte array to copy.
-     * @param malloc size of destination array
-     * @return a copy of the source byte array.
-     * @throws IndexOutOfBoundsException when {@code malloc} is invalid.
-     * @throws NullPointerException when {@code source} is null.
-     */
-    public static byte[] copy(final byte[] source, final int malloc) {
-        byte[] s = Objects.requireNonNull(source,"Source byte array is null");
-        if (malloc < s.length)
-            throw new IndexOutOfBoundsException();
-        return new Bytes(source).copy().toArray(malloc);
     }
 
     /**
@@ -515,8 +436,11 @@ public final class Bytes implements Iterable<Byte> {
     public static byte[] copyBlock(final byte[] source, final int beginIndex, final int endIndex, final int destIndex) {
         byte[] s = Objects.requireNonNull(source,"Source byte array is null");
         int fromIndex = checkBlockIndexes(beginIndex, endIndex, destIndex, s.length);
-        byte[] block = Bytes.subBytes(s, fromIndex, endIndex);
-        byte[] result = Bytes.copy(source);
+        byte[] block = Bytes.subbytes(s, fromIndex, endIndex);
+        byte[] result = new byte[s.length];
+        // Copy the source
+        System.arraycopy(source, 0, result, 0, s.length);
+        // Copy block into "source"
         System.arraycopy(block, 0, result, destIndex, block.length);
         return result;
     }
@@ -538,11 +462,11 @@ public final class Bytes implements Iterable<Byte> {
      */
     public static byte[] moveBlock(final byte[] source, final int beginIndex, final int endIndex, final int destIndex) {
         byte[] s = Objects.requireNonNull(source,"Source byte array is null");
-        int fromIndex = checkBlockIndexes(beginIndex, endIndex, destIndex, s.length);
+        int fromIndex = Bytes.checkBlockIndexes(beginIndex, endIndex, destIndex, s.length);
         // Extract block
-        byte[] block = Bytes.subBytes(s, fromIndex, endIndex);
+        byte[] block = Bytes.subbytes(s, fromIndex, endIndex);
         // Remove source block, leaving just left and right portions of either side of block
-        byte[] remainder = removeBlock(s, beginIndex, endIndex);
+        byte[] remainder = Bytes.removeBlock(s, beginIndex, endIndex);
         byte[] result = new byte[s.length];
         // Write block to destination
         System.arraycopy(block, 0, result, destIndex, block.length);
@@ -585,7 +509,11 @@ public final class Bytes implements Iterable<Byte> {
      * @return truncated byte array of source.
      */
     public static byte[] trimLeft(final byte[] source, final int bytes) {
-        return trimLeft(source,bytes,source.length);
+        byte[] s = Objects.requireNonNull(source,"Source byte array is null");
+        Objects.checkIndex(bytes,s.length);
+        byte[] result = new byte[s.length - bytes];
+        System.arraycopy(s,bytes,result,0,s.length - bytes);
+        return result;
     }
 
     /**
@@ -599,7 +527,7 @@ public final class Bytes implements Iterable<Byte> {
      * @throws IndexOutOfBoundsException if beginIndex is negative;
      * endIndex > source length; beginIndex > endIndex.
      */
-    public static byte[] subBytes(final byte[] source, final int beginIndex, final int endIndex) {
+    public static byte[] subbytes(final byte[] source, final int beginIndex, final int endIndex) {
         byte[] s = Objects.requireNonNull(source,"Source byte array is null");
         int fromIndex = Objects.checkFromToIndex(beginIndex,endIndex,s.length);
         byte[] result = new byte[endIndex - fromIndex];
@@ -616,7 +544,11 @@ public final class Bytes implements Iterable<Byte> {
      * @return truncated byte array of source.
      */
     public static byte[] trimRight(final byte[] source, final int bytes) {
-        return trimRight(source,bytes,source.length);
+        byte[] s = Objects.requireNonNull(source,"Source byte array is null");
+        Objects.checkIndex(bytes,s.length);
+        byte[] result = new byte[s.length - bytes];
+        System.arraycopy(s,0,result,0,s.length - bytes);
+        return result;
     }
 
     /**
@@ -625,13 +557,23 @@ public final class Bytes implements Iterable<Byte> {
      * @param value integer value to be transformed.
      * @return byte array.
      */
-    public static byte[] toBytes(int value) {
+    public static byte[] to32BitArray(int value) {
         return new byte[] {
                 (byte)(value >> 24),
                 (byte)(value >> 16),
                 (byte)(value >> 8),
                 (byte)value
         };
+    }
+
+    /**
+     * Converts an integer value into {@link Bytes}.
+     *
+     * @param value integer value to be transformed.
+     * @return byte array.
+     */
+    public static Bytes toBytes(int value) {
+        return new Bytes(to32BitArray(value));
     }
 
     /**
@@ -650,52 +592,42 @@ public final class Bytes implements Iterable<Byte> {
         return (((bytes[0] & 0xFF) << 24) + ((bytes[1] & 0xFF) << 16) + ((bytes[2] & 0xFF) << 8) + (bytes[3] & 0xFF));
     }
 
-    private static byte[] trimLeft(final byte[] source, final int bytes, final int length) {
-        Objects.checkIndex(bytes,length);
-        byte[] s = Objects.requireNonNull(source,"Source byte array is null");
-        byte[] result = new byte[length - bytes];
-        System.arraycopy(s,bytes,result,0,length - bytes);
-        return result;
+    /**
+     * Concatenates first and second byte arrays and returns a new combined
+     * byte array.
+     *
+     * @param first array of bytes
+     * @param second array of bytes
+     * @return combined byte array.
+     */
+    public static byte[] concat(final byte[] first, final byte[] second) {
+        return concat(Objects.requireNonNull(first),Objects.requireNonNull(second),second.length);
     }
 
-    private static byte[] trimRight(final byte[] source,  final int bytes, final int length) {
-        Objects.checkIndex(bytes,length);
-        byte[] s = Objects.requireNonNull(source,"Source byte array is null");
-        byte[] result = new byte[length - bytes];
-        System.arraycopy(s,0,result,0,length - bytes);
+    /**
+     * Concatenates first and second byte arrays and returns a new combined
+     * byte array.
+     *
+     * @param first array of bytes
+     * @param second array of bytes
+     * @param length number of bytes to concatenate. This must be greater than 0
+     *               and less than or equal to length of second parameter.
+     * @return combined byte array.
+     * @throws NullPointerException if first or second byte array is null
+     */
+    public static byte[] concat(final byte[] first, final byte[] second, final int length) {
+        Objects.requireNonNull(first);
+        int l = Objects.checkIndex(length,Objects.requireNonNull(second).length + 1);
+        byte[] result = new byte[first.length + l];
+        System.arraycopy(Objects.requireNonNull(first,"First byte array is null"),0,result,0,first.length);
+        System.arraycopy(Objects.requireNonNull(second,"Second byte array is null"),0,result,first.length,l);
         return result;
     }
-
     private static int checkBlockIndexes(final int beginIndex, final int endIndex, final int destIndex, final int length) {
         int fromIndex = Objects.checkFromToIndex(beginIndex,endIndex,length);
         if (destIndex < 0 || destIndex >= length - (endIndex - beginIndex) + 1)
             throw new IndexOutOfBoundsException("Insufficient space in which to copy/move block size %d, destination %d"
                     .formatted(endIndex - beginIndex,destIndex));
         return fromIndex;
-    }
-
-    private byte[] createCapacity() {
-        byte[] bytes = this.bytes;
-        if (marker >= bytes.length) {
-            return Arrays.copyOf(this.bytes, this.bytes.length + DEFAULT_EXTENSION);
-        }
-        return bytes;
-    }
-
-    /**
-     * Creates a {@code Snapshot} object of this {@link Bytes} object.
-     * <p>
-     * A {@link Snapshot} represents a thread-safe independent copy of {@code
-     * this} {@link Bytes} copy.
-     * <p>
-     * The creation of the {@link Snapshot} object is thread-safe, the {@code
-     * snapshot} is generally used with thread-safe methods like the {@link
-     * this#copy()}, {@link this#concat(Bytes)} t} and {@link
-     * this#forEach(Consumer)}.
-     *
-     * @return an instance of {@link Snapshot} object.
-     */
-    private synchronized Snapshot snapshot() {
-        return new Snapshot(this.bytes,this.marker);
     }
 }

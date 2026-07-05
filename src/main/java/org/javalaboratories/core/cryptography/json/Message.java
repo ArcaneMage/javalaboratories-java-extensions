@@ -26,6 +26,7 @@ import org.javalaboratories.core.util.Bytes;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 
@@ -119,7 +120,7 @@ public class Message {
      * @return a copy of the message structure in bytes array.
      */
     public byte[] getSigned() {
-        return Bytes.copy(signed);
+        return Arrays.copyOf(signed,signed.length);
     }
 
     /**
@@ -148,8 +149,8 @@ public class Message {
 
     private byte[] encodeSign() {
         byte[] publicKeyBytes = publicKey.getEncoded();
-        byte[] signatureSz = Bytes.toBytes(signature.length);
-        byte[] publicKeySz = Bytes.toBytes(publicKeyBytes.length);
+        byte[] signatureSz = Bytes.to32BitArray(signature.length);
+        byte[] publicKeySz = Bytes.to32BitArray(publicKeyBytes.length);
         byte[] publicKeyBlock = Bytes.concat(publicKeySz,publicKeyBytes);
         byte[] signatureBlock = Bytes.concat(signatureSz,signature);
         byte[] header = Bytes.concat(publicKeyBlock,signatureBlock);

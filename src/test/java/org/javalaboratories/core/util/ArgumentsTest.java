@@ -39,7 +39,7 @@ public final class ArgumentsTest {
 
     @Test
     public void testRequireNonNull_NullPointerExceptionWithMessage_Fail() {
-        Object argument = "null";
+        Object argument = null;
         Exception e = assertThrows(NullPointerException.class,() -> Arguments.requireNonNull("No argument",argument));
         assertEquals("No argument",e.getMessage());
     }

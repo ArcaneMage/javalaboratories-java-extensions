@@ -54,6 +54,7 @@ public final class Arguments {
         return argument;
     }
 
+    /*
     /**
      * Validates {@code arguments} for {@code null} values then throws requested
      * exception of type E when {@code null} is encountered.
@@ -63,12 +64,12 @@ public final class Arguments {
      * @param <T> type of argument undergoing test
      * @param <E> type of exception to be thrown when validation fails.
      * @throws E the exception object being thrown.
-     */
+     *
     public static <T, E extends Exception> T requireNonNull(final String message, final T argument) throws E {
         requireNonNull(message, (Object[]) argument);
         return argument;
     }
-
+*/
     /**
      * Validates {@code arguments} for {@code null} values.
      *
