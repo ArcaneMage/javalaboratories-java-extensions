@@ -244,9 +244,8 @@ public final class Bytes implements Iterable<Byte> {
         Bytes b = Objects.requireNonNull(bytes,"Bytes parameter cannot be null");
         if (b.length() == 0)
             return 0;
-        if (this.length() == 0)
-            return -1;
-        if (b.length() > this.length())
+
+        if (checkIndexOfLengths(bytes))
             return -1;
 
         byte first = b.at(0);
@@ -262,10 +261,61 @@ public final class Bytes implements Iterable<Byte> {
             if (i <= m) {
                 int j = i + 1;
                 int k = 1;
-                for (; k < end && this.at(j) == b.at(k);  k++, j++);
+                for (; k < end && this.at(j) == b.at(k); k++, j++);
                 if (k == end)
                     return i;
             }
+        }
+        return -1;
+    }
+
+    /**
+     * Searches byte for last, matching occurrence of {@code byte} and
+     * returns index value greater than -1. The -1 value indicates not match
+     * found.
+     *
+     * @param b byte to search in this {@link Bytes} object.
+     * @return a value greater than -1 is returned for successful search;
+     * otherwise -1 indicates no match found.
+     * @throws NullPointerException for null {@link Bytes} reference
+     */
+    public int lastIndexOf(byte b) {
+        return this.lastIndexOf(new Bytes(b));
+    }
+
+    /**
+     * Searches bytes for last, matching occurrence of {@link Bytes} and
+     * returns index value greater than -1. The -1 value indicates not match
+     * found.
+     *
+     * @param bytes bytes to search in this {@link Bytes} object.
+     * @return a value greater than -1 is returned for successful search;
+     * otherwise -1 indicates no match found.
+     * @throws NullPointerException for null {@link Bytes} reference
+     */
+    public int lastIndexOf(final Bytes bytes) {
+        Bytes b = Objects.requireNonNull(bytes,"Bytes parameter cannot be null");
+        if (b.length() == 0)
+            return this.length();
+
+        if (checkIndexOfLengths(bytes))
+            return -1;
+
+        byte first = b.at(0);
+        int end = b.length();
+        // Calculate maximum
+        int m = this.length() - b.length();
+        for (int i = m; i > 0; i--) {
+            if (this.at(i) != first) {
+                // Find first byte
+                while (i-- > 0 && this.at(i) != first);
+            }
+            // Now check the rest of the bytes sequentially
+            int j = i + 1;
+            int k = 1;
+            for (; k < end && this.at(j) == b.at(k); k++, j++);
+            if (k == end)
+                return i;
         }
         return -1;
     }
@@ -637,11 +687,18 @@ public final class Bytes implements Iterable<Byte> {
         System.arraycopy(Objects.requireNonNull(second,"Second byte array is null"),0,result,first.length,l);
         return result;
     }
+
     private static int checkBlockIndexes(final int beginIndex, final int endIndex, final int destIndex, final int length) {
         int fromIndex = Objects.checkFromToIndex(beginIndex,endIndex,length);
         if (destIndex < 0 || destIndex >= length - (endIndex - beginIndex) + 1)
             throw new IndexOutOfBoundsException("Insufficient space in which to copy/move block size %d, destination %d"
                     .formatted(endIndex - beginIndex,destIndex));
         return fromIndex;
+    }
+
+    private boolean checkIndexOfLengths(final Bytes bytes) {
+        if (this.length() == 0)
+            return true;
+        return bytes.length() > this.length();
     }
 }

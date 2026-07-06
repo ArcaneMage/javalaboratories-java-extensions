@@ -384,7 +384,7 @@ public class BytesTest {
         Bytes test2 = new Bytes(new byte[]{3,7,1,6,4}); // Index -1
         Bytes test3 = new Bytes(new byte[]{6,4,3,7,1}); // Index -1
         Bytes test4 = new Bytes(new byte[]{3,7,3,7,1}); // Index -1
-        Bytes test5 = new Bytes(new byte[]{6,7,6,4,1}); // Index 2
+        Bytes test5 = new Bytes(new byte[]{6,4,6,4,1}); // Index 2
 
         int i = test1.indexOf(block);
         assertEquals(2,i);
@@ -405,6 +405,39 @@ public class BytesTest {
         assertEquals(0,i);
 
         i = test1.indexOf((byte) 1);
+        assertEquals(4,i);
+    }
+
+    @Test
+    public void testBytesObjectLastIndexOf() {
+        Bytes block = new Bytes(new byte[]{6,4});
+        Bytes empty = new Bytes();
+
+        Bytes test1 = new Bytes(new byte[]{3,7,6,4,1}); // Index 2
+        Bytes test2 = new Bytes(new byte[]{3,7,1,6,4}); // Index 3
+        Bytes test3 = new Bytes(new byte[]{6,4,3,7,1}); // Index 0
+        Bytes test4 = new Bytes(new byte[]{3,7,3,7,1}); // Index -1
+        Bytes test5 = new Bytes(new byte[]{6,4,6,4,1}); // Index 2
+
+        int i = test1.lastIndexOf(block);
+        assertEquals(2,i);
+
+        i = test2.lastIndexOf(block);
+        assertEquals(3,i);
+
+        i = test3.lastIndexOf(block);
+        assertEquals(0,i);
+
+        i = test4.lastIndexOf(block);
+        assertEquals(-1,i);
+
+        i = test5.lastIndexOf(block);
+        assertEquals(2,i);
+
+        i = test1.lastIndexOf(empty);
+        assertEquals(5,i);
+
+        i = test1.lastIndexOf((byte) 1);
         assertEquals(4,i);
     }
 
