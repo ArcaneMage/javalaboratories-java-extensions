@@ -27,8 +27,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.javalaboratories.core.json.JsonTransformer.FLAG_PRETTY_FORMAT;
-import static org.javalaboratories.core.json.JsonTransformer.FLAG_SERIALISE_NULLS;
+import static org.javalaboratories.core.json.JsonTransformer.PRETTY_FORMAT_BIT;
+import static org.javalaboratories.core.json.JsonTransformer.SERIALISE_NULLS_BIT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -61,7 +61,7 @@ public class JsonTransformerTest {
                 }
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{\"id\":1923,\"name\":\"John\",\"address\":{\"city\":\"Dunstable\"}}",result);
     }
@@ -70,7 +70,7 @@ public class JsonTransformerTest {
     public void testNewWithBadParameters_Fail() {
         String schema = null;
 
-        assertThrows(NullPointerException.class, () -> TransformerFactory.createJsonTransformer(schema));
+        assertThrows(NullPointerException.class, () -> JsonTransformerFactory.createTransformer(schema));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class JsonTransformerTest {
             """;
         String source = null;
 
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         assertThrows(NullPointerException.class, () -> transformer.transform(source));
     }
 
@@ -114,7 +114,7 @@ public class JsonTransformerTest {
                     "postalCode": "LU6 3BX"
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         assertThrows(JsonTransformerException.class,() -> transformer.transform(source));
     }
 
@@ -145,7 +145,7 @@ public class JsonTransformerTest {
             }
             """;
 
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{\"id\":1923,\"name\":\"John\",\"address\":{\"city\":\"Dunstable\"}}",result);
     }
@@ -180,7 +180,7 @@ public class JsonTransformerTest {
                 }]
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{\"id\":1923,\"name\":\"John\",\"OpenDaysEnum\":[\"Mon\",\"Wed\",\"Fri\"]," +
                 "\"data\":[{\"city\":\"Dunstable\"}],\"address\":{\"city\":\"Dunstable\"}}",result);
@@ -200,7 +200,7 @@ public class JsonTransformerTest {
                 "business": "Jakes Cakes"
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{\"openDays\":[\"Mon\",\"Wed\",\"Fri\"],\"name\":\"Jakes Cakes\"}",result);
     }
@@ -216,7 +216,7 @@ public class JsonTransformerTest {
                 "business": "Jakes Cakes"
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("[[\"Mon\",\"Wed\",\"Fri\"],\"Jakes Cakes\",\"Fri\"]",result);
     }
@@ -237,7 +237,7 @@ public class JsonTransformerTest {
                 }]
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{}",result);
     }
@@ -258,7 +258,7 @@ public class JsonTransformerTest {
                 }]
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("[]",result);
     }
@@ -299,7 +299,7 @@ public class JsonTransformerTest {
                 }]
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{\"name\":\"nitroglycerin\"}",result);
     }
@@ -314,8 +314,8 @@ public class JsonTransformerTest {
             """;
         String source = "[]";
 
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
-        String result = transformer.transform(source, FLAG_SERIALISE_NULLS);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
+        String result = transformer.transform(source, SERIALISE_NULLS_BIT);
         assertEquals("{\"openDays\":null,\"name\":null}",result);
     }
 
@@ -329,17 +329,17 @@ public class JsonTransformerTest {
             """;
         String source = "[]";
 
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         String result = transformer.transform(source);
         assertEquals("{}",result);
 
-        result = transformer.transform(source, FLAG_PRETTY_FORMAT);
+        result = transformer.transform(source, PRETTY_FORMAT_BIT);
         assertEquals("{}",result);
 
-        result = transformer.transform(source, FLAG_SERIALISE_NULLS);
+        result = transformer.transform(source, SERIALISE_NULLS_BIT);
         assertEquals("{\"openDays\":null,\"name\":null}",result);
 
-        result = transformer.transform(source, FLAG_PRETTY_FORMAT | FLAG_SERIALISE_NULLS);
+        result = transformer.transform(source, PRETTY_FORMAT_BIT | SERIALISE_NULLS_BIT);
         assertEquals("{\n  \"openDays\": null,\n  \"name\": null\n}",result);
     }
 
@@ -382,7 +382,7 @@ public class JsonTransformerTest {
                 }]
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         JsonTransformerException e = assertThrows(JsonTransformerException.class,() -> transformer.transform(source));
         log.error(e.getMessage());
         log.error(e.getJson());
@@ -424,7 +424,7 @@ public class JsonTransformerTest {
                 }]
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         StringReader reader = new StringReader(source);
         StringWriter writer = new StringWriter();
         transformer.transform(reader,writer);
@@ -468,7 +468,7 @@ public class JsonTransformerTest {
                 }]
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         InputStream input = new ByteArrayInputStream(source.getBytes());
         OutputStream output = new ByteArrayOutputStream();
         transformer.transform(input,output);
@@ -513,7 +513,7 @@ public class JsonTransformerTest {
                 }]
             }
             """;
-        JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+        JsonTransformer transformer = JsonTransformerFactory.createTransformer(schema);
         AtomicInteger events = new AtomicInteger(0);
         transformer.subscribe(event -> {
             switch (event) {

@@ -35,7 +35,7 @@ public class LongHoldersTest {
                .filter(n -> n % 2 == 0)
                .collect(() -> Holder.of(0L),(a, b) -> a.setGet(v -> v + b),(a, b) -> a.setGet(v -> v + b.fold(0L, n -> n)))
                .map(n -> n / 2)
-               .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+               .fold("","Sum of even numbers (2,4,6,8,10) / 2 = %d"::formatted);
 
         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15",result);
         logger.info(result);
@@ -56,7 +56,7 @@ public class LongHoldersTest {
                .map(Long::valueOf)
                .collect(LongHolders.summing())
                .map(n -> n / 2)
-               .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+               .fold("","Sum of even numbers (2,4,6,8,10) / 2 = %d"::formatted);
 
         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15",result);
         logger.info(result);
@@ -70,7 +70,7 @@ public class LongHoldersTest {
                .map(Long::valueOf)
                .collect(LongHolders.max())
                .map(n -> n / 2)
-               .fold("",n -> STR."Maximum of even numbers (10) / 2 = \{n}");
+               .fold("","Maximum of even numbers (10) / 2 = %d"::formatted);
 
         assertEquals("Maximum of even numbers (10) / 2 = 5",result);
         logger.info(result);
@@ -84,7 +84,7 @@ public class LongHoldersTest {
                 .map(Long::valueOf)
                 .collect(LongHolders.min())
                 .map(n -> n / 2)
-                .fold("",n -> STR."Minimum of even numbers (2) / 2 = \{n}");
+                .fold("","Minimum of even numbers (2) / 2 = %d"::formatted);
 
         assertEquals("Minimum of even numbers (2) / 2 = 1",result);
         logger.info(result);
@@ -97,7 +97,7 @@ public class LongHoldersTest {
             .filter(n -> n % 2 == 0)
             .reduce(Holder.of(0L),LongHolders::sum,LongHolders::sum)
             .map(n -> n / 2)
-            .fold("",n -> STR."Sum of even numbers (2,4,6,8,10) / 2 = \{n}");
+            .fold("","Sum of even numbers (2,4,6,8,10) / 2 = %d"::formatted);
 
         assertEquals("Sum of even numbers (2,4,6,8,10) / 2 = 15",result);
         logger.info(result);
@@ -110,7 +110,7 @@ public class LongHoldersTest {
                 .filter(n -> n % 2 == 0)
                 .reduce(Holder.of(0L),LongHolders::max,LongHolders::max)
                 .map(n -> n / 2)
-                .fold("",n -> STR."Maximum of even numbers (10) / 2 = \{n}");
+                .fold("","Maximum of even numbers (10) / 2 = %d"::formatted);
 
         assertEquals("Maximum of even numbers (10) / 2 = 5",result);
         logger.info(result);
@@ -123,7 +123,7 @@ public class LongHoldersTest {
                 .filter(n -> n % 2 == 0)
                 .reduce(Holder.of(Long.MAX_VALUE),LongHolders::min,LongHolders::min)
                 .map(n -> n / 2)
-                .fold("",n -> STR."Minimum of even numbers (2) / 2 = \{n}");
+                .fold("","Minimum of even numbers (2) / 2 = %d"::formatted);
 
         assertEquals("Minimum of even numbers (2) / 2 = 1",result);
         logger.info(result);

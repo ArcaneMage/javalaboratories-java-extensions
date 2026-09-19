@@ -168,7 +168,7 @@ public class RsaHybridCryptographyTest {
     @Test
     public void testStreamDecryption_withCorruptedSessionKey_Fail() {
         try (MockedStatic<Bytes> bytes = Mockito.mockStatic(Bytes.class)) {
-            bytes.when(() -> Bytes.fromBytes(any())).thenReturn(127);
+            bytes.when(() -> Bytes.valueOf(any())).thenReturn(127);
 
             assertThrows(CryptographyException.class, () -> cryptography
                     .decrypt(privateKey, new ByteArrayInputStream(TEXT.getBytes()), new ByteArrayOutputStream()));

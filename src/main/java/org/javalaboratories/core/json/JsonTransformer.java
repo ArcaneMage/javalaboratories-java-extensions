@@ -67,7 +67,7 @@ import java.util.Objects;
  *                 }
  *                 """;
  *
- *     JsonTransformer transformer = TransformerFactory.createJsonTransformer(schema);
+ *     JsonTransformer transformer = JsonTransformerFactory.createJsonTransformer(schema);
  *     String result = transformer.transform(source);
  * }
  * </pre>
@@ -90,17 +90,17 @@ public interface JsonTransformer extends EventSubscribable<JsonTransformerSubscr
     /**
      * Default flag setting -- no formatting
      */
-    byte FLAG_CLEAR = 0x0;
+    byte CLEAR_BITS = 0x0;
 
     /**
      * Pretty format of transformed JSON
      */
-    byte FLAG_PRETTY_FORMAT = 0x01;
+    byte PRETTY_FORMAT_BIT = 0x01;
 
     /**
      * Serialize null attributes of transformed JSON
      */
-    byte FLAG_SERIALISE_NULLS = 0x02;
+    byte SERIALISE_NULLS_BIT = 0x02;
 
     /**
      * Transforms the JSON source as dictated by the mappings schema.
@@ -132,7 +132,7 @@ public interface JsonTransformer extends EventSubscribable<JsonTransformerSubscr
      * transforming the JSON structure.
      */
     default void transform(final InputStream in, final OutputStream out) throws JsonTransformerException {
-        this.transform(in,out,FLAG_CLEAR);
+        this.transform(in,out, CLEAR_BITS);
     }
 
     /**
@@ -171,7 +171,7 @@ public interface JsonTransformer extends EventSubscribable<JsonTransformerSubscr
      * transforming the JSON structure.
      */
     default void transform(final Reader reader, final Writer writer)  throws JsonTransformerException {
-        this.transform(reader, writer, FLAG_CLEAR);
+        this.transform(reader, writer, CLEAR_BITS);
     }
 
     /**
@@ -220,7 +220,7 @@ public interface JsonTransformer extends EventSubscribable<JsonTransformerSubscr
      * transforming the JSON structure.
      */
     default String transform(final String s)  throws JsonTransformerException {
-        return this.transform(s, FLAG_CLEAR);
+        return this.transform(s, CLEAR_BITS);
     }
 
     /**

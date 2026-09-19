@@ -81,6 +81,6 @@ final class ReadOnlyHolder<T> extends Holder<T> {
     @Override
     public String toString() {
         String s = super.toString();
-        return STR."\{s} (Read-Only)";
+        return String.format("%s (Read-Only)",s);
     }
 }

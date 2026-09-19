@@ -24,7 +24,11 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import org.javalaboratories.core.event.EventBroadcaster;
 import org.javalaboratories.core.event.EventSource;
-import org.javalaboratories.core.json.events.*;
+import org.javalaboratories.core.json.events.AfterTransformationEvent;
+import org.javalaboratories.core.json.events.BeforeTransformationEvent;
+import org.javalaboratories.core.json.events.JsonPropertyTransformationEvent;
+import org.javalaboratories.core.json.events.JsonTransformerSubscriber;
+import org.javalaboratories.core.json.events.TransformerEvent;
 import org.javalaboratories.core.tuple.Pair;
 import org.javalaboratories.core.tuple.Tuple2;
 
@@ -62,20 +66,20 @@ import java.util.regex.Pattern;
  *
  * @see JsonTransformer
  */
-public class GoogleJsonTransformer implements JsonTransformer, EventSource {
-    private final EventBroadcaster<GoogleJsonTransformer,TransformerEvent,JsonTransformerSubscriber> broadcaster;
+public class DefaultJsonTransformer implements JsonTransformer, EventSource {
+    private final EventBroadcaster<DefaultJsonTransformer,TransformerEvent,JsonTransformerSubscriber> broadcaster;
     private final Pattern arrayRefPattern;
     private final String schema;
 
     /**
-     * Constructs this {@link GoogleJsonTransformer} with a mappings schema.
+     * Constructs this {@link DefaultJsonTransformer} with a mappings schema.
      * <p>
-     * Use {@link TransformerFactory} to create an instance of this object.
+     * Use {@link JsonTransformerFactory} to create an instance of this object.
      *
      * @param s mappings schema.
      * @throws NullPointerException if the schema is null.
      */
-    GoogleJsonTransformer(final String s) {
+    DefaultJsonTransformer(final String s) {
         this.schema = Objects.requireNonNull(s,"schema/mappings is null");
         this.arrayRefPattern = Pattern.compile("\\([0-9]+\\)");
         this.broadcaster = new EventBroadcaster<>();
@@ -275,9 +279,9 @@ public class GoogleJsonTransformer implements JsonTransformer, EventSource {
         Gson gson;
         final byte BIT_MASK = (byte) 0xFF;
         switch(flags & BIT_MASK) {
-            case FLAG_PRETTY_FORMAT -> gson = new GsonBuilder().setPrettyPrinting().create();
-            case FLAG_SERIALISE_NULLS -> gson = new GsonBuilder().serializeNulls().create();
-            case FLAG_PRETTY_FORMAT | FLAG_SERIALISE_NULLS -> gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+            case PRETTY_FORMAT_BIT -> gson = new GsonBuilder().setPrettyPrinting().create();
+            case SERIALISE_NULLS_BIT -> gson = new GsonBuilder().serializeNulls().create();
+            case PRETTY_FORMAT_BIT | SERIALISE_NULLS_BIT -> gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
             default -> gson = new GsonBuilder().create();
         }
         return gson.toJson(json);
