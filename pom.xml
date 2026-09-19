@@ -6,7 +6,7 @@
 
     <groupId>org.javalaboratories</groupId>
     <artifactId>java-extensions</artifactId>
-    <version>2.2.0.0-RELEASE</version>
+    <version>2.2.0.1-RELEASE</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>This is an eclectic library of utilities, framework abstractions and patterns
@@ -185,6 +185,14 @@
                     <release>25</release>
                     <failOnError>true</failOnError>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
