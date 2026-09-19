@@ -95,7 +95,7 @@ public final class Bytes implements Iterable<Byte> {
      */
     public Bytes add(final byte... values) {
         byte[] v = Objects.requireNonNull(values, "Parameter values cannot be null");
-        byte[] result = concat(this.bytes,  v, v.length);
+        byte[] result = concat(this.bytes, v, v.length);
         return new Bytes(result);
     }
 
@@ -218,7 +218,7 @@ public final class Bytes implements Iterable<Byte> {
 
     /**
      * Searches byte for first, matching occurrence of {@code byte} and
-     * returns index value greater than -1. The -1 value indicates not match
+     * returns index value greater than -1. The -1 value indicates no match
      * found.
      *
      * @param b byte to search in this {@link Bytes} object.
@@ -226,13 +226,13 @@ public final class Bytes implements Iterable<Byte> {
      * otherwise -1 indicates no match found.
      * @throws NullPointerException for null {@link Bytes} reference
      */
-    public int indexOf(byte b) {
+    public int indexOf(final byte b) {
         return this.indexOf(new Bytes(b));
     }
 
     /**
      * Searches bytes for first, matching occurrence of {@link Bytes} and
-     * returns index value greater than -1. The -1 value indicates not match
+     * returns index value greater than -1. The -1 value indicates no match
      * found.
      *
      * @param bytes bytes to search in this {@link Bytes} object.
@@ -270,8 +270,15 @@ public final class Bytes implements Iterable<Byte> {
     }
 
     /**
+     * Returns {@code true} if the {@link Bytes} container is empty.
+     */
+    public boolean isEmpty() {
+        return this.bytes.length == 0;
+    }
+
+    /**
      * Searches byte for last, matching occurrence of {@code byte} and
-     * returns index value greater than -1. The -1 value indicates not match
+     * returns index value greater than -1. The -1 value indicates no match
      * found.
      *
      * @param b byte to search in this {@link Bytes} object.
@@ -285,7 +292,7 @@ public final class Bytes implements Iterable<Byte> {
 
     /**
      * Searches bytes for last, matching occurrence of {@link Bytes} and
-     * returns index value greater than -1. The -1 value indicates not match
+     * returns index value greater than -1. The -1 value indicates no match
      * found.
      *
      * @param bytes bytes to search in this {@link Bytes} object.
@@ -420,6 +427,16 @@ public final class Bytes implements Iterable<Byte> {
     }
 
     /**
+     * Returns encapsulated {@code bytes}.
+     * <p>
+     * This is an immutable class, so the method returns a copy of the encapsulated
+     * {@code bytes} to protect state of the {@link Bytes} object.
+     */
+    public byte[] getBytes() {
+        return toArray();
+    }
+
+    /**
      * Moves a block of bytes in {@code source} to a destination specified by
      * {@code destIndex}.
      * <p>
@@ -452,7 +469,6 @@ public final class Bytes implements Iterable<Byte> {
     public Bytes removeBlock(final int beginIndex, final int endIndex) {
         return new Bytes(Bytes.removeBlock(this.bytes, beginIndex, endIndex));
     }
-
 
     /**
      * Returns a string representation of the {@link Bytes} container.
