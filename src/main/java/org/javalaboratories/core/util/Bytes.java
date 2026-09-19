@@ -74,7 +74,7 @@ public final class Bytes implements Iterable<Byte> {
      *<p>
      * This method is ideal for a small number of bytes. However, if adding
      * megabytes or gigabytes, consider using the optimised {@link
-     * this#add(Bytes)} or {@link this#add(byte...)} methods instead.
+     * Bytes#add(Bytes)} or {@link Bytes#add(byte...)} methods instead.
      *
      * @param value the value to be added to the array.
      * @return a bytes object with byte added.
@@ -375,7 +375,7 @@ public final class Bytes implements Iterable<Byte> {
      * from the current {@code index} are used to calculate the 32-bit number.
      *
      * @param index index must be greater than 0 and less than
-     * {@link this#length() -4}
+     * {@link Bytes#length() -4}
      * @return a 32 bit integer number
      * @throws IndexOutOfBoundsException exception if insufficient bytes are
      * supplied from current {@code index} location.
@@ -474,7 +474,7 @@ public final class Bytes implements Iterable<Byte> {
      * Returns a string representation of the {@link Bytes} container.
      * <p>
      * All values are signed byte values. For unsigned values, consider the
-     * use of {@link this#toString(boolean)}.
+     * use of {@link Bytes#toString(boolean)}.
      *
      * @return a string representation of the container.
      */
