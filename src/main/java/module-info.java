@@ -36,10 +36,10 @@ module javalaboratories.java.extensions {
   exports org.javalaboratories.core.function;
   exports org.javalaboratories.core.handlers;
   exports org.javalaboratories.core.json;
+  exports org.javalaboratories.core.json.events;
   exports org.javalaboratories.core.statistics;
   exports org.javalaboratories.core.tuple;
   exports org.javalaboratories.core.util;
   exports org.javalaboratories.core.util.resources;
   exports org.javalaboratories.core.holders;
-  exports org.javalaboratories.core.json.events;
 }
