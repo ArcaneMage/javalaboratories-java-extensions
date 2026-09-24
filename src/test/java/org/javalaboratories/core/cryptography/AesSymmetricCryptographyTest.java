@@ -45,7 +45,7 @@ public class AesSymmetricCryptographyTest {
 
     private static final String PASSWORD = "F0xedFence75";
     private static final String TEXT = "The quick brown fox jumped over the fence";
-    private static final String ENCRYPTED_STRING_DATA = "xGc/N5WQGeje8QHK68GPdUbho0YIX3mYj/Zqt4YcH5zOD6COPDqdRgt5wqTjvkAvOLMOp/RGMM8yRn2GBsFRZA==";
+    private static final String ENCRYPTED_STRING_DATA = "7ketVo0PTPTumGfdzNiKbY8rpsCBuCEWASZRbpE85uaW+EzbxX7q0lR9vf+XB9Fy2+83QZHvCocIF1dYF23zVxZdx7sF";
     private static final String TAMPERED_ENCRYPTED_STRING_DATA = "xGc/N5WQGeje8QHK68GPdUbho0YIX3mYj/Zqt4YcH5zOD6COPDqdRgt5wqTjvkAvOLMOp/RGMM8yRn2GBsFRYA==";
     private static final String BAD_ENCRYPTED_STRING_DATA = "7883This is a badly encrypted nonsense==";
 
