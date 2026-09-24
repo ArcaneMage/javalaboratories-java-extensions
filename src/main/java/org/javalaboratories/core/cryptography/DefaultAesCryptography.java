@@ -18,11 +18,12 @@ package org.javalaboratories.core.cryptography;
 import org.javalaboratories.core.cryptography.keys.SymmetricKey;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Objects;
 
@@ -30,11 +31,11 @@ import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 public final class DefaultAesCryptography implements AesCryptography {
 
-    private static final int HEADER_SIZE = 16;
-    private static final int IV_BYTES = 16;
+    private static final int IV_BYTES = 12;
+    private static final int IV_LENGTH_BITS = 128;
     private static final int STREAM_BUFFER_SIZE = 512;
     
-    private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
+    private static final String ALGORITHM = "AES/GCM/NoPadding";
 
     /**
      * Package-private default constructor.
@@ -54,7 +55,7 @@ public final class DefaultAesCryptography implements AesCryptography {
         K k = Objects.requireNonNull(key,"Expected key object");
         try {
             // Read IV Header
-            IvParameterSpec iv = readIvHeader(ciphertext);
+            GCMParameterSpec iv = readIvHeader(ciphertext);
 
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE,k,iv);
@@ -76,15 +77,15 @@ public final class DefaultAesCryptography implements AesCryptography {
                                                                                                  final T ciphertext) {
         K k = Objects.requireNonNull(key, "Expected key object");
         try {
-            IvParameterSpec iv = generateIvParameterSpec();
+            GCMParameterSpec iv = generateIvParameterSpec();
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(ENCRYPT_MODE,k,iv);
+            cipher.init(ENCRYPT_MODE, k, iv);
 
             // Write Prefix IV Header
             Objects.requireNonNull(ciphertext)
                     .write(iv.getIV());
 
-            write(cipher,inputStream, ciphertext);
+            write(cipher, inputStream, ciphertext);
             return new StreamCryptographyResultImpl<>(k, ciphertext);
         } catch (GeneralSecurityException e) {
             throw new CryptographyException("Failed to encrypt stream",e);
@@ -93,18 +94,18 @@ public final class DefaultAesCryptography implements AesCryptography {
         }
     }
 
-    private static IvParameterSpec generateIvParameterSpec() {
-        SecureRandom r = new SecureRandom();
+    private static GCMParameterSpec generateIvParameterSpec() throws NoSuchAlgorithmException  {
+        SecureRandom r = SecureRandom.getInstanceStrong();
         byte[] bytes = new byte[IV_BYTES];
         r.nextBytes(bytes);
-        return new IvParameterSpec(bytes);
+        return new GCMParameterSpec(IV_LENGTH_BITS,bytes);
     }
 
-    private IvParameterSpec readIvHeader(final InputStream cipherStream) throws IOException {
-        byte[] bytes = new byte[HEADER_SIZE];
+    private GCMParameterSpec readIvHeader(final InputStream cipherStream) throws IOException {
+        byte[] bytes = new byte[IV_BYTES];
         if (Objects.requireNonNull(cipherStream).read(bytes) == -1)
             throw new IOException("Failed to read Header -- end of stream encountered");
-        return new IvParameterSpec(bytes);
+        return new GCMParameterSpec(IV_LENGTH_BITS,bytes);
     }
 
     private void write(final Cipher cipher, final InputStream inputStream, final OutputStream outputStream)

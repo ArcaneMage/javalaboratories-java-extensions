@@ -58,18 +58,18 @@ public class MessageAuthenticationTest {
             "RLSqt6hJs1/zCGUcUfveumoMdoxIDS3ung2taJW62YnMIU8IOHYu9vfitW+kbYWXTD1uUh4K8BNfyb8PzT96oLtjGV4qBwlO+R4eg57nciP" +
             "htPoQaBeglhf1Hat7/Dju1hAErbPRy9dHBKBHbQqLoaKUtsyk0XNBgZBYw==";
 
-    private static final String TEXT_SIGNED = "AAABJjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALXvARIORX4JcyvIqqy6uJWZF" +
-            "J0/PkOrTGFBTOXIjUr86OeJawYyo04Qr0fA4TJHrryf3nhlMPWyAj7mTUhx8BkkxvS0n0jGM/MWLrlt3FVel1GuGlKMNkV5uJE+/+NP+C/l" +
-            "5jwQd3zWDICYwEBEOd9xus9CwcgjGETCQhFtSd47nQJlk9GicevKSh1WjobLCORgUhA8b94ugTazSHVzL9XCoVOOiNoKOXgAZz+qXPu+BCx" +
-            "bCg3fY1YWeL8TJomCo3t38p/j/Trybtsw5dhbi/O8CNHOYkqxHTZR3sR0MC9CSCrS8W0F29kpzvDMCVmeinD9+2Kec3VB2l96wnnYDOkCAw" +
-            "EAAQAAAQBdcdTMuX4nJenexUNEEDcEDIP4kcbeRhO6dCETvZ6m4VU9MUTrLKasaKjH/5l0jKF2ZSztggD5QjUk4lkUzT74B4Fv4SI6xnLHB" +
-            "kWedJVxy3yut/0bX4WLmVhtIiynVdzrXK+eITAZhhg3/IfSMEZx2B1vPKvK3TRCXVkkQb+UHFON0fitEtKq3qEmzX/MIZRxR+966agx2jEg" +
-            "NLe6eDa1olbrZicwhTwg4di729+K1b6RthZdMPW5SHgrwE1/Jvw/NP3qgu2MZXioHCU75Hh6DnudyI+G0+hBoF6CWF/Udq3v8OO7WEASts9" +
-            "HL10cEoEdtCouhopS2zKTRc0GBkFjAAABAC1LTS3xvi4qVmdL4xNBBeGLvWzmB/V8QC1j3m4pBRd9k2+8rNaa5Hre2FH4mGJJQ067XMkWDG" +
-            "LCiLSh6aNSw/qEa+c5xDHUah5QBO36fTvIb4rcn68zFtz4LasA2Eu8MSkPa95MDvuWwSPucc+WKUJs6NiExo8CCcUkjXcgu+5XH5JALUJ97" +
-            "3R1xJH6Gmv7hlB7rF0nuXIWHuFj1hwElVTJJSEeAlzv5zqOxmazUmla2UbgbW/EJu/MgKuehAqubz8jhWyP51VmOzQOky5p0kYRDOoNmbsz" +
-            "SC3qKrZMVI81oQs7Z9tiSrRrgIuoRKw9N9+nihCwW+lZI8wc7Spn2MhRk21pfPdBwbzXx4Uu+9X0dXDn4gNVL7BBV4v5tjObDR8zh5L4L++" +
-            "tWBXjyUyJVTQOchlSKpnJzDqsFVjz9YL2glN2JcnQrI1QjiqGaewjRXlCPVvV9GrY/oswSa/i5ziSKxRc15jcHgFl+bpOqGbZ";
+    private static final String TEXT_SIGNED = "AAABJjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALXvARIORX4JcyvIqqy6uJWZFJ" +
+            "0/PkOrTGFBTOXIjUr86OeJawYyo04Qr0fA4TJHrryf3nhlMPWyAj7mTUhx8BkkxvS0n0jGM/MWLrlt3FVel1GuGlKMNkV5uJE+/+NP+C/l5j" +
+            "wQd3zWDICYwEBEOd9xus9CwcgjGETCQhFtSd47nQJlk9GicevKSh1WjobLCORgUhA8b94ugTazSHVzL9XCoVOOiNoKOXgAZz+qXPu+BCxbCg" +
+            "3fY1YWeL8TJomCo3t38p/j/Trybtsw5dhbi/O8CNHOYkqxHTZR3sR0MC9CSCrS8W0F29kpzvDMCVmeinD9+2Kec3VB2l96wnnYDOkCAwEAAQA" +
+            "AAQBdcdTMuX4nJenexUNEEDcEDIP4kcbeRhO6dCETvZ6m4VU9MUTrLKasaKjH/5l0jKF2ZSztggD5QjUk4lkUzT74B4Fv4SI6xnLHBkWedJVx" +
+            "y3yut/0bX4WLmVhtIiynVdzrXK+eITAZhhg3/IfSMEZx2B1vPKvK3TRCXVkkQb+UHFON0fitEtKq3qEmzX/MIZRxR+966agx2jEgNLe6eDa1o" +
+            "lbrZicwhTwg4di729+K1b6RthZdMPW5SHgrwE1/Jvw/NP3qgu2MZXioHCU75Hh6DnudyI+G0+hBoF6CWF/Udq3v8OO7WEASts9HL10cEoEdtC" +
+            "ouhopS2zKTRc0GBkFjAAABAItkUeOM7jLxHxH3kBTIk64fQ+K2c/Zod9ltZu21CKf2NSveFx4sh7ujQCaGVg8+oFPnbgp9QzIhDEI8lJJdN2P" +
+            "CHGTpbaRCUDVu25bSMJA1GZLadVv5DYlad4Nd6YDTJvyI25pXooW9fzOEiIGADxxyevX2vzASZEkAm4aCH7Km6H7cuhlaem7Od8aLYxfx7Omhd" +
+            "6mZMB3CAqfPgzherQ55FDrt+A2X6a/DoUKahcIBm7LW5M8O+i4PsgKbyNxzpnNL+TDts/Ik4mhiOL3g0/AUW3FaxlYthr/MnCi8yHQjdu75ukt" +
+            "8PUTycoP9bb8+BISQrW4fR8itxRGt1n8qX7dgfisL41K74H18nkP20cqeGk3+CTgi6es965PYPkK2PQ1RshisdatAC/S1iY21S4yU3MasjPwmAK" +
+            "wk49G1wjZi0M9vqqMbftwzBRhaT9vEE4qhvBbrCJt2S4LQAGwmeDxxFuj5EZbO7BJw+Xo=";
 
     private static final String FILE_TEXT = "This is a test file with encrypted data -- TOP SECRET!";
 

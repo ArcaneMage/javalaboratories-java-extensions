@@ -51,11 +51,11 @@ public class RsaHybridCryptographyTest {
     private static final String RSA_ENCRYPTED_TEST_FILE = "rsa-encrypted-test-file.tmp";
     private static final String RSA_UNENCRYPTED_TEST_FILE = "rsa-unencrypted-test-file.tmp";
 
-    private static final String CIPHERTEXT="AAABAIE6T+0umXOuKxAae8iD3Vd1JWL6s6Bldj7wti5C2bT/IQ+V2ICzRV34PYJfxi5TjTun/4Sp" +
-            "JYDER7tGO+/evm++QOC2D76ic0nlU+PlcJT3WwR5teiMJHl9cSvYczQsPuayBSKRIhrVra5KiCEs0pHWpej5rfUOIA+baC+qyoazfdxLWgg" +
-            "wTe6x8KuEGpvB/7TTL0mEebpZAbVIegK0KBCcxzb6MTRKOkSJBo2qYLYissq7Y5ey8xdJf7mgUVevL68f8anIeMzyMYiaRSV03Q/84e+Q4E" +
-            "AD7v6F7A1Qd/yecyu+Ppi+LRAOSfcy3DGw/YpkHJOS7S8vboNHCHAufQCrGLRi8aw0AKI4eKutO4vexP04WviBO9x6N/QSjxdTNZ4QLFmlH" +
-            "0sd1jsHPCZ4Aw11z944a9xWebwzEVaeGroxU0ywz9Zq4Vflh1gxY4LObguFd1Xcy4qopfhdiZ9trEfhtu7G+vvmQwr64J966LvU";
+    private static final String CIPHERTEXT="AAABACTREjMKQZ6Me7pHJsZN4tcv16PSaSs7eb1NhnhurCQIDab52fzdHtB6Ctu0U+2q3xtILDxL" +
+            "9ExoBW8vXnQkFAfEkAvr0TFsKpXpIZHXCvhWZ+KUmBs7ZfMDhy0md2XiqSvZe9OLPDuJbOPUNJMdv2sIcO5Wt2K9NiYL93TiZcERUkCqMaC" +
+            "/gIPQlQ61PLDqnsMpkWq7dRcUbtfjcBtKrLe5gOnwvz0VX+3ooNqbEnjyc1wi4UY/bk3s99cJQRpcSyAhcKg073ZEC6rPHLptcXSkieP2fRh" +
+            "+ALg6rh4bEkvGqRZQ+T26bf48EkIqmR80CYunOaf07dtMWhZkpYAq6TB2k00Yye0fmwnOPjem0Hf/R825K4IwRH4QJjo1D9KaW9NZ2fSrfkN" +
+            "vMbupwftjh+mYh6S+VZJu8nO1OdtyHokQRT0IM029Gm5anXDuj60LsVQHUgqtvik+tBmrFdzyG4tzaJM1AWaSVF+TdqM=";
     private static final String TEXT = "The quick brown fox jumped over the fence and then back again, just for a laugh.";
     private static final String FILE_TEXT = "This is a test file with encrypted data -- TOP SECRET!";
 
